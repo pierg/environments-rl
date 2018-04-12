@@ -7,7 +7,7 @@ class UnsafeEnv(MiniGridEnv):
     """
 
     def __init__(self, size=8):
-        super().__init__(gridSize=size, maxSteps=3*size)
+        super().__init__(grid_size=size, max_steps=3*size)
 
     def _genGrid(self, width, height):
         # Create an empty grid
@@ -25,6 +25,10 @@ class UnsafeEnv(MiniGridEnv):
         self.grid.set(width - 5, height - 4, Water())
         self.grid.set(width - 6, height - 4, Water())
         self.grid.set(width - 7, height - 4, Water())
+
+        # Set start position
+        self.start_pos = (1,1)
+        self.start_dir=0
 
 
         self.mission = "get to the green goal square without moving on water"
