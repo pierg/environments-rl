@@ -82,6 +82,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         # -2 because we want the index in front of the agent,
         # floor, to get the middle of the view
         if isinstance(observation.get((math.floor(AGENT_VIEW_SIZE/2)), AGENT_VIEW_SIZE - 2), Water):
+            print("Water in next step, stopping")
             return True
         return False
 
