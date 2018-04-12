@@ -102,7 +102,7 @@ class Goal(WorldObj):
         return True
 
     def render(self, r):
-        self._setColor(r)
+        self._set_color(r)
         r.drawPolygon([
             (0          , CELL_PIXELS),
             (CELL_PIXELS, CELL_PIXELS),
