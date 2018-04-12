@@ -34,7 +34,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
     def step(self, action):
 
         # Get current observations from the environment and decode them
-        current_obs = self.env.genObs()['image']
+        current_obs = self.env.gen_obs()['image']
         current_obs = Grid.decode(current_obs)
 
         proposed_action = action
