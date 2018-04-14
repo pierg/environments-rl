@@ -1,104 +1,114 @@
-from transitions import Machine, State
+from transitions import State
 
-from obshelper import ObsHelper
+from obshelper import ObsHelper as oh
+
+from safetystatemachine import SafetyStateMachine
 
 
-class TakeBath(object):
+class AvoidWater(SafetyStateMachine):
     """ The agent should never step into the water """
 
     states = [
-        'normal',
+        'safe',
         'facing_water',
-        State(name='block', on_enter=['set_safe_action'])
+        State(name='block', on_enter=['set_unsafe_actions'])
     ]
-
-
 
     transitions = [
-        {'trigger': 'forward',
-         'source': 'normal',
-         'dest': 'facing_water',
-         'unless': 'is_water_approaching'},
-
-        {'trigger': 'forward',
-         'source': 'facing_water',
-         'dest': 'block'},
-
-        {'trigger': 'forward',
+        {'trigger': '*',
          'source': '*',
-         'dest': 'normal',
+         'dest': 'safe',
          'unless': 'is_water_approaching'},
+
+        {'trigger': '*',
+         'source': 'safe',
+         'conditions': 'forward',
+         'dest': 'facing_water'},
+
+        {'trigger': '*',
+         'source': 'facing_water',
+         'conditions': 'forward',
+         'dest': 'block'},
     ]
 
-    def __init__(self, name):
+    def __init__(self, name, notify):
+        # Initializing the SafetyStateMachine
+        super().__init__(name, AvoidWater.states, AvoidWater.transitions, notify)
 
-        self.name = name
-        self.obs = None
-        self.safe_action = None
+    def set_unsafe_actions(self, action):
+        # RETURN THE UNSAFE ACTIONS TO BE AVOIDED
+        self.unsafe_actions.append(action)
+        # RAISE VIOLATION
+        self._on_block()
 
-        # Initialize the state machine
-        self.machine = Machine(model=self, states=TakeBath.states, initial='normal')
 
-
-    def update_obs(self, obs):
-        self.obs = obs
-
-    def get_safe_action(self):
-        return self.safe_action
-
-    def set_safe_action(self):
-        # SET A SAFE ACTION
-        self.safe_action = 2
-
-    def is_water_approaching(self):
-        return ObsHelper.is_water_approaching(self.obs)
+    """ Conditions """
+    def is_water_approaching(self, action):
+        return oh.is_water_approaching(self.obs)
 
 
 
-class EnterRoom(object):
+
+class AvoidDark(SafetyStateMachine):
     """ The agent should not enter a room without first turning the lights on """
 
     states = [
-        'room_inside',
-        'room_entrance',
-        State(name='block', on_enter=['set_safe_action'])
+        'safe',
+        'door_ahead',
+        'room_ahead',
+        State(name='block', on_enter=['set_unsafe_actions'])
     ]
 
     transitions = [
-        {'trigger': 'forward',
-         'source': 'room_inside',
-         'dest': 'room_entrance',
-         'conditions': 'is_door_in_front'},
+        {'trigger': '*',
+         'source': 'safe',
+         'conditions': 'is_light_on',
+         'dest': 'safe'},
 
-        {'trigger': 'forward',
-         'source': 'room_entrance',
-         'dest': 'room_inside',
-         'conditions': 'is_light_on'},
+        {'trigger': '*',
+         'source': 'safe',
+         'conditions': 'is_door_closed_ahead',
+         'dest': 'door_ahead'},
 
-        {'trigger': 'forward',
-         'source': 'room_entrance',
+        {'trigger': '*',
+         'source': 'door_ahead',
+         'dest': 'door_ahead',
+         'conditions': 'toggle'},
+
+        {'trigger': '*',
+         'source': 'door_ahead',
+         'dest': 'room_ahead',
+         'unless': '[is_empty_ahead, toggle]'},
+
+        {'trigger': '*',
+         'source': 'room_ahead',
+         'dest': 'safe',
+         'conditions': '[forward, is_light_on]'},
+
+        {'trigger': '*',
+         'source': 'room_ahead',
          'dest': 'block',
+         'conditions': 'forward',
          'unless': 'is_light_on'},
     ]
 
-    def __init__(self, name):
+    def __init__(self, name, notify):
+        # Initializing the SafetyStateMachine
+        super().__init__(name, AvoidDark.states, AvoidDark.transitions, notify)
 
-        self.name = name
-        self.obs = None
-        self.safe_action = None
+    def set_unsafe_actions(self, action):
+        # RETURN THE UNSAFE ACTIONS TO BE AVOIDED
+        self.unsafe_actions.append(self.actions.forward)
+        # RAISE VIOLATION
+        self._on_block()
 
-        # Initialize the state machine
-        self.machine = Machine(model=self, states=EnterRoom.states, initial='room_inside')
 
-    def update_obs(self, obs):
-        self.obs = obs
+    """ Conditions """
+    def is_light_on(self, action):
+        return oh.is_light_on(self.obs)
 
-    def get_safe_action(self):
-        return self.safe_action
+    def is_door_closed_ahead(self, action):
+        return oh.is_door_closed_ahead(self.obs)
 
-    def set_safe_action(self):
-        # SET A SAFE ACTION
-        self.safe_action = 2
-
-    def is_door_in_front(self):
-        return ObsHelper.is_door_in_front(self.obs)
+    def is_empty_ahead(self, action):
+        return oh.is_empty_ahead(self.obs)
