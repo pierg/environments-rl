@@ -78,7 +78,8 @@ class AvoidDark(SafetyStateMachine):
         {'trigger': '*',
          'source': 'door_ahead',
          'dest': 'room_ahead',
-         'unless': '[is_empty_ahead, toggle]'},
+         'conditions': 'toggle',
+         'unless': '[is_empty_ahead]'},
 
         {'trigger': '*',
          'source': 'room_ahead',
