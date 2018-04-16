@@ -9,7 +9,7 @@ def main():
     obs = 'fake_agent_observations'
     # Fake action proposed by the agent
     action = 'forward'
-    
+
     avoid_water = AvoidWater('avoid_water', notify_violations)
     avoid_water.draw()
     print(avoid_water.state)
@@ -28,7 +28,13 @@ def main():
     print(avoid_dark.state)
 
 
+def test():
+    test_state_types = TestStateTypes('TestStateTypes', notify_violations)
+    test_state_types.draw()
+
+
 
 class TestAutomata:
     if __name__ == "__main__":
+        test()
         main()

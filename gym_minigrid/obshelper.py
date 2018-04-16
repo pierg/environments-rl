@@ -1,4 +1,3 @@
-from minigrid import *
 
 # Helper class to analyse agent's observations
 class ObsHelper():

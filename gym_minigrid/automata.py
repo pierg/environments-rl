@@ -2,7 +2,7 @@ from transitions import State
 
 from obshelper import ObsHelper as oh
 
-from safetystatemachine import SafetyStateMachine
+from safetystatemachine import SafetyStateMachine, SafetyState
 
 
 class AvoidWater(SafetyStateMachine):
@@ -11,7 +11,9 @@ class AvoidWater(SafetyStateMachine):
     states = [
         'safe',
         'facing_water',
-        State(name='block', on_enter=['set_unsafe_actions'])
+        {'name': 'block',
+         'type': 'violated',
+         'on_enter': 'set_unsafe_actions'}
     ]
 
     transitions = [
@@ -33,7 +35,7 @@ class AvoidWater(SafetyStateMachine):
 
     def __init__(self, name, notify):
         # Initializing the SafetyStateMachine
-        super().__init__(name, AvoidWater.states, AvoidWater.transitions, notify)
+        super().__init__(name, AvoidWater.states, AvoidWater.transitions, 'safe', notify)
 
     def set_unsafe_actions(self, action):
         # RETURN THE UNSAFE ACTIONS TO BE AVOIDED
@@ -53,10 +55,27 @@ class AvoidDark(SafetyStateMachine):
     """ The agent should not enter a room without first turning the lights on """
 
     states = [
-        'safe',
-        'door_ahead',
-        'room_ahead',
-        State(name='block', on_enter=['set_unsafe_actions'])
+
+        {'name': 'safe',
+         'type': 'inf_ctrl'},
+
+        {'name': 'door_ahead',
+         'type': 'inf_ctrl'},
+
+        {'name': 'room_ahead',
+         'type': 'inf_ctrl',
+         'children': [
+
+             {'name': 'light',
+              'type': 'inf_ctrl'},
+
+             {'name': 'dark',
+              'type': 'inf_ctrl'},
+         ]},
+
+        {'name': 'block',
+         'type': 'violated',
+         'on_enter': 'set_unsafe_actions'}
     ]
 
     transitions = [
@@ -83,19 +102,29 @@ class AvoidDark(SafetyStateMachine):
 
         {'trigger': '*',
          'source': 'room_ahead',
-         'dest': 'safe',
-         'conditions': '[forward, is_light_on]'},
+         'dest': 'room_ahead_light',
+         'conditions': 'is_light_on'},
+
+            {'trigger': '*',
+             'source': 'room_ahead',
+             'dest': 'room_ahead_dark',
+             'unless': 'is_light_on'},
+
+            {'trigger': '*',
+             'source': 'room_ahead_light',
+             'dest': 'safe',
+             'conditions': 'forward'},
 
         {'trigger': '*',
-         'source': 'room_ahead',
+         'source': 'room_ahead_dark',
          'dest': 'block',
-         'conditions': 'forward',
-         'unless': 'is_light_on'},
+         'conditions': 'forward'},
+
     ]
 
     def __init__(self, name, notify):
         # Initializing the SafetyStateMachine
-        super().__init__(name, AvoidDark.states, AvoidDark.transitions, notify)
+        super().__init__(name, AvoidDark.states, AvoidDark.transitions, 'safe', notify)
 
     def set_unsafe_actions(self, action):
         # RETURN THE UNSAFE ACTIONS TO BE AVOIDED
@@ -113,3 +142,39 @@ class AvoidDark(SafetyStateMachine):
 
     def is_empty_ahead(self, action):
         return oh.is_empty_ahead(self.obs)
+
+
+
+class TestStateTypes(SafetyStateMachine):
+    """ Testing """
+
+    states = [
+
+        {'name': 'satisfied',
+         'type': 'satisfied'},
+
+        {'name': 'inf_ctrl',
+         'type': 'inf_ctrl'},
+
+        {'name': 'sys_fin_ctrl',
+         'type': 'sys_fin_ctrl'},
+
+        {'name': 'sys_urg_ctrl',
+         'type': 'sys_urg_ctrl'},
+
+        {'name': 'env_fin_ctrl',
+         'type': 'env_fin_ctrl'},
+
+        {'name': 'env_urg_ctrl',
+         'type': 'env_urg_ctrl'},
+
+        {'name': 'violated',
+         'type': 'violated'}
+    ]
+
+    transitions = []
+
+    def __init__(self, name, notify):
+        # Initializing the SafetyStateMachine
+        super().__init__(name, TestStateTypes.states, TestStateTypes.transitions, 'satisfied', notify)
+
