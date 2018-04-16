@@ -150,6 +150,9 @@ class TestStateTypes(SafetyStateMachine):
 
     states = [
 
+        {'name': 'initial',
+         'type': 'inf_ctrl'},
+
         {'name': 'satisfied',
          'type': 'satisfied'},
 
@@ -176,5 +179,5 @@ class TestStateTypes(SafetyStateMachine):
 
     def __init__(self, name, notify):
         # Initializing the SafetyStateMachine
-        super().__init__(name, TestStateTypes.states, TestStateTypes.transitions, 'satisfied', notify)
+        super().__init__(name, TestStateTypes.states, TestStateTypes.transitions, 'initial', notify)
 

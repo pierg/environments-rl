@@ -61,9 +61,7 @@ class SafetyNestedGraph(NestedGraph):
                 'color': 'black'
             },
             'active': {
-                'color': 'black',
-                'fillcolor': 'white',
-                'shape': 'doublecircle'
+                'color': 'red'
             },
             'previous': {
                 'color': 'blue',
@@ -201,8 +199,7 @@ class SafetyStateMachine(object):
                                      states=states,
                                      transitions=transitions,
                                      initial=initial,
-                                     show_conditions=True,
-                                     ignore_invalid_triggers=True
+                                     show_conditions=True
                                      )
 
         # Agent's observations
