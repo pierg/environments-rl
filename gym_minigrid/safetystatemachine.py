@@ -142,6 +142,24 @@ class SafetyState(NestedState):
                 Attributes:
                 type: can be a string among the state_types. `State.is_<type>` may be used
                         to check if the state is of type <type>.
+
+                    satisfied:    Satisfied, in the current state, the property is satisfied and, from the current state
+                                  it does not exist a path that may invalidate the property in the future.
+                    inf_ctrl:     Infinitely controllable, in the current state the property is satisfied and it may reach
+                                  a failure state in the future but is not close.
+                    sys_fin_ctrl: System finitely controllable, the current state is finitely controllable by the
+                                  system, and consequently the system can only stay in this state for a finite number of
+                                  steps and then a failure may happen.
+                    sys_urg_ctrl: System urgently controllable, the current state is urgently controllable by the
+                                  system, and the next step of the system may lead to a failure.
+                    env_fin_ctrl: Environment finitely controllable, the current state is finitely controllable by
+                                  the environment, consequently the environment can only stay in the state for a finite
+                                  number of steps and then a failure may happen. However, the environment can have
+                                  the ability to make the system avoid this failure.
+                    env_url_ctrl: Environment urgently controllable, the current state is urgently
+                                  controllable by the environment, and the next step of the environment
+                                  may lead to a failure.
+                    violated:     Violated: the property is definitely violated.
             """
 
     state_types = ["satisfied",
