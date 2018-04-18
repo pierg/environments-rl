@@ -20,15 +20,25 @@ class ObsHelper():
         return isinstance(observation.get((math.floor(view_size / ahead)), view_size - ahead), unsafe)
 
     @staticmethod
-    def is_distance_to_worldobj(object_type, distance):
+    def is_immediate_to_worldobj(object_type):
         """
-        General method that returns true if the number of steps to reach a cell of type 'object_type'
-        is equals to 'distance'
+        General method that returns true if the number of steps (sequence of actions) to reach a cell
+        of type 'object_type' is equals to 1
         :param object_type: type of WorldObj
-        :param distance: current number of steps (actions) that needed to be performed
-                         in order to reach the cell containing the 'object_type'
         :return: True / False
         """
+        # 4 cases. the agent is facing the danger (if it performs forward it goes into the object_type)
+        return True
+
+    @staticmethod
+    def is_near_to_worldobj(object_type):
+        """
+        General method that returns true if the number of steps (sequence of actions) to reach a cell
+        of type 'object_type' is equals to 2
+        :param object_type: type of WorldObj
+        :return: True / False
+        """
+        # 12 cases
         return True
 
     @staticmethod
