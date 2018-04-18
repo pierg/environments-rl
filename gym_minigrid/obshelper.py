@@ -20,6 +20,18 @@ class ObsHelper():
         return isinstance(observation.get((math.floor(view_size / ahead)), view_size - ahead), unsafe)
 
     @staticmethod
+    def is_distance_to_worldobj(object_type, distance):
+        """
+        General method that returns true if the number of steps to reach a cell of type 'object_type'
+        is equals to 'distance'
+        :param object_type: type of WorldObj
+        :param distance: current number of steps (actions) that needed to be performed
+                         in order to reach the cell containing the 'object_type'
+        :return: True / False
+        """
+        return True
+
+    @staticmethod
     def is_water_in_front_of_agent(observation, view_size):
         return ObsHelper.is_unsafe_approach(observation, view_size, Water)
 
