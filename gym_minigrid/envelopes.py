@@ -25,7 +25,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
     The purpose is to detect dangerous actions and block them sending back a modified reward
     """
 
-    def __init__(self, env):
+    def __init__(self, env, reset_on_catastrophe=False):
         super().__init__(env)
 
         # Stores history of the last N observation / proposed_actions
@@ -33,6 +33,8 @@ class SafetyEnvelope(gym.core.RewardWrapper):
 
         # Stores history of the last N observation / applied_actions
         self.actual_history = collections.deque(N * [(None, None)], N)
+
+        self.reset_on_catastrophe = reset_on_catastrophe
 
 
     def step(self, action, reset_on_catastrophe=False):
@@ -47,12 +49,16 @@ class SafetyEnvelope(gym.core.RewardWrapper):
 
         if proposed_action == MiniGridEnv.Actions.forward:
             if self.blocker(current_obs):
-                if reset_on_catastrophe:
-                    self.steps_remaining = 0
-                safe_action = MiniGridEnv.Actions.wait
-                obs, reward, done, info = self.env.step(safe_action)
-                reward = NEGATIVE_REWARD_CATASTROPHE
-                info = {'catastrophe': 1}
+                if self.reset_on_catastrophe:
+                    obs = self.env.gen_obs()
+                    reward = NEGATIVE_REWARD_CATASTROPHE
+                    done = True
+                    info = {}
+                else:
+                    safe_action = MiniGridEnv.Actions.wait
+                    obs, reward, done, info = self.env.step(safe_action)
+                    reward = NEGATIVE_REWARD_CATASTROPHE
+                    info = {'catastrophe': 1}
             else:
                 obs, reward, done, info = self.env.step(safe_action)
         else:
