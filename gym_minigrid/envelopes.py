@@ -35,7 +35,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         self.actual_history = collections.deque(N * [(None, None)], N)
 
 
-    def step(self, action):
+    def step(self, action, reset_on_catastrophe=False):
         # Get current observations from the environment and decode them
         current_obs = Grid.decode(self.env.gen_obs()['image'])
 
@@ -45,12 +45,14 @@ class SafetyEnvelope(gym.core.RewardWrapper):
 
         safe_action = proposed_action
 
-        if proposed_action == self.env.actions.forward:
-            if self.blocker(current_obs, proposed_action):
-                obs, reward, done, info = self.env.step(4)
-                safe_action = self.env.actions.wait
+        if proposed_action == MiniGridEnv.Actions.forward:
+            if self.blocker(current_obs):
+                if reset_on_catastrophe:
+                    self.steps_remaining = 0
+                safe_action = MiniGridEnv.Actions.wait
                 obs, reward, done, info = self.env.step(safe_action)
                 reward = NEGATIVE_REWARD_CATASTROPHE
+                info = {'catastrophe': 1}
             else:
                 obs, reward, done, info = self.env.step(safe_action)
         else:
@@ -67,7 +69,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
 
         return obs, mod_reward, done, info
 
-    def blocker(self, observation, action):
+    def blocker(self, observation):
         return ObsHelper.is_water_in_front_of_agent(observation, AGENT_VIEW_SIZE)
 
 
