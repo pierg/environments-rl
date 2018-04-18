@@ -53,7 +53,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
                     obs = self.env.gen_obs()
                     reward = NEGATIVE_REWARD_CATASTROPHE
                     done = True
-                    info = {}
+                    info = {'catastrophe': 1}
                 else:
                     safe_action = MiniGridEnv.Actions.wait
                     obs, reward, done, info = self.env.step(safe_action)
