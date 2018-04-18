@@ -5,7 +5,7 @@ import time
 import collections
 from minigrid import  AGENT_VIEW_SIZE
 from functools import reduce
-
+from obshelper import ObsHelper
 import numpy as np
 
 import gym
@@ -15,6 +15,9 @@ from minigrid import *
 
 # Size of the history collection
 N = 5
+
+# Negative reward when trying to enter a catastrophic area
+NEGATIVE_REWARD_CATASTROPHE = -1000
 
 class SafetyEnvelope(gym.core.RewardWrapper):
     """
@@ -31,36 +34,23 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         # Stores history of the last N observation / applied_actions
         self.actual_history = collections.deque(N * [(None, None)], N)
 
-    def step(self, action):
 
+    def step(self, action):
         # Get current observations from the environment and decode them
-        current_obs = self.env.gen_obs()['image']
-        current_obs = Grid.decode(current_obs)
+        current_obs = Grid.decode(self.env.gen_obs()['image'])
 
         proposed_action = action
 
-        # If we go forward, blocking is relevant.
-        # Action:
-        #         Turn left, turn right, move forward
-        #         left = 0
-        #         right = 1
-        #         forward = 2
-        #         # Toggle/pick up/activate object
-        #         toggle = 3
-        #         # Wait/stay put/do nothing
-        #         wait = 4
-        # Store the observation-action tuple in the history
         self.proposed_history.append((current_obs, proposed_action))
 
         safe_action = proposed_action
 
-        if proposed_action == 2:
+        if proposed_action == self.env.actions.forward:
             if self.blocker(current_obs, proposed_action):
-                #self.env.displayAlert()
                 obs, reward, done, info = self.env.step(4)
-                safe_action = 4
+                safe_action = self.env.actions.wait
                 obs, reward, done, info = self.env.step(safe_action)
-                reward = -1
+                reward = NEGATIVE_REWARD_CATASTROPHE
             else:
                 obs, reward, done, info = self.env.step(safe_action)
         else:
@@ -78,12 +68,6 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         return obs, mod_reward, done, info
 
     def blocker(self, observation, action):
-        # Check if tile in direction of action is type catastrophe, then say: NO!
-        # -2 because we want the index in front of the agent,
-        # floor, to get the middle of the view
-        if isinstance(observation.get((math.floor(AGENT_VIEW_SIZE/2)), AGENT_VIEW_SIZE - 2), Water):
-            print("Water in next step, stopping")
-            return True
-        return False
+        return ObsHelper.is_water_in_front_of_agent(observation, AGENT_VIEW_SIZE)
 
 
