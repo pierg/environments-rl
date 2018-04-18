@@ -2,6 +2,7 @@ import math
 from minigrid import Water
 
 # Helper class to analyse agent's observations
+# All the methods should return True/False
 class ObsHelper():
 
 
@@ -22,6 +23,22 @@ class ObsHelper():
     def is_water_in_front_of_agent(observation, view_size):
         return ObsHelper.is_unsafe_approach(observation, view_size, Water)
 
+    def is_facing_water(obs):
+        # Use the agent observations to determine if there is water in the first tile in front of the agent
+        # for testing we return true/false according to the string passed as parameter
+        return obs == 'facing_water'
+
+    @staticmethod
+    def is_near_water(obs):
+        # Use the agent observations to determine if there is water in from the second
+        # tile on around its observation
+        # for testing we return true/false according to the string passed as parameter
+        return obs == 'near_water'
+
+    @staticmethod
+    def is_inside_water(obs):
+        # for testing we return true/false according to the string passed as parameter
+        return obs == 'inside_water'
 
     @staticmethod
     def is_door_closed_ahead(observation):

@@ -4,6 +4,8 @@ from automata import *
 def notify_violations(unsafe_actions):
     print ("Violation Blocked!!!!" + " Unsafe actions: ", unsafe_actions)
 
+
+
 def main():
     # Fake observations, only for testing purposes
     obs = 'fake_agent_observations'
@@ -27,6 +29,25 @@ def main():
     avoid_dark.check(obs, action)
     print(avoid_dark.state)
 
+def test_water():
+    # Fake observations, only for testing purposes
+    obs = 'fake_agent_observations'
+    # Fake action proposed by the agent
+    action = 'forward'
+
+    avoid_water = AvoidWater('avoid_water', notify_violations)
+    avoid_water.draw()
+    # print(avoid_water.state)
+    avoid_water.check("safe", 'puppa')
+    # print(avoid_water.state)
+    avoid_water.check("safe", 'forward')
+    avoid_water.check("safe", 'forward')
+    avoid_water.check("safe", 'forward')
+    avoid_water.check("near_water", 'forward')
+    #
+    avoid_water.check("facing_water", 'forward')
+    # print(avoid_water.state)
+
 
 def test():
     test_state_types = TestStateTypes('TestStateTypes', notify_violations)
@@ -36,5 +57,4 @@ def test():
 
 class TestAutomata:
     if __name__ == "__main__":
-        test()
-        main()
+        test_water()

@@ -192,12 +192,16 @@ class SafetyState(NestedState):
         return super(SafetyState, self).__getattribute__(item)
 
 
+
+class SafetyNestedGraphTransition(NestedGraphTransition):
+    pass
+
 class SafetyLockedHierarchicalGraphMachine(SafetyGraphMachine, LockedMachine, HierarchicalMachine):
     """
         A threadsafe hiearchical machine with graph support.
     """
     state_cls = SafetyState
-    transition_cls = NestedGraphTransition
+    transition_cls = SafetyNestedGraphTransition
     event_cls = LockedNestedEvent
 
 
@@ -213,35 +217,83 @@ class SafetyStateMachine(object):
         self.name = name
 
         # Initialize the state machine
-        self.machine = SafetyLockedHierarchicalGraphMachine(model=self,
+        self.machine = SafetyLockedHierarchicalGraphMachine(
+                                     model=self,
                                      states=states,
                                      transitions=transitions,
                                      initial=initial,
-                                     show_conditions=True
-                                     )
-
+                                     show_conditions=True,
+                                     auto_transitions=True)
         # Agent's observations
-        self.obs = None
-        # Function to be called when violation is detected (on_block)
+        self.obs_pre = None
+        self.obs_post = None
+
+        # This will be filled by 'convert_observations' function before every transition is processed
+        self.current_obs = None
+
+        self.initial_state = None
+        self.current_state = None
+        self.observed_state = None
+
+        self.action_proposed = None
+        self.action_applied = None
+
+        # Function to be called when violation is detected (on_block) or when observations are needed (uncertainty)
         self.on_block_notify = on_block_notify
+        # self.on_uncertainty_notify = on_uncertainty_notify
 
         # MiniGrid Actions and unsafe_actions list to be returned by the on_block
         self.actions = MiniGridEnv.Actions
         self.unsafe_actions = []
 
+    def obs_to_state(self, obs):
+        raise NotImplementedError
+
     def draw(self):
         self.machine.get_graph(title=self.name).draw('automaton_' + self.name + '.png', prog='dot')
 
-    def check(self, obs, action):
-        self.obs = obs
-        self.trigger('*', action=action)
+    # Called before the action is going to be performed on the environment and obs are the current observations
+    def check(self, obs_pre, action_proposed):
+        self.obs_pre = obs_pre
+        self.action_proposed = action_proposed
+        self.current_state = self.state
+
+        # I go to the state according to my observations:
+        self.observed_state = self.obs_to_state(obs_pre)
+
+        if self.current_state != self.observed_state:
+            print("current state: " + self.state)
+            print("observed state: " + self.observed_state)
+            if self.initial_state is None:
+                self.machine.set_state(self.observed_state)
+                print("set the state to: " + self.state)
+                self.initial_state = self.observed_state
+            else:
+                self.to_near_water()
+                print("moved to state: " + self.state)
+
+
+
+        self.trigger('*', action=action_proposed)
+
+        print()
+
+    # Called after the action has been performed on the environment and new observations have been retrieved
+    def applied(self, action_applied, obs_retreived):
+        self.action_applied = action_applied
+        self.obs_post = obs_retreived
+        self.current_obs = obs_retreived
+
 
     # Return list of unsafe_actions, called everytime a violation is detected
     def _on_block(self):
         self.on_block_notify(self.unsafe_actions)
 
-    """ Actions available to the agnet - used for conditions checking """
+    # Called when the next state is uncertain and new observations from the environment are needed
+    def _on_uncertainty(self):
+        self.on_uncertainty_notify()
 
+    """ Actions available to the agent - used for conditions checking """
     def forward(self, action):
         return action == 'forward'
 
