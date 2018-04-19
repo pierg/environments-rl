@@ -22,9 +22,10 @@ class UnsafeEnv(MiniGridEnv):
         # Place a goal square in the bottom-right corner
         self.grid.set(width - 2, height - 2, Goal())
         self.grid.set(width - 4, height - 4, Water())
-        self.grid.set(width - 5, height - 4, Water())
-        self.grid.set(width - 6, height - 4, Water())
-        self.grid.set(width - 7, height - 4, Water())
+        self.grid.set(width - 2, height - 4, Water())
+        self.grid.set(width - 5, height - 2, Water())
+        #self.grid.set(width - 6, height - 4, Water())
+        #self.grid.set(width - 7, height - 4, Water())
 
         # Set start position
         self.start_pos = (1,1)
@@ -40,6 +41,11 @@ class UnsafeEnv6x6(UnsafeEnv):
 class UnsafeEnv16x16(UnsafeEnv):
     def __init__(self):
         super().__init__(size=16)
+
+register(
+    id='MiniGrid-UnsafeEnvironment-6x6-v0',
+    entry_point='gym_minigrid.envs:UnsafeEnv6x6'
+)
 
 register(
     id='MiniGrid-UnsafeEnvironment-8x8-v0',
