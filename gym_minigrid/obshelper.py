@@ -76,4 +76,5 @@ class ObsHelper():
         # 12 cases
         if ObsHelper.is_ahead_of_worldobj(obs, object_type, 2): return True
         if ObsHelper.is_worldobj_to_left(obs, object_type): return True
-        if ObsHelper.is_worldobj_to_right(obs, object_type): return False
+        if ObsHelper.is_worldobj_to_right(obs, object_type): return True
+        return False
