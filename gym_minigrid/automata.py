@@ -5,6 +5,71 @@ from fake_obshelper import ObsHelper as oh
 from safetystatemachine import SafetyStateMachine, SafetyState
 
 
+
+
+class AlwaysAvoidTest(SafetyStateMachine):
+
+    states = [
+        {'name': 'initial',
+         'type': 'inf_ctrl'},
+
+        {'name': 'safe',
+         'type': 'inf_ctrl'},
+
+        {'name': 'near',
+         'type': 'sys_fin_ctrl'},
+
+        {'name': 'immediate',
+         'type': 'sys_urg_ctrl'},
+
+        {'name': 'fail',
+         'type': 'violated',
+         'on_enter': 'on_violated'}
+    ]
+
+    transitions = [
+        {'trigger': '*',
+         'source': 'initial',
+         'dest': '*'},
+
+        {'trigger': '*',
+         'source': 'safe',
+         'dest': 'near',
+         'conditions': 'obs_immediate'},
+
+        {'trigger': '*',
+         'source': 'near',
+         'dest': 'immediate',
+         'conditions': 'obs_immediate'},
+    ]
+
+    def __init__(self, name, worldobj_avoid, notify):
+        self.worldobj_avoid = worldobj_avoid
+        # Initializing the SafetyStateMachine
+        super().__init__(name, self.states, self.transitions, 'initial', notify)
+
+    def _obs_to_state(self, obs):
+        near = oh.is_near_to_worldobj(obs, self.worldobj_avoid)
+        immediate = oh.is_immediate_to_worldobj(obs, self.worldobj_avoid)
+        if immediate:
+            return 'immediate'
+        elif near and not immediate:
+            return 'near'
+        else:
+            return'safe'
+
+    def obs_near(self):
+        n = oh.is_near_to_worldobj(self.observations_pre, self.worldobj_avoid)
+        return oh.is_near_to_worldobj(self.observations_pre, self.worldobj_avoid)
+
+    def obs_immediate(self):
+        i = oh.is_immediate_to_worldobj(self.observations_pre, self.worldobj_avoid)
+        return oh.is_immediate_to_worldobj(self.observations_pre, self.worldobj_avoid)
+
+
+
+
+
 class AlwaysAvoid(SafetyStateMachine):
 
     states = [
@@ -33,7 +98,7 @@ class AlwaysAvoid(SafetyStateMachine):
         {'trigger': '*',
          'source': 'safe',
          'dest': '=',
-         'unless': 'obs_near'},
+         'unless': ['obs_near', 'obs_immediate']},
 
         {'trigger': '*',
          'source': 'safe',
@@ -43,7 +108,7 @@ class AlwaysAvoid(SafetyStateMachine):
         {'trigger': '*',
          'source': 'near',
          'dest': 'safe',
-         'unless': '[obs_near, obs_immediate]'},
+         'unless': ['obs_near', 'obs_immediate']},
 
         {'trigger': '*',
          'source': 'near',
@@ -89,9 +154,11 @@ class AlwaysAvoid(SafetyStateMachine):
             return'safe'
 
     def obs_near(self):
+        n = oh.is_near_to_worldobj(self.observations_pre, self.worldobj_avoid)
         return oh.is_near_to_worldobj(self.observations_pre, self.worldobj_avoid)
 
     def obs_immediate(self):
+        i = oh.is_immediate_to_worldobj(self.observations_pre, self.worldobj_avoid)
         return oh.is_immediate_to_worldobj(self.observations_pre, self.worldobj_avoid)
 
 
