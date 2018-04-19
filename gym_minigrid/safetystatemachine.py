@@ -224,18 +224,19 @@ class SafetyStateMachine(object):
                                      initial=initial,
                                      show_conditions=True,
                                      auto_transitions=True)
-        # Agent's observations
-        self.obs_pre = None
-        self.obs_post = None
 
-        # This will be filled by 'convert_observations' function before every transition is processed
-        self.current_obs = None
-
+        # Initial state observed by the agent
         self.initial_state = None
         self.current_state = None
-        self.observed_state = None
 
+        # Observations retreived before applying the action
+        self.observations_pre = None
+        # Observations retreived after applying the action
+        self.observations_post = None
+
+        # Action proposed by the agent
         self.action_proposed = None
+        # Action applied on the environment by the agent
         self.action_applied = None
 
         # Function to be called when violation is detected (on_block) or when observations are needed (uncertainty)
@@ -246,52 +247,65 @@ class SafetyStateMachine(object):
         self.actions = MiniGridEnv.Actions
         self.unsafe_actions = []
 
-    def obs_to_state(self, obs):
+    def _obs_to_state(self, obs):
         raise NotImplementedError
+
+    # Triggered when it enters in a state of time 'violated'
+    def _on_violated(self):
+        self.unsafe_actions.append(self.action_proposed)
+
+        # Rollback to the state before the violation:
+        self.set_state(self.current_state)
+
+        # Notify
+        self.on_block_notify(self.unsafe_actions)
+
+    # # Called when the next state is uncertain and new observations from the environment are needed
+    # def _on_uncertainty(self):
+    #     self.on_uncertainty_notify()
 
     def draw(self):
         self.machine.get_graph(title=self.name).draw('automaton_' + self.name + '.png', prog='dot')
 
     # Called before the action is going to be performed on the environment and obs are the current observations
     def check(self, obs_pre, action_proposed):
-        self.obs_pre = obs_pre
+        self.observations_pre = obs_pre
         self.action_proposed = action_proposed
-        self.current_state = self.state
 
-        # I go to the state according to my observations:
-        self.observed_state = self.obs_to_state(obs_pre)
+        # I map the observation to a state
+        observed_state = self._obs_to_state(obs_pre)
 
-        if self.current_state != self.observed_state:
-            print("current state: " + self.state)
-            print("observed state: " + self.observed_state)
-            if self.initial_state is None:
-                self.machine.set_state(self.observed_state)
-                print("set the state to: " + self.state)
-                self.initial_state = self.observed_state
+        if self.initial_state is None:
+            # First time
+            print("first time!")
+            self.initial_state = observed_state
+            self.current_state = observed_state
+            self.machine.set_state(observed_state)
+            print("state set to: " + observed_state)
+            self.trigger('*')
+        else:
+            if self.state != observed_state:
+                print("new state! i'm in: " + self.state)
+                self.trigger('*')
+                print("the state is now: " + self.state)
+                if self.state != observed_state:
+                    print("ERROR!! - MISMATCH WORLD/MONITOR 1")
             else:
-                self.to_near_water()
-                print("moved to state: " + self.state)
+                print("all good! i'm in  : " + self.state)
+                self.trigger('*')
+                print("the state after is: " + self.state)
 
-
-
-        self.trigger('*', action=action_proposed)
-
-        print()
 
     # Called after the action has been performed on the environment and new observations have been retrieved
     def applied(self, action_applied, obs_retreived):
         self.action_applied = action_applied
-        self.obs_post = obs_retreived
-        self.current_obs = obs_retreived
+        self.observations_post = obs_retreived
 
+        observed_state = self._obs_to_state(obs_retreived)
 
-    # Return list of unsafe_actions, called everytime a violation is detected
-    def _on_block(self):
-        self.on_block_notify(self.unsafe_actions)
+        if self.state != observed_state:
+            print("ERROR!! - MISMATCH WORLD/MONITOR 2")
 
-    # Called when the next state is uncertain and new observations from the environment are needed
-    def _on_uncertainty(self):
-        self.on_uncertainty_notify()
 
     """ Actions available to the agent - used for conditions checking """
     def forward(self, action):

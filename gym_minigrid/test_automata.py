@@ -48,6 +48,16 @@ def test_water():
     avoid_water.check("facing_water", 'forward')
     # print(avoid_water.state)
 
+def test_avoid():
+
+    avoid_water = AlwaysAvoid('avoid_water', 'water', notify_violations)
+    avoid_water.draw()
+    avoid_water.check("safe", 'puppa')
+    avoid_water.check("safe", 'ciao')
+    avoid_water.check("safe", 'forward')
+    avoid_water.check("near", 'forward')
+    avoid_water.check("immediate", 'left')
+
 
 def test():
     test_state_types = TestStateTypes('TestStateTypes', notify_violations)
@@ -57,4 +67,4 @@ def test():
 
 class TestAutomata:
     if __name__ == "__main__":
-        test_water()
+        test_avoid()
