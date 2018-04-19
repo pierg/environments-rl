@@ -25,7 +25,7 @@ class ObsHelper():
         return ObsHelper.is_unsafe_approach(observation, view_size, Water)
 
     @staticmethod
-    def is_immediate_to_worldobj(object_type):
+    def is_immediate_to_worldobj(obs, object_type):
         """
         General method that returns true if the number of steps (sequence of actions) to reach a cell
         of type 'object_type' is equals to 1
@@ -33,10 +33,10 @@ class ObsHelper():
         :return: True / False
         """
         # 4 cases. the agent is facing the danger (if it performs forward it goes into the object_type)
-        return True
+        raise NotImplementedError
 
     @staticmethod
-    def is_near_to_worldobj(object_type):
+    def is_near_to_worldobj(obs, object_type):
         """
         General method that returns true if the number of steps (sequence of actions) to reach a cell
         of type 'object_type' is equals to 2
@@ -44,38 +44,15 @@ class ObsHelper():
         :return: True / False
         """
         # 12 cases
-        return True
-
-    def is_facing_water(obs):
-        # Use the agent observations to determine if there is water in the first tile in front of the agent
-        # for testing we return true/false according to the string passed as parameter
-        return obs == 'facing_water'
+        raise NotImplementedError
 
     @staticmethod
-    def is_near_water(obs):
-        # Use the agent observations to determine if there is water in from the second
-        # tile on around its observation
-        # for testing we return true/false according to the string passed as parameter
-        return obs == 'near_water'
-
-    @staticmethod
-    def is_inside_water(obs):
-        # for testing we return true/false according to the string passed as parameter
-        return obs == 'inside_water'
-
-    @staticmethod
-    def is_door_closed_ahead(observation):
-        # Use the agent observations to determine if there is a door in the first tile in front of the agent
-        return False
-
-    @staticmethod
-    def is_empty_ahead(observation):
-        # Use the agent observations to determine if there is an empty cell in front of the agent
-        # (the door is already open)
-        return False
-
-
-    @staticmethod
-    def is_light_on(observation):
-        # Return true if the space ahead of the agent is visible to the agent
-        return True
+    def is_ahead_of_worldobj(obs, object_type):
+        """
+        Return True if the cell in front of the agent contain is of type 'object_type'
+        :param obs:
+        :param object_type:
+        :return:
+        """
+        # 1 case
+        raise NotImplementedError
