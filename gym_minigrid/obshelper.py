@@ -19,6 +19,41 @@ class ObsHelper():
             return isinstance(observation.get((math.floor(view_size / ahead)), view_size - ahead), unsafe)
         return isinstance(observation.get((math.floor(view_size / ahead)), view_size - ahead), unsafe)
 
+
+    @staticmethod
+    def is_ahead_of_worldobj(obs, object_type, distance):
+        """
+        Return True if "distance" cell in front of the agent contain is of type 'object_type'
+        :param obs:
+        :param object_type:
+        :param distance: number of cells in front (1 = the one next to the agent cell)
+        :return:
+        """
+        raise NotImplementedError
+
+
+    @staticmethod
+    def is_worldobj_to_left(obs, object_type):
+        """
+        Returns True is "object_type" is located to the left of the agent
+        :param obs:
+        :param object_type:
+        :return:
+        """
+        raise NotImplementedError
+
+
+    @staticmethod
+    def is_worldobj_to_right(obs, object_type):
+        """
+        Returns True is "object_type" is located to the left of the agent
+        :param obs:
+        :param object_type:
+        :return:
+        """
+        raise NotImplementedError
+
+
     @staticmethod
     def is_immediate_to_worldobj(obs, object_type):
         """
@@ -27,8 +62,7 @@ class ObsHelper():
         :param object_type: type of WorldObj
         :return: True / False
         """
-        # 4 cases. the agent is facing the danger (if it performs forward it goes into the object_type)
-        raise NotImplementedError
+        return ObsHelper.is_ahead_of_worldobj(obs, object_type, 1)
 
     @staticmethod
     def is_near_to_worldobj(obs, object_type):
@@ -39,15 +73,6 @@ class ObsHelper():
         :return: True / False
         """
         # 12 cases
-        raise NotImplementedError
-
-    @staticmethod
-    def is_ahead_of_worldobj(obs, object_type):
-        """
-        Return True if the cell in front of the agent contain is of type 'object_type'
-        :param obs:
-        :param object_type:
-        :return:
-        """
-        # 1 case
-        raise NotImplementedError
+        if ObsHelper.is_ahead_of_worldobj(obs, object_type, 2): return True
+        if ObsHelper.is_worldobj_to_left(obs, object_type): return True
+        if ObsHelper.is_worldobj_to_right(obs, object_type): return False
