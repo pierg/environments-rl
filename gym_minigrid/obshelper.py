@@ -7,22 +7,18 @@ class ObsHelper():
 
 
     @staticmethod
-    def is_unsafe_approach(observation, view_size, unsafe, in_front_of=True, ahead=2):
+    """ This is a helper method, classes to check for must be specified in a function, see is_water_inf_front_of_agent """
+    def is_unsafe_in_front_of_agent(observation, view_size, unsafe):
         """ Returns True or False if the tile ahead is an unsafe tile for the agent
-
             :param observation: An observation grid to investigate
             :param view_size: The agents view size
             :param unsafe: A type that is deemed as unsafe for the agent
-            :param in_front_of: Check if the tile in front of the agent, default value is true, false if you want to check a tile further away
-            :param ahead: Number of tiles ahead of the agent, default value is 2, which is the next tile in front of the agent
             :return: True / False"""
-        if in_front_of:
-            return isinstance(observation.get((math.floor(view_size / ahead)), view_size - ahead), unsafe)
-        return isinstance(observation.get((math.floor(view_size / ahead)), view_size - ahead), unsafe)
+        return isinstance(observation.get((math.floor(view_size / 2)), view_size - 2), unsafe)
 
     @staticmethod
     def is_water_in_front_of_agent(observation, view_size):
-        return ObsHelper.is_unsafe_approach(observation, view_size, Water)
+        return ObsHelper.is_unsafe_in_front_of_agent(observation, view_size, Water)
 
     @staticmethod
     def is_immediate_to_worldobj(obs, object_type):
