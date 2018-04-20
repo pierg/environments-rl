@@ -37,7 +37,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         super().__init__(env)
 
         # Assumption: baby-ai-game repo folder is located in the same folder containing gym-minigrid repo folder
-        config_file_path = os.path.abspath(__file__ + "/../../../" + "/baby-ai-game/configurations/default.json")
+        config_file_path = os.path.abspath(__file__ + "/../../../" + "/baby-ai-game/configurations/main.json")
         with open(config_file_path, 'r') as jsondata:
             configdata = jsondata.read()
             self.config = json.loads(configdata,
@@ -88,8 +88,8 @@ class SafetyEnvelope(gym.core.RewardWrapper):
 
         mod_reward = reward
 
-        # Create a window to render into
-        self.env.render('human')
+        if self.config.num_processes == 1 and self.config.rendering:
+            self.env.render('human')
 
         return obs, mod_reward, done, info
 
