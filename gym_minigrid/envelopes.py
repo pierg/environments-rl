@@ -42,9 +42,6 @@ class SafetyEnvelope(gym.core.RewardWrapper):
             configdata = jsondata.read()
             self.config = json.loads(configdata,
                                      object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
-        # Test config file
-        print(self.config.blocker)
-        print(self.config.action_water)
 
         # Stores history of the last N observation / proposed_actions
         self.proposed_history = collections.deque(N*[(None, None)], N)
@@ -59,7 +56,14 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         # Get current observations from the environment and decode them
         current_obs = Grid.decode(self.env.gen_obs()['image'])
 
+        if self.config.num_processes == 1 and self.config.rendering:
+            self.env.render('human')
+
         proposed_action = action
+
+        for i in current_obs.grid:
+            if i is not None:
+                print("WAIT!")
 
         self.proposed_history.append((current_obs, proposed_action))
 
@@ -88,12 +92,10 @@ class SafetyEnvelope(gym.core.RewardWrapper):
 
         mod_reward = reward
 
-        if self.config.num_processes == 1 and self.config.rendering:
-            self.env.render('human')
 
         return obs, mod_reward, done, info
 
     def blocker(self, observation):
-        return ObsHelper.is_unsafe_approach(observation, AGENT_VIEW_SIZE, Water)
+        return ObsHelper.testObs(observation, AGENT_VIEW_SIZE, Water)
 
 

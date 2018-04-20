@@ -1,5 +1,5 @@
 import math
-from minigrid import Water
+from minigrid import AGENT_VIEW_SIZE
 
 # Helper class to analyse agent's observations
 # All the methods should return True/False
@@ -22,6 +22,18 @@ class ObsHelper():
 
 
     @staticmethod
+    def testObs(observation, view_size, unsafe, in_front_of=True, ahead=2):
+        x = math.floor(view_size / ahead)
+        y = view_size - ahead
+        type = observation.get(x, y)
+        result = isinstance(type, unsafe)
+        if result:
+            return True
+        else:
+            return False
+
+
+    @staticmethod
     def is_ahead_of_worldobj(obs, object_type, distance):
         """
         Return True if "distance" cell in front of the agent contain is of type 'object_type'
@@ -30,6 +42,7 @@ class ObsHelper():
         :param distance: number of cells in front (1 = the one next to the agent cell)
         :return:
         """
+
         raise NotImplementedError
 
 
