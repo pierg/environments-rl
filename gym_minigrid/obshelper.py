@@ -2,8 +2,11 @@ import math
 from minigrid import AGENT_VIEW_SIZE
 from minigrid import  Water
 
+AGENT_GRID_LOCATION = 2
+
 # Helper class to analyse agent's observations
 # All the methods should return True/False
+
 class ObsHelper():
 
 
@@ -17,7 +20,10 @@ class ObsHelper():
             :param view_size: The agents view size
             :param unsafe: A type that is deemed as unsafe for the agent
             :return: True / False"""
-        return isinstance(observation.get((math.floor(view_size / 2)), view_size - 2), unsafe)
+        x = (math.floor(view_size / AGENT_GRID_LOCATION))
+        y = view_size - AGENT_GRID_LOCATION
+        type = observation.get(x, y)
+        return isinstance(type, unsafe)
 
     """ Use this to check for water in front of the agent"""
     @staticmethod
