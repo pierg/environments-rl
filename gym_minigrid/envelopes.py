@@ -17,7 +17,7 @@ from minigrid import *
 N = 5
 
 # Negative reward when trying to enter a catastrophic area
-NEGATIVE_REWARD_CATASTROPHE = -1000
+NEGATIVE_REWARD_CATASTROPHE = -2
 
 class SafetyEnvelope(gym.core.RewardWrapper):
     """
