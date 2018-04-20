@@ -997,6 +997,7 @@ class MiniGridEnv(gym.Env):
 
         reward = 0
         done = False
+        info = {}
 
         # Get the position in front of the agent
         u, v = self.get_dir_vec()
@@ -1022,6 +1023,7 @@ class MiniGridEnv(gym.Env):
             if fwdCell != None and fwdCell.type == 'goal':
                 done = True
                 reward = 1000 - self.step_count
+                info = {"goal": 1}
 
         # Pick up an object
         elif action == self.actions.pickup:
@@ -1053,7 +1055,7 @@ class MiniGridEnv(gym.Env):
 
         obs = self.gen_obs()
 
-        return obs, reward, done, {}
+        return obs, reward, done, info
 
     def gen_obs(self):
         """
