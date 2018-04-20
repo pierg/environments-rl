@@ -285,7 +285,7 @@ class SafetyStateMachine(object):
             self.trigger('*')
         else:
             if self.state != observed_state:
-                print("new state! i'm in: " + self.state)
+                print("new state: " + observed_state + " i'm in: " + self.state)
                 self.trigger('*')
                 print("the state is now: " + self.state)
                 if self.state != observed_state:

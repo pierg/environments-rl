@@ -50,13 +50,14 @@ def test_water():
 
 def test_avoid():
 
-    avoid_water = AlwaysAvoid('avoid_water', 'water', notify_violations)
+    avoid_water = AlwaysAvoidTest('avoid_water', 'water', notify_violations)
     avoid_water.draw()
     avoid_water.check("safe", 'puppa')
-    avoid_water.check("safe", 'ciao')
-    avoid_water.check("safe", 'forward')
-    avoid_water.check("near", 'forward')
+    # avoid_water.check("safe", 'ciao')
+    # avoid_water.check("safe", 'forward')
+    # avoid_water.check("safe", 'forward')
     avoid_water.check("immediate", 'left')
+
 
 
 def test():

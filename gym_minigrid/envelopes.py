@@ -11,6 +11,13 @@ import numpy as np
 import gym
 from gym import error, spaces, utils
 
+
+import os
+
+
+import json
+from collections import namedtuple
+
 from minigrid import *
 
 # Size of the history collection
@@ -25,8 +32,16 @@ class SafetyEnvelope(gym.core.RewardWrapper):
     The purpose is to detect dangerous actions and block them sending back a modified reward
     """
 
+
     def __init__(self, env, reset_on_catastrophe=False):
         super().__init__(env)
+
+        # Assumption: baby-ai-game repo folder is located in the same folder containing gym-minigrid repo folder
+        config_file_path = os.path.abspath(__file__ + "/../../../" + "/baby-ai-game/configurations/main.json")
+        with open(config_file_path, 'r') as jsondata:
+            configdata = jsondata.read()
+            self.config = json.loads(configdata,
+                                     object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
 
         # Stores history of the last N observation / proposed_actions
         self.proposed_history = collections.deque(N*[(None, None)], N)
@@ -41,7 +56,14 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         # Get current observations from the environment and decode them
         current_obs = Grid.decode(self.env.gen_obs()['image'])
 
+        if self.config.num_processes == 1 and self.config.rendering:
+            self.env.render('human')
+
         proposed_action = action
+
+        for i in current_obs.grid:
+            if i is not None:
+                print("WAIT!")
 
         self.proposed_history.append((current_obs, proposed_action))
 
@@ -70,12 +92,10 @@ class SafetyEnvelope(gym.core.RewardWrapper):
 
         mod_reward = reward
 
-        # Create a window to render into
-        self.env.render('human')
 
         return obs, mod_reward, done, info
 
     def blocker(self, observation):
-        return ObsHelper.is_water_in_front_of_agent(observation, AGENT_VIEW_SIZE)
+        return ObsHelper.testObs(observation, AGENT_VIEW_SIZE, Water)
 
 

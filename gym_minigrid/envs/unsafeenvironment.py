@@ -21,8 +21,8 @@ class UnsafeEnv(MiniGridEnv):
 
         # Place a goal square in the bottom-right corner
         self.grid.set(width - 2, height - 2, Goal())
-        self.grid.set(width - 4, height - 4, Water())
-        self.grid.set(width - 2, height - 4, Water())
+        #self.grid.set(width - 4, height - 4, Water())
+        self.grid.set(width - 2, height - 5, Water())
         self.grid.set(width - 5, height - 2, Water())
         #self.grid.set(width - 6, height - 4, Water())
         #self.grid.set(width - 7, height - 4, Water())
