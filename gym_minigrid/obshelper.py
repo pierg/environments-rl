@@ -7,8 +7,10 @@ from minigrid import  Water
 class ObsHelper():
 
 
+    """ This is a helper method,
+        classes to check for must be specified in a function,
+        see is_water_inf_front_of_agent """
     @staticmethod
-    """ This is a helper method, classes to check for must be specified in a function, see is_water_inf_front_of_agent """
     def is_unsafe_in_front_of_agent(observation, view_size, unsafe):
         """ Returns True or False if the tile ahead is an unsafe tile for the agent
             :param observation: An observation grid to investigate
@@ -17,8 +19,8 @@ class ObsHelper():
             :return: True / False"""
         return isinstance(observation.get((math.floor(view_size / 2)), view_size - 2), unsafe)
 
-    @staticmethod
     """ Use this to check for water in front of the agent"""
+    @staticmethod
     def is_water_in_front_of_agent(observation, view_size):
         return ObsHelper.is_unsafe_in_front_of_agent(observation, view_size, Water)
 
