@@ -37,7 +37,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         super().__init__(env)
 
         # Assumption: baby-ai-game repo folder is located in the same folder containing gym-minigrid repo folder
-        config_file_path = os.path.abspath(__file__ + "/../../../" + "/baby-ai-game/configurations/main.json")
+        config_file_path = os.path.abspath(__file__ + "/../../../" + "/baby-ai-game/configurations/blocker.json")
         with open(config_file_path, 'r') as jsondata:
             configdata = jsondata.read()
             self.config = json.loads(configdata,
@@ -51,7 +51,6 @@ class SafetyEnvelope(gym.core.RewardWrapper):
 
         self.reset_on_catastrophe = reset_on_catastrophe
 
-
     def step(self, action, reset_on_catastrophe=False):
         # Get current observations from the environment and decode them
         current_obs = Grid.decode(self.env.gen_obs()['image'])
@@ -60,10 +59,6 @@ class SafetyEnvelope(gym.core.RewardWrapper):
             self.env.render('human')
 
         proposed_action = action
-
-        for i in current_obs.grid:
-            if i is not None:
-                print("WAIT!")
 
         self.proposed_history.append((current_obs, proposed_action))
 
@@ -91,7 +86,6 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         # Apply the agent action to the environment or a safety action
 
         mod_reward = reward
-
 
         return obs, mod_reward, done, info
 
