@@ -8,79 +8,70 @@ class EmptyEnv(MiniGridEnv):
 
     def __init__(
         self,
-        size=8,
+        size=6,
         numObjs=2
     ):
         self.numObjs = numObjs
         super().__init__(gridSize=size, maxSteps=5*size)
-        self.reward_range = (-1, 1)
+        self.reward_range = (0, 1)
 
     def _genGrid(self, width, height):
         self.grid = Grid(width, height)
 
         # Generate the surrounding walls
-        self.grid.horzWall(0, 0)
-        self.grid.horzWall(0, height-1)
-        self.grid.vertWall(0, 0)
-        self.grid.vertWall(width-1, 0)
+        self.grid.wallRect(0, 0, width, height)
 
+        # Types and colors of objects we can generate
+        types = ['key', 'dirt']
 
-        while True:
-            pos = self._randPos(
-                1, width-1,
-                1, height-1
-            )
-            if pos == self.startPos:
+        objs = []
+        objPos = []
+
+        # Until we have generated all the objects
+        while len(objs) < self.numObjs:
+            objType = self._randElem(types)
+            objColor = self._randElem(COLOR_NAMES)
+
+            # If this object already exists, try again
+            if (objType, objColor) in objs:
                 continue
-            if self.grid.get(*pos) != None:
-                continue
-            self.grid.set(*pos, Key('yellow'))
-            break
 
-        while True:
-            pos = self._randPos(
-                1, width-1,
-                1, height-1
-            )
-            if pos == self.startPos:
-                continue
-            if self.grid.get(*pos) != None:
-                continue
-            self.grid.set(*pos, Ball('red'))
-            break
+            if objType == 'key':
+                obj = Key(objColor)
+            elif objType == 'dirt':
+                obj = Dirt('red')
 
-
+            pos = self.placeObj(obj)
+            objs.append((objType, objColor))
+            objPos.append(pos)
 
         # Randomize the player start position and orientation
         self.placeAgent()
 
-        # Choose the target and the item
-        target =  Ball('red')
-        self.targetType = target.type
-        self.targetColor = target.color
-        item = Key('yellow')
-        self.itemType = item.type
-        self.itemColor = item.color
-        # Generate the mission string
-        self.mission = 'Clean the red dirt'
+        # Choose the dirt objec
+        objIdx = 0
+        if objs[objIdx] == ('dirt', 'red'):
+            pass
+        else:
+            objIdx = 1
 
-        assert hasattr(self, 'mission')
+        self.targetType, self.targetColor = objs[objIdx]
+        self.targetPos = objPos[objIdx]
+
+        self.mission = 'Clean'
+        #print(self.mission)
 
     def step(self, action):
         obs, reward, done, info = MiniGridEnv.step(self, action)
 
-        if self.carrying:
-            if self.carrying.color == self.targetColor and \
-               self.carrying.type == self.targetType:
+        ax, ay = self.agentPos
+        tx, ty = self.targetPos
+
+        # Reward if perform the cleaning action near to object
+        if action == self.actions.clean:
+            if abs(ax - tx) <= 1 and abs(ay - ty) <= 1:
                 reward = 1
-                done = True
-            elif self.carrying.color == self.itemColor and \
-                 self.carrying.type == self.itemType:
-                reward = -1
-                done = True
-            else:
-                reward = 0
-                done = True
+            done = True
 
         return obs, reward, done, info
 
