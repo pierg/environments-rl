@@ -40,7 +40,7 @@ COLOR_TO_IDX = {
 IDX_TO_COLOR = dict(zip(COLOR_TO_IDX.values(), COLOR_TO_IDX.keys()))
 
 # Map of object type to integers
-# Added dirt and vase. It can be added later in a different file so we won't alter the minigrid.py
+# Added dirt and vase. It can be added later in through dict() function a different file so we won't alter the minigrid.py
 OBJECT_TO_IDX = {
     'empty'         : 0,
     'wall'          : 1,
