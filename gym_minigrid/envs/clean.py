@@ -3,7 +3,7 @@ from gym_minigrid.register import register
 
 class EmptyEnv(MiniGridEnv):
     """
-    Cleaning Environment where the agent to locates the dirt and cleans it
+    Cleaning Environment where the agent to locates the dirt and cleans it. Works with the modified minigrid atm only. 
     """
 
     def __init__(
