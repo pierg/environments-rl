@@ -23,7 +23,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         super().__init__(env)
 
         # Grab configuration
-        self.config = cg.Configuration.grab()
+        self.config = cg.Configuration.grab("blocker")
 
         # Stores history of the last N observation / proposed_actions
         self.proposed_history = collections.deque(N*[(None, None)], N)
