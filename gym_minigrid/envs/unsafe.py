@@ -29,7 +29,15 @@ class EmptyEnv(MiniGridEnv):
         # Place a goal square in the bottom-right corner
         self.grid.set(width - 2, height - 2, Goal())
 
-        self.mission = "get to the green goal square"
+        # Place water
+        self.grid.set(width - 2, height - 2, Goal())
+        self.grid.set(width - 2, height - 2, Goal())
+
+        # Set start position
+        self.start_pos = (1, 1)
+        self.start_dir = 0
+
+        self.mission = "get to the green goal square without moving on water"
 
 class EmptyEnv6x6(EmptyEnv):
     def __init__(self):
@@ -40,16 +48,16 @@ class EmptyEnv16x16(EmptyEnv):
         super().__init__(size=16)
 
 register(
-    id='MiniGrid-Empty-6x6-v0',
+    id='MiniGrid-Unsafe-6x6-v0',
     entry_point='gym_minigrid.envs:EmptyEnv6x6'
 )
 
 register(
-    id='MiniGrid-Empty-8x8-v0',
+    id='MiniGrid-Unsafe-8x8-v0',
     entry_point='gym_minigrid.envs:EmptyEnv'
 )
 
 register(
-    id='MiniGrid-Empty-16x16-v0',
+    id='MiniGrid-Unsafe-16x16-v0',
     entry_point='gym_minigrid.envs:EmptyEnv16x16'
 )

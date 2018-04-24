@@ -43,7 +43,7 @@ class UnsafeEnv16x16(UnsafeEnv):
         super().__init__(size=16)
 
 register(
-    id='MiniGrid-UnsafeEnvironment-6x6-v0',
+    id='MiniGrid-\-6x6-v0',
     entry_point='gym_minigrid.envs:UnsafeEnv6x6'
 )
 

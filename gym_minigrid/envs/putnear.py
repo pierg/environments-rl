@@ -13,17 +13,22 @@ class PutNearEnv(MiniGridEnv):
         numObjs=2
     ):
         self.numObjs = numObjs
-        super().__init__(grid_size=size, max_steps=5*size)
-        self.reward_range = (0, 1)
 
-    def _genGrid(self, width, height):
+        super().__init__(
+            grid_size=size,
+            max_steps=5*size,
+            # Set this to True for maximum speed
+            see_through_walls=True
+        )
+
+    def _gen_grid(self, width, height):
         self.grid = Grid(width, height)
 
         # Generate the surrounding walls
-        self.grid.horzWall(0, 0)
-        self.grid.horzWall(0, height-1)
-        self.grid.vertWall(0, 0)
-        self.grid.vertWall(width-1, 0)
+        self.grid.horz_wall(0, 0)
+        self.grid.horz_wall(0, height-1)
+        self.grid.vert_wall(0, 0)
+        self.grid.vert_wall(width-1, 0)
 
         # Types and colors of objects we can generate
         types = ['key', 'ball', 'box']
@@ -41,8 +46,8 @@ class PutNearEnv(MiniGridEnv):
 
         # Until we have generated all the objects
         while len(objs) < self.numObjs:
-            objType = self._randElem(types)
-            objColor = self._randElem(COLOR_NAMES)
+            objType = self._rand_elem(types)
+            objColor = self._rand_elem(COLOR_NAMES)
 
             # If this object already exists, try again
             if (objType, objColor) in objs:
@@ -55,22 +60,22 @@ class PutNearEnv(MiniGridEnv):
             elif objType == 'box':
                 obj = Box(objColor)
 
-            pos = self.placeObj(obj, reject_fn=near_obj)
+            pos = self.place_obj(obj, reject_fn=near_obj)
 
             objs.append((objType, objColor))
             objPos.append(pos)
 
         # Randomize the agent start position and orientation
-        self.placeAgent()
+        self.place_agent()
 
         # Choose a random object to be moved
-        objIdx = self._randInt(0, len(objs))
+        objIdx = self._rand_int(0, len(objs))
         self.move_type, self.moveColor = objs[objIdx]
         self.move_pos = objPos[objIdx]
 
         # Choose a target object (to put the first object next to)
         while True:
-            targetIdx = self._randInt(0, len(objs))
+            targetIdx = self._rand_int(0, len(objs))
             if targetIdx != objIdx:
                 break
         self.target_type, self.target_color = objs[targetIdx]
