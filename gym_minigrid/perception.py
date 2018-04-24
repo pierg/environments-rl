@@ -1,5 +1,6 @@
 import math
 from minigrid import AGENT_VIEW_SIZE
+from extendedminigrid import SafetyHazard
 from extendedminigrid import Water
 
 AGENT_GRID_LOCATION = 2

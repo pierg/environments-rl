@@ -17,6 +17,9 @@ def extended_dic(obj_names=[]):
 extended_dic(["water"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
+extended_dic(["hazard"])
+IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
+
 class Water(WorldObj):
     def __init__(self):
         super(Water, self).__init__('water', 'blue')
@@ -32,6 +35,23 @@ class Water(WorldObj):
             (CELL_PIXELS,           0),
             (0          ,           0)
         ])
+
+class SafetyHazard(WorldObj):
+    def __init__(self):
+        super(SafetyHazard, self).__init__('safetyHazard', 'red')
+
+    def can_pickup(self):
+        return False
+
+    def render(self, r):
+        self._set_color(r)
+        r.drawPolygon([
+            (0              , CELL_PIXELS/2),
+            (CELL_PIXELS    ,   CELL_PIXELS),
+            (CELL_PIXELS/2  ,             0),
+            (0              ,             0)
+        ])
+
 
 class ExGrid(Grid):
     """
@@ -79,6 +99,8 @@ class ExGrid(Grid):
                     v = Goal()
                 elif objType == 'water':
                     v = Water()
+                elif objType == 'hazard':
+                    v = SafetyHazard()
                 else:
                     assert False, "unknown obj type in decode '%s'" % objType
 
