@@ -213,8 +213,9 @@ class MyTest(Machine):
 
 class SafetyStateMachine(object):
 
-    def __init__(self, name, states, transitions, initial, on_block_notify):
+    def __init__(self, name, pattern, states, transitions, initial, notify):
         self.name = name
+        self.pattern = pattern
 
         # Initialize the state machine
         self.machine = SafetyLockedHierarchicalGraphMachine(
@@ -240,7 +241,7 @@ class SafetyStateMachine(object):
         self.action_applied = None
 
         # Function to be called when violation is detected (on_block) or when observations are needed (uncertainty)
-        self.on_block_notify = on_block_notify
+        self.notify = notify
         # self.on_uncertainty_notify = on_uncertainty_notify
 
         # MiniGrid Actions and unsafe_actions list to be returned by the on_block
@@ -255,22 +256,23 @@ class SafetyStateMachine(object):
         self.unsafe_actions.append(self.action_proposed)
 
         # Rollback to the state before the violation:
-        self.set_state(self.current_state)
+        self.machine.set_state(self.current_state)
+        print("Rolled-back state to: " + self.state)
 
         # Notify
-        self.on_block_notify(self.unsafe_actions)
+        self.notify("violation", self.unsafe_actions)
 
-    # # Called when the next state is uncertain and new observations from the environment are needed
-    # def _on_uncertainty(self):
-    #     self.on_uncertainty_notify()
+    def _on_mismatch(self):
+        self.notify("mismatch")
 
     def draw(self):
-        self.machine.get_graph(title=self.name).draw('automaton_' + self.name + '.png', prog='dot')
+        self.machine.get_graph(title=self.name).draw('state_machines/patterns/' + self.pattern + "_" + self.name + '.png', prog='dot')
 
     # Called before the action is going to be performed on the environment and obs are the current observations
     def check(self, obs_pre, action_proposed):
         self.observations_pre = obs_pre
         self.action_proposed = action_proposed
+        self.current_state = self.state
 
         # I map the observation to a state
         observed_state = self._obs_to_state(obs_pre)
@@ -289,7 +291,7 @@ class SafetyStateMachine(object):
                 self.trigger('*')
                 print("the state is now: " + self.state)
                 if self.state != observed_state:
-                    print("ERROR!! - MISMATCH WORLD/MONITOR 1")
+                    self._on_mismatch()
             else:
                 print("all good! i'm in  : " + self.state)
                 self.trigger('*')
@@ -308,8 +310,8 @@ class SafetyStateMachine(object):
 
 
     """ Actions available to the agent - used for conditions checking """
-    def forward(self, action):
-        return action == 'forward'
+    def forward(self):
+        return self.action_proposed == 'forward'
 
-    def toggle(self, action):
-        return action == 'toggle'
+    def toggle(self):
+        return self.action_proposed == 'toggle'
