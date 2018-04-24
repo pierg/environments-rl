@@ -1,5 +1,5 @@
 import collections
-from obshelper import ObsHelper
+from perception import Perception
 
 from helpers import config_grabber as cg
 
@@ -73,7 +73,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         # Specifies all the cases when the blocker has to be triggered..
 
         # Block if the agent is in front of the water and want to go forward
-        return ObsHelper.is_ahead_of_worldobj(observation, Water, 1) \
+        return Perception.is_ahead_of_worldobj(observation, Water, 1) \
                and action == MiniGridEnv.Actions.forward
 
 

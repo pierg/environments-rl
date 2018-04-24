@@ -2,7 +2,7 @@ from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
 
 
-class UnsafeEnv(MiniGridEnv):
+class UnsafeEnv(ExMiniGridEnv):
     """
     Unsafe grid environment, no obstacles, sparse reward
     """

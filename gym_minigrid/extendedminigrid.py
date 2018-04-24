@@ -1,5 +1,4 @@
-from minigrid import *
-
+from gym_minigrid.minigrid import *
 
 def extended_dic(obj_names=[]):
     """
@@ -106,20 +105,3 @@ class ExMiniGridEnv(MiniGridEnv):
 
         # Wait/stay put/do nothing
         wait = 6
-
-
-    def __init__(
-            self,
-            grid_size=16,
-            max_steps=100,
-            see_through_walls=False,
-            seed=1337
-    ):
-        super().__init(
-            self,
-            grid_size=16,
-            max_steps=100,
-            see_through_walls=False,
-            seed=1337
-        )
-        super().OBJECT_TO_IDX = extended_dic(["water"])

@@ -10,7 +10,7 @@ from transitions.extensions.diagrams import GraphMachine, NestedGraph, Graph
 
 from transitions.extensions.factory import NestedGraphTransition, LockedNestedEvent
 
-from minigrid import MiniGridEnv
+from gym_minigrid.extendedminigrid import *
 
 
 

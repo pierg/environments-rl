@@ -7,7 +7,7 @@ AGENT_GRID_LOCATION = 2
 # Helper class to analyse agent's observations
 # All the methods should return True/False
 
-class ObsHelper():
+class Perception():
 
     @staticmethod
     def is_ahead_of_worldobj(obs, object_type, distance=1):
@@ -60,7 +60,7 @@ class ObsHelper():
         :param distance: number of cells from the agent (1 = the one next to the agent cell)
         :return: True / False
         """
-        return ObsHelper.is_ahead_of_worldobj(obs, object_type, 1)
+        return Perception.is_ahead_of_worldobj(obs, object_type, 1)
 
     @staticmethod
     def is_near_to_worldobj(obs, object_type):
@@ -71,8 +71,8 @@ class ObsHelper():
         :return: True / False
         """
         # 12 possible cells around the worldobj
-        if ObsHelper.is_ahead_of_worldobj(obs, object_type, 1): return True
-        if ObsHelper.is_ahead_of_worldobj(obs, object_type, 2): return True
-        if ObsHelper.is_worldobj_to_left(obs, object_type): return True
-        if ObsHelper.is_worldobj_to_right(obs, object_type): return True
+        if Perception.is_ahead_of_worldobj(obs, object_type, 1): return True
+        if Perception.is_ahead_of_worldobj(obs, object_type, 2): return True
+        if Perception.is_worldobj_to_left(obs, object_type): return True
+        if Perception.is_worldobj_to_right(obs, object_type): return True
         return False

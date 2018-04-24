@@ -1,5 +1,5 @@
 import math
-from extendedminigrid import Water
+# from extendedminigrid import Water
 
 # Helper class to analyse agent's observations
 # All the methods should return True/False
