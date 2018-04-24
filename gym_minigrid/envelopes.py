@@ -1,9 +1,9 @@
 import collections
-from perception import Perception
+from .perception import Perception
 
 from helpers import config_grabber as cg
 
-from extendedminigrid import *
+from .extendedminigrid import *
 
 # Size of the history collection
 N = 5
