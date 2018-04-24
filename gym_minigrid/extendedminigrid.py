@@ -14,7 +14,9 @@ def extended_dic(obj_names=[]):
         OBJECT_TO_IDX.update({obj_name: new_obj_idx})
         new_obj_idx = new_obj_idx + 1
 
+
 extended_dic(["water"])
+IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 class Water(WorldObj):
     def __init__(self):
@@ -36,19 +38,24 @@ class ExGrid(Grid):
     """
     Extending Grid methods to support the new objects
     """
+
     def decode(array):
+        """
+        Decode an array grid encoding back into a grid
+        """
+
         width = array.shape[0]
         height = array.shape[1]
         assert array.shape[2] == 3
 
-        grid = Grid(width, height)
+        grid = ExGrid(width, height)
 
         for j in range(0, height):
             for i in range(0, width):
 
-                typeIdx = array[i, j, 0]
+                typeIdx  = array[i, j, 0]
                 colorIdx = array[i, j, 1]
-                openIdx = array[i, j, 2]
+                openIdx  = array[i, j, 2]
 
                 if typeIdx == 0:
                     continue

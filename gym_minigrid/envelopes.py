@@ -35,7 +35,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
 
     def step(self, action, reset_on_catastrophe=False):
         # Get current observations from the environment and decode them
-        current_obs = Grid.decode(self.env.gen_obs()['image'])
+        current_obs = ExGrid.decode(self.env.gen_obs()['image'])
 
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
