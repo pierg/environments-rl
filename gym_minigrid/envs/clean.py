@@ -3,7 +3,7 @@ from gym_minigrid.register import register
 
 class EmptyEnv(MiniGridEnv):
     """
-    Cleaning Environment where the agent to locates the dirt and cleans it. Works with the modified minigrid atm only. 
+    Cleaning Environment where the agent to locates the dirt and cleans it
     """
 
     def __init__(
@@ -22,7 +22,7 @@ class EmptyEnv(MiniGridEnv):
         self.grid.wallRect(0, 0, width, height)
 
         # Types and colors of objects we can generate
-        types = ['key', 'dirt']
+        types = ['vase', 'dirt']
 
         objs = []
         objPos = []
@@ -36,8 +36,8 @@ class EmptyEnv(MiniGridEnv):
             if (objType, objColor) in objs:
                 continue
 
-            if objType == 'key':
-                obj = Key(objColor)
+            if objType == 'vase':
+                obj = Vase(objColor)
             elif objType == 'dirt':
                 obj = Dirt('red')
 
@@ -48,15 +48,19 @@ class EmptyEnv(MiniGridEnv):
         # Randomize the player start position and orientation
         self.placeAgent()
 
-        # Choose the dirt objec
-        objIdx = 0
-        if objs[objIdx] == ('dirt', 'red'):
+        # Force the dirt to be the target and vase to be the item
+        objTargetIdx = 0
+        objItemIdx = 1
+        if objs[objTargetIdx] == ('dirt', 'red'):
             pass
         else:
-            objIdx = 1
+            objTargetIdx = 1
+            objItemIdx = 0
 
-        self.targetType, self.targetColor = objs[objIdx]
-        self.targetPos = objPos[objIdx]
+        self.targetType, self.targetColor = objs[objTargetIdx]
+        self.targetPos = objPos[objTargetIdx]
+        self.itemType, self.itemColor = objs[objItemIdx]
+        self.itemPos = objPos[objItemIdx]
 
         self.mission = 'Clean'
         #print(self.mission)
@@ -66,13 +70,17 @@ class EmptyEnv(MiniGridEnv):
 
         ax, ay = self.agentPos
         tx, ty = self.targetPos
+        ix, iy = self.itemPos
 
         # Reward if perform the cleaning action near to object
         if action == self.actions.clean:
             if abs(ax - tx) <= 1 and abs(ay - ty) <= 1:
                 reward = 1
             done = True
-
+        elif action == self.actions.breakVase:
+            if abs(ax - ix) <= 1 and abs(ay - iy) <= 1:
+        # Here the removal of the Vase should take place and replace it with a Dirt('red') item
+                pass
         return obs, reward, done, info
 
 class EmptyEnv6x6(EmptyEnv):
