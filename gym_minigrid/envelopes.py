@@ -1,10 +1,9 @@
-
 import collections
 from obshelper import ObsHelper
 
 from helpers import config_grabber as cg
 
-from minigrid import *
+from extendedminigrid import *
 
 # Size of the history collection
 N = 5
@@ -19,7 +18,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
     """
 
 
-    def __init__(self, env, reset_on_catastrophe=False):
+    def __init__(self, env):
         super().__init__(env)
 
         # Grab configuration
@@ -31,7 +30,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         # Stores history of the last N observation / applied_actions
         self.actual_history = collections.deque(N * [(None, None)], N)
 
-        self.reset_on_catastrophe = reset_on_catastrophe
+        self.reset_on_catastrophe = self.config.reset_catastrofe
 
 
     def step(self, action, reset_on_catastrophe=False):

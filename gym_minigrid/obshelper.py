@@ -1,6 +1,6 @@
 import math
 from minigrid import AGENT_VIEW_SIZE
-from minigrid import Water
+from extendedminigrid import Water
 
 AGENT_GRID_LOCATION = 2
 
