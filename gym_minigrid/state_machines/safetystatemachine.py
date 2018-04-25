@@ -266,7 +266,7 @@ class SafetyStateMachine(object):
         self.notify("mismatch")
 
     def draw(self):
-        self.machine.get_graph(title=self.name).draw('state_machines/patterns/' + self.pattern + "_" + self.name + '.png', prog='dot')
+        self.machine.get_graph(title=self.name).draw('patterns/' + self.pattern + "_" + self.name + '.png', prog='dot')
 
     # Called before the action is going to be performed on the environment and obs are the current observations
     def check(self, obs_pre, action_proposed):
