@@ -1,4 +1,4 @@
-from fake_obshelper import ObsHelper as oh
+from state_machines.fake_obshelper import ObsHelper as oh
 
 from state_machines.safetystatemachine import SafetyStateMachine
 
@@ -13,16 +13,20 @@ class Absence(SafetyStateMachine):
 
     states = [
         {'name': 'initial',
-         'type': 'inf_ctrl'},
+         'type': 'inf_ctrl',
+         'on_enter': '_on_monitoring'},
 
         {'name': 'safe',
-         'type': 'inf_ctrl'},
+         'type': 'inf_ctrl',
+         'on_enter': '_on_monitoring'},
 
         {'name': 'near',
-         'type': 'sys_fin_ctrl'},
+         'type': 'sys_fin_ctrl',
+         'on_enter': '_on_shaping'},
 
         {'name': 'immediate',
-         'type': 'sys_urg_ctrl'},
+         'type': 'sys_urg_ctrl',
+         'on_enter': '_on_shaping'},
 
         {'name': 'fail',
          'type': 'violated',

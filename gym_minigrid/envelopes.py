@@ -9,8 +9,6 @@ from state_machines.patterns.absence import *
 # Size of the history collection
 N = 5
 
-# Negative reward when trying to enter a catastrophic area
-NEGATIVE_REWARD_CATASTROPHE = -2
 
 class SafetyEnvelope(gym.core.Wrapper):
     """
@@ -25,51 +23,81 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Stores history of the last N observation / applied_actions
         self.actual_history = collections.deque(N * [(None, None)], N)
 
-        self.reset_on_catastrophe = self.config.reset_catastrofe
-
         # Grab configuration
         self.config = cg.Configuration.grab()
-
-        # State of all the monitors after they have been checked
-        self.monitor_states = {}
-
-        self.shaped_reward = None
-        self.unsafe_actions = []
 
         # Action shaped by the action planner
         self.shaped_action = None
 
-        # List of automata-based monitors
-        self.monitors = []
+        self.propsed_action = None
+
+        # List of automata-based monitors with their states, rewards and unsafe-actions
+        self.absence_monitors = []
+        # Dictionary that gets populated with information by all the monitors at runtime
+        self.monitor_states = {}
 
         # Generates automata-based monitors
-        for cell_type in self.config.automata.absence:
-            self.monitors.append(Absence("absence_" + cell_type, cell_type, self.on_monitoring))
+        for avoid_obj in self.config.absence_monitors:
+            new_absence_monitor = Absence("absence_" + avoid_obj, avoid_obj, self.on_monitoring)
+            self.absence_monitors.append(new_absence_monitor)
+            self.monitor_states[new_absence_monitor.name] = {}
+            self.monitor_states[new_absence_monitor.name]["state"] = ""
+            self.monitor_states[new_absence_monitor.name]["shaped_reward"] = 0
+            self.monitor_states[new_absence_monitor.name]["unsafe_action"] = ""
 
-
-    def on_monitoring(self, type, **kwargs):
+    def on_monitoring(self, name, state, **kwargs):
         """
         Callback function called by the monitors
-        :param type:
-        :param kwargs:
-        :return:
+        :param state: mismatch, violation
+        :param kwargs: in case of violation it returns a reward and the action causing the violation (unsafe_aciton)
+        :return: None
         """
-        if type == "mismatch":
-            print("Mismatch between state machine and observations!!!")
+        self.monitor_states[name]["state"] = state
 
-        if type=="violation":
+        if state == "mismatch":
+            print(name + "Mismatch between state machine and observations!!!")
+
+        if state == "monitoring":
+            print(name + " All good")
+
+        if state== "shaping":
             if kwargs:
-                print("Violation Blocked!!!!")
-                self.shaped_reward = kwargs.get('shaped_reward', 0)
-                self.unsafe_actions.append(kwargs.get('unsafe_action'))
+                print(name + " Monitor activated...")
+                shaped_reward = kwargs.get('shaped_reward', 0)
+                print("shaped_reward=" + str(shaped_reward))
+                self.monitor_states[name]["shaped_reward"] = shaped_reward
+            else:
+                print(name + " ERROR. missing action and reward")
+
+        if state== "violation":
+            if kwargs:
+                print(name + " Violation Blocked!!!!")
+                unsafe_action = kwargs.get('unsafe_action')
+                shaped_reward = kwargs.get('shaped_reward', 0)
+                self.monitor_states[name]["unsafe_action"] = unsafe_action
+                self.monitor_states[name]["shaped_reward"] = shaped_reward
                 print("shaped_reward=" + str(shaped_reward) + " unsafe_action=" + str(unsafe_action))
             else:
-                print("ERROR. missing action and reward")
+                print(name + " ERROR. missing action and reward")
+
+    def action_planner(self, unsafe_actions):
+        """
+        Return a suitable action that (that is not one of the 'unsafe_action')
+        :param unsafe_actions:
+        :return: safe action or proposed action
+        """
+        if len(unsafe_actions) == 0:
+            return self.propsed_action
+        return self.env.actions.wait
+
 
 
     def step(self, proposed_action, reset_on_catastrophe=False):
         # Get current observations from the environment and decode them
         current_obs = ExGrid.decode(self.env.gen_obs()['image'])
+        # To be returned to the agent
+        obs, reward, done, info = None, None, None, None
+        self.propsed_action = proposed_action
 
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
@@ -78,44 +106,42 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.proposed_history.append((current_obs, proposed_action))
 
         # Check observation and proposed action in all running monitors
-        for monitor in self.monitors:
+        for monitor in self.absence_monitors:
             monitor.check(current_obs, proposed_action)
 
-        if self.monitor_state == "violation":
-            if self.config.on_catastrofe == "reset":
-                obs = self.env.reset()
-                reward = self.shaped_reward
-                done = True
-                info = {'violation': 1}
-            elif self.config.on_catastrofe == "keep_going":
-                safe_action = self.env.wait
-                obs, reward, done, info = self.env.step(safe_action)
-                reward = self.shaped_reward
-                info = {'violation': 1}
+        # Simply all shaped reward from all the monitors
+        shaped_rewards = []
+        unsafe_actions = []
+
+        for name, monitor in self.monitor_states.items():
+            if monitor["state"] == "violation":
+                if self.config.on_violation == "reset":
+                    obs = self.env.reset()
+                    done = True
+                    info = {}
+                    shaped_rewards.append(monitor["shaped_reward"])
             else:
-                print(self.config.on_violation + " not implemented")
-                raise NotImplementedError
-        else:
-            obs, reward, done, info = self.env.step(proposed_action)
+                if monitor["unsafe_action"]:
+                    unsafe_actions.append(monitor["unsafe_action"])
+                shaped_rewards.append(monitor["shaped_reward"])
 
+        # If any violation occurred
+        if done:
+            reward = sum(shaped_rewards)
+            return obs, reward, done, info
 
-        self.actual_history.append((current_obs, safe_action))
+        # Build action to send to the environment and reward to send back to the agent
+        suitable_action = self.action_planner(unsafe_actions)
 
-        # Apply the agent action to the environment or a safety action
-        mod_reward = reward
+        # Send it to the environment
+        obs, reward, done, info = self.env.step(suitable_action)
 
+        # Check for mismatch with the observations received from the environment in all the monitors
+        for monitor in self.absence_monitors:
+            monitor.verify(obs)
 
-        return obs, mod_reward, done, info
+        # Shape the reward
+        reward += sum(shaped_rewards)
 
-    def monitor(self, observation, proposed_action):
-        """
-
-        :param observation:
-        :param proposed_action:
-        :return:
-        """
-        # Block if the agent is in front of the water and want to go forward
-        return Perception.is_ahead_of_worldobj(observation, Water, 1) \
-               and proposed_action == MiniGridEnv.Actions.forward
-
-
+        # Return everything to the agent
+        return obs, reward, done, info

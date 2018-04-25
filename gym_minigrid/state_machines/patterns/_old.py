@@ -1,4 +1,4 @@
-from fake_obshelper import ObsHelper as oh
+from state_machines.fake_obshelper import ObsHelper as oh
 from state_machines.safetystatemachine import SafetyStateMachine
 
 

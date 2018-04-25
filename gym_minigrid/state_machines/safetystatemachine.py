@@ -237,8 +237,6 @@ class SafetyStateMachine(object):
 
         # Action proposed by the agent
         self.action_proposed = None
-        # Action applied on the environment by the agent
-        self.action_applied = None
 
         # Function to be called when violation is detected (on_block) or when observations are needed (uncertainty)
         self.notify = notify
@@ -250,6 +248,15 @@ class SafetyStateMachine(object):
     def _obs_to_state(self, obs):
         raise NotImplementedError
 
+
+    def _on_monitoring(self):
+        # Notify
+        self.notify(self.name, "monitoring")
+
+    def _on_shaping(self):
+        # Notify
+        self.notify(self.name, "shaping", shaped_reward=100)
+
     # Triggered when it enters in a state of time 'violated'
     def _on_violated(self):
 
@@ -258,10 +265,10 @@ class SafetyStateMachine(object):
         print("Rolled-back state to: " + self.state)
 
         # Notify
-        self.notify("violation", shaped_reward=100, unsafe_action=self.action_proposed)
+        self.notify(self.name, "violation", shaped_reward=100, unsafe_action=self.action_proposed)
 
     def _on_mismatch(self):
-        self.notify("mismatch")
+        self.notify(self.name, "mismatch")
 
     def draw(self):
         self.machine.get_graph(title=self.name).draw('patterns/' + self.pattern + "_" + self.name + '.png', prog='dot')
@@ -272,39 +279,31 @@ class SafetyStateMachine(object):
         self.action_proposed = action_proposed
         self.current_state = self.state
 
-        # I map the observation to a state
-        observed_state = self._obs_to_state(obs_pre)
+        # Map the observation to a state
+        self.current_state = self._obs_to_state(obs_pre)
 
         if self.initial_state is None:
             # First time
             print("first time!")
-            self.initial_state = observed_state
-            self.current_state = observed_state
-            self.machine.set_state(observed_state)
-            print("state set to: " + observed_state)
+            self.initial_state = self.current_state
+            self.machine.set_state(self.current_state)
+            print("state set to: " + self.current_state)
             self.trigger('*')
+        elif self.state == self.current_state:
+            print("all good! i'm in  : " + self.state)
+            self.trigger('*')
+            print("the state after is: " + self.state)
         else:
-            if self.state != observed_state:
-                print("new state: " + observed_state + " i'm in: " + self.state)
-                self.trigger('*')
-                print("the state is now: " + self.state)
-                if self.state != observed_state:
-                    self._on_mismatch()
-            else:
-                print("all good! i'm in  : " + self.state)
-                self.trigger('*')
-                print("the state after is: " + self.state)
+            self._on_mismatch()
 
+    # Update the state after the action has been performed in the environment
+    def verify(self, obs_post):
 
-    # Called after the action has been performed on the environment and new observations have been retrieved
-    def applied(self, action_applied, obs_retreived):
-        self.action_applied = action_applied
-        self.observations_post = obs_retreived
+        # Map the observation to a state
+        self.current_state = self._obs_to_state(obs_post)
 
-        observed_state = self._obs_to_state(obs_retreived)
-
-        if self.state != observed_state:
-            print("ERROR!! - MISMATCH WORLD/MONITOR 2")
+        if self.state != self.current_state:
+            self._on_mismatch()
 
 
     """ Actions available to the agent - used for conditions checking """
