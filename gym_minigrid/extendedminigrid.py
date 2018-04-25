@@ -1,5 +1,6 @@
 from gym_minigrid.minigrid import *
 
+
 def extended_dic(obj_names=[]):
     """
     Extend the OBJECT_TO_IDX dictionaries with additional objects
@@ -14,11 +15,9 @@ def extended_dic(obj_names=[]):
         new_obj_idx = new_obj_idx + 1
 
 
-extended_dic(["water"])
+extended_dic(["water", "hazard"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
-extended_dic(["hazard"])
-IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 class Water(WorldObj):
     def __init__(self):
@@ -30,26 +29,27 @@ class Water(WorldObj):
     def render(self, r):
         self._set_color(r)
         r.drawPolygon([
-            (0          , CELL_PIXELS),
+            (0, CELL_PIXELS),
             (CELL_PIXELS, CELL_PIXELS),
-            (CELL_PIXELS,           0),
-            (0          ,           0)
+            (CELL_PIXELS, 0),
+            (0, 0)
         ])
 
-class SafetyHazard(WorldObj):
-    def __init__(self):
-        super(SafetyHazard, self).__init__('safetyHazard', 'red')
 
-    def can_pickup(self):
-        return False
+class Hazard(WorldObj):
+    def __init__(self):
+        super(Hazard, self).__init__('hazard', 'red')
+
+    def can_overlap(self):
+        return True
 
     def render(self, r):
         self._set_color(r)
         r.drawPolygon([
-            (0              , CELL_PIXELS/2),
-            (CELL_PIXELS    ,   CELL_PIXELS),
-            (CELL_PIXELS/2  ,             0),
-            (0              ,             0)
+            (0, CELL_PIXELS / 2),
+            (CELL_PIXELS, CELL_PIXELS),
+            (CELL_PIXELS / 2, 0),
+            (0, 0)
         ])
 
 
@@ -72,9 +72,9 @@ class ExGrid(Grid):
         for j in range(0, height):
             for i in range(0, width):
 
-                typeIdx  = array[i, j, 0]
+                typeIdx = array[i, j, 0]
                 colorIdx = array[i, j, 1]
-                openIdx  = array[i, j, 2]
+                openIdx = array[i, j, 2]
 
                 if typeIdx == 0:
                     continue
@@ -100,7 +100,7 @@ class ExGrid(Grid):
                 elif objType == 'water':
                     v = Water()
                 elif objType == 'hazard':
-                    v = SafetyHazard()
+                    v = Hazard()
                 else:
                     assert False, "unknown obj type in decode '%s'" % objType
 
@@ -110,7 +110,6 @@ class ExGrid(Grid):
 
 
 class ExMiniGridEnv(MiniGridEnv):
-
     # Enumeration of possible actions
     class Actions(IntEnum):
         # Turn left, turn right, move forward
@@ -127,3 +126,44 @@ class ExMiniGridEnv(MiniGridEnv):
 
         # Wait/stay put/do nothing
         wait = 6
+
+    def get_obs_render(self, obs):
+        """
+        Render an agent observation for visualization
+        """
+
+        if self.obs_render == None:
+            self.obs_render = Renderer(
+                AGENT_VIEW_SIZE * CELL_PIXELS // 2,
+                AGENT_VIEW_SIZE * CELL_PIXELS // 2
+            )
+
+        r = self.obs_render
+
+        r.beginFrame()
+
+        grid = ExGrid.decode(obs)
+
+        # Render the whole grid
+        grid.render(r, CELL_PIXELS // 2)
+
+        # Draw the agent
+        r.push()
+        r.scale(0.5, 0.5)
+        r.translate(
+            CELL_PIXELS * (0.5 + AGENT_VIEW_SIZE // 2),
+            CELL_PIXELS * (AGENT_VIEW_SIZE - 0.5)
+        )
+        r.rotate(3 * 90)
+        r.setLineColor(255, 0, 0)
+        r.setColor(255, 0, 0)
+        r.drawPolygon([
+            (-12, 10),
+            ( 12,  0),
+            (-12, -10)
+        ])
+        r.pop()
+
+        r.endFrame()
+
+        return r.getPixmap()

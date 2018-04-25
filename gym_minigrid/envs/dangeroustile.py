@@ -1,16 +1,24 @@
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
 
+
 class DangerousTile(ExMiniGridEnv):
+
     """
-    First GOAP Environment, empty 5x5 grid with ONE dangerous Tile
+    First GOAP Environment, empty 8x8 grid with ONE dangerous Tile
     """
 
-    def __init__(self, size=8):
+    def __init__(
+            self,
+            size=8,
+            numObjs=2
+    ):
+        self.numObjs = numObjs
+
         super().__init__(
             grid_size=size,
-            max_steps=4*size*size,
-            #Max speed
+            max_steps=4 * size * size,
+            # Max speed
             see_through_walls=True
         )
 
@@ -29,20 +37,27 @@ class DangerousTile(ExMiniGridEnv):
         self.grid.set(width - 2, height - 2, Goal())
 
         # Place a safety concern
-        self.place_obj(self._rand_int(0, width - 2), self._rand_int(0, height - 2), SafetyHazard())
+        self.grid.set(width - 4, height - 3, Hazard())
 
         self.mission = "get to the green goal square"
 
+
+class DangerousTile6x6(DangerousTile):
+    def __init__(self):
+        super().__init__(size=6)
+
+
 class DangerousTile8x8(DangerousTile):
     def __init__(self):
-        super().__init___(size=8)
+        super().__init__(size=8)
+
 
 register(
-    id='MiniGrid-DangTile-6x6-v0',
+    id='MiniGrid-DangerousTile-6x6-v0',
     entry_point='gym_minigrid.envs:DangerousTile6x6'
 )
 
 register(
-    id='MiniGrid-DangTile-8x8-v0',
+    id='MiniGrid-DangerousTile-8x8-v0',
     entry_point='gym_minigrid.envs:DangerousTile'
 )
