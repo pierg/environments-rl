@@ -90,6 +90,15 @@ class ExGrid(Grid):
 
 class ExMiniGridEnv(MiniGridEnv):
     # Enumeration of possible actions
+
+    def step(self, action):
+        if action == "clean":
+            print("doclean")
+        elif action == "move":
+            print("domove")
+        else:
+            super().step(action)
+
     class Actions(IntEnum):
         # Turn left, turn right, move forward
         left = 0
@@ -107,5 +116,5 @@ class ExMiniGridEnv(MiniGridEnv):
         wait = 6
 
         # More actions:
-        # Ex:
         clean = 7
+        move = 8
