@@ -38,6 +38,7 @@ class ExGrid(Grid):
     Extending Grid methods to support the new objects
     """
 
+    # Add new worldobje that need to be decoded (Ex. water)
     def decode(array):
         """
         Decode an array grid encoding back into a grid
@@ -90,18 +91,7 @@ class ExGrid(Grid):
 class ExMiniGridEnv(MiniGridEnv):
 
     # Enumeration of possible actions
-    class Actions(IntEnum):
-        # Turn left, turn right, move forward
-        left = 0
-        right = 1
-        forward = 2
-
-        # Pick up an object
-        pickup = 3
-        # Drop an object
-        drop = 4
-        # Toggle/activate an object
-        toggle = 5
-
-        # Wait/stay put/do nothing
-        wait = 6
+    class Actions(MiniGridEnv.Actions):
+        # Add actions here
+        # Ex:
+        clean = 7
