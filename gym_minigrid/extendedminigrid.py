@@ -89,9 +89,23 @@ class ExGrid(Grid):
 
 
 class ExMiniGridEnv(MiniGridEnv):
-
     # Enumeration of possible actions
-    class Actions(MiniGridEnv.Actions):
-        # Add actions here
+    class Actions(IntEnum):
+        # Turn left, turn right, move forward
+        left = 0
+        right = 1
+        forward = 2
+
+        # Pick up an object
+        pickup = 3
+        # Drop an object
+        drop = 4
+        # Toggle/activate an object
+        toggle = 5
+
+        # Wait/stay put/do nothing
+        wait = 6
+
+        # More actions:
         # Ex:
         clean = 7
