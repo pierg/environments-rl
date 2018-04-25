@@ -1,13 +1,13 @@
 import math
 from .minigrid import AGENT_VIEW_SIZE
-from .extendedminigrid import Water
 
 AGENT_GRID_LOCATION = 2
+
 
 # Helper class to analyse agent's observations
 # All the methods should return True/False
 
-class Perception():
+class Perception:
 
     @staticmethod
     def is_ahead_of_worldobj(obs, object_type, distance=1):
@@ -29,11 +29,11 @@ class Perception():
         #     return False
         return isinstance(type, object_type)
 
-
     @staticmethod
     def is_worldobj_to_left(obs, object_type, distance=1):
         """
         Returns True is "object_type" is located to the left of the agent
+        :param distance:
         :param obs:
         :param object_type:
         :return:
@@ -56,6 +56,7 @@ class Perception():
         """
         General method that returns true if the number of steps (sequence of actions) to reach a cell
         of type 'object_type' is equals to 1
+        :param obs:
         :param object_type: type of WorldObj
         :param distance: number of cells from the agent (1 = the one next to the agent cell)
         :return: True / False
@@ -67,6 +68,7 @@ class Perception():
         """
         General method that returns true if the number of steps (sequence of actions) to reach a cell
         of type 'object_type' is equals to 2
+        :param obs:
         :param object_type: type of WorldObj
         :return: True / False
         """
