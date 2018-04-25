@@ -1,18 +1,26 @@
 from state_machines.patterns.absence import *
 
 
-def notify(type, unsafe_actions=None):
+def on_monitoring(type, **kwargs):
     """
     Notify for violations
     :param type: Can be of state/observations mismatch or violation of safety property
     :param unsafe_actions: list of unsafe actions (in case of violation type)
     :return:
     """
-    if type == "violation":
-        print ("Violation Blocked!!!!" + " Unsafe actions: ", unsafe_actions)
 
     if type == "mismatch":
         print("Mismatch between state machine and observations!!!")
+
+    if type=="violation":
+        if kwargs:
+            print("Violation Blocked!!!!")
+            shaped_reward = kwargs.get('shaped_reward', 0)
+            unsafe_action = kwargs.get('unsafe_action')
+            print("shaped_reward=" + str(shaped_reward) + " unsafe_action=" + str(unsafe_action))
+        else:
+            print("ERROR. missing action and reward")
+
 
 
 
@@ -60,7 +68,7 @@ def notify(type, unsafe_actions=None):
 #
 def test_absence():
 
-    avoid_water = Absence('avoid_water', 'water', notify)
+    avoid_water = Absence('avoid_water', 'water', on_monitoring)
     avoid_water.draw()
     avoid_water.check("safe", 'puppa')
     avoid_water.check("near", 'puppa')

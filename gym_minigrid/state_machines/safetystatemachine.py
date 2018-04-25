@@ -246,21 +246,19 @@ class SafetyStateMachine(object):
 
         # MiniGrid Actions and unsafe_actions list to be returned by the on_block
         self.actions = MiniGridEnv.Actions
-        self.unsafe_actions = []
 
     def _obs_to_state(self, obs):
         raise NotImplementedError
 
     # Triggered when it enters in a state of time 'violated'
     def _on_violated(self):
-        self.unsafe_actions.append(self.action_proposed)
 
         # Rollback to the state before the violation:
         self.machine.set_state(self.current_state)
         print("Rolled-back state to: " + self.state)
 
         # Notify
-        self.notify("violation", self.unsafe_actions)
+        self.notify("violation", shaped_reward=100, unsafe_action=self.action_proposed)
 
     def _on_mismatch(self):
         self.notify("mismatch")
