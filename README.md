@@ -1,5 +1,7 @@
 # Minimalistic Gridworld Environment (MiniGrid)
 
+[![Build Status](https://travis-ci.org/maximecb/gym-minigrid.svg?branch=master)](https://travis-ci.org/maximecb/gym-minigrid)
+
 There are other gridworld Gym environments out there, but this one is
 designed to be particularly simple, lightweight and fast. The code has very few
 dependencies, making it less likely to break or fail to install. It loads no
@@ -16,6 +18,19 @@ Requirements:
 
 This environment has been built at the [MILA](https://mila.quebec/en/) as
 part of the [Baby AI Game](https://github.com/maximecb/baby-ai-game) project.
+
+Please use this bibtex if you want to cite this repository in your publications:
+
+```
+@misc{gym_minigrid,
+  author = {Maxime Chevalier-Boisvert},
+  title = {Minimalistic Gridworld Environment for OpenAI Gym},
+  year = {2018},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/maximecb/gym-minigrid}},
+}
+```
 
 ## Installation
 
@@ -69,17 +84,18 @@ python3 pytorch_rl/enjoy.py --env-name MiniGrid-Empty-6x6-v0 --load-dir ./traine
 
 MiniGrid is built to support tasks involving natural language and sparse rewards.
 The observations are dictionaries, with an 'image' field, partially observable
-view of the environment, and a 'mission' field which is a textual string
-describing the objective the agent should reach to get a reward. Using
-dictionaries makes it easy for you to add additional information to observations
+view of the environment, a 'mission' field which is a textual string
+describing the objective the agent should reach to get a reward, and a 'direction'
+field which can be used as an optional compass. Using dictionaries makes it
+easy for you to add additional information to observations
 if you need to, without having to force everything into a single tensor.
-If your RL code expects a tensor for observations, please take a look at
+If your RL code expects one single tensor for observations, please take a look at
 `FlatObsWrapper` in
 [gym_minigrid/wrappers.py](/gym_minigrid/wrappers.py).
 
 The partially observable view of the environment uses a compact and efficient
-encoding, with just 3 input values per visible grid cell, 147 values total.
-If you want to obtain an array of RGB pixels instead, see the `getObsRender` method in
+encoding, with just 3 input values per visible grid cell, 7x7x3 values total.
+If you want to obtain an array of RGB pixels instead, see the `get_obs_render` method in
 [gym_minigrid/minigrid.py](gym_minigrid/minigrid.py).
 
 Structure of the world:
@@ -95,13 +111,17 @@ Actions in the basic environment:
 - Turn left
 - Turn right
 - Move forward
-- Toggle (pick up or interact with objects)
+- Pick up an object
+- Drop the object being carried
+- Toggle (interact with objects)
 - Wait (noop, do nothing)
 
-By default, sparse rewards for reaching a goal square are provided, but you can
-define your own reward function by creating a class derived from MiniGridEnv. Extending
-the environment with new object types or action should be very easy very easy.
-If you wish to do this, you should take a look at the
+By default, sparse rewards are given for reaching a green goal tile. A
+reward of 1 is given for success, and zero for failure. There is also an
+environment-specific time step limit for completing the task.
+You can define your own reward function by creating a class derived
+from `MiniGridEnv`. Extending the environment with new object types or action
+should be very easy. If you wish to do this, you should take a look at the
 [gym_minigrid/minigrid.py](gym_minigrid/minigrid.py) source file.
 
 ## Included Environments
@@ -214,25 +234,3 @@ a textual mission string as input, telling it which room to go to in order
 to get the key that opens the locked room. It then has to go into the locked
 room in order to reach the final goal. This environment is extremely difficult
 to solve with vanilla reinforcement learning alone.
-
-### Four room question answering environment
-
-Registered configurations:
-- `MiniGrid-FourRoomQA-v0`
-
-<p align="center">
-<img src="/figures/fourroomqa-env.png">
-</p>
-
-This environment is inspired by the
-[Embodied Question Answering](https://arxiv.org/abs/1711.11543) paper. The question are of the form:
-
-> Are there any keys in the red room?
-
-There are four colored rooms, and the agent starts at a random position in the grid.
-Multiple objects of different types and colors are also placed at random
-positions in random rooms. A question and answer pair is generated, the
-question is given to the agent as an observation, and the agent has a limited
-number of time steps to explore the environment and produce a response. This
-environment can be easily modified to add more question types or to diversify
-the way the questions are phrased.

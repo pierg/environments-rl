@@ -34,23 +34,22 @@ class MultiRoomEnv(MiniGridEnv):
         self.rooms = []
 
         super(MultiRoomEnv, self).__init__(
-            gridSize=25,
-            maxSteps=self.maxNumRooms * 20
+            grid_size=25,
+            max_steps=self.maxNumRooms * 20
         )
 
-    def _genGrid(self, width, height):
-
+    def _gen_grid(self, width, height):
         roomList = []
 
         # Choose a random number of rooms to generate
-        numRooms = self._randInt(self.minNumRooms, self.maxNumRooms+1)
+        numRooms = self._rand_int(self.minNumRooms, self.maxNumRooms+1)
 
         while len(roomList) < numRooms:
             curRoomList = []
 
             entryDoorPos = (
-                self._randInt(0, width - 2),
-                self._randInt(0, width - 2)
+                self._rand_int(0, width - 2),
+                self._rand_int(0, width - 2)
             )
 
             # Recursively place the rooms
@@ -69,15 +68,6 @@ class MultiRoomEnv(MiniGridEnv):
         # Store the list of rooms in this environment
         assert len(roomList) > 0
         self.rooms = roomList
-
-        # Randomize the starting agent position and direction
-        topX, topY = roomList[0].top
-        sizeX, sizeY = roomList[0].size
-        self.startPos = (
-            self._randInt(topX + 1, topX + sizeX - 2),
-            self._randInt(topY + 1, topY + sizeY - 2)
-        )
-        self.startDir = self._randInt(0, 4)
 
         # Create the grid
         self.grid = Grid(width, height)
@@ -109,7 +99,7 @@ class MultiRoomEnv(MiniGridEnv):
                     doorColors.remove(prevDoorColor)
                 # Note: the use of sorting here guarantees determinism,
                 # This is needed because Python's set is not deterministic
-                doorColor = self._randElem(sorted(doorColors))
+                doorColor = self._rand_elem(sorted(doorColors))
 
                 entryDoor = Door(doorColor)
                 self.grid.set(*room.entryDoorPos, entryDoor)
@@ -118,17 +108,11 @@ class MultiRoomEnv(MiniGridEnv):
                 prevRoom = roomList[idx-1]
                 prevRoom.exitDoorPos = room.entryDoorPos
 
-        # Place the final goal
-        while True:
-            self.goalPos = (
-                self._randInt(topX + 1, topX + sizeX - 1),
-                self._randInt(topY + 1, topY + sizeY - 1)
-            )
+        # Randomize the starting agent position and direction
+        self.place_agent(roomList[0].top, roomList[0].size)
 
-            # Make sure the goal doesn't overlap with the agent
-            if self.goalPos != self.startPos:
-                self.grid.set(*self.goalPos, Goal())
-                break
+        # Place the final goal in the last room
+        self.goal_pos = self.place_obj(Goal(), roomList[-1].top, roomList[-1].size)
 
         self.mission = 'traverse the rooms to get to the goal'
 
@@ -142,8 +126,8 @@ class MultiRoomEnv(MiniGridEnv):
         entryDoorPos
     ):
         # Choose the room size randomly
-        sizeX = self._randInt(minSz, maxSz+1)
-        sizeY = self._randInt(minSz, maxSz+1)
+        sizeX = self._rand_int(minSz, maxSz+1)
+        sizeY = self._rand_int(minSz, maxSz+1)
 
         # The first room will be at the door position
         if len(roomList) == 0:
@@ -152,21 +136,21 @@ class MultiRoomEnv(MiniGridEnv):
         elif entryDoorWall == 0:
             topX = entryDoorPos[0] - sizeX + 1
             y = entryDoorPos[1]
-            topY = self._randInt(y - sizeY + 2, y)
+            topY = self._rand_int(y - sizeY + 2, y)
         # Entry wall on the south
         elif entryDoorWall == 1:
             x = entryDoorPos[0]
-            topX = self._randInt(x - sizeX + 2, x)
+            topX = self._rand_int(x - sizeX + 2, x)
             topY = entryDoorPos[1] - sizeY + 1
         # Entry wall on the left
         elif entryDoorWall == 2:
             topX = entryDoorPos[0]
             y = entryDoorPos[1]
-            topY = self._randInt(y - sizeY + 2, y)
+            topY = self._rand_int(y - sizeY + 2, y)
         # Entry wall on the top
         elif entryDoorWall == 3:
             x = entryDoorPos[0]
-            topX = self._randInt(x - sizeX + 2, x)
+            topX = self._rand_int(x - sizeX + 2, x)
             topY = entryDoorPos[1]
         else:
             assert False, entryDoorWall
@@ -174,7 +158,7 @@ class MultiRoomEnv(MiniGridEnv):
         # If the room is out of the grid, can't place a room here
         if topX < 0 or topY < 0:
             return False
-        if topX + sizeX > self.gridSize or topY + sizeY >= self.gridSize:
+        if topX + sizeX > self.grid_size or topY + sizeY >= self.grid_size:
             return False
 
         # If the room intersects with previous rooms, can't place it here
@@ -206,7 +190,7 @@ class MultiRoomEnv(MiniGridEnv):
             # Pick which wall to place the out door on
             wallSet = set((0, 1, 2, 3))
             wallSet.remove(entryDoorWall)
-            exitDoorWall = self._randElem(sorted(wallSet))
+            exitDoorWall = self._rand_elem(sorted(wallSet))
             nextEntryWall = (exitDoorWall + 2) % 4
 
             # Pick the exit door position
@@ -214,24 +198,24 @@ class MultiRoomEnv(MiniGridEnv):
             if exitDoorWall == 0:
                 exitDoorPos = (
                     topX + sizeX - 1,
-                    topY + self._randInt(1, sizeY - 1)
+                    topY + self._rand_int(1, sizeY - 1)
                 )
             # Exit on south wall
             elif exitDoorWall == 1:
                 exitDoorPos = (
-                    topX + self._randInt(1, sizeX - 1),
+                    topX + self._rand_int(1, sizeX - 1),
                     topY + sizeY - 1
                 )
             # Exit on left wall
             elif exitDoorWall == 2:
                 exitDoorPos = (
                     topX,
-                    topY + self._randInt(1, sizeY - 1)
+                    topY + self._rand_int(1, sizeY - 1)
                 )
             # Exit on north wall
             elif exitDoorWall == 3:
                 exitDoorPos = (
-                    topX + self._randInt(1, sizeX - 1),
+                    topX + self._rand_int(1, sizeX - 1),
                     topY
                 )
             else:

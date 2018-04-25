@@ -1,9 +1,10 @@
-from gym_minigrid.minigrid import *
+from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
 
-class EmptyEnv(MiniGridEnv):
+
+class UnsafeEnv(ExMiniGridEnv):
     """
-    Empty grid environment, no obstacles, sparse reward
+    Unsafe grid environment, no obstacles, sparse reward
     """
 
     def __init__(self, size=8):
@@ -28,27 +29,34 @@ class EmptyEnv(MiniGridEnv):
         # Place a goal square in the bottom-right corner
         self.grid.set(width - 2, height - 2, Goal())
 
-        self.mission = "get to the green goal square"
+        # Place water
+        self.grid.set(width - 5, height - 2, Water())
 
-class EmptyEnv6x6(EmptyEnv):
+        # Set start position
+        self.start_pos = (1, 1)
+        self.start_dir = 0
+
+        self.mission = "get to the green goal square without moving on water"
+
+class UnsafeEnv6x6(UnsafeEnv):
     def __init__(self):
         super().__init__(size=6)
 
-class EmptyEnv16x16(EmptyEnv):
+class UnsafeEnv16x16(UnsafeEnv):
     def __init__(self):
         super().__init__(size=16)
 
 register(
-    id='MiniGrid-Empty-6x6-v0',
-    entry_point='gym_minigrid.envs:EmptyEnv6x6'
+    id='MiniGrid-Unsafe-6x6-v0',
+    entry_point='gym_minigrid.envs:UnsafeEnv6x6'
 )
 
 register(
-    id='MiniGrid-Empty-8x8-v0',
-    entry_point='gym_minigrid.envs:EmptyEnv'
+    id='MiniGrid-Unsafe-8x8-v0',
+    entry_point='gym_minigrid.envs:UnsafeEnv'
 )
 
 register(
-    id='MiniGrid-Empty-16x16-v0',
-    entry_point='gym_minigrid.envs:EmptyEnv16x16'
+    id='MiniGrid-Unsafe-16x16-v0',
+    entry_point='gym_minigrid.envs:UnsafeEnv16x16'
 )

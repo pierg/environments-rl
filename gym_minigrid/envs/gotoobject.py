@@ -13,14 +13,19 @@ class GoToObjectEnv(MiniGridEnv):
         numObjs=2
     ):
         self.numObjs = numObjs
-        super().__init__(gridSize=size, maxSteps=5*size)
-        self.reward_range = (0, 1)
 
-    def _genGrid(self, width, height):
+        super().__init__(
+            grid_size=size,
+            max_steps=5*size,
+            # Set this to True for maximum speed
+            see_through_walls=True
+        )
+
+    def _gen_grid(self, width, height):
         self.grid = Grid(width, height)
 
         # Generate the surrounding walls
-        self.grid.wallRect(0, 0, width, height)
+        self.grid.wall_rect(0, 0, width, height)
 
         # Types and colors of objects we can generate
         types = ['key', 'ball', 'box']
@@ -30,8 +35,8 @@ class GoToObjectEnv(MiniGridEnv):
 
         # Until we have generated all the objects
         while len(objs) < self.numObjs:
-            objType = self._randElem(types)
-            objColor = self._randElem(COLOR_NAMES)
+            objType = self._rand_elem(types)
+            objColor = self._rand_elem(COLOR_NAMES)
 
             # If this object already exists, try again
             if (objType, objColor) in objs:
@@ -44,27 +49,27 @@ class GoToObjectEnv(MiniGridEnv):
             elif objType == 'box':
                 obj = Box(objColor)
 
-            pos = self.placeObj(obj)
+            pos = self.place_obj(obj)
             objs.append((objType, objColor))
             objPos.append(pos)
 
-        # Randomize the player start position and orientation
-        self.placeAgent()
+        # Randomize the agent start position and orientation
+        self.place_agent()
 
         # Choose a random object to be picked up
-        objIdx = self._randInt(0, len(objs))
-        self.targetType, self.targetColor = objs[objIdx]
-        self.targetPos = objPos[objIdx]
+        objIdx = self._rand_int(0, len(objs))
+        self.targetType, self.target_color = objs[objIdx]
+        self.target_pos = objPos[objIdx]
 
-        descStr = '%s %s' % (self.targetColor, self.targetType)
+        descStr = '%s %s' % (self.target_color, self.targetType)
         self.mission = 'go to the %s' % descStr
         #print(self.mission)
 
     def step(self, action):
         obs, reward, done, info = MiniGridEnv.step(self, action)
 
-        ax, ay = self.agentPos
-        tx, ty = self.targetPos
+        ax, ay = self.agent_pos
+        tx, ty = self.target_pos
 
         # Toggle/pickup action terminates the episode
         if action == self.actions.toggle:

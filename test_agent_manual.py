@@ -7,6 +7,14 @@ import numpy
 import gym
 import time
 from optparse import OptionParser
+from helpers import config_grabber as cg
+try:
+    import gym_minigrid
+    from gym_minigrid.wrappers import *
+    from gym_minigrid.envelopes import *
+except Exception as e:
+    print(e)
+    pass
 
 import gym_minigrid
 
@@ -21,8 +29,24 @@ def main():
     )
     (options, args) = parser.parse_args()
 
+
+    # Getting configuration from file
+    config = cg.Configuration.grab()
+
+    # Overriding arguments with configuration file
+    options.env_name = config.env_name
+
+
     # Load the gym environment
     env = gym.make(options.env_name)
+
+    if config.monitor:
+        env = SafetyEnvelope(env)
+
+
+    # # Maxime: until RL code supports dict observations, squash observations into a flat vector
+    # if isinstance(env.observation_space, spaces.Dict):
+    #     env = FlatObsWrapper(env)
 
     def resetEnv():
         env.reset()
@@ -45,21 +69,21 @@ def main():
         action = 0
 
         if keyName == 'LEFT':
-            action = env.actions.left
+            action = env.env.actions.left
         elif keyName == 'RIGHT':
-            action = env.actions.right
+            action = env.env.actions.right
         elif keyName == 'UP':
-            action = env.actions.forward
+            action = env.env.actions.forward
 
         elif keyName == 'SPACE':
-            action = env.actions.toggle
+            action = env.env.actions.toggle
         elif keyName == 'PAGE_UP':
-            action = env.actions.pickup
+            action = env.env.actions.pickup
         elif keyName == 'PAGE_DOWN':
-            action = env.actions.drop
+            action = env.env.actions.drop
 
         elif keyName == 'CTRL':
-            action = env.actions.wait
+            action = env.env.actions.wait
 
         else:
             print("unknown key %s" % keyName)
@@ -67,7 +91,7 @@ def main():
 
         obs, reward, done, info = env.step(action)
 
-        print('step=%s, reward=%s' % (env.step_count, reward))
+        print('step=%s, reward=%s' % (env.env.step_count, reward))
 
         if done:
             print('done!')
