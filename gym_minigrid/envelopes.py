@@ -4,6 +4,7 @@ from perception import Perception
 from helpers import config_grabber as cg
 
 from extendedminigrid import *
+from state_machines.patterns.absence import *
 
 # Size of the history collection
 N = 5
@@ -29,12 +30,44 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Grab configuration
         self.config = cg.Configuration.grab()
 
-        # Reward safety action set by the monitor in case of violation
+        # State of all the monitors after they have been checked
+        self.monitor_states = {}
+
         self.shaped_reward = None
+        self.unsafe_actions = []
+
+        # Action shaped by the action planner
         self.shaped_action = None
 
+        # List of automata-based monitors
+        self.monitors = []
 
-    def step(self, action, reset_on_catastrophe=False):
+        # Generates automata-based monitors
+        for cell_type in self.config.automata.absence:
+            self.monitors.append(Absence("absence_" + cell_type, cell_type, self.on_monitoring))
+
+
+    def on_monitoring(self, type, **kwargs):
+        """
+        Callback function called by the monitors
+        :param type:
+        :param kwargs:
+        :return:
+        """
+        if type == "mismatch":
+            print("Mismatch between state machine and observations!!!")
+
+        if type=="violation":
+            if kwargs:
+                print("Violation Blocked!!!!")
+                self.shaped_reward = kwargs.get('shaped_reward', 0)
+                self.unsafe_actions.append(kwargs.get('unsafe_action'))
+                print("shaped_reward=" + str(shaped_reward) + " unsafe_action=" + str(unsafe_action))
+            else:
+                print("ERROR. missing action and reward")
+
+
+    def step(self, proposed_action, reset_on_catastrophe=False):
         # Get current observations from the environment and decode them
         current_obs = ExGrid.decode(self.env.gen_obs()['image'])
 
@@ -42,26 +75,28 @@ class SafetyEnvelope(gym.core.Wrapper):
             self.env.render('human')
 
         # Store obs/action in history
-        proposed_action = action
         self.proposed_history.append((current_obs, proposed_action))
 
-        if self.monitor(current_obs, proposed_action):
+        # Check observation and proposed action in all running monitors
+        for monitor in self.monitors:
+            monitor.check(current_obs, proposed_action)
+
+        if self.monitor_state == "violation":
             if self.config.on_catastrofe == "reset":
                 obs = self.env.reset()
                 reward = self.shaped_reward
                 done = True
-                info = {'catastrophe': 1}
+                info = {'violation': 1}
             elif self.config.on_catastrofe == "keep_going":
                 safe_action = self.env.wait
                 obs, reward, done, info = self.env.step(safe_action)
-                reward = NEGATIVE_REWARD_CATASTROPHE
-                info = {'catastrophe': 1}
+                reward = self.shaped_reward
+                info = {'violation': 1}
             else:
-                print(self.config.on_catastrofe + " not implemented")
+                print(self.config.on_violation + " not implemented")
                 raise NotImplementedError
         else:
             obs, reward, done, info = self.env.step(proposed_action)
-
 
 
         self.actual_history.append((current_obs, safe_action))
@@ -79,9 +114,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         :param proposed_action:
         :return:
         """
-
-
-
         # Block if the agent is in front of the water and want to go forward
         return Perception.is_ahead_of_worldobj(observation, Water, 1) \
                and proposed_action == MiniGridEnv.Actions.forward
