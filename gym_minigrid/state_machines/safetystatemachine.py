@@ -228,10 +228,10 @@ class SafetyStateMachine(object):
 
         # Initial state observed by the agent
         self.initial_state = None
-        self.current_state = None
+        self.env_state = None
 
         # Observations retreived before applying the action
-        self.observations_pre = None
+        self.observations = None
         # Observations retreived after applying the action
         self.observations_post = None
 
@@ -261,7 +261,7 @@ class SafetyStateMachine(object):
     def _on_violated(self):
 
         # Rollback to the state before the violation:
-        self.machine.set_state(self.current_state)
+        self.machine.set_state(self.env_state)
         print("Rolled-back state to: " + self.state)
 
         # Notify
@@ -275,36 +275,38 @@ class SafetyStateMachine(object):
 
     # Called before the action is going to be performed on the environment and obs are the current observations
     def check(self, obs_pre, action_proposed):
-        self.observations_pre = obs_pre
+        self.observations = obs_pre
         self.action_proposed = action_proposed
-        self.current_state = self.state
+        self.env_state = self.state
 
         # Map the observation to a state
-        self.current_state = self._obs_to_state(obs_pre)
+        self.env_state = self._obs_to_state(obs_pre)
 
         if self.initial_state is None:
             # First time
-            print("first time!")
-            self.initial_state = self.current_state
-            self.machine.set_state(self.current_state)
-            print("state set to: " + self.current_state)
+            # print("first time!")
+            self.initial_state = self.env_state
+            self.machine.set_state(self.env_state)
             self.trigger('*')
-        elif self.state == self.current_state:
-            print("all good! i'm in  : " + self.state)
+        elif self.state == self.env_state:
             self.trigger('*')
-            print("the state after is: " + self.state)
         else:
             self._on_mismatch()
+        # print("monitor_state: " + self.state)
 
     # Update the state after the action has been performed in the environment
-    def verify(self, obs_post):
+    def verify(self, obs_post, applied_action):
 
         # Map the observation to a state
-        self.current_state = self._obs_to_state(obs_post)
+        self.env_state = self._obs_to_state(obs_post)
 
-        if self.state != self.current_state:
-            self._on_mismatch()
-
+        if self.state != self.env_state:
+            # Switched to a new state
+            self.observations = obs_post
+            self.trigger('*')
+            # print("new_monitor_state: " + self.state)
+            if self.state != self.env_state:
+                self._on_mismatch()
 
     """ Actions available to the agent - used for conditions checking """
     def forward(self):

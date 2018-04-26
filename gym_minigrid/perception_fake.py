@@ -3,7 +3,7 @@ import math
 
 # Helper class to analyse agent's observations
 # All the methods should return True/False
-class ObsHelper():
+class Perception():
 
 
     @staticmethod

@@ -33,6 +33,14 @@ class Water(WorldObj):
             (0          ,           0)
         ])
 
+def worldobj_name_to_object(worldobj_name):
+    if worldobj_name == 'water':
+        return Water()
+    elif worldobj_name == 'wall':
+        return Wall()
+    else:
+        return None
+
 class ExGrid(Grid):
     """
     Extending Grid methods to support the new objects
@@ -109,3 +117,135 @@ class ExMiniGridEnv(MiniGridEnv):
         # More actions:
         # Ex:
         clean = 7
+
+
+    def worldobj_in_front_agent(self, distance=1):
+        """
+        Returns the type of the worldobj in the cell in front of the agent
+        :param distance: integer, how many cells in front
+        :return: string: worldobj type
+        """
+        ax, ay = self.agent_pos
+        wx, wy = ax, ay
+
+        worldobj = None
+
+        # agent facing down
+        if self.agent_dir == 1:
+            wy += distance
+        # agent facing right
+        elif self.agent_dir == 0:
+            wx += distance
+        # agent facing left
+        elif self.agent_dir == 2:
+            wx -= distance
+        # agent facing up
+        elif self.agent_dir == 3:
+            wy -= distance
+
+        if wx >= 0 and wx < AGENT_VIEW_SIZE and wy >=0 and wy < AGENT_VIEW_SIZE:
+            worldobj = self.grid.get(wx, wy)
+
+            if worldobj is not None:
+                worldobj_type = worldobj.type
+                print("front: " + worldobj_type)
+                return worldobj_type
+        else:
+            print("outside grid or agent's view")
+        return None
+
+
+    def worldobj_in_right_agent(self, distance=1):
+        """
+        Returns the type of the worldobj in the cell in right of the agent
+        :param distance: integer, how many cells in right
+        :return: string: worldobj type
+        """
+        ax, ay = self.agent_pos
+        ad = self.agent_dir
+        wx, wy = ax, ay
+
+        worldobj = None
+
+        # agent facing down
+        if self.agent_dir == 1:
+            wx -= distance
+        # agent facing right
+        elif self.agent_dir == 0:
+            wy += distance
+        # agent facing left
+        elif self.agent_dir == 2:
+            wy -= distance
+        # agent facing up
+        elif self.agent_dir == 3:
+            wx += distance
+
+        if wx >= 0 and wx < AGENT_VIEW_SIZE and wy >= 0 and wy < AGENT_VIEW_SIZE:
+            worldobj = self.grid.get(wx, wy)
+
+            if worldobj is not None:
+                worldobj_type = worldobj.type
+                print("right: " + worldobj_type)
+                return worldobj_type
+        else:
+            print("outside grid or agent's view")
+        return None
+
+    def worldobj_in_left_agent(self, distance=1):
+        """
+        Returns the type of the worldobj in the cell in left of the agent
+        :param distance: integer, how many cells in left
+        :return: string: worldobj type
+        """
+        ax, ay = self.agent_pos
+        ad = self.agent_dir
+        wx, wy = ax, ay
+
+        worldobj = None
+
+        # agent facing down
+        if self.agent_dir == 1:
+            wx += distance
+        # agent facing right
+        elif self.agent_dir == 0:
+            wy -= distance
+        # agent facing left
+        elif self.agent_dir == 2:
+            wy += distance
+        # agent facing up
+        elif self.agent_dir == 3:
+            wx -= distance
+
+        if wx >= 0 and wx < AGENT_VIEW_SIZE and wy >= 0 and wy < AGENT_VIEW_SIZE:
+            worldobj = self.grid.get(wx, wy)
+
+            if worldobj is not None:
+                worldobj_type = worldobj.type
+                print("left: " + worldobj_type)
+                return worldobj_type
+        else:
+            print("outside grid or agent's view")
+        return None
+
+    # TODO:
+    def get_grid_coords_from_view(self, i, j):
+        """
+        Dual of "get_view_coords". Translate and rotate relative to the agent coordinates (i, j) into the
+        absolute grid coordinates.
+        :param x:
+        :param y:
+        :return:
+        """
+
+    # TODO:
+    def worldobj_in_agent(self, front, side):
+        """
+        Returns the type of the worldobject in the 'front' cells in front and 'side' cells right (positive) or left (negative)
+        with respect to the agent
+        :param front: integer representing the number of cells in front of the agent
+        :param side: integer, if positive represents the cells to the right, negative to the left of the agent
+        :return: string: worldobj type
+        """
+
+
+

@@ -1,4 +1,4 @@
-from state_machines.fake_obshelper import ObsHelper as oh
+from perception_fake import ObsHelper as oh
 from state_machines.safetystatemachine import SafetyStateMachine
 
 
@@ -55,12 +55,12 @@ class AlwaysAvoidTest(SafetyStateMachine):
             return'safe'
 
     def obs_near(self):
-        n = oh.is_near_to_worldobj(self.observations_pre, self.worldobj_avoid)
-        return oh.is_near_to_worldobj(self.observations_pre, self.worldobj_avoid)
+        n = oh.is_near_to_worldobj(self.observations, self.worldobj_avoid)
+        return oh.is_near_to_worldobj(self.observations, self.worldobj_avoid)
 
     def obs_immediate(self):
-        i = oh.is_immediate_to_worldobj(self.observations_pre, self.worldobj_avoid)
-        return oh.is_immediate_to_worldobj(self.observations_pre, self.worldobj_avoid)
+        i = oh.is_immediate_to_worldobj(self.observations, self.worldobj_avoid)
+        return oh.is_immediate_to_worldobj(self.observations, self.worldobj_avoid)
 
 
 
@@ -150,12 +150,12 @@ class AlwaysAvoid(SafetyStateMachine):
             return'safe'
 
     def obs_near(self):
-        n = oh.is_near_to_worldobj(self.observations_pre, self.worldobj_avoid)
-        return oh.is_near_to_worldobj(self.observations_pre, self.worldobj_avoid)
+        n = oh.is_near_to_worldobj(self.observations, self.worldobj_avoid)
+        return oh.is_near_to_worldobj(self.observations, self.worldobj_avoid)
 
     def obs_immediate(self):
-        i = oh.is_immediate_to_worldobj(self.observations_pre, self.worldobj_avoid)
-        return oh.is_immediate_to_worldobj(self.observations_pre, self.worldobj_avoid)
+        i = oh.is_immediate_to_worldobj(self.observations, self.worldobj_avoid)
+        return oh.is_immediate_to_worldobj(self.observations, self.worldobj_avoid)
 
 
 

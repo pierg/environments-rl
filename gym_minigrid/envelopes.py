@@ -1,10 +1,11 @@
 import collections
-from perception import Perception
 
 from helpers import config_grabber as cg
 
 from extendedminigrid import *
 from state_machines.patterns.absence import *
+
+import gym
 
 # Size of the history collection
 N = 5
@@ -55,23 +56,23 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.monitor_states[name]["state"] = state
 
         if state == "mismatch":
-            print(name + "Mismatch between state machine and observations!!!")
+            print(name + " mismatch!!!!")
 
         if state == "monitoring":
-            print(name + " All good")
+            print(name + " monitoring")
 
-        if state== "shaping":
+        if state == "shaping":
             if kwargs:
-                print(name + " Monitor activated...")
+                print(name + " shaping")
                 shaped_reward = kwargs.get('shaped_reward', 0)
-                print("shaped_reward=" + str(shaped_reward))
+                print("     shaped_reward = " + str(shaped_reward))
                 self.monitor_states[name]["shaped_reward"] = shaped_reward
             else:
                 print(name + " ERROR. missing action and reward")
 
         if state== "violation":
             if kwargs:
-                print(name + " Violation Blocked!!!!")
+                print(name + " violation blocked!!")
                 unsafe_action = kwargs.get('unsafe_action')
                 shaped_reward = kwargs.get('shaped_reward', 0)
                 self.monitor_states[name]["unsafe_action"] = unsafe_action
@@ -88,16 +89,25 @@ class SafetyEnvelope(gym.core.Wrapper):
         """
         if len(unsafe_actions) == 0:
             return self.propsed_action
-        return self.env.actions.wait
+        else:
+            print("safe action: " + str(self.env.actions.wait))
+            return self.env.actions.wait
 
 
 
     def step(self, proposed_action, reset_on_catastrophe=False):
-        # Get current observations from the environment and decode them
-        current_obs = ExGrid.decode(self.env.gen_obs()['image'])
         # To be returned to the agent
         obs, reward, done, info = None, None, None, None
+
         self.propsed_action = proposed_action
+
+        # Get current observations from the environment and decode them
+        agent_obs = ExGrid.decode(self.env.gen_obs()['image'])
+        agent_pos = self.env.agent_pos
+        agent_dir = self.env.get_dir_vec()
+        current_obs = (agent_obs, agent_pos, agent_dir)
+
+        current_obs_env = self.env
 
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
@@ -107,40 +117,44 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Check observation and proposed action in all running monitors
         for monitor in self.absence_monitors:
-            monitor.check(current_obs, proposed_action)
+            print("check BEFORE action is applyed to the environment")
+            monitor.check(current_obs_env, proposed_action)
 
-        # Simply all shaped reward from all the monitors
-        shaped_rewards = []
+        # Check for unsafe actions before sending them to the environment:
         unsafe_actions = []
-
+        shaped_rewards = []
         for name, monitor in self.monitor_states.items():
             if monitor["state"] == "violation":
                 if self.config.on_violation == "reset":
                     obs = self.env.reset()
                     done = True
                     info = {}
-                    shaped_rewards.append(monitor["shaped_reward"])
-            else:
                 if monitor["unsafe_action"]:
                     unsafe_actions.append(monitor["unsafe_action"])
                 shaped_rewards.append(monitor["shaped_reward"])
 
-        # If any violation occurred
+        # If have to reset
         if done:
             reward = sum(shaped_rewards)
             return obs, reward, done, info
 
-        # Build action to send to the environment and reward to send back to the agent
+        # Build action to send to the environment
         suitable_action = self.action_planner(unsafe_actions)
 
-        # Send it to the environment
+        # Send a suitable action to the environment
         obs, reward, done, info = self.env.step(suitable_action)
 
-        # Check for mismatch with the observations received from the environment in all the monitors
+        # Notify the monitors of the new state reached in the environment and the applied action
         for monitor in self.absence_monitors:
-            monitor.verify(obs)
+            print("\nverify AFTER action is applyed to the environment")
+            monitor.verify(self.env, suitable_action)
 
-        # Shape the reward
+        # Get the shaped rewards from the monitors in the new state
+        shaped_rewards = []
+        for name, monitor in self.monitor_states.items():
+            shaped_rewards.append(monitor["shaped_reward"])
+
+        # Shape the reward at the cumulative sum of all the rewards from the monitors
         reward += sum(shaped_rewards)
 
         # Return everything to the agent

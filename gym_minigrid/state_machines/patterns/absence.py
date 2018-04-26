@@ -1,4 +1,4 @@
-from state_machines.fake_obshelper import ObsHelper as oh
+from perception import Perception as p
 
 from state_machines.safetystatemachine import SafetyStateMachine
 
@@ -86,13 +86,27 @@ class Absence(SafetyStateMachine):
          'unless': 'obs_near'},
     ]
 
+    obs = {
+        "near": False,
+        "immediate": False
+    }
+
     def __init__(self, name, worldobj_avoid, notify):
         self.worldobj_avoid = worldobj_avoid
         super().__init__(name, "absence", self.states, self.transitions, 'initial', notify)
 
+    # Convert obseravions to state and populate the obs_conditions
     def _obs_to_state(self, obs):
-        near = oh.is_near_to_worldobj(obs, self.worldobj_avoid)
-        immediate = oh.is_immediate_to_worldobj(obs, self.worldobj_avoid)
+
+        # Get observations conditions
+        near = p.is_near_to_worldobj(obs, self.worldobj_avoid)
+        immediate = p.is_immediate_to_worldobj(obs, self.worldobj_avoid)
+
+        # Save them in the obs_conditions dictionary
+        Absence.obs["near"] = near
+        Absence.obs["immediate"] = immediate
+
+        # Return the state
         if immediate:
             return 'immediate'
         elif near and not immediate:
@@ -101,12 +115,10 @@ class Absence(SafetyStateMachine):
             return'safe'
 
     def obs_near(self):
-        n = oh.is_near_to_worldobj(self.observations_pre, self.worldobj_avoid)
-        return oh.is_near_to_worldobj(self.observations_pre, self.worldobj_avoid)
+        return Absence.obs["near"]
 
     def obs_immediate(self):
-        i = oh.is_immediate_to_worldobj(self.observations_pre, self.worldobj_avoid)
-        return oh.is_immediate_to_worldobj(self.observations_pre, self.worldobj_avoid)
+        return Absence.obs["immediate"]
 
 
 
