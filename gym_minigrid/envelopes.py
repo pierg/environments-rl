@@ -76,4 +76,32 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         return Perception.is_ahead_of_worldobj(observation, Water, 1) \
                and action == MiniGridEnv.Actions.forward
 
+#######################################################################################
 
+class ActionPlannerEnvelope(gym.core.RewardWrapper):
+    """
+    Action Planner Envelope
+    Decides what actions to take after a safety hazard has been detected
+    """
+
+
+    def __init__(self, env):
+        self.config = cg.Configuration.grab()
+
+        self.proposed_history = collections.deque(N*[(None,None)],N)
+        self.actual_history = collections.deque(N*[(None,None)],N)
+
+    def step(self, action):
+        current_obs = ExGrid.decode(self.env.gen_obs()['image'])
+
+        if self.config.num_processes == 1 and self.config.rendering:
+            self.env.render('human')
+
+        proposed_action = action
+        self.proposed_history.append((current_obs, proposed_action))
+
+        safe_action = proposed_action
+
+        #TODO add safety measurement
+
+        #TODO add action planner
