@@ -117,7 +117,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Check observation and proposed action in all running monitors
         for monitor in self.absence_monitors:
-            print("check BEFORE action is applyed to the environment")
+            print("\n\n____check BEFORE action is applyed to the environment")
             monitor.check(current_obs_env, proposed_action)
 
         # Check for unsafe actions before sending them to the environment:
@@ -146,7 +146,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Notify the monitors of the new state reached in the environment and the applied action
         for monitor in self.absence_monitors:
-            print("\nverify AFTER action is applyed to the environment")
+            print("\n____verify AFTER action is applyed to the environment")
             monitor.verify(self.env, suitable_action)
 
         # Get the shaped rewards from the monitors in the new state

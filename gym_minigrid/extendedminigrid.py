@@ -143,15 +143,13 @@ class ExMiniGridEnv(MiniGridEnv):
         elif self.agent_dir == 3:
             wy -= distance
 
-        if wx >= 0 and wx < AGENT_VIEW_SIZE and wy >=0 and wy < AGENT_VIEW_SIZE:
+        if wx >= 0 and wx < self.grid.width and wy >=0 and wy < self.grid.height:
             worldobj = self.grid.get(wx, wy)
 
             if worldobj is not None:
                 worldobj_type = worldobj.type
-                print("front: " + worldobj_type)
+                print("front_" + str(distance) + ": " + worldobj_type)
                 return worldobj_type
-        else:
-            print("outside grid or agent's view")
         return None
 
 
@@ -180,15 +178,13 @@ class ExMiniGridEnv(MiniGridEnv):
         elif self.agent_dir == 3:
             wx += distance
 
-        if wx >= 0 and wx < AGENT_VIEW_SIZE and wy >= 0 and wy < AGENT_VIEW_SIZE:
+        if wx >= 0 and wx < self.grid.width and wy >= 0 and wy < self.grid.height:
             worldobj = self.grid.get(wx, wy)
 
             if worldobj is not None:
                 worldobj_type = worldobj.type
-                print("right: " + worldobj_type)
+                print("right_" + str(distance) + ": " + worldobj_type)
                 return worldobj_type
-        else:
-            print("outside grid or agent's view")
         return None
 
     def worldobj_in_left_agent(self, distance=1):
@@ -216,15 +212,13 @@ class ExMiniGridEnv(MiniGridEnv):
         elif self.agent_dir == 3:
             wx -= distance
 
-        if wx >= 0 and wx < AGENT_VIEW_SIZE and wy >= 0 and wy < AGENT_VIEW_SIZE:
+        if wx >= 0 and wx < self.grid.width and wy >= 0 and wy < self.grid.height:
             worldobj = self.grid.get(wx, wy)
 
             if worldobj is not None:
                 worldobj_type = worldobj.type
-                print("left: " + worldobj_type)
+                print("left_" + str(distance) + ": " + worldobj_type)
                 return worldobj_type
-        else:
-            print("outside grid or agent's view")
         return None
 
     # TODO:
