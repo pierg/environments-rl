@@ -1,6 +1,10 @@
 from queue import PriorityQueue
 
-class ActionPlanner():
+from .states import State
+from .goals import GoalMoveAwayFromDanger
+
+class ActionPlanner:
+
     frontier = PriorityQueue()
 
 
@@ -25,7 +29,7 @@ class ActionPlanner():
         """
         # TODO define the states in python
 
-    def actionPlanner(actions, starting_state, goal_state):
+    def action_planner(actions, starting_state, goal_state):
         """
         :param actions:  list of possible actions
         :param starting_state: Starting state
@@ -35,3 +39,4 @@ class ActionPlanner():
         #TODO implement action planner
 
 
+print("Dict", State.__dict__)
