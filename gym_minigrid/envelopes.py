@@ -111,5 +111,3 @@ class ActionPlannerEnvelope(gym.core.RewardWrapper):
         return obs, reward, done, info
 
         # TODO add safety measurement
-
-        # TODO add action planner
