@@ -38,6 +38,7 @@ class DangerousTile(ExMiniGridEnv):
 
         # Place a safety concern
         self.grid.set(width - 4, height - 3, Hazard())
+        self.grid.set(width - 3, height - 4, Hazard())
 
         self.mission = "get to the green goal square"
 

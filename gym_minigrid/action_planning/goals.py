@@ -1,13 +1,9 @@
-from .states import State
+""""
+    This file contains goals for action_planner
+    Goal defines states, which need to be fulfilled
+"""
 
-
-class GoalMoveAwayFromDanger:
-    
-    name = "Move away form danger"
-    goal_state = State()
-    goal_state.front_is_clear = True
-    goal_state.front_is_safe = True
-    goal_state.left_is_clear = True
-    goal_state.left_is_safe = True
-    goal_state.right_is_clear = True
-    goal_state.right_is_safe = True
+move_away_from_danger = {
+    'front_is_clear': True,
+    'front_is_safe': True
+}

@@ -4,6 +4,7 @@ from .perception import Perception
 from helpers import config_grabber as cg
 
 from .extendedminigrid import *
+from .action_planning import ActionPlanner
 
 # Size of the history collection
 N = 5
@@ -98,7 +99,14 @@ class ActionPlannerEnvelope(gym.core.RewardWrapper):
         proposed_action = action
         self.proposed_history.append((current_obs, proposed_action))
 
-        obs, reward, done, info = self.env.step(proposed_action)
+        # needs some thought
+        # start
+        if Perception.is_ahead_of_worldobj(current_obs, Hazard, 1):
+            planned_action = ActionPlanner().plan(current_obs)
+            obs, reward, done, info = self.env.step(planned_action)
+        else:
+            obs, reward, done, info = self.env.step(proposed_action)
+        # end
 
         return obs, reward, done, info
 

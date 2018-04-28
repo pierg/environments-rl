@@ -1,12 +1,10 @@
 from queue import PriorityQueue
+from .obs_parser import ObservationParser
+from .goals import *
+from gym_minigrid.extendedminigrid import ExMiniGridEnv
 
-from .states import State
-from .goals import GoalMoveAwayFromDanger
 
 class ActionPlanner:
-
-    frontier = PriorityQueue()
-
 
     """"
          Action planner needs an implementation of A* where Nodes are
@@ -20,6 +18,18 @@ class ActionPlanner:
          The heuristic distance can be calculated as the sum of the unstatisfied properties
          of the goal state.
     """
+
+    print('works')
+    frontier = PriorityQueue()
+
+    @staticmethod
+    def plan(obs):
+
+        current_state = ObservationParser().get_current_state(obs)
+        # how do we know the goal?
+        goal_state = move_away_from_danger
+
+        return ExMiniGridEnv.Actions.wait
 
     def heuristic(x, y):
         """
@@ -37,6 +47,3 @@ class ActionPlanner:
         :return: came_from, cost_so_far
         """
         #TODO implement action planner
-
-
-print("Dict", State.__dict__)
