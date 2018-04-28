@@ -31,6 +31,8 @@ class ActionObject(object):
 
         return ExMiniGridEnv.Actions.wait
 
+
+
 class ActionWrapper:
 
     # returns an ActionObject provided Actions enum value
@@ -41,15 +43,15 @@ class ActionWrapper:
 
     @staticmethod
     def _action_0() -> ActionObject:
-        preconditions = {}
-        effects = {}
+        preconditions = {'left_is_clear': True , 'left_is_safe': True}
+        effects = {'front_is_clear': True, 'front_is_safe': True}
         action = ActionObject("left", preconditions, effects, cost=1)
         return action
 
     @staticmethod
     def _action_1() -> ActionObject:
-        preconditions = {}
-        effects = {}
+        preconditions = {'right_is_clear' : True, 'right_is_safe': True}
+        effects = {'front_is_clear': True, 'front_is_safe': True}
         action = ActionObject("right", preconditions, effects, cost=1)
         return action
 

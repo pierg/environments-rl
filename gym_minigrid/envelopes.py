@@ -104,6 +104,7 @@ class ActionPlannerEnvelope(gym.core.RewardWrapper):
         if Perception.is_ahead_of_worldobj(current_obs, Hazard, 1):
             planned_action = ActionPlanner().plan(current_obs)
             obs, reward, done, info = self.env.step(planned_action)
+            print("USED THE ACTION PLANNER TO GO " )
         else:
             obs, reward, done, info = self.env.step(proposed_action)
         # end
