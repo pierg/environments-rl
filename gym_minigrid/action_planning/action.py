@@ -1,5 +1,6 @@
 from gym_minigrid.extendedminigrid import ExMiniGridEnv
 from .state_property import *
+import copy
 
 class Action:
 
@@ -9,21 +10,24 @@ class Action:
         self.effects = []
         self.cost = 1
 
-        if name == "front":
+        if name == ExMiniGridEnv.Actions.forward:
             self.preconditions.append(StateProperty(StatePropertyEnum.front_is_clear,True))
             self.preconditions.append(StateProperty(StatePropertyEnum.front_is_safe, True))
 
-        if name == "left":
+        if name == ExMiniGridEnv.Actions.left:
             self.preconditions.append(StateProperty(StatePropertyEnum.left_is_clear, True))
             self.preconditions.append(StateProperty(StatePropertyEnum.left_is_safe, True))
 
             self.effects = Action(ExMiniGridEnv.Actions.forward).preconditions
 
-        if name == "right":
+        if name == ExMiniGridEnv.Actions.right:
             self.preconditions.append(StateProperty(StatePropertyEnum.right_is_clear, True))
             self.preconditions.append(StateProperty(StatePropertyEnum.right_is_safe, True))
 
             self.effects = Action(ExMiniGridEnv.Actions.forward).preconditions
+
+    def get_as_int(self):
+        return
 
     @staticmethod
     def getAllPossibleActions() -> list:
@@ -34,26 +38,30 @@ class Action:
 
     @staticmethod
     def getStateAfterAction(state_original, action) -> list:
-        state_changed = list(state_original)
+        state_changed = copy.deepcopy(state_original)
         for state_property in state_changed:
             for effect_property in action.effects:
                 if(state_property.property == effect_property.property):
                     state_property.value = effect_property.value
+        return state_changed
 
 
     @staticmethod
     def availableActions(state : list) ->  list:
+        state_changed = copy.deepcopy(state)
         allActions = Action.getAllPossibleActions()
         availableActions = []
         for action in allActions:
             preconditions_total = len(action.preconditions)
             preconditions_met = 0
             for precondition in action.preconditions:
-                for property in state:
+                for property in state_changed:
                     if precondition.property == property.property:
                         if precondition.value == property.value:
                             preconditions_met = preconditions_met + 1
             if preconditions_met == preconditions_total:
+                availableActions.append(action)
+
                 return availableActions
 
         return []

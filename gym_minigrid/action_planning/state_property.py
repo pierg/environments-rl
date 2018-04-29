@@ -12,5 +12,5 @@ class StateProperty:
 
     def __init__(self, stateproperty_Enum : StatePropertyEnum , value : bool):
         self.property = stateproperty_Enum
-        self.value = bool
+        self.value = value
 
