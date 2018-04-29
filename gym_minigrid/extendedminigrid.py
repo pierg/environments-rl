@@ -1,3 +1,4 @@
+from enum import Enum
 from gym_minigrid.minigrid import *
 
 
@@ -111,7 +112,7 @@ class ExGrid(Grid):
 
 class ExMiniGridEnv(MiniGridEnv):
     # Enumeration of possible actions
-    class Actions(IntEnum):
+    class Actions(Enum):
         # Turn left, turn right, move forward
         left = 0
         right = 1

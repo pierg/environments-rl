@@ -1,7 +1,5 @@
 from queue import PriorityQueue
-from .obs_parser import ObservationParser
-from .goals import *
-from gym_minigrid.extendedminigrid import ExMiniGridEnv
+from gym_minigrid.action_planning.goals import *
 from .state_graph import *
 
 
@@ -16,8 +14,6 @@ class ActionPlanner:
 
          The cost of a node can be calculated as the sum of the costs of the actions
          that take the world to the state represented by the node.
-
-
 
          The heuristic distance can be calculated as the sum of the unstatisfied properties
          of the goal state.
