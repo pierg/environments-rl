@@ -18,15 +18,15 @@ class Absence(SafetyStateMachine):
 
         {'name': 'safe',
          'type': 'inf_ctrl',
-         'on_enter': '_on_monitoring'},
+         'on_enter': '_on_safe'},
 
         {'name': 'near',
          'type': 'sys_fin_ctrl',
-         'on_enter': '_on_shaping'},
+         'on_enter': '_on_near'},
 
         {'name': 'immediate',
          'type': 'sys_urg_ctrl',
-         'on_enter': '_on_shaping'},
+         'on_enter': '_on_immediate'},
 
         {'name': 'fail',
          'type': 'violated',
@@ -82,8 +82,8 @@ class Absence(SafetyStateMachine):
         {'trigger': '*',
          'source': 'immediate',
          'dest': 'fail',
-         'conditions': ['forward', 'obs_immediate'],
-         'unless': 'obs_near'},
+         'conditions': ['forward', 'obs_immediate']
+         },
     ]
 
     obs = {
@@ -113,6 +113,18 @@ class Absence(SafetyStateMachine):
             return 'near'
         else:
             return'safe'
+
+    def _on_safe(self):
+        super()._on_monitoring()
+
+    def _on_near(self):
+        super()._on_shaping(-55)
+
+    def _on_immediate(self):
+        super()._on_shaping(-105)
+
+    def _on_violated(self):
+        super()._on_violated(-505)
 
     def obs_near(self):
         return Absence.obs["near"]

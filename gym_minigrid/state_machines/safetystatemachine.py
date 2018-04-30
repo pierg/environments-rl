@@ -12,6 +12,7 @@ from transitions.extensions.factory import NestedGraphTransition, LockedNestedEv
 
 from gym_minigrid.extendedminigrid import *
 
+import os
 
 
 
@@ -253,25 +254,26 @@ class SafetyStateMachine(object):
         # Notify
         self.notify(self.name, "monitoring")
 
-    def _on_shaping(self):
+    def _on_shaping(self, shaped_reward=0):
         # Notify
-        self.notify(self.name, "shaping", shaped_reward=100)
+        self.notify(self.name, "shaping", shaped_reward=shaped_reward)
 
     # Triggered when it enters in a state of time 'violated'
-    def _on_violated(self):
+    def _on_violated(self, shaped_reward=0):
 
         # Rollback to the state before the violation:
         self.machine.set_state(self.env_state)
         print("Rolled-back state to: " + self.state)
 
         # Notify
-        self.notify(self.name, "violation", shaped_reward=100, unsafe_action=self.action_proposed)
+        self.notify(self.name, "violation", shaped_reward=shaped_reward, unsafe_action=self.action_proposed)
 
     def _on_mismatch(self):
         self.notify(self.name, "mismatch")
 
     def draw(self):
-        self.machine.get_graph(title=self.name).draw('patterns/' + self.pattern + "_" + self.name + '.png', prog='dot')
+        abs_file_path = os.path.abspath(__file__ + "/../patterns/" + self.pattern + "_" + self.name + ".png")
+        self.machine.get_graph(title=self.name).draw(abs_file_path, prog='dot')
 
     # Called before the action is going to be performed on the environment and obs are the current observations
     def check(self, obs_pre, action_proposed):
@@ -292,7 +294,7 @@ class SafetyStateMachine(object):
             self.trigger('*')
         else:
             self._on_mismatch()
-        # print("monitor_state: " + self.state)
+        print("monitor_state: " + self.state)
 
     # Update the state after the action has been performed in the environment
     def verify(self, obs_post, applied_action):
@@ -307,10 +309,11 @@ class SafetyStateMachine(object):
             # print("new_monitor_state: " + self.state)
             if self.state != self.env_state:
                 self._on_mismatch()
+        print("monitor_state: " + self.state)
 
     """ Actions available to the agent - used for conditions checking """
     def forward(self):
-        return self.action_proposed == 'forward'
+        return self.action_proposed == ExMiniGridEnv.Actions.forward
 
     def toggle(self):
-        return self.action_proposed == 'toggle'
+        return self.action_proposed == ExMiniGridEnv.Actions.toggle

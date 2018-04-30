@@ -125,7 +125,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         shaped_rewards = []
         for name, monitor in self.monitor_states.items():
             if monitor["state"] == "violation":
-                if self.config.on_violation == "reset":
+                if self.config.on_violation_reset:
                     obs = self.env.reset()
                     done = True
                     info = {}
@@ -156,6 +156,11 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Shape the reward at the cumulative sum of all the rewards from the monitors
         reward += sum(shaped_rewards)
+
+        # Reset monitor rewards and actions
+        for name, monitor in self.monitor_states.items():
+            monitor["shaped_reward"] = 0
+            monitor["unsafe_action"] = ""
 
         # Return everything to the agent
         return obs, reward, done, info
