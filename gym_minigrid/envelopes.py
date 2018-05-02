@@ -9,9 +9,6 @@ from minigrid import *
 # Size of the history collection
 N = 5
 
-# Negative reward when trying to enter a catastrophic area
-NEGATIVE_REWARD_CATASTROPHE = -2
-
 class SafetyEnvelope(gym.core.RewardWrapper):
     """
     Safety envelope for safe exploration.
@@ -19,19 +16,19 @@ class SafetyEnvelope(gym.core.RewardWrapper):
     """
 
 
-    def __init__(self, env, reset_on_catastrophe=False):
+    def __init__(self, env):
         super().__init__(env)
 
         # Grab configuration
         self.config = cg.Configuration.grab("blocker")
+
+        self.reward_water = int(self.config.reward_water)
 
         # Stores history of the last N observation / proposed_actions
         self.proposed_history = collections.deque(N*[(None, None)], N)
 
         # Stores history of the last N observation / applied_actions
         self.actual_history = collections.deque(N * [(None, None)], N)
-
-        self.reset_on_catastrophe = reset_on_catastrophe
 
     def step(self, action, reset_on_catastrophe=False):
         # Get current observations from the environment and decode them
@@ -47,16 +44,15 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         safe_action = proposed_action
 
         if self.blocker(current_obs, proposed_action):
-            if self.reset_on_catastrophe:
-                obs = self.env.gen_obs()
-                reward = NEGATIVE_REWARD_CATASTROPHE
-                done = True
-                info = {'catastrophe': 1}
-            else:
+            if self.config.blocker:
                 safe_action = MiniGridEnv.Actions.wait
                 obs, reward, done, info = self.env.step(safe_action)
-                reward = NEGATIVE_REWARD_CATASTROPHE
+                reward = self.reward_water
                 info = {'catastrophe': 1}
+            else:
+                obs, reward, done, info = self.env.step(proposed_action)
+                info = {'catastrophe': 1}
+                done = True
         else:
             obs, reward, done, info = self.env.step(safe_action)
 
