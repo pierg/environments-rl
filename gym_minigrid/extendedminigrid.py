@@ -230,28 +230,27 @@ class ExMiniGridEnv(MiniGridEnv):
         :return : coordinates translated into the absolute grid coordinates.
         """
         ax, ay = self.agent_pos
-        adx,ady = self.agent_dir
+        ad = self.agent_dir
         x,y = coordinates
         # agent facing down
-        if adx == 0 and ady == 1:
+        if ad == 1:
             ax -= x
             ay += y
         # agent facing right
-        elif  adx == 1 and ady == 0:
+        elif  ad == 0:
             ax += y
             ay += x
         # agent facing left
-        elif adx == -1 and ady == 0:
+        elif ad == 2:
             ax -= y
             ay -= x
         # agent facing up
-        elif adx == 0 and ady == -1:
+        elif ad == 3:
             ax += x
             ay -= y
         return ax,ay
 
 
-    # TODO:
     def worldobj_in_agent(self, front, side):
         """
         Returns the type of the worldobject in the 'front' cells in front and 'side' cells right (positive) or left (negative)
@@ -261,4 +260,16 @@ class ExMiniGridEnv(MiniGridEnv):
         :return: string: worldobj type
         """
 
+        coordinates = (front,side)
+        worldobj = None
+        wx,wy = ExMiniGridEnv.get_grid_coords_from_view(self,coordinates)
+
+        if wx >= 0 and wx < self.grid.width and wy >= 0 and wy < self.grid.height:
+            worldobj = self.grid.get(wx, wy)
+
+            if worldobj is not None:
+                worldobj_type = worldobj.type
+                print("worldobject located at : ["+front+" "+side+"] from agent is : " + worldobj_type)
+                return worldobj_type
+        return None
 
