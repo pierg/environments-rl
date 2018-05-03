@@ -1,4 +1,4 @@
-from state_machines.patterns.absence import *
+from monitors.patterns.absence import *
 
 
 def on_monitoring(name, type, **kwargs):
