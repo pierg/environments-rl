@@ -162,10 +162,5 @@ class SafetyEnvelope(gym.core.Wrapper):
             monitor["shaped_reward"] = 0
             monitor["unsafe_action"] = ""
 
-        # Next line is just a test to see if get_grid_coords_from_view work as expected
-        #x,y = agent_pos
-        #adx,ady = agent_dir
-        #ExMiniGridEnv.get_grid_coords_from_view(self,x,y,adx,ady,-2,-1)
-
         # Return everything to the agent
         return obs, reward, done, info

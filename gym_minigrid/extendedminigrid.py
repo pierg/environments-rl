@@ -221,18 +221,17 @@ class ExMiniGridEnv(MiniGridEnv):
                 return worldobj_type
         return None
 
-    def get_grid_coords_from_view(self,ax,ay,adx,ady, x, y):
+    def get_grid_coords_from_view(self,coordinates):
         """
         Dual of "get_view_coords". Translate and rotate relative to the agent coordinates (i, j) into the
         absolute grid coordinates.
-        :param x: horizontal position based on the agent view.
-        :param y: vertical position based on the agent view.
-        :param ax: horizontal position of the agent in the grid
-        :param ay: vertical position of the agent in the grid
-        :param adx: first value of the direction vector of the agent
-        :param ady: second value of the direction vector of the agent
+        Need to have tuples of integers for the position of the agent and its direction
+        :param coordinates: tuples of integers (horizontal,vertical) position from the agent relative to its position
         :return : coordinates translated into the absolute grid coordinates.
         """
+        ax, ay = self.agent_pos
+        adx,ady = self.agent_dir
+        x,y = coordinates
         # agent facing down
         if adx == 0 and ady == 1:
             ax -= x
