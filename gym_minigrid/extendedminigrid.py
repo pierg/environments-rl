@@ -57,6 +57,7 @@ class ExGrid(Grid):
         assert array.shape[2] == 3
 
         grid = ExGrid(width, height)
+        print("size :",width,height)
 
         for j in range(0, height):
             for i in range(0, width):
@@ -273,3 +274,54 @@ class ExMiniGridEnv(MiniGridEnv):
                 return worldobj_type
         return None
 
+    def worldpattern_in_front_agent(self,distance=1):
+
+        coordinates = (1,2)
+        wx1, wy1 = ExMiniGridEnv.get_grid_coords_from_view(self,coordinates)
+        coordinates = (1,1)
+        wx2, wy2 = ExMiniGridEnv.get_grid_coords_from_view(self, coordinates)
+        coordinates = (-1, 2)
+        wx3, wy3 = ExMiniGridEnv.get_grid_coords_from_view(self, coordinates)
+        coordinates = (-1, 1)
+        wx4, wy4 = ExMiniGridEnv.get_grid_coords_from_view(self, coordinates)
+        worldpattern =  None
+
+        worldpattern1 = self.grid.get(wx1, wy1)
+        worldpattern2 = self.grid.get(wx2, wy2)
+        worldpattern3 = self.grid.get(wx3, wy3)
+        worldpattern4 = self.grid.get(wx4, wy4)
+
+        if worldpattern1 is not None \
+                and worldpattern2 is not None \
+                and worldpattern3 is not None \
+                and worldpattern4 is not None:
+                print("front_" + str(distance) + ": Dead End")
+                return True
+        return False
+
+    #Todo : Change code (same as the function above)
+    def worldpatter_is_near_agent(self,distance=1):
+        coordinates = (1, 2)
+        wx1, wy1 = ExMiniGridEnv.get_grid_coords_from_view(self, coordinates)
+        coordinates = (1, 1)
+        wx2, wy2 = ExMiniGridEnv.get_grid_coords_from_view(self, coordinates)
+        coordinates = (-1, 2)
+        wx3, wy3 = ExMiniGridEnv.get_grid_coords_from_view(self, coordinates)
+        coordinates = (-1, 1)
+        wx4, wy4 = ExMiniGridEnv.get_grid_coords_from_view(self, coordinates)
+        worldpattern = None
+
+        worldpattern1 = self.grid.get(wx1, wy1)
+        worldpattern2 = self.grid.get(wx2, wy2)
+        worldpattern3 = self.grid.get(wx3, wy3)
+        worldpattern4 = self.grid.get(wx4, wy4)
+
+        print("Just Checking")
+
+        if worldpattern1 is not None \
+                and worldpattern2 is not None \
+                and worldpattern3 is not None \
+                and worldpattern4 is not None:
+            print("front_" + str(distance) + ": Dead End")
+            return True
+        return False

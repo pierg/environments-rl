@@ -98,6 +98,8 @@ class Absence(SafetyStateMachine):
     # Convert obseravions to state and populate the obs_conditions
     def _obs_to_state(self, obs):
 
+        # Make a distinction between world_object and world_pattern
+
         # Get observations conditions
         near = p.is_near_to_worldobj(obs, self.worldobj_avoid)
         immediate = p.is_immediate_to_worldobj(obs, self.worldobj_avoid)
