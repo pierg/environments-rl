@@ -14,31 +14,113 @@ def extended_dic(obj_names=[]):
         new_obj_idx = new_obj_idx + 1
 
 
-extended_dic(["water"])
+extended_dic(['dirt', 'vase'])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
-class Water(WorldObj):
-    def __init__(self):
-        super(Water, self).__init__('water', 'blue')
-
-    def can_overlap(self):
-        return True
+class Dirt(WorldObj):
+    def __init__(self, color='red', isCleaned = False):
+        super(Dirt, self).__init__('dirt', color)
+        self.isCleaned = isCleaned
 
     def render(self, r):
-        self._set_color(r)
+        self._setColor(r)
+
+        if self.isCleaned:
+            r.drawPolygon([
+                (0, CELL_PIXELS),
+                (CELL_PIXELS, CELL_PIXELS),
+                (CELL_PIXELS, 0),
+                (0, 0)
+            ])
+            return
+
+        r.drawCircle(CELL_PIXELS * 0.5, CELL_PIXELS * 0.5, 10)
+
+
+    def canClean(self, env, pos):
+        if not self.isCleaned:
+            self.isCleaned = True
+            #env.grid.set(*pos, None) Not sure about this though. I need a way to remove the dirt from the grid.
+            return True
+        return False
+
+    def canOverlap(self):
+        """The agent can only walk over this cell once it's cleaned"""
+        return True
+
+class Vase(WorldObj):
+    def __init__(self, color, isBroken=False, isCleaned=False):
+        super(Vase, self).__init__('vase', color)
+        self.isPushed = isBroken
+        self.isCleaned = isCleaned
+
+    def render(self, r):
+        self._setColor(r)
+
+        if self.isPushed:
+            r.drawCircle(CELL_PIXELS * 0.5, CELL_PIXELS * 0.5, 10)
+            return
+
         r.drawPolygon([
-            (0          , CELL_PIXELS),
-            (CELL_PIXELS, CELL_PIXELS),
-            (CELL_PIXELS,           0),
-            (0          ,           0)
+            (16, 10),
+            (20, 10),
+            (20, 28),
+            (16, 28)
         ])
+
+    def canPickup(self):
+        return False
+
+    def canPush(self, env, pos):
+        if not self.isPushed:
+            self.isPushed = True
+            # Again here I need to find a way to remove the Vase from the grid so I can introduce the dirt in it's place.
+            # For now I will leave it on the grid and use the option to be cleaned once it's broken
+            return True
+        return False
+
+    def canOverlap(self):
+        """The agent walk over the broken Vase"""
+        return self.isPushed
+
+    def canClean(self, env, pos):
+        if self.isPushed:
+            self.isCleaned = True
+            return True
+        return False
 
 class ExGrid(Grid):
     """
     Extending Grid methods to support the new objects
     """
+    def encode(self):
+        """
+        Produce a compact numpy encoding of the grid
+        """
 
-    # Add new worldobje that need to be decoded (Ex. water)
+        codeSize = self.width * self.height * 3
+
+        array = np.zeros(shape=(self.width, self.height, 3), dtype='uint8')
+
+        for j in range(0, self.height):
+            for i in range(0, self.width):
+
+                v = self.get(i, j)
+
+                if v == None:
+                    continue
+
+                array[i, j, 0] = OBJECT_TO_IDX[v.type]
+                array[i, j, 1] = COLOR_TO_IDX[v.color]
+
+                if hasattr(v, 'isOpen') and v.isOpen:
+                    array[i, j, 2] = 1
+                if hasattr(v, 'isCleaned') and v.isCleaned:
+                    array[i, j, 2] = 1
+                if hasattr(v, 'isBroken') and v.isBroken:#can this statement take place if we already have a clean action?
+                    array[i, j, 2] = 1
+        return array
+
     def decode(array):
         """
         Decode an array grid encoding back into a grid
@@ -56,6 +138,8 @@ class ExGrid(Grid):
                 typeIdx  = array[i, j, 0]
                 colorIdx = array[i, j, 1]
                 openIdx  = array[i, j, 2]
+                isCleaned = True if openIdx == 1 else 0  # Added code
+                isPushed = True if openIdx == 1 else 0  # Added code
 
                 if typeIdx == 0:
                     continue
@@ -78,8 +162,10 @@ class ExGrid(Grid):
                     v = LockedDoor(color, is_open)
                 elif objType == 'goal':
                     v = Goal()
-                elif objType == 'water':
-                    v = Water()
+                elif objType == 'dirt':
+                    v = Dirt(color, isCleaned)
+                elif objType == 'vase':
+                    v = Vase(color, isPushed, isCleaned)
                 else:
                     assert False, "unknown obj type in decode '%s'" % objType
 
@@ -87,18 +173,8 @@ class ExGrid(Grid):
 
         return grid
 
-
 class ExMiniGridEnv(MiniGridEnv):
     # Enumeration of possible actions
-
-    def step(self, action):
-        if action == "clean":
-            print("doclean")
-        elif action == "move":
-            print("domove")
-        else:
-            super().step(action)
-
     class Actions(IntEnum):
         # Turn left, turn right, move forward
         left = 0
@@ -118,3 +194,22 @@ class ExMiniGridEnv(MiniGridEnv):
         # More actions:
         clean = 7
         move = 8
+
+    def step(self, action):
+        if action == self.actions.clean:
+            u, v = self.getDirVec()
+            objPos = (self.agentPos[0] + u, self.agentPos[1] + v)
+            cell = self.grid.get(*objPos)
+            if cell and cell.canClean:
+                cell.canClean(self, objPos)
+        elif action == self.actions.move:
+            u, v = self.getDirVec()
+            objPos = (self.agentPos[0] + u, self.agentPos[1] + v)
+            cell = self.grid.get(*objPos)
+            if cell:
+                cell.canPush(self, objPos)
+        else:
+            super().step(action)
+
+
+
