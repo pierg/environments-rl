@@ -4,7 +4,7 @@ from state_machines.safetystatemachine import SafetyStateMachine
 
 
 
-class Absence(SafetyStateMachine):
+class Precedence(SafetyStateMachine):
     """
     It makes sure that the agent will never enter in the state of type 'violated'
     This pattern is the dual of the Existence pattern
@@ -93,20 +93,18 @@ class Absence(SafetyStateMachine):
 
     def __init__(self, name, worldobj_avoid, notify):
         self.worldobj_avoid = worldobj_avoid
-        super().__init__(name, "absence", self.states, self.transitions, 'initial', notify)
+        super().__init__(name, "precedence", self.states, self.transitions, 'initial', notify)
 
     # Convert obseravions to state and populate the obs_conditions
     def _obs_to_state(self, obs):
-        print("current obs :",self.worldobj_avoid)
-        # Make a distinction between world_object and world_pattern
 
         # Get observations conditions
-        near = p.is_near_to_worldobj(obs, self.worldobj_avoid)
-        immediate = p.is_immediate_to_worldobj(obs, self.worldobj_avoid)
+        near = p.is_near_to_pattern(obs,self.worldobj_avoid)
+        immediate = p.is_immediate_to_pattern(obs, self.worldobj_avoid)
 
         # Save them in the obs_conditions dictionary
-        Absence.obs["near"] = near
-        Absence.obs["immediate"] = immediate
+        Precedence.obs["near"] = near
+        Precedence.obs["immediate"] = immediate
         print(near,immediate)
         # Return the state
         if immediate:
@@ -129,10 +127,10 @@ class Absence(SafetyStateMachine):
         super()._on_violated(-505)
 
     def obs_near(self):
-        return Absence.obs["near"]
+        return Precedence.obs["near"]
 
     def obs_immediate(self):
-        return Absence.obs["immediate"]
+        return Precedence.obs["immediate"]
 
 
 

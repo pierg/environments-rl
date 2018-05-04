@@ -4,6 +4,7 @@ from helpers import config_grabber as cg
 
 from extendedminigrid import *
 from state_machines.patterns.absence import *
+from state_machines.patterns.precedence import *
 
 import gym
 
@@ -39,7 +40,10 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Generates automata-based monitors
         for avoid_obj in self.config.absence_monitors:
-            new_absence_monitor = Absence("absence_" + avoid_obj, avoid_obj, self.on_monitoring)
+            if avoid_obj.startswith("pattern"):
+                new_absence_monitor = Precedence("precedence_"+avoid_obj,avoid_obj,self.on_monitoring)
+            else :
+                new_absence_monitor = Absence("absence_" + avoid_obj, avoid_obj, self.on_monitoring)
             self.absence_monitors.append(new_absence_monitor)
             self.monitor_states[new_absence_monitor.name] = {}
             self.monitor_states[new_absence_monitor.name]["state"] = ""
