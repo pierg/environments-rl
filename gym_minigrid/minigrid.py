@@ -49,10 +49,10 @@ OBJECT_TO_IDX = {
     'ball'          : 5,
     'box'           : 6,
     'goal'          : 7,
-    'water'         : 8,
 }
 
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
+
 
 class WorldObj:
     """
@@ -97,22 +97,6 @@ class WorldObj:
 class Goal(WorldObj):
     def __init__(self):
         super(Goal, self).__init__('goal', 'green')
-
-    def can_overlap(self):
-        return True
-
-    def render(self, r):
-        self._set_color(r)
-        r.drawPolygon([
-            (0          , CELL_PIXELS),
-            (CELL_PIXELS, CELL_PIXELS),
-            (CELL_PIXELS,           0),
-            (0          ,           0)
-        ])
-
-class Water(WorldObj):
-    def __init__(self):
-        super(Water, self).__init__('water', 'blue')
 
     def can_overlap(self):
         return True
@@ -625,6 +609,12 @@ class MiniGridEnv(gym.Env):
         'video.frames_per_second' : 10
     }
 
+    class AgentDirections(IntEnum):
+        right = 0
+        down = 1
+        left = 2
+        up = 3
+
     # Enumeration of possible actions
     class Actions(IntEnum):
         # Turn left, turn right, move forward
@@ -645,6 +635,7 @@ class MiniGridEnv(gym.Env):
     def __init__(self, grid_size=16, max_steps=100):
         # Action enumeration for this environment
         self.actions = MiniGridEnv.Actions
+        self.agent_directions = MiniGridEnv.AgentDirections
 
         # Actions are discrete integer values
         self.action_space = spaces.Discrete(len(self.actions))
@@ -894,19 +885,18 @@ class MiniGridEnv(gym.Env):
         Get the direction vector for the agent, pointing in the direction
         of forward movement.
         """
-
         # Pointing right
-        if self.agent_dir == 0:
-            return (1, 0)
+        if self.agent_dir == self.agent_directions.right:
+            return 1, 0
         # Down (positive Y)
-        elif self.agent_dir == 1:
-            return (0, 1)
+        elif self.agent_dir == self.agent_directions.down:
+            return 0, 1
         # Pointing left
-        elif self.agent_dir == 2:
-            return (-1, 0)
+        elif self.agent_dir == self.agent_directions.left:
+            return -1, 0
         # Up (negative Y)
-        elif self.agent_dir == 3:
-            return (0, -1)
+        elif self.agent_dir == self.agent_directions.up:
+            return 0, -1
         else:
             assert False
 

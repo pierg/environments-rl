@@ -27,14 +27,3 @@ class ObsHelper():
         """
         # 12 cases
         return obs == "near"
-
-
-    @staticmethod
-    def is_ahead_of_worldobj(obs, object_type):
-        """
-        Return True if the cell in front of the agent contain is of type 'object_type'
-        :param obs:
-        :param object_type:
-        :return:
-        """
-        return obs == "ahead"

@@ -1,9 +1,5 @@
-from transitions import State
-
 from fake_obshelper import ObsHelper as oh
-
-from safetystatemachine import SafetyStateMachine, SafetyState
-
+from state_machines.safetystatemachine import SafetyStateMachine
 
 
 
