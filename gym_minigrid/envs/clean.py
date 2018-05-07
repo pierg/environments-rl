@@ -1,62 +1,107 @@
-from gym_minigrid.extendedminigrid import *
+from gym_minigrid.minigrid import *
 from gym_minigrid.register import register
 
-
-class CleanEnv(ExMiniGridEnv):
+class EmptyEnv(MiniGridEnv):
     """
-    Clean grid environment, no obstacles, sparse reward
+    Cleaning Environment where the agent to locates the dirt and cleans it
     """
 
-    def __init__(self, size=8):
-        super().__init__(
-            grid_size=size,
-            max_steps=4*size*size,
-            # Set this to True for maximum speed
-            see_through_walls=True
-        )
+    def __init__(
+        self,
+        size=6,
+        numObjs=2
+    ):
+        self.numObjs = numObjs
+        super().__init__(gridSize=size, maxSteps=5*size)
+        self.reward_range = (0, 1)
 
-    def _gen_grid(self, width, height):
-        # Create an empty grid
+    def _genGrid(self, width, height):
         self.grid = Grid(width, height)
 
         # Generate the surrounding walls
-        self.grid.wall_rect(0, 0, width, height)
+        self.grid.wallRect(0, 0, width, height)
 
-        # Place the agent in the top-left corner
-        self.start_pos = (1, 1)
-        self.start_dir = 0
+        # Types and colors of objects we can generate
+        types = ['vase', 'dirt']
 
-        # Place a goal square in the bottom-right corner
-        self.grid.set(width - 2, height - 2, Goal())
+        objs = []
+        objPos = []
 
-        # Place water
-        self.grid.set(width - 5, height - 2, Water())
+        # Until we have generated all the objects
+        while len(objs) < self.numObjs:
+            objType = self._randElem(types)
+            objColor = self._randElem(COLOR_NAMES)
 
-        # Set start position
-        self.start_pos = (1, 1)
-        self.start_dir = 0
+            # If this object already exists, try again
+            if (objType, objColor) in objs:
+                continue
 
-        self.mission = "get to the green goal square without moving on water"
+            if objType == 'vase':
+                obj = Vase(objColor)
+            elif objType == 'dirt':
+                obj = Dirt('red')
 
-class CleanEnv6x6(CleanEnv):
+            pos = self.placeObj(obj)
+            objs.append((objType, objColor))
+            objPos.append(pos)
+
+        # Randomize the player start position and orientation
+        self.placeAgent()
+
+        # Force the dirt to be the target and vase to be the item
+        objTargetIdx = 0
+        objItemIdx = 1
+        if objs[objTargetIdx] == ('dirt', 'red'):
+            pass
+        else:
+            objTargetIdx = 1
+            objItemIdx = 0
+
+        self.targetType, self.targetColor = objs[objTargetIdx]
+        self.targetPos = objPos[objTargetIdx]
+        self.itemType, self.itemColor = objs[objItemIdx]
+        self.itemPos = objPos[objItemIdx]
+
+        self.mission = 'Clean'
+        #print(self.mission)
+
+    def step(self, action):
+        obs, reward, done, info = MiniGridEnv.step(self, action)
+
+        ax, ay = self.agentPos
+        tx, ty = self.targetPos
+        ix, iy = self.itemPos
+
+        # Reward if perform the cleaning action near to object
+        if action == self.actions.clean:
+            if abs(ax - tx) <= 1 and abs(ay - ty) <= 1:
+                reward = 1
+            done = True
+        elif action == self.actions.move:
+            if abs(ax - ix) <= 1 and abs(ay - iy) <= 1:
+        # Here the removal of the Vase should take place and replace it with a Dirt('red') item
+                pass
+        return obs, reward, done, info
+
+class EmptyEnv6x6(EmptyEnv):
     def __init__(self):
         super().__init__(size=6)
 
-class CleanEnv16x16(CleanEnv):
+class EmptyEnv16x16(EmptyEnv):
     def __init__(self):
         super().__init__(size=16)
 
 register(
-    id='MiniGrid-Clean-6x6-v0',
-    entry_point='gym_minigrid.envs:CleanEnv6x6'
+    id='MiniGrid-Empty-6x6-v0',
+    entry_point='gym_minigrid.envs:EmptyEnv6x6'
 )
 
 register(
-    id='MiniGrid-Clean-8x8-v0',
-    entry_point='gym_minigrid.envs:CleanEnv'
+    id='MiniGrid-Empty-8x8-v0',
+    entry_point='gym_minigrid.envs:EmptyEnv'
 )
 
 register(
-    id='MiniGrid-Clean-16x16-v0',
-    entry_point='gym_minigrid.envs:CleanEnv16x16'
+    id='MiniGrid-Empty-16x16-v0',
+    entry_point='gym_minigrid.envs:EmptyEnv16x16'
 )
