@@ -17,6 +17,15 @@ def extended_dic(obj_names=[]):
 extended_dic(["water"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
+extended_dic(["lightswitch"])
+IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
+
+extended_dic(["unnews"])
+IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
+
+extended_dic(["None"])
+IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
+
 class Water(WorldObj):
     def __init__(self):
         super(Water, self).__init__('water', 'blue')
@@ -33,11 +42,65 @@ class Water(WorldObj):
             (0          ,           0)
         ])
 
+class Lightswitch(WorldObj):
+    def __init__(self):
+        super(Lightswitch, self).__init__('lightswitch', 'yellow')
+
+    def can_overlap(self):
+        return True
+
+    def render(self, r):
+        self._set_color(r)
+        r.drawPolygon([
+            (0, CELL_PIXELS),
+            (CELL_PIXELS, CELL_PIXELS),
+            (CELL_PIXELS, 0),
+            (0, 0)
+        ])
+
+class Unnews(WorldObj):
+    def __init__(self):
+        super(Unnews, self).__init__('None', 'purple')
+
+    def can_overlap(self):
+        return True
+
+    def render(self, r):
+        self._set_color(r)
+        r.drawPolygon([
+            (0, CELL_PIXELS),
+            (CELL_PIXELS, CELL_PIXELS),
+            (CELL_PIXELS, 0),
+            (0, 0)
+        ])
+
+class Unnewswall(WorldObj):
+    def __init__(self):
+        super(Unnewswall, self).__init__('None', 'purple')
+
+    def can_overlap(self):
+        return False
+
+    def render(self, r):
+        self._set_color(r)
+        r.drawPolygon([
+            (0, CELL_PIXELS),
+            (CELL_PIXELS, CELL_PIXELS),
+            (CELL_PIXELS, 0),
+            (0, 0)
+        ])
+
 def worldobj_name_to_object(worldobj_name):
     if worldobj_name == 'water':
         return Water()
     elif worldobj_name == 'wall':
         return Wall()
+    elif worldobj_name == 'lightswitch':
+        return Lightswitch()
+    elif worldobj_name == 'unnews':
+        return Unnews()
+    elif worldobj_name == 'unnewswall':
+        return Unnewswall()
     else:
         return None
 
@@ -89,6 +152,14 @@ class ExGrid(Grid):
                     v = Goal()
                 elif objType == 'water':
                     v = Water()
+                elif objType == 'lightswitch':
+                    v = Lightswitch()
+                elif objType == 'unnews':
+                    v = Unnews()
+                elif objType == 'unnewswall':
+                    v= Unnewswall()
+                elif objType == 'None':
+                    v = Unnews()
                 else:
                     assert False, "unknown obj type in decode '%s'" % objType
 
@@ -350,3 +421,5 @@ class ExMiniGridEnv(MiniGridEnv):
                 return False
             i = i+1
         return True
+
+
