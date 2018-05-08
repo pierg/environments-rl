@@ -45,12 +45,19 @@ class SafetyEnvelope(gym.core.RewardWrapper):
 
         safe_action = proposed_action
 
+        info = {}
+
         if self.blocker(proposed_action):
-            safe_action = UnsafeMiniGridEnv.Actions.wait
-            obs, reward, done, info = self.env.step(safe_action)
-            reward = NEGATIVE_REWARD_CATASTROPHE
+            if self.config.blocker:
+                # Change action to wait
+                safe_action = UnsafeMiniGridEnv.Actions.wait
+                obs, reward, done, info = self.env.step(safe_action)
+                reward = self.reward_water
+            else:
+                obs, reward, done, info = self.env.step(safe_action)
+            # An unction that is unsafe for the robot was performed
             self.number_of_catastrophes = self.number_of_catastrophes + 1
-            info = {'catastrophes': self.number_of_catastrophes}
+            info = {'catastrophe': True}
         else:
             obs, reward, done, info = self.env.step(safe_action)
 
