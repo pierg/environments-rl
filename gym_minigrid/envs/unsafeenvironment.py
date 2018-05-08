@@ -20,7 +20,7 @@ class UnsafeEnv(UnsafeMiniGridEnv):
 
         # Place a goal square in the bottom-right corner
         self.grid.set(width - 2, height - 2, Goal())
-        self.grid.set(width - 2, height - 5, Water())
+        #self.grid.set(width - 2, height - 5, Water())
         self.grid.set(width - 5, height - 2, Water())
 
         # Set start position
