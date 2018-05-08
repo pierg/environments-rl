@@ -18,6 +18,8 @@ class Perception():
         :param distance: number of cells from the agent (1 = the one next to the agent cell)
         :return: True / False
         """
+        if object_type == "deadend":
+            return obs.worldpattern_in_front_agent(object_type)
         return object_type == obs.worldobj_in_front_agent(1)
 
     @staticmethod
@@ -32,6 +34,8 @@ class Perception():
         :param object_type: type of WorldObj
         :return: True / False
         """
+        if object_type == "deadend":
+            return obs.worldpattern_is_near_agent(object_type)
         return  object_type == obs.worldobj_in_front_agent(2) or \
                 object_type == obs.worldobj_in_left_agent(1) or \
                 object_type == obs.worldobj_in_right_agent(1)

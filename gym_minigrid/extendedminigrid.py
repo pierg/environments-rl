@@ -146,7 +146,6 @@ class ExMiniGridEnv(MiniGridEnv):
 
         if wx >= 0 and wx < self.grid.width and wy >=0 and wy < self.grid.height:
             worldobj = self.grid.get(wx, wy)
-
             if worldobj is not None:
                 worldobj_type = worldobj.type
                 print("front_" + str(distance) + ": " + worldobj_type)
@@ -277,70 +276,63 @@ class ExMiniGridEnv(MiniGridEnv):
     def worldpattern_in_front_agent(self,object_type):
         if object_type == "deadend":
             return self.deadend_in_front_agent()
-        else :
-            return False
+        return False
 
     def worldpattern_is_near_agent(self,object_type):
         if object_type == "deadend":
             return self.deadend_is_near_agent()
-        else :
-            return False
+        return False
+
+    def check(self,coordinates):
+        wx, wy = ExMiniGridEnv.get_grid_coords_from_view(self, coordinates)
+        if wx >= 0 and wx < self.grid.width and 0 <= wy < self.grid.height:
+            front = self.grid.get(wx, wy)
+            return front
 
     def deadend_in_front_agent(self):
         i = 1
         while i < 4:
-            coordinates = (0,i)
-            wx,wy = ExMiniGridEnv.get_grid_coords_from_view(self,coordinates)
-            if wx >= 0 and wx < self.grid.width and 0 <= wy < self.grid.height:
-                worldpattern = self.grid.get(wx,wy)
-            if worldpattern is not None:
-                if worldpattern is Goal:
+            left = self.check((-1, i - 1))
+            right = self.check((1, i - 1))
+            front = self.check((0, i))
+            if left is None or right is None:
+                return False
+            if front is not None:
+                if front is Goal:
                     return False
-                if i == 1:
-                    coordinates = (-1,0)
-                    wx,wy = ExMiniGridEnv.get_grid_coords_from_view(self,coordinates)
-                    if wx >= 0 and wx < self.grid.width and 0 <= wy < self.grid.height:
-                        worldpattern = self.grid.get(wx, wy)
-                    coordinates = (-1,0)
-                    wx,wy = ExMiniGridEnv.get_grid_coords_from_view(self,coordinates)
-                    if wx >= 0 and wx < self.grid.width and 0 <= wy < self.grid.height:
-                        worldpattern2 = self.grid.get(wx, wy)
-                    if worldpattern is not None and worldpattern2 is not None:
-                        return True
-                else :# Maybe check side?
-                    j = 1
-                    while j < i:
-                        coordinates = (1,j)
-                        wx1,wy1 = ExMiniGridEnv.get_grid_coords_from_view(self,coordinates)
-                        coordinates = (-1,j)
-                        wx2,wy2 = ExMiniGridEnv.get_grid_coords_from_view(self, coordinates)
-                        if wx1 >= 0 and wx1 < self.grid.width and wy1 >= 0 and wy1 < self.grid.height:
-                            worldpattern1 = self.grid.get(wx1, wy1)
-                        if wx2 >= 0 and wx2 < self.grid.width and wy2 >= 0 and wy2 < self.grid.height:
-                            worldpattern2 = self.grid.get(wx2, wy2)
-                        if worldpattern1 is Goal or worldpattern2 is Goal:
-                            return False
-                        if worldpattern1 is None or worldpattern2 is None:
-                            return False
-                        j = j+1
+                if left is None or right is None:
+                    return False
+                if left is not None and right is not None:
+                    if left.type == "goal" or right.type == "goal":
+                        return False
                     return True
+                else :
+                    return False
             i = i+1
         return False
 
     def deadend_is_near_agent(self):
         i = 1
-        if self.deadend_in_front_agent() :
-            return False
-        while i < 3 :
-            coordinates = (1, i)
-            wx1, wy1 = ExMiniGridEnv.get_grid_coords_from_view(self, coordinates)
-            coordinates = (-1, i)
-            wx2, wy2 = ExMiniGridEnv.get_grid_coords_from_view(self, coordinates)
-            if wx1 >= 0 and wx1 < self.grid.width and wy1 >= 0 and wy1 < self.grid.height:
-                worldpattern1 = self.grid.get(wx1, wy1)
-            if wx2 >= 0 and wx2 < self.grid.width and wy2 >= 0 and wy2 < self.grid.height:
-                worldpattern2 = self.grid.get(wx2, wy2)
-            if worldpattern1 is None or worldpattern2 is None:
+        while i < 4:
+            front = self.check((0,i))
+            left = self.check((-1,i))
+            right = self.check((1,i))
+            closeLeft = self.check((-1,0))
+            closeRight = self.check((1,0))
+            if front is not None:
+                if closeLeft is None or closeRight is None :
+                    if front.type == "goal":
+                        return False
+                    return True
+            if left is None or right is None:
                 return False
+            elif left is not None and right is not None:
+                if left.type == "goal" or right.type == "goal":
+                    return False
+                if front is not None:
+                    return False
+            elif front is not None:
+                return True
             i = i+1
         return True
+
