@@ -105,7 +105,7 @@ class Precedence(SafetyStateMachine):
         # Save them in the obs_conditions dictionary
         Precedence.obs["near"] = near
         Precedence.obs["immediate"] = immediate
-        print(near,immediate)
+
         # Return the state
         if immediate:
             return 'immediate'

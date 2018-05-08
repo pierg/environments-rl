@@ -275,15 +275,13 @@ class ExMiniGridEnv(MiniGridEnv):
         return None
 
     def worldpattern_in_front_agent(self,object_type):
-        if object_type == "pattern_deadend":
-            print("deadend")
+        if object_type == "deadend":
             return self.deadend_in_front_agent()
         else :
             return False
 
     def worldpattern_is_near_agent(self,object_type):
-        if object_type == "pattern_deadend":
-            print("deadend")
+        if object_type == "deadend":
             return self.deadend_is_near_agent()
         else :
             return False
@@ -296,7 +294,6 @@ class ExMiniGridEnv(MiniGridEnv):
             if wx >= 0 and wx < self.grid.width and 0 <= wy < self.grid.height:
                 worldpattern = self.grid.get(wx,wy)
             if worldpattern is not None:
-                print("ici ",worldpattern)
                 if worldpattern is Goal:
                     return False
                 if i == 1:
@@ -308,8 +305,6 @@ class ExMiniGridEnv(MiniGridEnv):
                     wx,wy = ExMiniGridEnv.get_grid_coords_from_view(self,coordinates)
                     if wx >= 0 and wx < self.grid.width and 0 <= wy < self.grid.height:
                         worldpattern2 = self.grid.get(wx, wy)
-                    print("ici2",worldpattern,worldpattern2)
-
                     if worldpattern is not None and worldpattern2 is not None:
                         return True
                 else :# Maybe check side?
@@ -324,7 +319,6 @@ class ExMiniGridEnv(MiniGridEnv):
                         if wx2 >= 0 and wx2 < self.grid.width and wy2 >= 0 and wy2 < self.grid.height:
                             worldpattern2 = self.grid.get(wx2, wy2)
                         if worldpattern1 is Goal or worldpattern2 is Goal:
-                            print("found goal")
                             return False
                         if worldpattern1 is None or worldpattern2 is None:
                             return False
