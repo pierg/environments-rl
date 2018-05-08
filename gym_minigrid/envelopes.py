@@ -55,6 +55,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
                 reward = self.reward_water
             else:
                 obs, reward, done, info = self.env.step(safe_action)
+                done = True
             # An unction that is unsafe for the robot was performed
             self.number_of_catastrophes = self.number_of_catastrophes + 1
             info = {'catastrophe': True}
