@@ -10,3 +10,4 @@ from gym_minigrid.envs.playground_v0 import *
 from gym_minigrid.envs.unsafe import *
 from gym_minigrid.envs.unsafeDoor import *
 from gym_minigrid.envs.deadend import *
+from gym_minigrid.envs.bigEnv import *

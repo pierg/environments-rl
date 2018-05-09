@@ -15,11 +15,57 @@ def extended_dic(obj_names=[]):
 
 
 extended_dic(["water"])
+extended_dic(["lightSwitch"])
+extended_dic(["unknownCell"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
+
 
 class Water(WorldObj):
     def __init__(self):
         super(Water, self).__init__('water', 'blue')
+
+    def can_overlap(self):
+        return True
+
+    def render(self, r):
+        self._set_color(r)
+        r.drawPolygon([
+            (0          , CELL_PIXELS),
+            (CELL_PIXELS, CELL_PIXELS),
+            (CELL_PIXELS,           0),
+            (0          ,           0)
+        ])
+
+class LightSwitch(WorldObj):
+    def __init__(self):
+        super(LightSwitch, self).__init__('lightSwitch', 'yellow')
+
+    def affectRoom(self,room):
+        self.room = room
+
+    def toggle(self, env, pos):
+        self.room.setLight(not self.room.getLight())
+        print("light : ",self.room.lightOn)
+        return True
+
+    def can_overlap(self):
+        return False
+
+    def render(self, r):
+        self._set_color(r)
+        r.drawPolygon([
+            (0          , CELL_PIXELS),
+            (CELL_PIXELS, CELL_PIXELS),
+            (CELL_PIXELS,           0),
+            (0          ,           0)
+        ])
+
+class UnknownCell(WorldObj,):
+    def __init__(self):
+        super(UnknownCell, self).__init__('unknownCell', 'purple')
+
+    def affectWolrdObj(self,worldobj):
+        self.worldObj = worldobj_name_to_object(worldobj)
 
     def can_overlap(self):
         return True
@@ -38,6 +84,10 @@ def worldobj_name_to_object(worldobj_name):
         return Water()
     elif worldobj_name == 'wall':
         return Wall()
+    elif worldobj_name == "lightSwitch":
+        return LightSwitch()
+    elif worldobj_name == "goal":
+        return Goal()
     else:
         return None
 
@@ -89,6 +139,12 @@ class ExGrid(Grid):
                     v = Goal()
                 elif objType == 'water':
                     v = Water()
+                elif objType == 'lightSwitch':
+                    print("found lightswitch",i,j)
+                    v = LightSwitch()
+                elif objType == 'unknownCell':
+                    print(i,j)
+                    v = UnknownCell()
                 else:
                     assert False, "unknown obj type in decode '%s'" % objType
 

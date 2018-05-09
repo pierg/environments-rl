@@ -63,15 +63,14 @@ class Precedence(SafetyStateMachine):
         {'trigger': '*',
          'source': 'near',
          'dest': 'immediate',
-         'conditions': 'obs_immediate',
-         'unless': 'obs_near'},
+         'conditions': ['obs_immediate','obs_immediate']},
 
 
         {'trigger': '*',
          'source': 'immediate',
          'dest': 'immediate',
          'conditions': 'obs_immediate',
-         'unless': ['forward', 'obs_near']},
+         'unless': 'forward'},
 
         {'trigger': '*',
          'source': 'immediate',
@@ -79,11 +78,16 @@ class Precedence(SafetyStateMachine):
          'conditions': 'obs_near',
          'unless': 'obs_immediate'},
 
+        {'trigger':'*',
+         'source':'immediate',
+         'dest': 'safe',
+         'conditions': ['obs_immediate', 'forward']},
+
         {'trigger': '*',
          'source': 'immediate',
          'dest': 'fail',
-         'conditions': ['forward', 'obs_immediate']
-         },
+         'conditions': 'forward',
+         'unless':'obs_immediate'}
     ]
 
     obs = {
@@ -91,16 +95,18 @@ class Precedence(SafetyStateMachine):
         "immediate": False
     }
 
-    def __init__(self, name, worldobj_avoid, notify):
-        self.worldobj_avoid = worldobj_avoid
+    def __init__(self, name,first,second, notify):
+        self.first = first
+        self.second = second
         super().__init__(name, "precedence", self.states, self.transitions, 'initial', notify)
 
     # Convert obseravions to state and populate the obs_conditions
     def _obs_to_state(self, obs):
 
         # Get observations conditions
-        near = p.is_near_to_pattern(obs,self.worldobj_avoid)
-        immediate = p.is_immediate_to_pattern(obs, self.worldobj_avoid)
+        first = self.first
+        near = first(obs)
+        immediate = self.second(obs)
 
         # Save them in the obs_conditions dictionary
         Precedence.obs["near"] = near
@@ -133,7 +139,11 @@ class Precedence(SafetyStateMachine):
         return Precedence.obs["immediate"]
 
 
+    def first(self):
+        return False
 
+    def second(self):
+        return False
 
 
 

@@ -104,6 +104,7 @@ class Absence(SafetyStateMachine):
         near = p.is_near_to_worldobj(obs, self.worldobj_avoid)
         immediate = p.is_immediate_to_worldobj(obs, self.worldobj_avoid)
 
+
         # Save them in the obs_conditions dictionary
         Absence.obs["near"] = near
         Absence.obs["immediate"] = immediate
