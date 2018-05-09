@@ -2,13 +2,8 @@ from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
 from gym_minigrid.envs.multiroom import *
 
-class Light:
-    def __init__(self,
-                 room,
-                 switch
-    ):
-        self.top = room
-        self.switch = switch
+
+
 
 class BigEnvironnementEnv(ExMiniGridEnv):
     """
@@ -54,54 +49,52 @@ class BigEnvironnementEnv(ExMiniGridEnv):
         self.grid.horz_wall(width//4+2,height-2,width//4-2)
 
         # Place the door which separate the rooms
-        self.grid.set(int(round(width/2)),height-12,Door(self._rand_elem(sorted(set(COLOR_NAMES)))))
-
-        # Place the lightswitch of the second room
-        switch= [width//2+1,height-13]
-        wx, wy = self._rand_pos(2, width//2-1, 2, height - 6)
-        self.grid.set(wx, wy, Lightswitch())
+        self.grid.set(width//2,height-12,Door(('red')))
 
         # Place a goal square in the bottom-right corner
         self.grid.set(width - 8, height - 2, Goal())
 
         # Place waters
-        #The water muuss't hide a tunnel or the door
+        # The water muss't hide a tunnel or the door
         for i in range(1, 11):
-            x, y = self._rand_pos(2, width//2-1, 2, height - 6)
+            x, y = self._rand_pos(2, width // 2 - 1, 2, height - 6)
             self.grid.set(x, y, Water())
-            x2,y2 = self._rand_pos(width//2+2, width-8, 1, height - 2)
+            x2, y2 = self._rand_pos(width // 2 + 2, width - 8, 1, height - 2)
             self.grid.set(x2, y2, Water())
 
-        #Add the room
+        # Add the room
         RoomList = []
         RoomList.append(Room(
             (1, 1),
-            (width//2-1, height-2),
+            (width // 2-1, height - 2),
             None,
             (width / 2, height - 12)
         ))
         RoomList.append(Room(
-            (width//2+1, 1),
-            (width//2-2, height-2),
-            (width / 2, height - 12),
+            (width // 2 + 1, 1),
+            (width // 2 - 2, height - 1),
+            (width // 2, height - 12),
             None
         ))
 
 
-        #"""
-        # Create the shadows room
-        xmin,ymin=RoomList[1].top
-        sidex,sidey=RoomList[1].size
-        xmax=xmin+sidex
-        ymax=ymin+sidey
-        tab=[]
-        tab=self._ShadowRoom(xmin,ymin,xmax,ymax)
-        #"""
 
-        # Create the light affiliated to the room 2
-        self.agent_pos = (1, 1)
-        self.agent_dir = 0
-        self._LightRoom(switch[0],switch[1],tab)
+
+        # Create the shadow room
+        xmin, ymin = RoomList[1].top
+        sidex, sidey = RoomList[1].size
+        xmax = xmin + sidex
+        ymax = ymin + sidey
+        xenter, yenter = RoomList[1].entryDoorPos
+        tab=self._ShadowRoom(xmin,ymin,xmax,ymax)
+        self.grid.set(xenter+1,yenter,ShadowRoom('yellow',(xmin, ymin, sidex, sidey,xenter+1,yenter)))
+
+        # Place the door which separate the rooms
+        self.grid.set(width // 2, height - 12, Door(('red')))
+        # Place the lightswitch of the second room
+        switch = [width // 2 + 1, height - 13]
+        wx, wy = self._rand_pos(2, width // 2 - 1, 2, height - 6)
+        self.grid.set(wx, wy, Lightswitch('yellow'))
 
 
         # Set start position
@@ -119,42 +112,45 @@ class BigEnvironnementEnv(ExMiniGridEnv):
         ymax,
         xmax,
     ):
-        tab = [[]]
+        tab=[[]]
         for z in range(xmin, xmax):
             for t in range(ymin, ymax):
-                tab.append((z, t, self.grid.get(z, t)))
-                #print(tab[(len(tab)-1)][3[24:27]])
                 worldobj = self.grid.get(z, t)
-                #tab[(len(tab) - 1)][2]=worldobj.type
                 if worldobj is not None:
+                    tab.append((z, t, worldobj.type))
+                    """
                     if worldobj.type == 'wall':
                         self.grid.set(z, t, Unnewswall())
-                        tab[(len(tab) - 1)][2] = worldobj.type
                     else:
                         self.grid.set(z, t, Unnews())
-                        #if worldobj.type == 'wall'
-                        tab[(len(tab) - 1)][2] = worldobj.type
+                    #"""
                 else:
-                    self.grid.set(z, t, Unnews())
-                print(tab[(len(tab) - 1)])
+                    tab.append((z, t, None))
+                    #self.grid.set(z, t, Unnews())
+        del tab[0]
         return tab
     #"""
-    def _LightRoom(
-            self,
-            switchx,
-            switchy,
-            tab,
-    ):
 
-        i,j=ExMiniGridEnv.get_grid_coords_from_view(self,(0,0))
-        if (i,j) == (switchx,switchy):
-            print(" on the switch")
-            for z in range(0,len(tab)):
-                    self.grid.set(tab[z[0]],tab[z[1]],tab[z[2]])
-        return True
-    #"""
+
+    def save_room(self,room,pos):
+        (z,t) = pos
+        worldobj = self.grid.get(z, t)
+        if worldobj is not None:
+            if worldobj.type == "lightswitch":
+                print("on the switch")
+                for z in range(0, len(room)):
+                    if room[z][2] == 'wall':
+                        self.grid.set(room[z][0], room[z][1], Wall())
+                    elif room[z][2] == 'water':
+                        self.grid.set(room[z][0], room[z][1], Water())
+                    elif room[z][2] == 'goal':
+                        self.grid.set(room[z][0], room[z][1], Goal())
+                    else:
+                        self.grid.set(room[z][0], room[z][1], None)
 
 register(
     id='MiniGrid-BigEnvironnement-32x32-v0',
     entry_point='gym_minigrid.envs:BigEnvironnementEnv'
 )
+
+

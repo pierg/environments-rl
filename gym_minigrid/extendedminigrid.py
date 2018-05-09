@@ -20,8 +20,6 @@ IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 extended_dic(["lightswitch"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
-extended_dic(["unnews"])
-IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 extended_dic(["None"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
@@ -36,58 +34,49 @@ class Water(WorldObj):
     def render(self, r):
         self._set_color(r)
         r.drawPolygon([
-            (0          , CELL_PIXELS),
+            (0         , CELL_PIXELS),
             (CELL_PIXELS, CELL_PIXELS),
             (CELL_PIXELS,           0),
             (0          ,           0)
         ])
-
-class Lightswitch(WorldObj):
-    def __init__(self):
-        super(Lightswitch, self).__init__('lightswitch', 'yellow')
-
-    def can_overlap(self):
-        return True
-
-    def render(self, r):
-        self._set_color(r)
-        r.drawPolygon([
-            (0, CELL_PIXELS),
-            (CELL_PIXELS, CELL_PIXELS),
-            (CELL_PIXELS, 0),
-            (0, 0)
-        ])
-
-class Unnews(WorldObj):
-    def __init__(self):
-        super(Unnews, self).__init__('None', 'purple')
+class ShadowRoom(WorldObj):
+    def __init__(self,color='yellow',coordinates=None,is_open=False):
+        super(ShadowRoom, self).__init__('None', color)
+        self.coordinates=coordinates
+        self.is_open=is_open
 
     def can_overlap(self):
         return True
 
-    def render(self, r):
-        self._set_color(r)
-        r.drawPolygon([
-            (0, CELL_PIXELS),
-            (CELL_PIXELS, CELL_PIXELS),
-            (CELL_PIXELS, 0),
-            (0, 0)
-        ])
-
-class Unnewswall(WorldObj):
-    def __init__(self):
-        super(Unnewswall, self).__init__('None', 'purple')
-
-    def can_overlap(self):
+    def toggle(self, env, pos):
+        if isinstance(env.carrying, Lightswitch) and env.carrying.color == self.color:
+            self.is_open = True
+            env.carrying = None
+            return True
         return False
 
     def render(self, r):
         self._set_color(r)
+        (xmin,ymin,width,height,xenter,yenter)=self.coordinates
+        if self.is_open==False:
+            r.fillRect((xmin-xenter)*(CELL_PIXELS),(ymin-yenter)*(CELL_PIXELS), width*CELL_PIXELS, height*CELL_PIXELS,0,0,0)
+        else:
+            r.pop
+
+
+
+class Lightswitch(WorldObj):
+    def __init__(self,color='yellow'):
+        super(Lightswitch, self).__init__('None', color)
+    def can_pickup(self):
+        return True
+    def render(self, r):
+        self._set_color(r)
         r.drawPolygon([
             (0, CELL_PIXELS),
             (CELL_PIXELS, CELL_PIXELS),
             (CELL_PIXELS, 0),
-            (0, 0)
+            (0, 0),
         ])
 
 def worldobj_name_to_object(worldobj_name):
@@ -97,10 +86,6 @@ def worldobj_name_to_object(worldobj_name):
         return Wall()
     elif worldobj_name == 'lightswitch':
         return Lightswitch()
-    elif worldobj_name == 'unnews':
-        return Unnews()
-    elif worldobj_name == 'unnewswall':
-        return Unnewswall()
     else:
         return None
 
@@ -114,13 +99,11 @@ class ExGrid(Grid):
         """
         Decode an array grid encoding back into a grid
         """
-
         width = array.shape[0]
         height = array.shape[1]
         assert array.shape[2] == 3
 
         grid = ExGrid(width, height)
-        print("size :",width,height)
 
         for j in range(0, height):
             for i in range(0, width):
@@ -134,8 +117,8 @@ class ExGrid(Grid):
 
                 objType = IDX_TO_OBJECT[typeIdx]
                 color = IDX_TO_COLOR[colorIdx]
+                print(color)
                 is_open = True if openIdx == 1 else 0
-
                 if objType == 'wall':
                     v = Wall(color)
                 elif objType == 'ball':
@@ -154,12 +137,8 @@ class ExGrid(Grid):
                     v = Water()
                 elif objType == 'lightswitch':
                     v = Lightswitch()
-                elif objType == 'unnews':
-                    v = Unnews()
-                elif objType == 'unnewswall':
-                    v= Unnewswall()
                 elif objType == 'None':
-                    v = Unnews()
+                    v = ShadowRoom()
                 else:
                     assert False, "unknown obj type in decode '%s'" % objType
 
@@ -421,5 +400,4 @@ class ExMiniGridEnv(MiniGridEnv):
                 return False
             i = i+1
         return True
-
 
