@@ -95,7 +95,10 @@ class Precedence(SafetyStateMachine):
         "immediate": False
     }
 
-    def __init__(self, name,first,second, notify):
+    def __init__(self, name,first,second, notify,reward):
+        self.nearReward = reward.near
+        self.immediateReward = reward.immediate
+        self.violatedReward = reward.violated
         self.first = first
         self.second = second
         super().__init__(name, "precedence", self.states, self.transitions, 'initial', notify)
@@ -124,13 +127,13 @@ class Precedence(SafetyStateMachine):
         super()._on_monitoring()
 
     def _on_near(self):
-        super()._on_shaping(-55)
+        super()._on_shaping(self.nearReward)
 
     def _on_immediate(self):
-        super()._on_shaping(-105)
+        super()._on_shaping(self.immediateReward)
 
     def _on_violated(self):
-        super()._on_violated(-505)
+        super()._on_violated(self.violatedReward)
 
     def obs_near(self):
         return Precedence.obs["near"]

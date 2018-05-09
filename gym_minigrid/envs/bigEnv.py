@@ -21,7 +21,6 @@ class Room:
 
     def activate(self):
         global grid,realGrid
-        print("ok")
         x,y = self.size
         k,l = self.position
         x += k
@@ -34,9 +33,7 @@ class Room:
                     else :
                         grid.set(i,j,None)
                 else :
-                    cell = UnknownCell()
-                    cell.affectWolrdObj(realGrid.get(i,j))
-                    grid.set(i,j,cell)
+                    grid.set(i,j,None)
 
 class bigEnv(ExMiniGridEnv):
     """
@@ -51,6 +48,9 @@ class bigEnv(ExMiniGridEnv):
             see_through_walls=False
 
         )
+
+    def getRooms(self):
+        return self.roomList
 
     def _gen_grid(self, width, height):
         # Create an empty grid

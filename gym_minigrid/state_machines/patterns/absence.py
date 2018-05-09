@@ -63,15 +63,14 @@ class Absence(SafetyStateMachine):
         {'trigger': '*',
          'source': 'near',
          'dest': 'immediate',
-         'conditions': 'obs_immediate',
-         'unless': 'obs_near'},
+         'conditions': 'obs_immediate'},
 
 
         {'trigger': '*',
          'source': 'immediate',
          'dest': 'immediate',
          'conditions': 'obs_immediate',
-         'unless': ['forward', 'obs_near']},
+         'unless': ['forward']},
 
         {'trigger': '*',
          'source': 'immediate',
@@ -91,19 +90,18 @@ class Absence(SafetyStateMachine):
         "immediate": False
     }
 
-    def __init__(self, name, worldobj_avoid, notify):
+    def __init__(self, name, worldobj_avoid, notify,reward):
+        self.nearReward = reward.near
+        self.immediateReward = reward.immediate
+        self.violatedReward = reward.violated
         self.worldobj_avoid = worldobj_avoid
         super().__init__(name, "absence", self.states, self.transitions, 'initial', notify)
 
     # Convert obseravions to state and populate the obs_conditions
     def _obs_to_state(self, obs):
-        print("current obs :",self.worldobj_avoid)
-        # Make a distinction between world_object and world_pattern
-
         # Get observations conditions
         near = p.is_near_to_worldobj(obs, self.worldobj_avoid)
         immediate = p.is_immediate_to_worldobj(obs, self.worldobj_avoid)
-
 
         # Save them in the obs_conditions dictionary
         Absence.obs["near"] = near
@@ -121,13 +119,13 @@ class Absence(SafetyStateMachine):
         super()._on_monitoring()
 
     def _on_near(self):
-        super()._on_shaping(-55)
+        super()._on_shaping(self.nearReward)
 
     def _on_immediate(self):
-        super()._on_shaping(-105)
+        super()._on_shaping(self.immediateReward)
 
     def _on_violated(self):
-        super()._on_violated(-505)
+        super()._on_violated(self.violatedReward)
 
     def obs_near(self):
         return Absence.obs["near"]

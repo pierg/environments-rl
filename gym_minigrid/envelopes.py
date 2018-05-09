@@ -37,14 +37,14 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.absence_monitors = []
 
         # List of pattern-based monitors with their stats, rewards and unsafe-actions
-        self.pattern_monitors = []
+        self.precedence_monitors = []
 
         # Dictionary that gets populated with information by all the monitors at runtime
         self.monitor_states = {}
 
         # Generates automata-based monitors
-        for avoid_obj in self.config.absence_monitors:
-            new_absence_monitor = Absence("absence_" + avoid_obj, avoid_obj, self.on_monitoring)
+        for avoid_obj in self.config.monitors.absence.monitored:
+            new_absence_monitor = Absence("absence_" + avoid_obj, avoid_obj, self.on_monitoring,self.config.monitors.absence.reward)
             self.absence_monitors.append(new_absence_monitor)
             self.monitor_states[new_absence_monitor.name] = {}
             self.monitor_states[new_absence_monitor.name]["state"] = ""
@@ -52,13 +52,13 @@ class SafetyEnvelope(gym.core.Wrapper):
             self.monitor_states[new_absence_monitor.name]["unsafe_action"] = ""
 
         # Generates pattern-based monitors
-        for first,second in self.config.pattern_monitors:
-            new_pattern_monitor = Precedence("precedence_"+first+"_"+second,first,second, self.on_monitoring)
-            self.pattern_monitors.append(new_pattern_monitor )
-            self.monitor_states[new_pattern_monitor .name] = {}
-            self.monitor_states[new_pattern_monitor .name]["state"] = ""
-            self.monitor_states[new_pattern_monitor .name]["shaped_reward"] = 0
-            self.monitor_states[new_pattern_monitor .name]["unsafe_action"] = ""
+        for first,second in self.config.monitors.precedence.monitored:
+            new_precedence_monitor = Precedence("precedence_"+first+"_"+second,first,second, self.on_monitoring,self.config.monitors.precedence.reward)
+            self.precedence_monitors.append(new_precedence_monitor)
+            self.monitor_states[new_precedence_monitor .name] = {}
+            self.monitor_states[new_precedence_monitor .name]["state"] = ""
+            self.monitor_states[new_precedence_monitor .name]["shaped_reward"] = 0
+            self.monitor_states[new_precedence_monitor .name]["unsafe_action"] = ""
 
 
     def on_monitoring(self, name, state, **kwargs):
@@ -71,34 +71,30 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.monitor_states[name]["state"] = state
 
         if state == "mismatch":
-            pass
-            #print(name + " mismatch!!!!")
+            print(name + " mismatch!!!!")
 
         if state == "monitoring":
-            pass
-            #print(name + " monitoring")
+            print(name + " monitoring")
 
         if state == "shaping":
             if kwargs:
-                #print(name + " shaping")
+                print(name + " shaping")
                 shaped_reward = kwargs.get('shaped_reward', 0)
-                #print("     shaped_reward = " + str(shaped_reward))
+                print("     shaped_reward = " + str(shaped_reward))
                 self.monitor_states[name]["shaped_reward"] = shaped_reward
             else:
-                pass
-                #print(name + " ERROR. missing action and reward")
+                print(name + " ERROR. missing action and reward")
 
         if state== "violation":
             if kwargs:
-                #print(name + " violation blocked!!")
+                print(name + " violation blocked!!")
                 unsafe_action = kwargs.get('unsafe_action')
                 shaped_reward = kwargs.get('shaped_reward', 0)
                 self.monitor_states[name]["unsafe_action"] = unsafe_action
                 self.monitor_states[name]["shaped_reward"] = shaped_reward
-                #print("shaped_reward=" + str(shaped_reward) + " unsafe_action=" + str(unsafe_action))
+                print("shaped_reward=" + str(shaped_reward) + " unsafe_action=" + str(unsafe_action))
             else:
-                pass
-                #print(name + " ERROR. missing action and reward")
+                print(name + " ERROR. missing action and reward")
 
     def action_planner(self, unsafe_actions):
         """
@@ -109,7 +105,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         if len(unsafe_actions) == 0:
             return self.propsed_action
         else:
-            #print("safe action: " + str(self.env.actions.wait))
+            print("safe action: " + str(self.env.actions.wait))
             return self.env.actions.wait
 
 
@@ -136,11 +132,11 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Check observation and proposed action in all running monitors
         for monitor in self.absence_monitors:
-            #print("\n\n____check BEFORE action is applyed to the environment")
+            print("\n\n____check BEFORE action is applyed to the environment")
             monitor.check(current_obs_env, proposed_action)
 
-        for monitor in self.pattern_monitors:
-            #print("\n\n____check BEFORE action is applyed to the environment")
+        for monitor in self.precedence_monitors:
+            print("\n\n____check BEFORE action is applyed to the environment")
             monitor.check(current_obs_env, proposed_action)
 
 
@@ -162,23 +158,23 @@ class SafetyEnvelope(gym.core.Wrapper):
             reward = sum(shaped_rewards)
             return obs, reward, done, info
 
-        #print("unsafe actions = ",unsafe_actions)
+        print("unsafe actions = ",unsafe_actions)
 
         # Build action to send to the environment
         suitable_action = self.action_planner(unsafe_actions)
 
-        #print("actions possibles = ",suitable_action)
+        print("actions possibles = ",suitable_action)
 
         # Send a suitable action to the environment
         obs, reward, done, info = self.env.step(suitable_action)
 
         # Notify the monitors of the new state reached in the environment and the applied action
         for monitor in self.absence_monitors:
-            #print("\n____verify AFTER action is applyed to the environment")
+            print("\n____verify AFTER action is applyed to the environment")
             monitor.verify(self.env, suitable_action)
 
-        for monitor in self.pattern_monitors:
-            #print("\n____verify AFTER action is applyed to the environment")
+        for monitor in self.precedence_monitors:
+            print("\n____verify AFTER action is applyed to the environment")
             monitor.verify(self.env, suitable_action)
 
         # Get the shaped rewards from the monitors in the new state

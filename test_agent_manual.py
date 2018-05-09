@@ -40,7 +40,7 @@ def main():
     # Load the gym environment
     env = gym.make(options.env_name)
 
-    if config.monitor:
+    if config.monitors:
         env = SafetyEnvelope(env)
 
 
