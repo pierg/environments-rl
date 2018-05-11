@@ -12,8 +12,8 @@ class ActionPlanner:
         goal_state = move_away_from_danger
 
         graph = Graph()
-        graph.updateGraph(current_state)
-        relevant_current_state = self.relevantTo(current_state, goal_state)
+        graph.update(current_state)
+        relevant_current_state = self.relevant_to(current_state, goal_state)
 
         came_from, cost = self.action_planner(graph, tuple(current_state), tuple(goal_state))
 
@@ -27,7 +27,6 @@ class ActionPlanner:
 
         came_from = list_of_nodes
 
-
         path = ActionPlanner.reconstruct_path(came_from, current_state, goal_state)
 
         # TODO for some reason this name (that is supposed to be a minigrid.action) is not recognized as an action
@@ -39,7 +38,7 @@ class ActionPlanner:
         came_from_changes = copy.deepcopy(came_from)
         start_changes = copy.deepcopy(start)
         goal_changes = copy.deepcopy(goal)
-        start_changes = ActionPlanner.relevantTo(start_changes, goal_changes)
+        start_changes = ActionPlanner.relevant_to(start_changes, goal_changes)
 
         actions = []
 
@@ -48,23 +47,15 @@ class ActionPlanner:
             goal_counter = 0
             for edge in node.edges:
                 for state in goal_changes:
-                    for state_after_action in Action.getStateAfterAction(node.states, edge):
+                    for state_after_action in Action.get_states_after_action(node.states, edge):
                         if state.property == state_after_action.property:
                             if state.value == state_after_action.value:
                                 goal_counter = goal_counter + 1
 
-                if(goal_counter == goal_length):
+                if goal_counter == goal_length:
                     actions.append(edge)
 
         return actions
-
-
-
-
-
-
-        return 1
-
 
     @staticmethod
     def heuristic(goal: tuple, current: tuple):
@@ -105,10 +96,10 @@ class ActionPlanner:
         return came_from, cost_so_far
 
     @staticmethod
-    def relevantTo(start: list, goal: list):
-        relevantProperties = []
+    def relevant_to(start: list, goal: list):
+        relevant_properties = []
         for state_property in start:
             for goal_property in goal:
                 if state_property.property == goal_property.property:
-                    relevantProperties.append(state_property)
-        return relevantProperties
+                    relevant_properties.append(state_property)
+        return relevant_properties

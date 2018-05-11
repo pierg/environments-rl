@@ -2,6 +2,7 @@ from gym_minigrid.extendedminigrid import ExMiniGridEnv
 from .state_property import *
 import copy
 
+
 class Action:
 
     def __init__(self, name):
@@ -30,26 +31,26 @@ class Action:
         return
 
     @staticmethod
-    def getAllPossibleActions() -> list:
+    def get_possible_actions() -> list:
         action_list = []
         for action in ExMiniGridEnv.Actions:
             action_list.append(Action(action))
         return action_list
 
     @staticmethod
-    def getStateAfterAction(state_original, action) -> list:
+    def get_states_after_action(state_original, action) -> list:
         state_changed = copy.deepcopy(state_original)
         for state_property in state_changed:
             for effect_property in action.effects:
-                if(state_property.property == effect_property.property):
+                if state_property.property == effect_property.property:
                     state_property.value = effect_property.value
         return state_changed
 
 
     @staticmethod
-    def availableActions(state : list) ->  list:
+    def available_actions_for_state(state : list) ->  list:
         state_changed = copy.deepcopy(state)
-        allActions = Action.getAllPossibleActions()
+        allActions = Action.get_possible_actions()
         availableActions = []
         for action in allActions:
             preconditions_total = len(action.preconditions)
