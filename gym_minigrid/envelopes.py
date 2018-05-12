@@ -4,7 +4,7 @@ from .perception import Perception
 from helpers import config_grabber as cg
 
 from .extendedminigrid import *
-from .action_planning import ActionPlanner
+from .action_planning import ActionPlanner, Evaluator
 
 # Size of the history collection
 N = 5
@@ -87,6 +87,8 @@ class ActionPlannerEnvelope(gym.core.RewardWrapper):
 
         self.config = cg.Configuration.grab()
 
+        self.reward_range = (-100, 100)
+
         self.proposed_history = collections.deque(N * [(None, None)], N)
         self.actual_history = collections.deque(N * [(None, None)], N)
 
@@ -96,19 +98,25 @@ class ActionPlannerEnvelope(gym.core.RewardWrapper):
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
-        proposed_action = action
-        self.proposed_history.append((current_obs, proposed_action))
+        self.proposed_history.append((current_obs, action))
 
         # needs some thought
         # start
-        if Perception.is_ahead_of_worldobj(current_obs, Hazard, 1):
-            planned_action = ActionPlanner().plan(current_obs)
-            obs, reward, done, info = self.env.step(planned_action)
-            print("USED THE ACTION PLANNER TO GO " )
+
+        if self.config.action_planner:
+
+            if Perception.is_ahead_of_worldobj(current_obs, Hazard, 1):
+                planned_action = ActionPlanner().plan(current_obs)
+                obs, reward, done, info = self.env.step(planned_action)
+                reward, done, info = Evaluator.evaluate(planned_action, current_obs, reward, done, info)
+            else:
+                obs, reward, done, info = self.env.step(action)
+                reward, done, info = Evaluator.evaluate(action, current_obs, reward, done, info)
+
         else:
-            obs, reward, done, info = self.env.step(proposed_action)
+            obs, reward, done, info = self.env.step(action)
+            reward, done, info = Evaluator.evaluate(action, current_obs, reward, done, info)
+
         # end
 
         return obs, reward, done, info
-
-        # TODO add safety measurement

@@ -46,7 +46,6 @@ class Action:
                     state_property.value = effect_property.value
         return state_changed
 
-
     @staticmethod
     def available_actions_for_state(state : list) ->  list:
         state_changed = copy.deepcopy(state)
