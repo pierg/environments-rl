@@ -1,39 +1,5 @@
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
-from gym_minigrid.envs.multiroom import *
-
-global realGrid, grid
-
-class Room:
-
-    def __init__(self, room, size, position, lightOn):
-        self.number = room
-        self.size = size
-        self.position = position
-        self.lightOn = lightOn
-
-    def setLight(self,lightOn):
-        self.lightOn = lightOn
-        self.activate()
-
-    def getLight(self):
-        return self.lightOn
-
-    def activate(self):
-        global grid,realGrid
-        x,y = self.size
-        k,l = self.position
-        x += k
-        y += l
-        for i in range(k,x):
-            for j in range(l,y):
-                if self.lightOn:
-                    if realGrid.get(i,j) is not None:
-                        grid.set(i,j,realGrid.get(i,j))
-                    else :
-                        grid.set(i,j,None)
-                else :
-                    grid.set(i,j,None)
 
 class bigEnv(ExMiniGridEnv):
     """
@@ -54,10 +20,9 @@ class bigEnv(ExMiniGridEnv):
 
     def _gen_grid(self, width, height):
         # Create an empty grid
-        global grid,realGrid
 
         self.grid = Grid(width, height)
-        grid = self.grid
+
         # Generate the surrounding walls
         self.grid.wall_rect(0, 0, width, height)
 
@@ -85,11 +50,6 @@ class bigEnv(ExMiniGridEnv):
         # Place the door which separate the rooms
         self.grid.set(int(round(width/2)),height-12,Door(self._rand_elem(sorted(set(COLOR_NAMES)))))
 
-        # Place the lightswitch of the second room
-        switch= [width//2+1,height-13]
-        wx, wy = self._rand_pos(2, width//2-1, 2, height - 6)
-        #self.grid.set(wx, wy, Lightswitch())
-
         # Place a goal square in the bottom-right corner
         self.grid.set(width - 8, height - 2, Goal())
 
@@ -101,7 +61,6 @@ class bigEnv(ExMiniGridEnv):
             x2,y2 = self._rand_pos(width//2+2, width-8, 1, height - 2)
             self.grid.set(x2, y2, Water())
 
-        realGrid = self.grid.copy()
 
         #Add the room
         self.roomList = []
@@ -110,12 +69,7 @@ class bigEnv(ExMiniGridEnv):
 
         switchRoom2 = LightSwitch()
         switchRoom2.affectRoom(self.roomList[1])
-        self.grid.set(3,3,switchRoom2)
-
-        self.roomList[1].activate()
-
-
-
+        self.grid.set(int(round(width/2)-1),height-11,switchRoom2)
 
         # Set start position
         self.start_pos = (1, 1)

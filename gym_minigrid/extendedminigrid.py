@@ -19,6 +19,32 @@ extended_dic(["lightSwitch"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 
+class Room:
+
+    def __init__(self, room, size, position, lightOn):
+        self.number = room
+        self.size = size
+        self.position = position
+        self.lightOn = lightOn
+
+    def setLight(self,lightOn):
+        self.lightOn = lightOn
+        #self.activate()
+
+    def getLight(self):
+        return self.lightOn
+
+    def agentInRoom(self,position):
+        ax,ay = position
+        x,y = self.size
+        k,l = self.position
+        x += k
+        y += l
+        if ax < x and ax >= k:
+            if ay < y and ay >= l:
+                return True
+        return False
+
 class Water(WorldObj):
     def __init__(self):
         super(Water, self).__init__('water', 'blue')
@@ -129,6 +155,7 @@ class ExGrid(Grid):
 
 
 class ExMiniGridEnv(MiniGridEnv):
+
     # Enumeration of possible actions
     class Actions(IntEnum):
         # Turn left, turn right, move forward
@@ -150,6 +177,19 @@ class ExMiniGridEnv(MiniGridEnv):
         # Ex:
         clean = 7
 
+    def check_if_agent_in_dark_room(self):
+        try:
+            if self.roomList:
+                for x in self.roomList:
+                    if not x.getLight():
+                        position = self.agent_pos
+                        if x.agentInRoom(position):
+                            print("Agent in dark room")
+                            return True
+            return False
+        except AttributeError:
+            return False
+
 
     def worldobj_in_front_agent(self, distance=1):
         """
@@ -157,6 +197,10 @@ class ExMiniGridEnv(MiniGridEnv):
         :param distance: integer, how many cells in front
         :return: string: worldobj type
         """
+
+        if self.check_if_agent_in_dark_room():
+           return None
+
         ax, ay = self.agent_pos
         wx, wy = ax, ay
 
@@ -190,6 +234,10 @@ class ExMiniGridEnv(MiniGridEnv):
         :param distance: integer, how many cells in right
         :return: string: worldobj type
         """
+
+        if self.check_if_agent_in_dark_room():
+           return None
+
         ax, ay = self.agent_pos
         ad = self.agent_dir
         wx, wy = ax, ay
@@ -224,6 +272,10 @@ class ExMiniGridEnv(MiniGridEnv):
         :param distance: integer, how many cells in left
         :return: string: worldobj type
         """
+
+        if self.check_if_agent_in_dark_room():
+           return None
+
         ax, ay = self.agent_pos
         ad = self.agent_dir
         wx, wy = ax, ay
@@ -290,6 +342,8 @@ class ExMiniGridEnv(MiniGridEnv):
         :param side: integer, if positive represents the cells to the right, negative to the left of the agent
         :return: string: worldobj type
         """
+        if self.check_if_agent_in_dark_room():
+           return None
 
         coordinates = (front,side)
         worldobj = None
@@ -321,6 +375,8 @@ class ExMiniGridEnv(MiniGridEnv):
             return front
 
     def deadend_in_front_agent(self):
+        if self.check_if_agent_in_dark_room():
+           return False
         i = 1
         while i < 4:
             left = self.check((-1, i - 1))
@@ -343,6 +399,8 @@ class ExMiniGridEnv(MiniGridEnv):
         return False
 
     def deadend_is_near_agent(self):
+        if self.check_if_agent_in_dark_room():
+           return False
         i = 1
         while i < 4:
             front = self.check((0,i))

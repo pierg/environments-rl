@@ -44,22 +44,21 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Generates automata-based monitors
         for avoid_obj in self.config.monitors.absence.monitored:
-            new_absence_monitor = Absence("absence_" + avoid_obj, avoid_obj, self.on_monitoring,self.config.monitors.absence.reward)
+            new_absence_monitor = Absence("absence_" + avoid_obj.name, avoid_obj.name, self.on_monitoring,avoid_obj.reward)
             self.absence_monitors.append(new_absence_monitor)
             self.monitor_states[new_absence_monitor.name] = {}
             self.monitor_states[new_absence_monitor.name]["state"] = ""
             self.monitor_states[new_absence_monitor.name]["shaped_reward"] = 0
             self.monitor_states[new_absence_monitor.name]["unsafe_action"] = ""
-
+#
         # Generates pattern-based monitors
-        for first,second in self.config.monitors.precedence.monitored:
-            new_precedence_monitor = Precedence("precedence_"+first+"_"+second,first,second, self.on_monitoring,self.config.monitors.precedence.reward)
-            self.precedence_monitors.append(new_precedence_monitor)
-            self.monitor_states[new_precedence_monitor .name] = {}
-            self.monitor_states[new_precedence_monitor .name]["state"] = ""
-            self.monitor_states[new_precedence_monitor .name]["shaped_reward"] = 0
-            self.monitor_states[new_precedence_monitor .name]["unsafe_action"] = ""
-
+#        for precedence_obj in self.config.monitors.precedence.monitored:
+#           new_precedence_monitor = Precedence("precedence_"+precedence_obj.name,precedence_obj,self.on_monitoring)
+#           self.precedence_monitors.append(new_precedence_monitor)
+#           self.monitor_states[new_precedence_monitor.name] = {}
+#           self.monitor_states[new_precedence_monitor.name]["state"] = ""
+#           self.monitor_states[new_precedence_monitor.name]["shaped_reward"] = 0
+#           self.monitor_states[new_precedence_monitor.name]["unsafe_action"] = ""
 
     def on_monitoring(self, name, state, **kwargs):
         """
