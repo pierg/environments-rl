@@ -64,12 +64,14 @@ class bigEnv(ExMiniGridEnv):
 
         #Add the room
         self.roomList = []
-        self.roomList.append(Room(1,(width//2-1, height-2),(1,1),True))
-        self.roomList.append(Room(2,(width//2-2, height-2),(width//2+1,1),False))
-
+        self.roomList.append(Room(0,(width//2-1, height-2),(1,1),True))
+        self.roomList.append(Room(1,(width//2-2, height-2),(width//2+1,1),False))
+        self.roomList[1].setEntryDoor((int(round(width/2)),height-12))
         switchRoom2 = LightSwitch()
         switchRoom2.affectRoom(self.roomList[1])
         self.grid.set(int(round(width/2)-1),height-11,switchRoom2)
+        self.switchPosition = []
+        self.switchPosition.append((int(round(width/2)-1),height-11))
 
         # Set start position
         self.start_pos = (1, 1)

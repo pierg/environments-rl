@@ -110,7 +110,7 @@ class Absence(SafetyStateMachine):
         # Return the state
         if immediate:
             return 'immediate'
-        elif near and not immediate:
+        elif near:
             return 'near'
         else:
             return'safe'

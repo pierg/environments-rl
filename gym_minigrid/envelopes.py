@@ -50,15 +50,16 @@ class SafetyEnvelope(gym.core.Wrapper):
             self.monitor_states[new_absence_monitor.name]["state"] = ""
             self.monitor_states[new_absence_monitor.name]["shaped_reward"] = 0
             self.monitor_states[new_absence_monitor.name]["unsafe_action"] = ""
-#
+
         # Generates pattern-based monitors
-#        for precedence_obj in self.config.monitors.precedence.monitored:
-#           new_precedence_monitor = Precedence("precedence_"+precedence_obj.name,precedence_obj,self.on_monitoring)
-#           self.precedence_monitors.append(new_precedence_monitor)
-#           self.monitor_states[new_precedence_monitor.name] = {}
-#           self.monitor_states[new_precedence_monitor.name]["state"] = ""
-#           self.monitor_states[new_precedence_monitor.name]["shaped_reward"] = 0
-#           self.monitor_states[new_precedence_monitor.name]["unsafe_action"] = ""
+        for precedence_obj in self.config.monitors.precedence.monitored:
+            print("voici mon nom : ",precedence_obj.name)
+            new_precedence_monitor = Precedence("precedence_"+precedence_obj.name,precedence_obj,self.on_monitoring,precedence_obj.reward)
+            self.precedence_monitors.append(new_precedence_monitor)
+            self.monitor_states[new_precedence_monitor.name] = {}
+            self.monitor_states[new_precedence_monitor.name]["state"] = ""
+            self.monitor_states[new_precedence_monitor.name]["shaped_reward"] = 0
+            self.monitor_states[new_precedence_monitor.name]["unsafe_action"] = ""
 
     def on_monitoring(self, name, state, **kwargs):
         """

@@ -31,15 +31,19 @@ class Room:
         self.lightOn = lightOn
         #self.activate()
 
+    def setEntryDoor(self,position):
+        self.entryDoor = position
+
     def getLight(self):
         return self.lightOn
 
-    def agentInRoom(self,position):
+    def objectInRoom(self, position):
         ax,ay = position
         x,y = self.size
         k,l = self.position
         x += k
         y += l
+        print("ax,ay,k,l,x,y",ax,ay,k,l,x,y)
         if ax < x and ax >= k:
             if ay < y and ay >= l:
                 return True
@@ -71,6 +75,9 @@ class LightSwitch(WorldObj):
     def toggle(self, env, pos):
         self.room.setLight(not self.room.getLight())
         return True
+
+    def getRoomNumber(self):
+        return self.room.number
 
     def can_overlap(self):
         return False
@@ -183,7 +190,7 @@ class ExMiniGridEnv(MiniGridEnv):
                 for x in self.roomList:
                     if not x.getLight():
                         position = self.agent_pos
-                        if x.agentInRoom(position):
+                        if x.objectInRoom(position):
                             print("Agent in dark room")
                             return True
             return False
@@ -358,12 +365,21 @@ class ExMiniGridEnv(MiniGridEnv):
                 return worldobj_type
         return None
 
-    def worldpattern_in_front_agent(self,object_type):
+    def check_precedence_condition(self,object_type):
+        if object_type == "light-on":
+            return self.check_light_are_on()
+        elif object_type == "door-opened":
+            return self.check_door_is_opened()
+        elif object_type == "enter-room":
+            return self.agent_want_to_enter_room()
+        return False
+
+    def worldpattern_in_front_agent(self, object_type):
         if object_type == "deadend":
             return self.deadend_in_front_agent()
         return False
 
-    def worldpattern_is_near_agent(self,object_type):
+    def worldpattern_is_near_agent(self, object_type):
         if object_type == "deadend":
             return self.deadend_is_near_agent()
         return False
@@ -425,4 +441,58 @@ class ExMiniGridEnv(MiniGridEnv):
             i = i+1
         return True
 
+    def agent_want_to_enter_room(self):
+        print("check if it wants to enter a new room")
+        if self.worldobj_in_front_agent() == "door":
+            print("True")
+            return True
+        print("False")
+        return False
 
+    def check_light_are_on(self):
+        print("check if lights are on or not")
+        try:
+            if self.roomList:
+                canToggleLight,number = self.agent_can_toggle_light()
+                if canToggleLight:
+                    print("Boolean = Light",number,self.roomList[number].getLight())
+                    return self.roomList[number].getLight()
+            print("False")
+            return True
+        except AttributeError:
+            return False
+
+    def agent_can_toggle_light(self):
+        print("agent can toggle light")
+        try:
+            allIlluminated = True
+            if self.roomList:
+                for room in self.roomList:
+                    print("roomnumber",room.number)
+                    for switch in self.switchPosition:
+                        if room.objectInRoom(switch):
+                            x,y = switch
+                            number = self.grid.get(x,y).getRoomNumber()
+                            print("switch dans la chambre", room.number, "pour la chambre ",number)
+                            if room.objectInRoom(self.agent_pos):
+                                print("agent dans la même chambre")
+                                return True, number
+                            else:
+                                return False,0
+                    if not room.getLight():
+                        allIlluminated = False
+            return allIlluminated,0
+        except AttributeError:
+            return False,0
+
+    def check_door_is_opened(self):
+        try:
+            if self.roomList:
+                for room in self.roomList:
+                    if room.objectInRoom(self.agent_pos):
+
+        if self.worldobj_in_front_agent() == "door":
+            x,y = self.get_grid_coords_from_view((0,1))
+            print("Door is ",self.grid.get(x,y).is_open )
+            return self.grid.get(x,y).is_open
+        return False
