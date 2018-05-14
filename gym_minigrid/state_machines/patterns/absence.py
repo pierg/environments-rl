@@ -1,6 +1,6 @@
 from perception import Perception as p
 
-from safetystatemachine import SafetyStateMachine
+from state_machines.safetystatemachine import SafetyStateMachine
 
 
 
