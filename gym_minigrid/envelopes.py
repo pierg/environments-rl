@@ -3,7 +3,7 @@ import collections
 from configurations import config_grabber as cg
 
 from extendedminigrid import *
-from state_machines.patterns.absence import *
+from monitors.patterns.absence import *
 
 import gym
 
