@@ -1,4 +1,5 @@
 from perception import Perception as p
+import logging
 
 from state_machines.safetystatemachine import SafetyStateMachine
 
@@ -81,8 +82,6 @@ class Precedence(SafetyStateMachine):
         self.precedenceViolatedReward = reward.precedenceViolated
         self.precondition = object_prec.preCondition
         self.postcondition = object_prec.postCondition
-        print("states",self.states)
-        print("transitions",self.transitions)
         super().__init__(object_prec.name, "precedence", self.states, self.transitions, 'initial', notify)
 
     # Convert observations to state and populate the obs_conditions
@@ -100,7 +99,8 @@ class Precedence(SafetyStateMachine):
         else:
             Precedence.obs["precedenceRespected"] = False
             Precedence.obs["precedenceViolated"] = False
-        print("boolean:",Precedence.obs["precedenceRespected"],Precedence.obs["precedenceViolated"])
+        logging.info("precedence ",self.name," : Conditions Respected -> ", Precedence.obs["precedenceRespected"],
+                     " Conditions Violated ->", Precedence.obs["precedenceViolated"])
         # Return the state
         if Precedence.obs["precedenceViolated"]:
             return 'disobey'
@@ -119,6 +119,7 @@ class Precedence(SafetyStateMachine):
         super()._on_shaping(self.precedenceViolatedReward)
 
     def _on_violated(self):
+        logging.warning("precedence %s violated", self.name)
         super()._on_violated(self.precedenceViolatedReward)
 
     def obs_precedence_respected(self):

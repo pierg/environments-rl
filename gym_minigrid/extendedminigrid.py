@@ -34,6 +34,9 @@ class Room:
     def setEntryDoor(self,position):
         self.entryDoor = position
 
+    def setExitDoor(self,position):
+        self.exitDoor = position
+
     def getLight(self):
         return self.lightOn
 
@@ -43,7 +46,6 @@ class Room:
         k,l = self.position
         x += k
         y += l
-        print("ax,ay,k,l,x,y",ax,ay,k,l,x,y)
         if ax < x and ax >= k:
             if ay < y and ay >= l:
                 return True
@@ -191,7 +193,6 @@ class ExMiniGridEnv(MiniGridEnv):
                     if not x.getLight():
                         position = self.agent_pos
                         if x.objectInRoom(position):
-                            print("Agent in dark room")
                             return True
             return False
         except AttributeError:
@@ -207,7 +208,9 @@ class ExMiniGridEnv(MiniGridEnv):
 
         if self.check_if_agent_in_dark_room():
            return None
+        return self.worldobj_in_front_agent_noDark(distance)
 
+    def worldobj_in_front_agent_noDark(self,distance=1):
         ax, ay = self.agent_pos
         wx, wy = ax, ay
 
@@ -230,10 +233,8 @@ class ExMiniGridEnv(MiniGridEnv):
             worldobj = self.grid.get(wx, wy)
             if worldobj is not None:
                 worldobj_type = worldobj.type
-                print("front_" + str(distance) + ": " + worldobj_type)
                 return worldobj_type
         return None
-
 
     def worldobj_in_right_agent(self, distance=1):
         """
@@ -269,7 +270,6 @@ class ExMiniGridEnv(MiniGridEnv):
 
             if worldobj is not None:
                 worldobj_type = worldobj.type
-                print("right_" + str(distance) + ": " + worldobj_type)
                 return worldobj_type
         return None
 
@@ -307,7 +307,6 @@ class ExMiniGridEnv(MiniGridEnv):
 
             if worldobj is not None:
                 worldobj_type = worldobj.type
-                print("left_" + str(distance) + ": " + worldobj_type)
                 return worldobj_type
         return None
 
@@ -361,18 +360,21 @@ class ExMiniGridEnv(MiniGridEnv):
 
             if worldobj is not None:
                 worldobj_type = worldobj.type
-                print("worldobject located at : ["+front+" "+side+"] from agent is : " + worldobj_type)
                 return worldobj_type
         return None
 
     def check_precedence_condition(self,object_type):
-        if object_type == "light-on":
-            return self.check_light_are_on()
-        elif object_type == "door-opened":
-            return self.check_door_is_opened()
-        elif object_type == "enter-room":
-            return self.agent_want_to_enter_room()
-        return False
+        try :
+            if self.roomList:
+                if object_type == "light-on":
+                    return self.check_light_are_on()
+                elif object_type == "door-opened":
+                    return self.check_door_is_opened()
+                elif object_type == "enter-room":
+                    return self.agent_want_to_enter_room()
+                return False
+        except AttributeError:
+            return True
 
     def worldpattern_in_front_agent(self, object_type):
         if object_type == "deadend":
@@ -442,40 +444,34 @@ class ExMiniGridEnv(MiniGridEnv):
         return True
 
     def agent_want_to_enter_room(self):
-        print("check if it wants to enter a new room")
         if self.worldobj_in_front_agent() == "door":
-            print("True")
-            return True
-        print("False")
+            x,y = self.get_grid_coords_from_view((0,1))
+            if self.grid.get(x,y).is_open:
+                return True
+            else:
+                return False
         return False
 
     def check_light_are_on(self):
-        print("check if lights are on or not")
         try:
             if self.roomList:
                 canToggleLight,number = self.agent_can_toggle_light()
                 if canToggleLight:
-                    print("Boolean = Light",number,self.roomList[number].getLight())
                     return self.roomList[number].getLight()
-            print("False")
             return True
         except AttributeError:
             return False
 
     def agent_can_toggle_light(self):
-        print("agent can toggle light")
         try:
             allIlluminated = True
             if self.roomList:
                 for room in self.roomList:
-                    print("roomnumber",room.number)
                     for switch in self.switchPosition:
                         if room.objectInRoom(switch):
                             x,y = switch
                             number = self.grid.get(x,y).getRoomNumber()
-                            print("switch dans la chambre", room.number, "pour la chambre ",number)
                             if room.objectInRoom(self.agent_pos):
-                                print("agent dans la même chambre")
                                 return True, number
                             else:
                                 return False,0
@@ -490,9 +486,26 @@ class ExMiniGridEnv(MiniGridEnv):
             if self.roomList:
                 for room in self.roomList:
                     if room.objectInRoom(self.agent_pos):
-
-        if self.worldobj_in_front_agent() == "door":
-            x,y = self.get_grid_coords_from_view((0,1))
-            print("Door is ",self.grid.get(x,y).is_open )
-            return self.grid.get(x,y).is_open
-        return False
+                        try:
+                            if room.exitDoor:
+                                x,y = room.exitDoor
+                                if self.grid.get(x,y).is_open:
+                                    return True
+                                else:
+                                    return False
+                        except AttributeError:
+                            try:
+                                if room.entryDoor:
+                                    x, y = room.entryDoor
+                                    if self.grid.get(x, y).is_open:
+                                        return True
+                                    else:
+                                        return False
+                            except AttributeError:
+                                return False
+            return True
+        except AttributeError:
+            if self.worldobj_in_front_agent() == "door":
+                x,y = self.get_grid_coords_from_view((0,1))
+                return self.grid.get(x,y).is_open
+            return False

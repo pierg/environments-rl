@@ -53,7 +53,6 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Generates pattern-based monitors
         for precedence_obj in self.config.monitors.precedence.monitored:
-            print("voici mon nom : ",precedence_obj.name)
             new_precedence_monitor = Precedence("precedence_"+precedence_obj.name,precedence_obj,self.on_monitoring,precedence_obj.reward)
             self.precedence_monitors.append(new_precedence_monitor)
             self.monitor_states[new_precedence_monitor.name] = {}
@@ -71,30 +70,30 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.monitor_states[name]["state"] = state
 
         if state == "mismatch":
-            print(name + " mismatch!!!!")
+            logging.warning(name + " mismatch!!!!")
 
         if state == "monitoring":
-            print(name + " monitoring")
+            logging.info(name + " monitoring")
 
         if state == "shaping":
             if kwargs:
-                print(name + " shaping")
+                logging.info(name + " shaping")
                 shaped_reward = kwargs.get('shaped_reward', 0)
-                print("     shaped_reward = " + str(shaped_reward))
+                logging.info("     shaped_reward = " + str(shaped_reward))
                 self.monitor_states[name]["shaped_reward"] = shaped_reward
             else:
-                print(name + " ERROR. missing action and reward")
+                logging.warning("%s ERROR. missing action and reward",name)
 
         if state== "violation":
             if kwargs:
-                print(name + " violation blocked!!")
+                logging.warning("%s violation blocked",name)
                 unsafe_action = kwargs.get('unsafe_action')
                 shaped_reward = kwargs.get('shaped_reward', 0)
                 self.monitor_states[name]["unsafe_action"] = unsafe_action
                 self.monitor_states[name]["shaped_reward"] = shaped_reward
-                print("shaped_reward=" + str(shaped_reward) + " unsafe_action=" + str(unsafe_action))
+                logging.info("shaped_reward=" + str(shaped_reward) + " unsafe_action=" + str(unsafe_action))
             else:
-                print(name + " ERROR. missing action and reward")
+                logging.warning("%s ERROR. missing action and reward",name)
 
     def action_planner(self, unsafe_actions):
         """
@@ -105,7 +104,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         if len(unsafe_actions) == 0:
             return self.propsed_action
         else:
-            print("safe action: " + str(self.env.actions.wait))
+            logging.info("safe action : ",str(self.env.actions.wait))
             return self.env.actions.wait
 
 
@@ -130,13 +129,12 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Store obs/action in history
         self.proposed_history.append((current_obs, proposed_action))
 
+        logging.info("___check BEFORE action is applyed to the environmnent")
         # Check observation and proposed action in all running monitors
         for monitor in self.absence_monitors:
-            print("\n\n____check BEFORE action is applyed to the environment")
             monitor.check(current_obs_env, proposed_action)
 
         for monitor in self.precedence_monitors:
-            print("\n\n____check BEFORE action is applyed to the environment")
             monitor.check(current_obs_env, proposed_action)
 
 
@@ -158,23 +156,29 @@ class SafetyEnvelope(gym.core.Wrapper):
             reward = sum(shaped_rewards)
             return obs, reward, done, info
 
-        print("unsafe actions = ",unsafe_actions)
+        logging.info("unsafe actions = ",unsafe_actions)
 
         # Build action to send to the environment
         suitable_action = self.action_planner(unsafe_actions)
+        logging.info("actions possibles =",suitable_action)
 
-        print("actions possibles = ",suitable_action)
+        # Reset if agent step on water without knowing it
+        if suitable_action == ExMiniGridEnv.Actions.forward \
+            and ExMiniGridEnv.worldobj_in_front_agent_noDark(self.env)=="water":
+                obs = self.env.reset()
+                done = True
+                info = {}
+                reward = sum(shaped_rewards)
+                return obs, reward, done, info
 
         # Send a suitable action to the environment
         obs, reward, done, info = self.env.step(suitable_action)
-
+        logging.info("____verify AFTER action is applyed to the environment")
         # Notify the monitors of the new state reached in the environment and the applied action
         for monitor in self.absence_monitors:
-            print("\n____verify AFTER action is applyed to the environment")
             monitor.verify(self.env, suitable_action)
 
         for monitor in self.precedence_monitors:
-            print("\n____verify AFTER action is applyed to the environment")
             monitor.verify(self.env, suitable_action)
 
         # Get the shaped rewards from the monitors in the new state

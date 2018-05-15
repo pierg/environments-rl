@@ -67,6 +67,9 @@ class bigEnv(ExMiniGridEnv):
         self.roomList.append(Room(0,(width//2-1, height-2),(1,1),True))
         self.roomList.append(Room(1,(width//2-2, height-2),(width//2+1,1),False))
         self.roomList[1].setEntryDoor((int(round(width/2)),height-12))
+        self.roomList[0].setExitDoor((int(round(width/2)),height-12))
+
+        #Add the light switch next to the door
         switchRoom2 = LightSwitch()
         switchRoom2.affectRoom(self.roomList[1])
         self.grid.set(int(round(width/2)-1),height-11,switchRoom2)
@@ -79,7 +82,16 @@ class bigEnv(ExMiniGridEnv):
 
         self.mission = "get to the green goal square without moving on water"
 
+class bigEnv24x24(bigEnv):
+    def __init__(self):
+        super().__init__(size=24)
+
 register(
     id='MiniGrid-BigEnv-32x32-v0',
     entry_point='gym_minigrid.envs:bigEnv'
+)
+
+register(
+    id='MiniGrid-BigEnv-24x24-v0',
+    entry_point='gym_minigrid.envs:bigEnv24x24'
 )

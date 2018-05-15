@@ -24,7 +24,6 @@ class Perception():
 
     @staticmethod
     def precedence_condition(obs,object_type):
-        print("checking postcondition",object_type)
         return obs.check_precedence_condition(object_type)
 
     @staticmethod

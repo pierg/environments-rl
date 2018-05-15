@@ -13,6 +13,7 @@ from transitions.extensions.factory import NestedGraphTransition, LockedNestedEv
 from gym_minigrid.extendedminigrid import *
 
 import os
+import logging
 
 
 
@@ -263,7 +264,7 @@ class SafetyStateMachine(object):
 
         # Rollback to the state before the violation:
         self.machine.set_state(self.env_state)
-        print("Rolled-back state to: " + self.state)
+        logging.warning("Rolled-back state to: %s", self.state)
 
         # Notify
         self.notify(self.name, "violation", shaped_reward=shaped_reward, unsafe_action=self.action_proposed)
@@ -294,7 +295,7 @@ class SafetyStateMachine(object):
             self.trigger('*')
         else:
             self._on_mismatch()
-        print("monitor_state: " + self.state)
+        logging.info("monitor_state: " + self.state)
 
     # Update the state after the action has been performed in the environment
     def verify(self, obs_post, applied_action):
@@ -309,7 +310,7 @@ class SafetyStateMachine(object):
             # print("new_monitor_state: " + self.state)
             if self.state != self.env_state:
                 self._on_mismatch()
-        print("monitor_state: " + self.state)
+        logging.info("monitor_state: " + self.state)
 
     """ Actions available to the agent - used for conditions checking """
     def forward(self):

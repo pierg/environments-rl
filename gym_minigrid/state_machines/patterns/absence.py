@@ -1,4 +1,5 @@
 from perception import Perception as p
+import logging
 
 from safetystatemachine import SafetyStateMachine
 
@@ -125,6 +126,7 @@ class Absence(SafetyStateMachine):
         super()._on_shaping(self.immediateReward)
 
     def _on_violated(self):
+        logging.warning("absence %s violated", self.name)
         super()._on_violated(self.violatedReward)
 
     def obs_near(self):
