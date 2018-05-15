@@ -6,9 +6,9 @@ from monitors.safetystatemachine import SafetyStateMachine
 
 class Precedence(SafetyStateMachine):
     """
-    It makes sure that the agent will never enter in the state of type 'violated'
-    This pattern is the dual of the Existence pattern
-    It takes as input the type of cell that the agent must avoid at all states
+    To describe relationships between a pair of events/states where the occurrence of the first
+    is a necessary pre-condition for an occurrence of the second. We say that an occurrence of
+    the second is enabled by an occurrence of the first.
     """
 
     states = [
