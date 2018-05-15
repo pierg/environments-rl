@@ -4,6 +4,7 @@ from configurations import config_grabber as cg
 
 from extendedminigrid import *
 from monitors.patterns.absence import *
+from monitors.patterns.precedence import *
 
 import gym
 
