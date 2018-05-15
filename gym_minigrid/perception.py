@@ -1,6 +1,6 @@
 import math
-from extendedminigrid import *
-from extendedminigrid import Water
+from gym_minigrid.extendedminigrid import *
+from gym_minigrid.extendedminigrid import Water
 
 AGENT_GRID_LOCATION = 2
 

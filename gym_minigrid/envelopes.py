@@ -33,16 +33,16 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         self.propsed_action = None
 
-        # List of automata-based monitors with their states, rewards and unsafe-actions
+        # List of absence-based monitors with their states, rewards and unsafe-actions
         self.absence_monitors = []
 
-        # List of pattern-based monitors with their stats, rewards and unsafe-actions
+        # List of precedence-based monitors with their stats, rewards and unsafe-actions
         self.precedence_monitors = []
 
         # Dictionary that gets populated with information by all the monitors at runtime
         self.monitor_states = {}
 
-        # Generates automata-based monitors
+        # Generates absence-based monitors
         for avoid_obj in self.config.monitors.absence.monitored:
             new_absence_monitor = Absence("absence_" + avoid_obj.name, avoid_obj.name, self.on_monitoring,avoid_obj.reward)
             self.absence_monitors.append(new_absence_monitor)
@@ -51,7 +51,7 @@ class SafetyEnvelope(gym.core.Wrapper):
             self.monitor_states[new_absence_monitor.name]["shaped_reward"] = 0
             self.monitor_states[new_absence_monitor.name]["unsafe_action"] = ""
 
-        # Generates pattern-based monitors
+        # Generates precedence-based monitors
         for precedence_obj in self.config.monitors.precedence.monitored:
             new_precedence_monitor = Precedence("precedence_"+precedence_obj.name,precedence_obj,self.on_monitoring,precedence_obj.reward)
             self.precedence_monitors.append(new_precedence_monitor)
