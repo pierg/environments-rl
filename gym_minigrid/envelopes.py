@@ -1,10 +1,9 @@
 import collections
 
-from helpers import config_grabber as cg
+from configurations import config_grabber as cg
 
 from extendedminigrid import *
 from state_machines.patterns.absence import *
-from state_machines.patterns.precedence import *
 
 import gym
 
@@ -146,7 +145,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if self.config.on_violation_reset:
                     obs = self.env.reset()
                     done = True
-                    info = {}
+                    info = {"violation"}
                 if monitor["unsafe_action"]:
                     unsafe_actions.append(monitor["unsafe_action"])
                 shaped_rewards.append(monitor["shaped_reward"])

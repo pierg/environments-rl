@@ -3,11 +3,9 @@
 from __future__ import division, print_function
 
 import sys
-import numpy
-import gym
 import time
 from optparse import OptionParser
-from helpers import config_grabber as cg
+
 try:
     import gym_minigrid
     from gym_minigrid.wrappers import *
@@ -16,7 +14,6 @@ except Exception as e:
     print(e)
     pass
 
-import gym_minigrid
 
 def main():
     parser = OptionParser()

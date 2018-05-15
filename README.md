@@ -16,14 +16,11 @@ Requirements:
 - NumPy
 - PyQT 5 for graphics
 
-This environment has been built at the [MILA](https://mila.quebec/en/) as
-part of the [Baby AI Game](https://github.com/maximecb/baby-ai-game) project.
-
 Please use this bibtex if you want to cite this repository in your publications:
 
 ```
 @misc{gym_minigrid,
-  author = {Maxime Chevalier-Boisvert},
+  author = {Maxime Chevalier-Boisvert, Lucas Willems},
   title = {Minimalistic Gridworld Environment for OpenAI Gym},
   year = {2018},
   publisher = {GitHub},
@@ -31,6 +28,8 @@ Please use this bibtex if you want to cite this repository in your publications:
   howpublished = {\url{https://github.com/maximecb/gym-minigrid}},
 }
 ```
+
+This environment has been built as part of work done at the [MILA](https://mila.quebec/en/).
 
 ## Installation
 
@@ -223,6 +222,19 @@ The agent is instructed through a textual string to pick up an object and
 place it next to another object. This environment is easy to solve with two
 objects, but difficult to solve with more, as it involves both textual
 understanding and spatial reasoning involving multiple objects.
+
+### Red and blue doors environment
+
+Registered configurations:
+- `MiniGrid-RedBlueDoors-6x6-v0`
+- `MiniGrid-RedBlueDoors-8x8-v0`
+
+The agent is randomly placed within a room with one red and one blue door
+facing opposite directions. The agent has to open the red door and then open
+the blue door, in that order. The purpose of this environment is to test
+memory. The agent, when facing one door, cannot see the door behind him.
+Hence, the agent needs to remember whether or not he has previously opened
+the other door in order to reliably succeed at completing the task.
 
 ### Locked Room Environment
 

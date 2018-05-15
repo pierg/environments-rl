@@ -1,7 +1,7 @@
 from perception import Perception as p
 import logging
 
-from safetystatemachine import SafetyStateMachine
+from state_machines.safetystatemachine import SafetyStateMachine
 
 
 
