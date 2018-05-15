@@ -10,7 +10,7 @@ from gym_minigrid.rendering import *
 CELL_PIXELS = 32
 
 # Number of cells (width and height) in the agent view
-AGENT_VIEW_SIZE = 7
+AGENT_VIEW_SIZE = 4
 
 # Size of the array given as an observation to the agent
 OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE, 3)
@@ -152,10 +152,8 @@ class Door(WorldObj):
         return self.is_open
 
     def toggle(self, env, pos):
-        if not self.is_open:
-            self.is_open = True
-            return True
-        return False
+        self.is_open = not self.is_open
+        return True
 
     def render(self, r):
         c = COLORS[self.color]
@@ -871,6 +869,7 @@ class MiniGridEnv(gym.Env):
         Set the agent's starting point at an empty position in the grid
         """
 
+        self.start_pos = None
         pos = self.place_obj(None, top, size)
         self.start_pos = pos
 
@@ -1049,7 +1048,7 @@ class MiniGridEnv(gym.Env):
         # Process occluders and visibility
         # Note that this incurs some performance cost
         if not self.see_through_walls:
-            vis_mask = grid.process_vis(agent_pos=(3, 6))
+            vis_mask = grid.process_vis(agent_pos=(AGENT_VIEW_SIZE // 2 , AGENT_VIEW_SIZE - 1))
         else:
             vis_mask = np.ones(shape=(grid.width, grid.height), dtype=np.bool)
 
@@ -1088,15 +1087,15 @@ class MiniGridEnv(gym.Env):
 
         return obs
 
-    def get_obs_render(self, obs):
+    def get_obs_render(self, obs, tile_pixels=CELL_PIXELS//2):
         """
         Render an agent observation for visualization
         """
 
         if self.obs_render == None:
             self.obs_render = Renderer(
-                AGENT_VIEW_SIZE * CELL_PIXELS // 2,
-                AGENT_VIEW_SIZE * CELL_PIXELS // 2
+                AGENT_VIEW_SIZE * tile_pixels,
+                AGENT_VIEW_SIZE * tile_pixels
             )
 
         r = self.obs_render
@@ -1106,11 +1105,12 @@ class MiniGridEnv(gym.Env):
         grid = Grid.decode(obs)
 
         # Render the whole grid
-        grid.render(r, CELL_PIXELS // 2)
+        grid.render(r, tile_pixels)
 
         # Draw the agent
+        ratio = tile_pixels / CELL_PIXELS
         r.push()
-        r.scale(0.5, 0.5)
+        r.scale(ratio, ratio)
         r.translate(
             CELL_PIXELS * (0.5 + AGENT_VIEW_SIZE // 2),
             CELL_PIXELS * (AGENT_VIEW_SIZE - 0.5)

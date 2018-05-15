@@ -12,6 +12,8 @@ from transitions.extensions.factory import NestedGraphTransition, LockedNestedEv
 
 from gym_minigrid.extendedminigrid import *
 
+import os
+import logging
 
 
 
@@ -228,17 +230,15 @@ class SafetyStateMachine(object):
 
         # Initial state observed by the agent
         self.initial_state = None
-        self.current_state = None
+        self.env_state = None
 
         # Observations retreived before applying the action
-        self.observations_pre = None
+        self.observations = None
         # Observations retreived after applying the action
         self.observations_post = None
 
         # Action proposed by the agent
         self.action_proposed = None
-        # Action applied on the environment by the agent
-        self.action_applied = None
 
         # Function to be called when violation is detected (on_block) or when observations are needed (uncertainty)
         self.notify = notify
@@ -246,72 +246,75 @@ class SafetyStateMachine(object):
 
         # MiniGrid Actions and unsafe_actions list to be returned by the on_block
         self.actions = MiniGridEnv.Actions
-        self.unsafe_actions = []
 
     def _obs_to_state(self, obs):
         raise NotImplementedError
 
+
+    def _on_monitoring(self):
+        # Notify
+        self.notify(self.name, "monitoring")
+
+    def _on_shaping(self, shaped_reward=0):
+        # Notify
+        self.notify(self.name, "shaping", shaped_reward=shaped_reward)
+
     # Triggered when it enters in a state of time 'violated'
-    def _on_violated(self):
-        self.unsafe_actions.append(self.action_proposed)
+    def _on_violated(self, shaped_reward=0):
 
         # Rollback to the state before the violation:
-        self.machine.set_state(self.current_state)
-        print("Rolled-back state to: " + self.state)
+        self.machine.set_state(self.env_state)
+        logging.warning("Rolled-back state to: %s", self.state)
 
         # Notify
-        self.notify("violation", self.unsafe_actions)
+        self.notify(self.name, "violation", shaped_reward=shaped_reward, unsafe_action=self.action_proposed)
 
     def _on_mismatch(self):
-        self.notify("mismatch")
+        self.notify(self.name, "mismatch")
 
     def draw(self):
-        self.machine.get_graph(title=self.name).draw('state_machines/patterns/' + self.pattern + "_" + self.name + '.png', prog='dot')
+        abs_file_path = os.path.abspath(__file__ + "/../patterns/" + self.pattern + "_" + self.name + ".png")
+        self.machine.get_graph(title=self.name).draw(abs_file_path, prog='dot')
 
     # Called before the action is going to be performed on the environment and obs are the current observations
     def check(self, obs_pre, action_proposed):
-        self.observations_pre = obs_pre
+        self.observations = obs_pre
         self.action_proposed = action_proposed
-        self.current_state = self.state
+        self.env_state = self.state
 
-        # I map the observation to a state
-        observed_state = self._obs_to_state(obs_pre)
+        # Map the observation to a state
+        self.env_state = self._obs_to_state(obs_pre)
 
         if self.initial_state is None:
             # First time
-            print("first time!")
-            self.initial_state = observed_state
-            self.current_state = observed_state
-            self.machine.set_state(observed_state)
-            print("state set to: " + observed_state)
+            # print("first time!")
+            self.initial_state = self.env_state
+            self.machine.set_state(self.env_state)
+            self.trigger('*')
+        elif self.state == self.env_state:
             self.trigger('*')
         else:
-            if self.state != observed_state:
-                print("new state: " + observed_state + " i'm in: " + self.state)
-                self.trigger('*')
-                print("the state is now: " + self.state)
-                if self.state != observed_state:
-                    self._on_mismatch()
-            else:
-                print("all good! i'm in  : " + self.state)
-                self.trigger('*')
-                print("the state after is: " + self.state)
+            self._on_mismatch()
+        logging.info("monitor_state: " + self.state)
 
+    # Update the state after the action has been performed in the environment
+    def verify(self, obs_post, applied_action):
 
-    # Called after the action has been performed on the environment and new observations have been retrieved
-    def applied(self, action_applied, obs_retreived):
-        self.action_applied = action_applied
-        self.observations_post = obs_retreived
+        # Map the observation to a state
+        self.env_state = self._obs_to_state(obs_post)
 
-        observed_state = self._obs_to_state(obs_retreived)
-
-        if self.state != observed_state:
-            print("ERROR!! - MISMATCH WORLD/MONITOR 2")
-
+        if self.state != self.env_state:
+            # Switched to a new state
+            self.observations = obs_post
+            self.trigger('*')
+            # print("new_monitor_state: " + self.state)
+            if self.state != self.env_state:
+                self._on_mismatch()
+        logging.info("monitor_state: " + self.state)
 
     """ Actions available to the agent - used for conditions checking """
     def forward(self):
-        return self.action_proposed == 'forward'
+        return self.action_proposed == ExMiniGridEnv.Actions.forward
 
     def toggle(self):
-        return self.action_proposed == 'toggle'
+        return self.action_proposed == ExMiniGridEnv.Actions.toggle
