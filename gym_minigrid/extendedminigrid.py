@@ -6,16 +6,17 @@ def extended_dic(obj_names=[]):
     :param obj_names: list of strings
     :return: OBJECT_TO_IDX extended
     """
-    latest_key = list(OBJECT_TO_IDX)[-1]
-    latest_idx = OBJECT_TO_IDX[latest_key]
-    new_obj_idx = latest_idx + 1
+    biggest_idx = list(OBJECT_TO_IDX.values())[-1]
+    for key in OBJECT_TO_IDX.values():
+        if key > biggest_idx:
+            biggest_idx = key
+    new_obj_idx = biggest_idx + 1
     for obj_name in obj_names:
         OBJECT_TO_IDX.update({obj_name: new_obj_idx})
         new_obj_idx = new_obj_idx + 1
 
 
-extended_dic(["water"])
-extended_dic(["lightSwitch"])
+extended_dic(["water","lightSwitch"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 
