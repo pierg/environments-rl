@@ -78,16 +78,16 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.monitor_states[name]["state"] = state
 
         if state == "mismatch":
-            logging.warning(name + " mismatch!!!!")
+            logging.warning("%s mismatch!!!!",name)
 
         if state == "monitoring":
-            logging.info(name + " monitoring")
+            logging.info("%s monitoring",name)
 
         if state == "shaping":
             if kwargs:
-                logging.info(name + " shaping")
+                logging.info("%s shaping",name)
                 shaped_reward = kwargs.get('shaped_reward', 0)
-                logging.info("     shaped_reward = " + str(shaped_reward))
+                logging.info("     shaped_reward = %s" , str(shaped_reward))
                 self.monitor_states[name]["shaped_reward"] = shaped_reward
             else:
                 logging.warning("%s ERROR. missing action and reward",name)
@@ -99,7 +99,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                 shaped_reward = kwargs.get('shaped_reward', 0)
                 self.monitor_states[name]["unsafe_action"] = unsafe_action
                 self.monitor_states[name]["shaped_reward"] = shaped_reward
-                logging.info("shaped_reward=" + str(shaped_reward) + " unsafe_action=" + str(unsafe_action))
+                logging.info("shaped_reward=%s unsafe_action=%s",str(shaped_reward),str(unsafe_action))
             else:
                 logging.warning("%s ERROR. missing action and reward",name)
 
@@ -112,7 +112,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         if len(unsafe_actions) == 0:
             return self.propsed_action
         else:
-            logging.info("safe action : ",str(self.env.actions.wait))
+            logging.info("safe action : %s",str(self.env.actions.wait))
             return self.env.actions.wait
 
 
@@ -164,11 +164,11 @@ class SafetyEnvelope(gym.core.Wrapper):
             reward = sum(shaped_rewards)
             return obs, reward, done, info
 
-        logging.info("unsafe actions = ",unsafe_actions)
+        logging.info("unsafe actions = %s",unsafe_actions)
 
         # Build action to send to the environment
         suitable_action = self.action_planner(unsafe_actions)
-        logging.info("actions possibles =",suitable_action)
+        logging.info("actions possibles =%s",suitable_action)
 
         # Reset if agent step on water without knowing it
         if suitable_action == ExMiniGridEnv.Actions.forward \
