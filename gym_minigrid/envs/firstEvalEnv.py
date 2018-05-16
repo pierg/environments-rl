@@ -2,9 +2,9 @@ from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
 
 """
-To use LightRoom:
-Generate all the others elementsCreate and create a Room with lightOn = False
-You need the function saveElements to to send to the lightswitch paterns
+To use a room linked to a lightswitch:
+Generate all the others elements and create a Room with lightOn = False
+You need the function saveElements to send to the lightswitch paterns
 You need before create the lightswitch with gid.set:
     -create a LightSwitch object (X=LightSwitch())
     -affect the room to the lightswitch (X.affectRoom(numberRoom))
