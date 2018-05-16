@@ -16,6 +16,10 @@ except Exception as e:
 
 
 def main():
+
+    logging.getLogger().setLevel(logging.INFO)
+
+
     parser = OptionParser()
     parser.add_option(
         "-e",
