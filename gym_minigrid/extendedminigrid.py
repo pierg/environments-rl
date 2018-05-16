@@ -121,7 +121,6 @@ class ExGrid(Grid):
         width = array.shape[0]
         height = array.shape[1]
         assert array.shape[2] == 3
-
         grid = ExGrid(width, height)
 
         for j in range(0, height):
@@ -160,7 +159,6 @@ class ExGrid(Grid):
                     assert False, "unknown obj type in decode '%s'" % objType
 
                 grid.set(i, j, v)
-
         return grid
 
 
