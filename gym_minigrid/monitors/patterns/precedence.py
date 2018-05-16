@@ -99,8 +99,8 @@ class Precedence(SafetyStateMachine):
         else:
             Precedence.obs["precedenceRespected"] = False
             Precedence.obs["precedenceViolated"] = False
-        logging.info("precedence ",self.name," : Conditions Respected -> ", Precedence.obs["precedenceRespected"],
-                     " Conditions Violated ->", Precedence.obs["precedenceViolated"])
+        logging.info("precedence %s : Conditions Respected ->%s Conditions Violated ->%s", self.name,
+                     Precedence.obs["precedenceRespected"], Precedence.obs["precedenceViolated"])
         # Return the state
         if Precedence.obs["precedenceViolated"]:
             return 'disobey'

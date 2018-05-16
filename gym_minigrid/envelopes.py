@@ -156,11 +156,11 @@ class SafetyEnvelope(gym.core.Wrapper):
             reward = sum(shaped_rewards)
             return obs, reward, done, info
 
-        logging.info("unsafe actions = ",unsafe_actions)
+        logging.info("unsafe actions = %s",unsafe_actions)
 
         # Build action to send to the environment
         suitable_action = self.action_planner(unsafe_actions)
-        logging.info("actions possibles =",suitable_action)
+        logging.info("actions possibles =%s",suitable_action)
 
         # Reset if agent step on water without knowing it
         if suitable_action == ExMiniGridEnv.Actions.forward \
