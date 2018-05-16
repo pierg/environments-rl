@@ -29,7 +29,6 @@ class Room:
 
     def setLight(self,lightOn):
         self.lightOn = lightOn
-        #self.activate()
 
     def setEntryDoor(self,position):
         self.entryDoor = position
@@ -50,6 +49,10 @@ class Room:
             if ay < y and ay >= l:
                 return True
         return False
+
+    def getSwitchPos(self,position):
+        self.switch = position
+
 
 class Water(WorldObj):
     def __init__(self):
@@ -74,6 +77,12 @@ class LightSwitch(WorldObj):
     def affectRoom(self,room):
         self.room = room
 
+    def getSwitchPos(self,position):
+        self.position = position
+
+    def Elements(self,room):
+        self.els = room
+
     def toggle(self, env, pos):
         self.room.setLight(not self.room.getLight())
         return True
@@ -92,7 +101,28 @@ class LightSwitch(WorldObj):
             (CELL_PIXELS,           0),
             (0          ,           0)
         ])
-
+        self.dark_light(r)
+    
+    def dark_light(self,r):
+        (xl, yl) = self.position
+        if self.room.getLight() == False:
+            r.setColor(255,0,0)
+            r.drawCircle(0.5*CELL_PIXELS,0.5*CELL_PIXELS,0.2*CELL_PIXELS)
+            #r.fillRect((x-xl)*CELL_PIXELS,(y-yl)*CELL_PIXELS,width*CELL_PIXELS,height*CELL_PIXELS,0,0,0,100)
+            for i in range(0,len(self.els)):
+                if self.els[i][2] == 1:
+                    r.setLineColor(10, 10, 10)
+                    r.setColor(10,10,10)
+                    r.drawPolygon([
+                        ((self.els[i][0]-xl)*CELL_PIXELS, (self.els[i][1]-yl+1)*CELL_PIXELS),
+                        ((self.els[i][0]-xl+1)*CELL_PIXELS,(self.els[i][1]-yl+1)*CELL_PIXELS),
+                        ((self.els[i][0] - xl + 1) * CELL_PIXELS, (self.els[i][1] - yl) * CELL_PIXELS),
+                        ((self.els[i][0] - xl) * CELL_PIXELS, (self.els[i][1] - yl) * CELL_PIXELS)
+                    ])
+        else :
+            r.setColor(0,255,0)
+            r.drawCircle(0.5*CELL_PIXELS,0.5*CELL_PIXELS,0.2*CELL_PIXELS)
+            r.pop
 
 def worldobj_name_to_object(worldobj_name):
     if worldobj_name == 'water':
