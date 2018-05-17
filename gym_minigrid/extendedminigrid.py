@@ -76,10 +76,11 @@ class Dirt(WorldObj):
         if not self.isCleaned:
             self.isCleaned = True
             env.grid.set(*pos, None)
+            env.grid.set(*pos, Goal())
             return True
         return False
 
-    def canOverlap(self):
+    def can_overlap(self):
         """The agent can only walk over this cell once it's cleaned"""
         return True
 
@@ -103,8 +104,6 @@ class Vase(WorldObj):
             (16, 28)
         ])
 
-    def canPickup(self):
-        return False
 
     def toggle(self, env, pos):
         if not self.isPushed:
@@ -114,7 +113,7 @@ class Vase(WorldObj):
             return True
         return False
 
-    def canOverlap(self):
+    def can_overlap(self):
         """The agent walk over the broken Vase"""
         return self.isPushed
 
