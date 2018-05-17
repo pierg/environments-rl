@@ -58,7 +58,7 @@ class Dirt(WorldObj):
         self.isCleaned = isCleaned
 
     def render(self, r):
-        self._setColor(r)
+        self._set_color(r)
 
         if self.isCleaned:
             r.drawPolygon([
@@ -75,7 +75,7 @@ class Dirt(WorldObj):
     def toggle(self, env, pos):
         if not self.isCleaned:
             self.isCleaned = True
-            #env.grid.set(*pos, None) Not sure about this though. I need a way to remove the dirt from the grid.
+            env.grid.set(*pos, None)
             return True
         return False
 
@@ -84,13 +84,13 @@ class Dirt(WorldObj):
         return True
 
 class Vase(WorldObj):
-    def __init__(self, color, isPushed=False):
+    def __init__(self, color = 'yellow', isPushed=False):
         super(Vase, self).__init__('vase', color)
         self.isPushed = isPushed
 
 
     def render(self, r):
-        self._setColor(r)
+        self._set_color(r)
 
         if self.isPushed:
             r.drawCircle(CELL_PIXELS * 0.5, CELL_PIXELS * 0.5, 10)
@@ -109,8 +109,8 @@ class Vase(WorldObj):
     def toggle(self, env, pos):
         if not self.isPushed:
             self.isPushed = True
-            # Again here I need to find a way to remove the Vase from the grid so I can introduce the dirt in it's place.
-            # For now I will leave it on the grid and use the option to be cleaned once it's broken
+            env.grid.set(*pos, None)
+            env.grid.set(*pos, Dirt('red'))
             return True
         return False
 
