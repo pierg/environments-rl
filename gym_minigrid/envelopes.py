@@ -154,7 +154,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if self.config.on_violation_reset:
                     obs = self.env.reset()
                     done = True
-                    info = {"violation"}
+                    info = "violation"
                 if monitor["unsafe_action"]:
                     unsafe_actions.append(monitor["unsafe_action"])
                 shaped_rewards.append(monitor["shaped_reward"])
@@ -175,7 +175,7 @@ class SafetyEnvelope(gym.core.Wrapper):
             and ExMiniGridEnv.worldobj_in_front_agent_noDark(self.env)=="water":
                 obs = self.env.reset()
                 done = True
-                info = {}
+                info = "died"
                 reward = sum(shaped_rewards)
                 return obs, reward, done, info
 
@@ -208,6 +208,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         if current_cell is not None:
             if current_cell.type == "goal":
                 reward = self.goal_reward
+                info = "goal"
 
         # Check if normal step, if yes add normal_reward
         if reward == 0:
