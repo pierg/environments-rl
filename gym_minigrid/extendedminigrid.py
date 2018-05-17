@@ -16,6 +16,8 @@ def extended_dic(obj_names=[]):
 
 extended_dic(["water"])
 extended_dic(["lightSwitch"])
+extended_dic(["dirt"])
+extended_dic(["vase"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 
@@ -124,6 +126,98 @@ class LightSwitch(WorldObj):
             r.drawCircle(0.5*CELL_PIXELS,0.5*CELL_PIXELS,0.2*CELL_PIXELS)
             r.pop
 
+class Dirt(WorldObj):
+    def __init__(self):
+        super(Dirt, self).__init__('dirt', 'yellow')
+        self.clean = 0
+    def can_overlap(self):
+        """
+        (i,j) = self.pos
+        i = i - 1
+        j = j - 1
+        dirt = Dirt()
+        dirt.get_grid(self.grid,(i , j))
+        if self.grid.get(i,j) is None:
+            self.grid.set(i,j,dirt)
+
+        j = j + 2
+        dirt = Dirt()
+        dirt.get_grid(self.grid, (i , j))
+        if self.grid.get(i, j) is None:
+            self.grid.set(i, j, dirt)
+
+        i = i + 2
+        j = j - 1
+        dirt = Dirt()
+        dirt.get_grid(self.grid, (i , j))
+        if self.grid.get(i, j) is None:
+            self.grid.set(i, j, dirt)
+        """
+        return True
+
+    def toggle(self, env, pos):
+        self.clean = 1
+        (x,y) = self.pos
+        self.grid.set(x, y, None)
+        return True
+
+    def render(self,r):
+        self._set_color(r)
+        r.setColor(240 ,150 , 0)
+        r.setLineColor(81, 41, 0)
+        if self.clean == 0 :
+            r.drawPolygon([
+                (0, CELL_PIXELS),
+                (CELL_PIXELS, CELL_PIXELS),
+                (CELL_PIXELS, 0),
+                (0, 0)
+            ])
+        else:
+            r.pop
+
+
+    def get_grid(self,grid, position):
+        self.grid = grid
+        self.pos = position
+
+class Vase(WorldObj):
+    def __init__(self):
+        super(Vase, self).__init__('vase','grey')
+        self.content = Dirt()
+
+    def can_overlap(self):
+        (x, y) = self.position
+        self.content.get_grid(self.grid,(x,y))
+        self.grid.set(x,y,self.content)
+        return False
+
+    def render(self,r):
+        self._set_color(r)
+        r.setColor(255,255,255)
+        QUARTER_CELL = 0.25 * CELL_PIXELS
+        DEMI_CELL = 0.5 * CELL_PIXELS
+        r.drawCircle(DEMI_CELL,DEMI_CELL,DEMI_CELL)
+        r.drawPolygon([
+            (QUARTER_CELL, 3 * QUARTER_CELL),
+            (3 * QUARTER_CELL, 3 * QUARTER_CELL),
+            (3 * QUARTER_CELL, QUARTER_CELL),
+            (QUARTER_CELL, QUARTER_CELL)
+        ])
+        if self.content is not None:
+            r.setColor(240,150,0)
+            r.drawPolygon([
+                (0.32 * CELL_PIXELS, 0.7 * CELL_PIXELS),
+                (0.7 * CELL_PIXELS, 0.7 * CELL_PIXELS),
+                (0.7 * CELL_PIXELS, 0.32 * CELL_PIXELS),
+                (0.32 * CELL_PIXELS, 0.32 * CELL_PIXELS)
+            ])
+
+
+    def grid(self,grid,position):
+        self.grid = grid
+        self.position = position
+
+
 def worldobj_name_to_object(worldobj_name):
     if worldobj_name == 'water':
         return Water()
@@ -131,6 +225,13 @@ def worldobj_name_to_object(worldobj_name):
         return Wall()
     elif worldobj_name == "lightSwitch":
         return LightSwitch()
+    elif worldobj_name == "dirt":
+        if Dirt.get_clean() == 0:
+            return Dirt()
+        else:
+            return None
+    elif worldobj_name == "vase":
+        return Vase()
     elif worldobj_name == "goal":
         return Goal()
     else:
@@ -185,6 +286,10 @@ class ExGrid(Grid):
                     v = Water()
                 elif objType == 'lightSwitch':
                     v = LightSwitch()
+                elif objType == 'dirt':
+                    v = Dirt()
+                elif objType == 'vase':
+                    v = Vase()
                 else:
                     assert False, "unknown obj type in decode '%s'" % objType
 
