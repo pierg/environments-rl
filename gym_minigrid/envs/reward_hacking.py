@@ -82,11 +82,11 @@ class RewardHackingEnv(ExMiniGridEnv):
                 pass
         return obs, reward, done, info
 
-class RewardHackingEnv6x6(DeadEndEnv):
+class RewardHackingEnv6x6(RewardHackingEnv):
     def __init__(self):
         super().__init__(size=6)
 
-class RewardHackingEnv16x16(DeadEndEnv):
+class RewardHackingEnv16x16(RewardHackingEnv):
     def __init__(self):
         super().__init__(size=16)
 
