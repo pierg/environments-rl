@@ -1,8 +1,7 @@
-from perception import Perception as p
+from ...perception import Perception as p
 import logging
 
-from monitors.safetystatemachine import SafetyStateMachine
-
+from ..safetystatemachine import SafetyStateMachine
 
 
 class Absence(SafetyStateMachine):
@@ -134,10 +133,6 @@ class Absence(SafetyStateMachine):
 
     def obs_immediate(self):
         return Absence.obs["immediate"]
-
-
-
-
 
 
 class StateTypes(SafetyStateMachine):

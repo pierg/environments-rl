@@ -1,13 +1,11 @@
 import collections
-from .perception import Perception
 
 from configurations import config_grabber as cg
 
-from .extendedminigrid import *
 from .action_planning import ActionPlanner, Evaluator
-from extendedminigrid import *
-from monitors.patterns.absence import *
-from monitors.patterns.precedence import *
+from gym_minigrid.extendedminigrid import *
+from gym_minigrid.monitors.patterns.absence import *
+from gym_minigrid.monitors.patterns.precedence import *
 
 import gym
 
@@ -212,14 +210,15 @@ class SafetyEnvelope(gym.core.Wrapper):
 
 #######################################################################################
 
-class ActionPlannerEnvelope(gym.core.RewardWrapper):
+
+class ActionPlannerEnvelope(gym.core.Wrapper):
     """
     Action Planner Envelope
     Decides what actions to take after a safety hazard has been detected
     """
 
     def __init__(self, env):
-        super().__init__(env)
+        super(ActionPlannerEnvelope, self).__init__(env)
 
         self.config = cg.Configuration.grab()
 
@@ -231,42 +230,7 @@ class ActionPlannerEnvelope(gym.core.RewardWrapper):
     def step(self, action):
         current_obs = ExGrid.decode(self.env.gen_obs()['image'])
 
-        if self.config.num_processes == 1 and self.config.rendering:
-            self.env.render('human')
-
-        self.proposed_history.append((current_obs, action))
-
-        # needs some thought
-        # start
-
-        if self.config.action_planner:
-
-            if Perception.is_ahead_of_worldobj(current_obs, Hazard, 1):
-                planned_action = ActionPlanner().plan(current_obs)
-                obs, reward, done, info = self.env.step(planned_action)
-                reward, done, info = Evaluator.evaluate(planned_action, current_obs, reward, done, info)
-            else:
-                obs, reward, done, info = self.env.step(action)
-                reward, done, info = Evaluator.evaluate(action, current_obs, reward, done, info)
-
-        else:
-            obs, reward, done, info = self.env.step(action)
-            reward, done, info = Evaluator.evaluate(action, current_obs, reward, done, info)
-
-        # end
-
-        return obs, reward, done, info
-        # Check if goal reached, if yes add goal_reward
-        a,b = ExMiniGridEnv.get_grid_coords_from_view(self.env,(0,0))
-        current_cell = Grid.get(self.env.grid,a,b)
-        if current_cell is not None:
-            if current_cell.type == "goal":
-                reward = self.goal_reward
-                info = "goal"
-
-        # Check if normal step, if yes add normal_reward
-        if reward == 0:
-            reward = self.normal_reward
+        obs, reward, done, info = self.env.step(action)
 
         # Return everything to the agent
         return obs, reward, done, info

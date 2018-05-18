@@ -1,7 +1,7 @@
 from gym_minigrid.perception import Perception as p
 import logging
 
-from monitors.safetystatemachine import SafetyStateMachine
+from ..safetystatemachine import SafetyStateMachine
 
 
 class Precedence(SafetyStateMachine):

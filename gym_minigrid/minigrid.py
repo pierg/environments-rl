@@ -582,6 +582,7 @@ class Grid:
 
         return mask
 
+
 class MiniGridEnv(gym.Env):
     """
     2D grid world game environment

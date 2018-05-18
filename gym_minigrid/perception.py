@@ -1,12 +1,9 @@
-import math
-from .minigrid import AGENT_VIEW_SIZE
-from gym_minigrid.extendedminigrid import *
-from gym_minigrid.extendedminigrid import Water
 
 AGENT_GRID_LOCATION = 2
 
 # Helper class to analyse agent's observations
 # All the methods should return True/False
+
 
 class Perception():
 

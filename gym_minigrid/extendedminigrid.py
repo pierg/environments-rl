@@ -1,5 +1,6 @@
 from gym_minigrid.minigrid import *
 
+
 def extended_dic(obj_names=[]):
     """
     Extend the OBJECT_TO_IDX dictionaries with additional objects
@@ -16,10 +17,7 @@ def extended_dic(obj_names=[]):
         new_obj_idx = new_obj_idx + 1
 
 
-extended_dic(["water", "hazard"])
-extended_dic(["water"])
-extended_dic(["lightSwitch"])
-extended_dic(["water","lightSwitch"])
+extended_dic(["water", "lightSwitch", "unsafe"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 
@@ -72,9 +70,9 @@ class Water(WorldObj):
         ])
 
 
-class Hazard(WorldObj):
+class Unsafe(WorldObj):
     def __init__(self):
-        super(Hazard, self).__init__('hazard', 'red')
+        super(Unsafe, self).__init__('unsafe', 'red')
 
     def can_overlap(self):
         return True
@@ -123,18 +121,24 @@ def worldobj_name_to_object(worldobj_name):
         return Wall()
     elif worldobj_name == "lightSwitch":
         return LightSwitch()
+    elif worldobj_name == 'unsafe':
+        return Unsafe()
     elif worldobj_name == "goal":
         return Goal()
     else:
         return None
+
 
 def worldobj_name_can_be_toggled(worldobj_name):
     if worldobj_name == "lightSwitch":
         return True
     elif worldobj_name == "door":
         return True
+    elif worldobj_name == 'unsafe':
+        return True
     else:
         return False
+
 
 class ExGrid(Grid):
     """
@@ -182,8 +186,8 @@ class ExGrid(Grid):
                     v = Goal()
                 elif objType == 'water':
                     v = Water()
-                elif objType == 'hazard':
-                    v = Hazard()
+                elif objType == 'unsafe':
+                    v = Unsafe()
                 elif objType == 'lightSwitch':
                     v = LightSwitch()
                 else:
@@ -215,6 +219,47 @@ class ExMiniGridEnv(MiniGridEnv):
         # More actions:
         # Ex:
         clean = 7
+
+    def get_obs_render(self, obs):
+        """
+        Render an agent observation for visualization
+        """
+
+        if self.obs_render == None:
+            self.obs_render = Renderer(
+                AGENT_VIEW_SIZE * CELL_PIXELS // 2,
+                AGENT_VIEW_SIZE * CELL_PIXELS // 2
+            )
+
+        r = self.obs_render
+
+        r.beginFrame()
+
+        grid = ExGrid.decode(obs)
+
+        # Render the whole grid
+        grid.render(r, CELL_PIXELS // 2)
+
+        # Draw the agent
+        r.push()
+        r.scale(0.5, 0.5)
+        r.translate(
+            CELL_PIXELS * (0.5 + AGENT_VIEW_SIZE // 2),
+            CELL_PIXELS * (AGENT_VIEW_SIZE - 0.5)
+        )
+        r.rotate(3 * 90)
+        r.setLineColor(255, 0, 0)
+        r.setColor(255, 0, 0)
+        r.drawPolygon([
+            (-12, 10),
+            (12, 0),
+            (-12, -10)
+        ])
+        r.pop()
+
+        r.endFrame()
+
+        return r.getPixmap()
 
     def check_if_agent_in_dark_room(self):
         try:
