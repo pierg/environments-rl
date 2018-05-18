@@ -11,5 +11,7 @@ from gym_minigrid.envs.redbluedoors import *
 from gym_minigrid.envs.unsafe import *
 from gym_minigrid.envs.unsafeDoor import *
 from gym_minigrid.envs.deadend import *
+from gym_minigrid.envs.deadendWater import *
 from gym_minigrid.envs.bigEnv import *
 from gym_minigrid.envs.firstEvalEnv import *
+from gym_minigrid.envs.doorEnv import *

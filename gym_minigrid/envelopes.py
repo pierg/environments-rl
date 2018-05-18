@@ -11,7 +11,6 @@ import gym
 # Size of the history collection
 N = 5
 
-
 class SafetyEnvelope(gym.core.Wrapper):
     """
     Safety envelope for safe exploration.
@@ -47,6 +46,8 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Set reward for the goal
         self.goal_reward = self.config.reward.goal
+
+        self.death_reward = self.config.reward.death
 
         # Generates absence-based monitors
         for avoid_obj in self.config.monitors.absence.monitored:
@@ -130,7 +131,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         current_obs = (agent_obs, agent_pos, agent_dir)
 
         current_obs_env = self.env
-
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
@@ -154,7 +154,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if self.config.on_violation_reset:
                     obs = self.env.reset()
                     done = True
-                    info = {"violation"}
+                    info = "violation"
                 if monitor["unsafe_action"]:
                     unsafe_actions.append(monitor["unsafe_action"])
                 shaped_rewards.append(monitor["shaped_reward"])
@@ -173,10 +173,11 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Reset if agent step on water without knowing it
         if suitable_action == ExMiniGridEnv.Actions.forward \
             and ExMiniGridEnv.worldobj_in_front_agent_noDark(self.env)=="water":
+                reward = sum(shaped_rewards)
+                reward += self.death_reward
                 obs = self.env.reset()
                 done = True
-                info = {}
-                reward = sum(shaped_rewards)
+                info = "died"
                 return obs, reward, done, info
 
         # Send a suitable action to the environment
@@ -208,6 +209,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         if current_cell is not None:
             if current_cell.type == "goal":
                 reward = self.goal_reward
+                info = "goal"
 
         # Check if normal step, if yes add normal_reward
         if reward == 0:
