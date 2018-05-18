@@ -1,6 +1,4 @@
-from enum import Enum
 from gym_minigrid.minigrid import *
-
 
 def extended_dic(obj_names=[]):
     """
@@ -8,9 +6,11 @@ def extended_dic(obj_names=[]):
     :param obj_names: list of strings
     :return: OBJECT_TO_IDX extended
     """
-    latest_key = list(OBJECT_TO_IDX)[-1]
-    latest_idx = OBJECT_TO_IDX[latest_key]
-    new_obj_idx = latest_idx + 1
+    biggest_idx = list(OBJECT_TO_IDX.values())[-1]
+    for key in OBJECT_TO_IDX.values():
+        if key > biggest_idx:
+            biggest_idx = key
+    new_obj_idx = biggest_idx + 1
     for obj_name in obj_names:
         OBJECT_TO_IDX.update({obj_name: new_obj_idx})
         new_obj_idx = new_obj_idx + 1
@@ -19,6 +19,7 @@ def extended_dic(obj_names=[]):
 extended_dic(["water", "hazard"])
 extended_dic(["water"])
 extended_dic(["lightSwitch"])
+extended_dic(["water","lightSwitch"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 
@@ -127,6 +128,14 @@ def worldobj_name_to_object(worldobj_name):
     else:
         return None
 
+def worldobj_name_can_be_toggled(worldobj_name):
+    if worldobj_name == "lightSwitch":
+        return True
+    elif worldobj_name == "door":
+        return True
+    else:
+        return False
+
 class ExGrid(Grid):
     """
     Extending Grid methods to support the new objects
@@ -141,7 +150,6 @@ class ExGrid(Grid):
         width = array.shape[0]
         height = array.shape[1]
         assert array.shape[2] == 3
-
         grid = ExGrid(width, height)
 
         for j in range(0, height):
@@ -182,7 +190,6 @@ class ExGrid(Grid):
                     assert False, "unknown obj type in decode '%s'" % objType
 
                 grid.set(i, j, v)
-
         return grid
 
 
@@ -204,48 +211,6 @@ class ExMiniGridEnv(MiniGridEnv):
 
         # Wait/stay put/do nothing
         wait = 6
-
-    def get_obs_render(self, obs):
-        """
-        Render an agent observation for visualization
-        """
-
-        if self.obs_render == None:
-            self.obs_render = Renderer(
-                AGENT_VIEW_SIZE * CELL_PIXELS // 2,
-                AGENT_VIEW_SIZE * CELL_PIXELS // 2
-            )
-
-        r = self.obs_render
-
-        r.beginFrame()
-
-        grid = ExGrid.decode(obs)
-
-        # Render the whole grid
-        grid.render(r, CELL_PIXELS // 2)
-
-        # Draw the agent
-        r.push()
-        r.scale(0.5, 0.5)
-        r.translate(
-            CELL_PIXELS * (0.5 + AGENT_VIEW_SIZE // 2),
-            CELL_PIXELS * (AGENT_VIEW_SIZE - 0.5)
-        )
-        r.rotate(3 * 90)
-        r.setLineColor(255, 0, 0)
-        r.setColor(255, 0, 0)
-        r.drawPolygon([
-            (-12, 10),
-            ( 12,  0),
-            (-12, -10)
-        ])
-        r.pop()
-
-        r.endFrame()
-
-        return r.getPixmap()
-
 
         # More actions:
         # Ex:

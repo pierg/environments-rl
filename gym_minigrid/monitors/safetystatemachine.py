@@ -295,7 +295,7 @@ class SafetyStateMachine(object):
             self.trigger('*')
         else:
             self._on_mismatch()
-        logging.info("monitor_state: " + self.state)
+        logging.info("monitor_state: %s" , self.state)
 
     # Update the state after the action has been performed in the environment
     def verify(self, obs_post, applied_action):
@@ -310,7 +310,7 @@ class SafetyStateMachine(object):
             # print("new_monitor_state: " + self.state)
             if self.state != self.env_state:
                 self._on_mismatch()
-        logging.info("monitor_state: " + self.state)
+        logging.info("monitor_state: %s" , self.state)
 
     """ Actions available to the agent - used for conditions checking """
     def forward(self):

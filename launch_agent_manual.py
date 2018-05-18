@@ -17,7 +17,7 @@ except Exception as e:
 
 def main():
 
-    logging.getLogger().setLevel(logging.INFO)
+    #logging.getLogger().setLevel(logging.INFO)
 
 
     parser = OptionParser()

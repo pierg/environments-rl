@@ -46,23 +46,35 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Dictionary that gets populated with information by all the monitors at runtime
         self.monitor_states = {}
 
+        # Set reward for a normal step
+        self.normal_reward = self.config.reward.step
+
+        # Set reward for the goal
+        self.goal_reward = self.config.reward.goal
+
+        self.death_reward = self.config.reward.death
+
         # Generates absence-based monitors
-        for avoid_obj in self.config.monitors.absence.monitored:
-            new_absence_monitor = Absence("absence_" + avoid_obj.name, avoid_obj.name, self.on_monitoring,avoid_obj.reward)
-            self.absence_monitors.append(new_absence_monitor)
-            self.monitor_states[new_absence_monitor.name] = {}
-            self.monitor_states[new_absence_monitor.name]["state"] = ""
-            self.monitor_states[new_absence_monitor.name]["shaped_reward"] = 0
-            self.monitor_states[new_absence_monitor.name]["unsafe_action"] = ""
+        if 'absence' in self.config.monitors:
+            for avoid_obj in self.config.monitors.absence.monitored:
+                if avoid_obj.active:
+                    new_absence_monitor = Absence("absence_" + avoid_obj.name, avoid_obj.name, self.on_monitoring,avoid_obj.reward)
+                    self.absence_monitors.append(new_absence_monitor)
+                    self.monitor_states[new_absence_monitor.name] = {}
+                    self.monitor_states[new_absence_monitor.name]["state"] = ""
+                    self.monitor_states[new_absence_monitor.name]["shaped_reward"] = 0
+                    self.monitor_states[new_absence_monitor.name]["unsafe_action"] = ""
 
         # Generates precedence-based monitors
-        for precedence_obj in self.config.monitors.precedence.monitored:
-            new_precedence_monitor = Precedence("precedence_"+precedence_obj.name,precedence_obj,self.on_monitoring,precedence_obj.reward)
-            self.precedence_monitors.append(new_precedence_monitor)
-            self.monitor_states[new_precedence_monitor.name] = {}
-            self.monitor_states[new_precedence_monitor.name]["state"] = ""
-            self.monitor_states[new_precedence_monitor.name]["shaped_reward"] = 0
-            self.monitor_states[new_precedence_monitor.name]["unsafe_action"] = ""
+        if 'precedence' in self.config.monitors:
+            for precedence_obj in self.config.monitors.precedence.monitored:
+                if precedence_obj.active:
+                    new_precedence_monitor = Precedence("precedence_"+precedence_obj.name,precedence_obj,self.on_monitoring,precedence_obj.reward)
+                    self.precedence_monitors.append(new_precedence_monitor)
+                    self.monitor_states[new_precedence_monitor.name] = {}
+                    self.monitor_states[new_precedence_monitor.name]["state"] = ""
+                    self.monitor_states[new_precedence_monitor.name]["shaped_reward"] = 0
+                    self.monitor_states[new_precedence_monitor.name]["unsafe_action"] = ""
 
     def on_monitoring(self, name, state, **kwargs):
         """
@@ -74,16 +86,16 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.monitor_states[name]["state"] = state
 
         if state == "mismatch":
-            logging.warning(name + " mismatch!!!!")
+            logging.warning("%s mismatch!!!!",name)
 
         if state == "monitoring":
-            logging.info(name + " monitoring")
+            logging.info("%s monitoring",name)
 
         if state == "shaping":
             if kwargs:
-                logging.info(name + " shaping")
+                logging.info("%s shaping",name)
                 shaped_reward = kwargs.get('shaped_reward', 0)
-                logging.info("     shaped_reward = " + str(shaped_reward))
+                logging.info("     shaped_reward = %s" , str(shaped_reward))
                 self.monitor_states[name]["shaped_reward"] = shaped_reward
             else:
                 logging.warning("%s ERROR. missing action and reward",name)
@@ -95,7 +107,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                 shaped_reward = kwargs.get('shaped_reward', 0)
                 self.monitor_states[name]["unsafe_action"] = unsafe_action
                 self.monitor_states[name]["shaped_reward"] = shaped_reward
-                logging.info("shaped_reward=" + str(shaped_reward) + " unsafe_action=" + str(unsafe_action))
+                logging.info("shaped_reward=%s unsafe_action=%s",str(shaped_reward),str(unsafe_action))
             else:
                 logging.warning("%s ERROR. missing action and reward",name)
 
@@ -108,7 +120,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         if len(unsafe_actions) == 0:
             return self.propsed_action
         else:
-            logging.info("safe action : ",str(self.env.actions.wait))
+            logging.info("safe action : %s",str(self.env.actions.wait))
             return self.env.actions.wait
 
 
@@ -126,7 +138,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         current_obs = (agent_obs, agent_pos, agent_dir)
 
         current_obs_env = self.env
-
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
@@ -150,7 +161,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if self.config.on_violation_reset:
                     obs = self.env.reset()
                     done = True
-                    info = {"violation"}
+                    info = "violation"
                 if monitor["unsafe_action"]:
                     unsafe_actions.append(monitor["unsafe_action"])
                 shaped_rewards.append(monitor["shaped_reward"])
@@ -160,19 +171,20 @@ class SafetyEnvelope(gym.core.Wrapper):
             reward = sum(shaped_rewards)
             return obs, reward, done, info
 
-        logging.info("unsafe actions = ",unsafe_actions)
+        logging.info("unsafe actions = %s",unsafe_actions)
 
         # Build action to send to the environment
         suitable_action = self.action_planner(unsafe_actions)
-        logging.info("actions possibles =",suitable_action)
+        logging.info("actions possibles =%s",suitable_action)
 
         # Reset if agent step on water without knowing it
         if suitable_action == ExMiniGridEnv.Actions.forward \
             and ExMiniGridEnv.worldobj_in_front_agent_noDark(self.env)=="water":
+                reward = sum(shaped_rewards)
+                reward += self.death_reward
                 obs = self.env.reset()
                 done = True
-                info = {}
-                reward = sum(shaped_rewards)
+                info = "died"
                 return obs, reward, done, info
 
         # Send a suitable action to the environment
@@ -244,5 +256,17 @@ class ActionPlannerEnvelope(gym.core.RewardWrapper):
         # end
 
         return obs, reward, done, info
+        # Check if goal reached, if yes add goal_reward
+        a,b = ExMiniGridEnv.get_grid_coords_from_view(self.env,(0,0))
+        current_cell = Grid.get(self.env.grid,a,b)
+        if current_cell is not None:
+            if current_cell.type == "goal":
+                reward = self.goal_reward
+                info = "goal"
+
+        # Check if normal step, if yes add normal_reward
+        if reward == 0:
+            reward = self.normal_reward
+
         # Return everything to the agent
         return obs, reward, done, info
