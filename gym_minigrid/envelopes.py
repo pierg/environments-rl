@@ -59,14 +59,15 @@ class SafetyEnvelope(gym.core.Wrapper):
                 self.monitor_states[new_absence_monitor.name]["unsafe_action"] = ""
 
         # Generates precedence-based monitors
-        for precedence_obj in self.config.monitors.precedence.monitored:
-            if precedence_obj.active:
-                new_precedence_monitor = Precedence("precedence_"+precedence_obj.name,precedence_obj,self.on_monitoring,precedence_obj.reward)
-                self.precedence_monitors.append(new_precedence_monitor)
-                self.monitor_states[new_precedence_monitor.name] = {}
-                self.monitor_states[new_precedence_monitor.name]["state"] = ""
-                self.monitor_states[new_precedence_monitor.name]["shaped_reward"] = 0
-                self.monitor_states[new_precedence_monitor.name]["unsafe_action"] = ""
+        if 'precedence' in self.config.monitors:
+            for precedence_obj in self.config.monitors.precedence.monitored:
+                if precedence_obj.active:
+                    new_precedence_monitor = Precedence("precedence_"+precedence_obj.name,precedence_obj,self.on_monitoring,precedence_obj.reward)
+                    self.precedence_monitors.append(new_precedence_monitor)
+                    self.monitor_states[new_precedence_monitor.name] = {}
+                    self.monitor_states[new_precedence_monitor.name]["state"] = ""
+                    self.monitor_states[new_precedence_monitor.name]["shaped_reward"] = 0
+                    self.monitor_states[new_precedence_monitor.name]["unsafe_action"] = ""
 
     def on_monitoring(self, name, state, **kwargs):
         """
