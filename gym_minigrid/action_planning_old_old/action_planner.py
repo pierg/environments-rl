@@ -1,5 +1,5 @@
 from queue import PriorityQueue
-from gym_minigrid.action_planning.goals import *
+from gym_minigrid.action_planning_old.goals import *
 from .state_graph import *
 
 

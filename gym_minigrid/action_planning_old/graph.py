@@ -28,5 +28,5 @@ class Graph:
         return tuple(neighbors)
 
     @staticmethod
-    def cost(self, node1 : Node, node2: Node) -> int:
+    def cost(node1 : Node, node2: Node) -> int:
         return 1

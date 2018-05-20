@@ -4,7 +4,7 @@ from .perception import Perception
 from helpers import config_grabber as cg
 
 from .extendedminigrid import *
-from .action_planning import ActionPlanner, Evaluator
+from .action_planning import Evaluator, ObservationParser
 
 # Size of the history collection
 N = 5
@@ -93,13 +93,17 @@ class ActionPlannerEnvelope(gym.core.RewardWrapper):
         self.actual_history = collections.deque(N * [(None, None)], N)
 
     def step(self, action):
-        current_obs = ExGrid.decode(self.env.gen_obs()['image'])
+        obs = self.env.gen_obs()
+        current_obs = ExGrid.decode(obs['image'])
 
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
         self.proposed_history.append((current_obs, action))
 
+        parser = ObservationParser(current_obs, obs['direction'])
+
+        print(parser)
         # needs some thought
         # start
 

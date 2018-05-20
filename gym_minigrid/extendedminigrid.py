@@ -2,6 +2,13 @@ from enum import Enum
 from gym_minigrid.minigrid import *
 
 
+class Orientation(IntEnum):
+    east = 0
+    south = 1
+    west = 2
+    north = 3
+
+
 def extended_dic(obj_names=[]):
     """
     Extend the OBJECT_TO_IDX dictionaries with additional objects
