@@ -49,8 +49,9 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         self.death_reward = self.config.reward.death
 
+
         # Generates absence-based monitors
-        if 'absence' in self.config.monitors:
+        if hasattr(self.config.monitors, 'absence'):
             for avoid_obj in self.config.monitors.absence.monitored:
                 if avoid_obj.active:
                     new_absence_monitor = Absence("absence_" + avoid_obj.name, avoid_obj.name, self.on_monitoring,avoid_obj.reward)
@@ -61,7 +62,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                     self.monitor_states[new_absence_monitor.name]["unsafe_action"] = ""
 
         # Generates precedence-based monitors
-        if 'precedence' in self.config.monitors:
+        if hasattr(self.config.monitors, 'precedence'):
             for precedence_obj in self.config.monitors.precedence.monitored:
                 if precedence_obj.active:
                     new_precedence_monitor = Precedence("precedence_"+precedence_obj.name,precedence_obj,self.on_monitoring,precedence_obj.reward)
@@ -174,7 +175,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Reset if agent step on water without knowing it
         if suitable_action == ExMiniGridEnv.Actions.forward \
-            and ExMiniGridEnv.worldobj_in_front_agent_noDark(self.env)=="water":
+            and ExMiniGridEnv.worldobj_in_front_agent_noDark(self.env) == "water":
                 reward = sum(shaped_rewards)
                 reward += self.death_reward
                 obs = self.env.reset()
