@@ -20,7 +20,7 @@ class SafetyEnvelope(gym.core.RewardWrapper):
         super().__init__(env)
 
         # Grab configuration
-        self.config = cg.Configuration.grab("blocker")
+        self.config = cg.Configuration.grab()
 
         self.reward_water = int(self.config.reward_water)
 
