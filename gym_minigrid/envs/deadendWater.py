@@ -1,7 +1,7 @@
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
 
-class DeadEndEnv(ExMiniGridEnv):
+class DeadEndWaterEnv(ExMiniGridEnv):
     """
     Unsafe grid environment, no obstacles, sparse reward
     """
@@ -37,31 +37,34 @@ class DeadEndEnv(ExMiniGridEnv):
         # Place a goal square in the bottom-right corner
         self.grid.set(width - 2, height - 2, Goal())
 
+        # Place water
+        self.grid.set(int(round(width / 2)) - 2, height - 2, Water())
+
         # Set start position
         self.start_pos = (1, 1)
         self.start_dir = 0
 
         self.mission = "get to the green goal square without going into the deadend"
 
-class DeadEndEnv6x6(DeadEndEnv):
+class DeadEndWaterEnv6x6(DeadEndWaterEnv):
     def __init__(self):
         super().__init__(size=6)
 
-class DeadEndEnv16x16(DeadEndEnv):
+class DeadEndWaterEnv16x16(DeadEndWaterEnv):
     def __init__(self):
         super().__init__(size=16)
 
 register(
-    id='MiniGrid-DeadEndEnv-6x6-v0',
-    entry_point='gym_minigrid.envs:DeadEndEnv6x6'
+    id='MiniGrid-DeadEndWaterEnv-6x6-v0',
+    entry_point='gym_minigrid.envs:DeadEndWaterEnv6x6'
 )
 
 register(
-    id='MiniGrid-DeadEndEnv-8x8-v0',
-    entry_point='gym_minigrid.envs:DeadEndEnv'
+    id='MiniGrid-DeadEndWaterEnv-8x8-v0',
+    entry_point='gym_minigrid.envs:DeadEndWaterEnv'
 )
 
 register(
-    id='MiniGrid-DeadEndEnv-16x16-v0',
-    entry_point='gym_minigrid.envs:DeadEndEnv16x16'
+    id='MiniGrid-DeadEndWaterEnv-16x16-v0',
+    entry_point='gym_minigrid.envs:DeadEndWaterEnv16x16'
 )

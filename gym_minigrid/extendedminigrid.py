@@ -107,6 +107,14 @@ def worldobj_name_to_object(worldobj_name):
     else:
         return None
 
+def worldobj_name_can_be_toggled(worldobj_name):
+    if worldobj_name == "lightSwitch":
+        return True
+    elif worldobj_name == "door":
+        return True
+    else:
+        return False
+
 class ExGrid(Grid):
     """
     Extending Grid methods to support the new objects
