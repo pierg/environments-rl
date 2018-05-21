@@ -81,11 +81,6 @@ class Absence(SafetyStateMachine):
 
         {'trigger': '*',
          'source': 'immediate',
-         'dest': 'safe',
-         'unless': ['obs_near', 'obs_immediate']},
-
-        {'trigger': '*',
-         'source': 'immediate',
          'dest': 'fail',
          'conditions': ['forward', 'obs_immediate']
          },
