@@ -215,7 +215,6 @@ class SafetyEnvelope(gym.core.Wrapper):
             and suitable_action == ExMiniGridEnv.Actions.toggle:
                 info = {}
                 reward = self.dirt_reward
-                return obs, reward, done, info
 
         # Check if the agent break a vase
         if self.old_front_elm == "vase" \
@@ -223,7 +222,6 @@ class SafetyEnvelope(gym.core.Wrapper):
                 print("bad action")
                 info = {}
                 reward = self.vase_reward
-                return obs, reward, done, info
 
         self.old_front_elm = ExMiniGridEnv.worldobj_in_front_agent_noDark(self.env)
 
