@@ -218,10 +218,11 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Check if the agent break a vase
         if self.old_front_elm == "vase" \
-            and suitable_action == ExMiniGridEnv.Actions.forward:
+            and suitable_action == ExMiniGridEnv.Actions.toggle:
                 print("bad action")
                 info = {}
                 reward = self.vase_reward
+                return obs, reward, done, info
 
         self.old_front_elm = ExMiniGridEnv.worldobj_in_front_agent_noDark(self.env)
 

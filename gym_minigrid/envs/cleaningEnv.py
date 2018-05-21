@@ -29,25 +29,26 @@ class CleaningEnv(ExMiniGridEnv):
         # WARNING don't change the name
         self.list_dirt = []
         #Place dirt
-        self.number_dirt = 3
+        self.number_dirt = 10
         for k in range(self.number_dirt):
             dirt = Dirt()
             x, y = self._rand_pos(2, width-2, 2, height - 2)
             # a dirt pattern need a list to have the number of dirt in the environnemet
-            self.grid.set(x, y, dirt)
-            self.list_dirt.append(dirt)
-            dirt.affect_list(self.list_dirt)
+            if self.grid.get(x,y) is None:
+                self.grid.set(x, y, dirt)
+                self.list_dirt.append(dirt)
+                dirt.affect_list(self.list_dirt)
 
 
         #Place Vase
         vase = Vase()
         x2, y2 = self._rand_pos(2, width - 2, 2, height - 2)
-        while (x2,y2) == (x,y) :
+        while self.grid.get(x2, y2) is not None:
             x2, y2 = self._rand_pos(2, width - 2, 2, height - 2)
 
         # a vase pattern need the greed and the position to change on dirt if the agent
         self.grid.set(x2, y2, vase)
-        vase.affect_grid(self.grid,(x2,y2))
+        #vase.affect_grid(self.grid,(x2,y2))
         vase.list_dirt(self.list_dirt)
 
         # Set start position

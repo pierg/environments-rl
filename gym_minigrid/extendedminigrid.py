@@ -18,7 +18,6 @@ extended_dic(["water"])
 extended_dic(["lightSwitch"])
 extended_dic(["dirt"])
 extended_dic(["vase"])
-#extended_dic(["clean_reward"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 
@@ -132,21 +131,17 @@ class Dirt(WorldObj):
     def __init__(self):
         super(Dirt, self).__init__('dirt', 'yellow')
         self.clean = 0
-        #self.numb_dirt = 1
 
     def can_overlap(self):
         return True
 
     def affect_list(self,list):
         self.list = list
-        self.number_dirt = len(list)
 
     def toggle(self, env, pos):
         self.clean = 1
         x,y = ExMiniGridEnv.get_grid_coords_from_view(env,(0,1))
         env.grid.set(x,y,None)
-        self.number_dirt -= 1
-        self.modify_list_dirt()
         del self.list[len(self.list)-1]
         return True
 
@@ -162,27 +157,24 @@ class Dirt(WorldObj):
             (0, 0)
         ])
 
-    def modify_list_dirt(self):
-        for i in range (0,self.number_dirt-1):
-            self.list[i].set_number_dirt(self.number_dirt)
-
-    def set_number_dirt(self,number):
-        self.number_dirt = number
-
-    def get_list(self):
-        return self.number_dirt
 
 class Vase(WorldObj):
     def __init__(self):
         super(Vase, self).__init__('vase','grey')
         self.content = Dirt()
-
+    """
     def can_overlap(self):
         (x, y) = self.position
         self.grid.set(x,y,self.content)
         self.list.append(Dirt())
         self.content.affect_list(self.list)
         return False
+    """
+    def toggle(self, env, pos):
+        x, y = ExMiniGridEnv.get_grid_coords_from_view(env, (0, 1))
+        env.grid.set(x, y, self.content)
+        self.list.append(Dirt())
+        self.content.affect_list(self.list)
 
     def render(self,r):
         self._set_color(r)
@@ -204,17 +196,18 @@ class Vase(WorldObj):
             (0.32 * CELL_PIXELS, 0.32 * CELL_PIXELS)
         ])
 
-
+    """
     def affect_grid(self,grid,position):
         self.grid = grid
         self.position = position
+    """
 
     def list_dirt(self,list):
         self.list = list
 
-
-
-
+#class ExWorldObj(WorldObj):
+    #def change_class(self, env, pos):
+        #return False
 def worldobj_name_to_object(worldobj_name):
     if worldobj_name == 'water':
         return Water()
