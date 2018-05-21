@@ -264,7 +264,7 @@ class SafetyStateMachine(object):
 
         # Rollback to the state before the violation:
         self.machine.set_state(self.env_state)
-        logging.warning("Rolled-back state to: %s", self.state)
+        #logging.warning("Rolled-back state to: %s", self.state)
 
         # Notify
         self.notify(self.name, "violation", shaped_reward=shaped_reward, unsafe_action=self.action_proposed)

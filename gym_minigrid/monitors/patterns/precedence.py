@@ -119,7 +119,7 @@ class Precedence(SafetyStateMachine):
         super()._on_shaping(self.precedenceViolatedReward)
 
     def _on_violated(self):
-        logging.warning("precedence %s violated", self.name)
+        #logging.warning("precedence %s violated", self.name)
         super()._on_violated(self.precedenceViolatedReward)
 
     def obs_precedence_respected(self):

@@ -11,8 +11,8 @@ def on_monitoring(name, state, **kwargs):
     :return:
     """
 
-    if state == "mismatch":
-        logging.warning(name + " mismatch!!!!")
+    #if state == "mismatch":
+    #    logging.warning(name + " mismatch!!!!")
 
     if state == "monitoring":
         logging.info(name + " monitoring")
@@ -26,7 +26,7 @@ def on_monitoring(name, state, **kwargs):
 
     if state == "violation":
         if kwargs:
-            logging.warning("%s violation blocked", name)
+            #logging.warning("%s violation blocked", name)
             logging.info("shaped_reward=" + str(shaped_reward) + " unsafe_action=" + str(unsafe_action))
         else:
             logging.warning("%s ERROR. missing action and reward", name)
