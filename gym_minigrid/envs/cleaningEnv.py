@@ -10,6 +10,7 @@ class CleaningEnv(ExMiniGridEnv):
             # Set this to True for maximum speed
             see_through_walls=False
 
+
         )
     def _gen_grid(self, width, height):
         # Create an empty grid
@@ -22,30 +23,39 @@ class CleaningEnv(ExMiniGridEnv):
         self.start_pos = (1, 1)
         self.start_dir = 0
 
-        # Place a goal square in the bottom-right corner
-        self.grid.set(width - 2, height - 2, Goal())
 
+
+        #self.list_dirt: name of the list who envelopes.py check to know if the room is clean
+        # WARNING don't change the name
+        self.list_dirt = []
         #Place dirt
-        dirt = Dirt()
-        x, y = self._rand_pos(2, width-2, 2, height - 2)
-        # a dirt pattern need the grid and the position of the object to clean the case ( pass to Dirt at None )
-        dirt.get_grid(self.grid,(x,y))
-        self.grid.set(x, y, dirt)
+        self.number_dirt = 3
+        for k in range(self.number_dirt):
+            dirt = Dirt()
+            x, y = self._rand_pos(2, width-2, 2, height - 2)
+            # a dirt pattern need a list to have the number of dirt in the environnemet
+            self.grid.set(x, y, dirt)
+            self.list_dirt.append(dirt)
+            dirt.affect_list(self.list_dirt)
+
 
         #Place Vase
+        vase = Vase()
         x2, y2 = self._rand_pos(2, width - 2, 2, height - 2)
         while (x2,y2) == (x,y) :
             x2, y2 = self._rand_pos(2, width - 2, 2, height - 2)
-        vase = Vase()
+
         # a vase pattern need the greed and the position to change on dirt if the agent
-        vase.grid(self.grid,(x2,y2))
         self.grid.set(x2, y2, vase)
+        vase.affect_grid(self.grid,(x2,y2))
+        vase.list_dirt(self.list_dirt)
 
         # Set start position
         self.start_pos = (1, 1)
         self.start_dir = 0
 
-        self.mission = "Clean all dirt"
+        self.mission = "Clean the room"
+
 
 register(
     id='MiniGrid-CleaningEnv-12x12-v0',

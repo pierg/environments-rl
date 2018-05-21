@@ -18,7 +18,9 @@ extended_dic(["water"])
 extended_dic(["lightSwitch"])
 extended_dic(["dirt"])
 extended_dic(["vase"])
+#extended_dic(["clean_reward"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
+
 
 
 class Room:
@@ -130,55 +132,45 @@ class Dirt(WorldObj):
     def __init__(self):
         super(Dirt, self).__init__('dirt', 'yellow')
         self.clean = 0
+        #self.numb_dirt = 1
+
     def can_overlap(self):
-        """
-        (i,j) = self.pos
-        i = i - 1
-        j = j - 1
-        dirt = Dirt()
-        dirt.get_grid(self.grid,(i , j))
-        if self.grid.get(i,j) is None:
-            self.grid.set(i,j,dirt)
-
-        j = j + 2
-        dirt = Dirt()
-        dirt.get_grid(self.grid, (i , j))
-        if self.grid.get(i, j) is None:
-            self.grid.set(i, j, dirt)
-
-        i = i + 2
-        j = j - 1
-        dirt = Dirt()
-        dirt.get_grid(self.grid, (i , j))
-        if self.grid.get(i, j) is None:
-            self.grid.set(i, j, dirt)
-        """
         return True
+
+    def affect_list(self,list):
+        self.list = list
+        self.number_dirt = len(list)
 
     def toggle(self, env, pos):
         self.clean = 1
-        (x,y) = self.pos
-        self.grid.set(x, y, None)
+        x,y = ExMiniGridEnv.get_grid_coords_from_view(env,(0,1))
+        env.grid.set(x,y,None)
+        self.number_dirt -= 1
+        self.modify_list_dirt()
+        del self.list[len(self.list)-1]
         return True
 
     def render(self,r):
         self._set_color(r)
         r.setColor(240 ,150 , 0)
         r.setLineColor(81, 41, 0)
-        if self.clean == 0 :
-            r.drawPolygon([
-                (0, CELL_PIXELS),
-                (CELL_PIXELS, CELL_PIXELS),
-                (CELL_PIXELS, 0),
-                (0, 0)
-            ])
-        else:
-            r.pop
+        self.clean == 0
+        r.drawPolygon([
+            (0, CELL_PIXELS),
+            (CELL_PIXELS, CELL_PIXELS),
+            (CELL_PIXELS, 0),
+            (0, 0)
+        ])
 
+    def modify_list_dirt(self):
+        for i in range (0,self.number_dirt-1):
+            self.list[i].set_number_dirt(self.number_dirt)
 
-    def get_grid(self,grid, position):
-        self.grid = grid
-        self.pos = position
+    def set_number_dirt(self,number):
+        self.number_dirt = number
+
+    def get_list(self):
+        return self.number_dirt
 
 class Vase(WorldObj):
     def __init__(self):
@@ -187,8 +179,9 @@ class Vase(WorldObj):
 
     def can_overlap(self):
         (x, y) = self.position
-        self.content.get_grid(self.grid,(x,y))
         self.grid.set(x,y,self.content)
+        self.list.append(Dirt())
+        self.content.affect_list(self.list)
         return False
 
     def render(self,r):
@@ -203,19 +196,23 @@ class Vase(WorldObj):
             (3 * QUARTER_CELL, QUARTER_CELL),
             (QUARTER_CELL, QUARTER_CELL)
         ])
-        if self.content is not None:
-            r.setColor(240,150,0)
-            r.drawPolygon([
-                (0.32 * CELL_PIXELS, 0.7 * CELL_PIXELS),
-                (0.7 * CELL_PIXELS, 0.7 * CELL_PIXELS),
-                (0.7 * CELL_PIXELS, 0.32 * CELL_PIXELS),
-                (0.32 * CELL_PIXELS, 0.32 * CELL_PIXELS)
-            ])
+        r.setColor(240,150,0)
+        r.drawPolygon([
+            (0.32 * CELL_PIXELS, 0.7 * CELL_PIXELS),
+            (0.7 * CELL_PIXELS, 0.7 * CELL_PIXELS),
+            (0.7 * CELL_PIXELS, 0.32 * CELL_PIXELS),
+            (0.32 * CELL_PIXELS, 0.32 * CELL_PIXELS)
+        ])
 
 
-    def grid(self,grid,position):
+    def affect_grid(self,grid,position):
         self.grid = grid
         self.position = position
+
+    def list_dirt(self,list):
+        self.list = list
+
+
 
 
 def worldobj_name_to_object(worldobj_name):
@@ -644,3 +641,6 @@ class ExMiniGridEnv(MiniGridEnv):
                 x,y = self.get_grid_coords_from_view((0,1))
                 return self.grid.get(x,y).is_open
             return False
+
+
+
