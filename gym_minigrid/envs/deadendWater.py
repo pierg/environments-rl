@@ -38,7 +38,7 @@ class DeadEndWaterEnv(ExMiniGridEnv):
         self.grid.set(width - 2, height - 2, Goal())
 
         # Place water
-        self.grid.set(int(round(width / 2)) - 2, height - 2, Water())
+        self.grid.set(width -2, height - 3, Water())
 
         # Set start position
         self.start_pos = (1, 1)

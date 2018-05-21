@@ -49,6 +49,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         self.death_reward = self.config.reward.death
 
+        self.step_number = 0
 
         # Generates absence-based monitors
         if hasattr(self.config.monitors, 'absence'):
@@ -81,8 +82,9 @@ class SafetyEnvelope(gym.core.Wrapper):
         """
         self.monitor_states[name]["state"] = state
 
-        #if state == "mismatch":
-        #    logging.warning("%s mismatch!!!!",name)
+        if state == "mismatch":
+            print(name,state,kwargs)
+            logging.warning("%s mismatch!!!!",name)
 
         if state == "monitoring":
             logging.info("%s monitoring",name)
@@ -119,10 +121,24 @@ class SafetyEnvelope(gym.core.Wrapper):
             return self.env.actions.wait
 
 
+    def resetMonitors(self):
+        for monitor in self.absence_monitors:
+            monitor.initial_state = None
+        for monitor in self.precedence_monitors:
+            monitor.initial_state = None
+
 
     def step(self, proposed_action, reset_on_catastrophe=False):
         # To be returned to the agent
         obs, reward, done, info = None, None, None, {}
+
+        if self.step_number == 0:
+            self.resetMonitors()
+
+        self.step_number += 1
+
+        if self.step_number == self.env.max_steps:
+            self.step_number = 0
 
         self.propsed_action = proposed_action
 
@@ -166,7 +182,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         # If have to reset
         if done:
             reward = sum(shaped_rewards)
-            print("returning")
+            self.step_number = 0
             return obs, reward, done, info
 
         logging.info("unsafe actions = %s",unsafe_actions)
@@ -183,11 +199,12 @@ class SafetyEnvelope(gym.core.Wrapper):
                 obs = self.env.reset()
                 done = True
                 info = "died"
+                self.step_number = 0
                 return obs, reward, done, info
 
         # Send a suitable action to the environment
         obs, reward, done, _info = self.env.step(suitable_action)
-        logging.info("____verify AFTER action is applyed to the environment")
+        logging.info("____verify AFTER action is applied to the environment")
         # Notify the monitors of the new state reached in the environment and the applied action
         for monitor in self.absence_monitors:
             monitor.verify(self.env, suitable_action)
@@ -213,8 +230,9 @@ class SafetyEnvelope(gym.core.Wrapper):
         current_cell = Grid.get(self.env.grid,a,b)
         if current_cell is not None:
             if current_cell.type == "goal":
-                reward = self.goal_reward + (self.env.step_count * self.normal_reward)
+                reward = self.goal_reward + (self.step_number * self.normal_reward)
                 info = "goal"
+                self.step_number = 0
 
         # Check if normal step, if yes add normal_reward
         #if reward == 0:
