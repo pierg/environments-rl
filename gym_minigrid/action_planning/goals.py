@@ -1,11 +1,17 @@
-from .states import *
+from .obs_parser import StateEnum
+
 """"
     This file contains goals for action_planner
     Goal defines states, which need to be fulfilled
 """
 
-move_away_from_danger = (
-    (StateNameEnum.front_is_safe, True),
-    (StateNameEnum.front_is_clear, True)
+
+goal_safe_east = (
+    (StateEnum.east_is_safe, True),
+    (StateEnum.east_is_clear, True),
+    (StateEnum.current_is_clear, True),
+    (StateEnum.current_is_safe, True),
+    (StateEnum.orientation_east, True)
 )
+
 

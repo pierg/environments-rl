@@ -1,11 +1,9 @@
 import collections
 from .perception import Perception
-
 from helpers import config_grabber as cg
-
+from .action_planning import *
 from .extendedminigrid import *
-from .action_planning import Evaluator, ObservationParser
-
+import gym
 # Size of the history collection
 N = 5
 
@@ -95,24 +93,31 @@ class ActionPlannerEnvelope(gym.core.RewardWrapper):
     def step(self, action):
         obs = self.env.gen_obs()
         current_obs = ExGrid.decode(obs['image'])
-
+        current_dir = obs['direction']
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
         self.proposed_history.append((current_obs, action))
 
-        parser = ObservationParser(current_obs, obs['direction'])
-
-        print(parser)
+        #parser = ObservationParser(current_obs, current_dir)
+        #current_cell = parser.get_current_cell()
+        #current_cell_state = CellState(current_cell, current_dir)
+        #graph = Graph()
+        #graph.update(current_cell_state)
+        # planner = ActionPlanner(current_cell_state)
+        # state_action_list, action_cost = planner.plan(current_cell_state, goal)
+        actions = []
         # needs some thought
         # start
 
         if self.config.action_planner:
 
             if Perception.is_ahead_of_worldobj(current_obs, Hazard, 1):
-                planned_action = ActionPlanner().plan(current_obs)
-                obs, reward, done, info = self.env.step(planned_action)
-                reward, done, info = Evaluator.evaluate(planned_action, current_obs, reward, done, info)
+                planned_actions = run(current_obs, current_dir, goal_safe_east)
+                action = planned_actions.pop()
+                # action = MiniGridEnv.Actions.forward
+                obs, reward, done, info = self.env.step(action)
+                reward, done, info = Evaluator.evaluate(action, current_obs, reward, done, info)
             else:
                 obs, reward, done, info = self.env.step(action)
                 reward, done, info = Evaluator.evaluate(action, current_obs, reward, done, info)
