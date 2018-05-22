@@ -283,8 +283,12 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
             if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
                 self.action_plan = run(current_obs, current_dir, goal_safe_zone)
-                self.critical_actions = [ExMiniGridEnv.Actions.forward, ExMiniGridEnv.Actions.pickup,
-                                         ExMiniGridEnv.Actions.toggle]
+                self.critical_actions = [ExMiniGridEnv.Actions.forward]
+                # self.critical_actions = [
+                #     ExMiniGridEnv.Actions.forward,
+                #     ExMiniGridEnv.Actions.pickup,
+                #     ExMiniGridEnv.Actions.toggle
+                # ]
                 print(self.action_plan)
 
             print(reward)
