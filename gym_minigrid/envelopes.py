@@ -99,24 +99,13 @@ class ActionPlannerEnvelope(gym.core.RewardWrapper):
 
         self.proposed_history.append((current_obs, action))
 
-        #parser = ObservationParser(current_obs, current_dir)
-        #current_cell = parser.get_current_cell()
-        #current_cell_state = CellState(current_cell, current_dir)
-        #graph = Graph()
-        #graph.update(current_cell_state)
-        # planner = ActionPlanner(current_cell_state)
-        # state_action_list, action_cost = planner.plan(current_cell_state, goal)
-        actions = []
-        # needs some thought
-        # start
-
         if self.config.action_planner:
 
             if Perception.is_ahead_of_worldobj(current_obs, Hazard, 1):
                 planned_actions = run(current_obs, current_dir, goal_safe_east)
                 action = planned_actions.pop()
                 # action = MiniGridEnv.Actions.forward
-                obs, reward, done, info = self.env.step(action)
+                obs, reward, done, info = self.env.step(action.value)
                 reward, done, info = Evaluator.evaluate(action, current_obs, reward, done, info)
             else:
                 obs, reward, done, info = self.env.step(action)
