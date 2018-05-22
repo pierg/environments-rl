@@ -2,7 +2,7 @@ from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
 
 
-class UnsafeEnv(ExMiniGridEnv):
+class UnsafeDoorEnv(ExMiniGridEnv):
     """
     Unsafe grid environment, no obstacles, sparse reward
     """
@@ -26,11 +26,20 @@ class UnsafeEnv(ExMiniGridEnv):
         self.start_pos = (1, 1)
         self.start_dir = 0
 
+        # Generate the wall which separate the rooms
+        i = 0
+        while i < height-2 :
+            self.grid.set(int(round(width/2)), i, Wall())
+            i += 1
+
+        # Place the door which separate the rooms
+        self.grid.set(int(round(width/2)),height-2,Door(self._rand_elem(sorted(set(COLOR_NAMES)))))
+
         # Place a goal square in the bottom-right corner
         self.grid.set(width - 2, height - 2, Goal())
 
         # Place water
-        self.grid.set(width - 5, height - 2, Water())
+        self.grid.set(int(round(width/2))-2, height - 2, Water())
 
         # Set start position
         self.start_pos = (1, 1)
@@ -38,25 +47,25 @@ class UnsafeEnv(ExMiniGridEnv):
 
         self.mission = "get to the green goal square without moving on water"
 
-class UnsafeEnv6x6(UnsafeEnv):
+class UnsafeDoorEnv6x6(UnsafeDoorEnv):
     def __init__(self):
         super().__init__(size=6)
 
-class UnsafeEnv16x16(UnsafeEnv):
+class UnsafeDoorEnv16x16(UnsafeDoorEnv):
     def __init__(self):
         super().__init__(size=16)
 
 register(
-    id='MiniGrid-Unsafe-6x6-v0',
-    entry_point='gym_minigrid.envs:UnsafeEnv6x6'
+    id='MiniGrid-UnsafeDoor-6x6-v0',
+    entry_point='gym_minigrid.envs:UnsafeDoorEnv6x6'
 )
 
 register(
-    id='MiniGrid-Unsafe-8x8-v0',
-    entry_point='gym_minigrid.envs:UnsafeEnv'
+    id='MiniGrid-UnsafeDoor-8x8-v0',
+    entry_point='gym_minigrid.envs:UnsafeDoorEnv'
 )
 
 register(
-    id='MiniGrid-Unsafe-16x16-v0',
-    entry_point='gym_minigrid.envs:UnsafeEnv16x16'
+    id='MiniGrid-UnsafeDoor-16x16-v0',
+    entry_point='gym_minigrid.envs:UnsafeDoorEnv16x16'
 )
