@@ -50,7 +50,6 @@ class FirstEvalEnv(ExMiniGridEnv):
         # Add the rooms
         self.roomList = []
         self.roomList.append(Room(0,(width//2-1, height-1),(1,1),True))
-        print(width//2+1)
         self.roomList.append(Room(1,(width//2-2, height-1),(width//2+1,1),False))
 
         # Set room entry and exit that are needed
