@@ -216,11 +216,11 @@ class ExMiniGridEnv(MiniGridEnv):
         wait = 6
 
         # turn around
-        turnaround = 7
+        #turnaround = 7
 
         # More actions:
         # Ex:
-        clean = 8
+        #clean = 8
 
     def get_obs_render(self, obs):
         """

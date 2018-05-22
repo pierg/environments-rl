@@ -43,7 +43,7 @@ class Action:
             elif orientation == StateEnum.orientation_west and current_cell.west_cell is not None:
                 self.preconditions = ((StateEnum.orientation_west, True),)
                 self.effects = ((StateEnum.orientation_south, True), (StateEnum.orientation_west, False))
-            elif orientation == StateEnum.orientation_south and current_cell.east_cell is not None:
+            elif orientation == StateEnum.orientation_east and current_cell.east_cell is not None:
                 self.preconditions = ((StateEnum.orientation_east, True),)
                 self.effects = ((StateEnum.orientation_north, True), (StateEnum.orientation_east, False))
 

@@ -42,11 +42,10 @@ class CellState:
         for action in possible_actions:
             preconditions_total = len(action.preconditions)
             preconditions_met = 0
-            for precondition_name, precondition_value in action.preconditions:
-                for state_name, state_value in resulting_worldstate.items():
-                    if precondition_name == state_name:
-                        if precondition_value == state_value:
-                            preconditions_met += 1
+            for precondition in action.preconditions:
+                for state in resulting_worldstate.items():
+                    if precondition == state:
+                        preconditions_met += 1
             if preconditions_met == preconditions_total:
                 available_actions.append(action)
 
