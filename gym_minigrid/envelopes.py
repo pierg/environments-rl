@@ -282,7 +282,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             # self.proposed_history.append((current_obs, action))
 
             if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
-                self.action_plan = run(current_obs, current_dir, goal_safe_zone)
+                self.action_plan = run(current_obs, current_dir, goal_green_square)
                 self.critical_actions = [ExMiniGridEnv.Actions.forward]
                 print(self.action_plan)
 

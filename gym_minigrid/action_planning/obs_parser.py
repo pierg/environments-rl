@@ -26,6 +26,8 @@ class StateEnum(IntEnum):
     east_is_none = 18
 
 
+State = Tuple[StateEnum, bool]
+
 
 """"
     obs_parser takes agents observation and translates it to world states.
@@ -181,6 +183,6 @@ class Cell:
         self.is_clear: bool = True  # These change when the cell is created
         self.is_safe: bool = True
         self.type = cell_type
-        self.states: Tuple[Tuple[StateEnum, bool]] = tuple()
+        self.states: State = tuple()
         self.x: int = 0
         self.y: int = 0

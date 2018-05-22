@@ -91,6 +91,7 @@ class CellState:
     def tuple(self):
         """
         Returns the dict of states as a tuple, to be used when you need a hashable worldState
-        :return: Tuple containing the individual states
+        :return: Tuple containing the individual states and coordinates of the cell
         """
+        #return tuple(self.states.items()), (self.cell.x, self.cell.y)
         return tuple(self.states.items())

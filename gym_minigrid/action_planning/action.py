@@ -1,4 +1,4 @@
-from .obs_parser import Cell, StateEnum
+from .obs_parser import Cell, StateEnum, State
 from gym_minigrid.extendedminigrid import ExMiniGridEnv
 from typing import Tuple, TypeVar
 
@@ -7,8 +7,8 @@ class Action:
 
     def __init__(self, name: ExMiniGridEnv.Actions, current_cell: Cell, orientation: StateEnum):
         self.name: ExMiniGridEnv.Actions = name
-        self.preconditions: Tuple[Tuple[StateEnum, bool]] = tuple()
-        self.effects: Tuple[Tuple[StateEnum, bool]] = tuple()
+        self.preconditions: State = tuple()
+        self.effects: State = tuple()
         self.cost: int = 1
 
         if name == ExMiniGridEnv.Actions.forward:

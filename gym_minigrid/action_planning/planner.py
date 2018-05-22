@@ -1,8 +1,10 @@
 from queue import PriorityQueue
-from .obs_parser import ObservationParser, StateEnum
+from .obs_parser import ObservationParser, StateEnum, State
 from .states import CellState
 from .action import Action
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, TypeVar
+
+Coordinates = Tuple[int, int]
 
 
 class Graph:
@@ -12,8 +14,9 @@ class Graph:
             As keys it has cellStates
             As values it has lists containing pairs of cellStates and the action taken to reach them from the key
         """
-        self.edges: Dict[Tuple[Tuple[StateEnum, bool]], List[Tuple[Tuple[StateEnum, bool], Action]]] = dict()
-        self.updated: Dict[Tuple[StateEnum, int, int], bool] = dict()
+
+        self.edges: Dict[State, List[Tuple[Tuple[StateEnum, bool], Action]]] = dict()
+        self.updated = dict()
 
     def update(self, cell_state: CellState):
         current = cell_state
@@ -27,13 +30,13 @@ class Graph:
                 self.edges[current.tuple()].append((next_state.tuple(), action))
                 self.update(next_state)
 
-    def neighbors(self, cell_state: Tuple[Tuple[StateEnum, bool]]) -> List[Tuple[Tuple[StateEnum, bool], Action]]:
+    def neighbors(self, cell_state: State) -> List[Tuple[State, Action]]:
         if cell_state is not None:
             if (StateEnum.current_is_clear, True) in cell_state:  # Walls lead nowhere thus they have no neighbours
                 return self.edges[cell_state]
         return [()]
 
-    def cost(self, start: Tuple[StateEnum, bool], goal: Tuple[StateEnum, bool]) -> int:
+    def cost(self, start: State, goal: State) -> int:
         """
         :return: action cost between two neighbor CellStates, if they are not neighbours return -1
         """
@@ -43,19 +46,19 @@ class Graph:
                 return state_action_tuple[1].cost
         return -1
 
-    def find_state(self, goal_states: Tuple[Tuple[StateEnum, bool]]):
+    def find_state(self, goal_states: State):
         states_total = len(goal_states)
         for node in self.edges.keys():
             states_met = 0
-            for goal_state in goal_states:
-                if goal_state in node:
+            for state in goal_states:
+                if state in node:
                     states_met += 1
             if states_met == states_total:
                 return node
         return None
 
 
-def run(current_obs, direction, goal: Tuple[Tuple[StateEnum, bool]]):
+def run(current_obs, direction, goal: State):
     parser = ObservationParser(current_obs, direction)
     current_cell = parser.get_current_cell()
     current_cell_state = CellState(current_cell, direction)
@@ -102,11 +105,11 @@ class ActionPlanner:
                 counter += 1
         return counter
 
-    def plan(self, start_state: Tuple[StateEnum, bool], goal_state: Tuple[Tuple[StateEnum, bool]]):
+    def plan(self, start_state: State, goal_state: State):
         frontier = PriorityQueue()
         frontier.put(start_state, 0)
-        came_from: Dict[Tuple[StateEnum, bool], (Tuple[StateEnum, bool], Action)] = dict()
-        cost_so_far: Dict[Tuple[StateEnum, bool], int] = dict()
+        came_from: Dict[State, (State, Action)] = dict()
+        cost_so_far: Dict[State, int] = dict()
         came_from[start_state] = (None, None)
         cost_so_far[start_state] = 0
 
