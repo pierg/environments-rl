@@ -7,17 +7,17 @@ AGENT_GRID_LOCATION = 2
 class Evaluator:
 
     @staticmethod
-    def evaluate(action, obs, reward, done, info):
+    def evaluate(action, env, reward, done, info):
 
         # check goal
-        if Perception.is_ahead_of_worldobj(obs, Goal, 1) and action == 2:
+        if ExMiniGridEnv.worldobj_in_front_agent(env, 0) == 'goal' and action == 2:
             reward = 100
             done = True
             info = {'goal': 1}
             print('Goal!')
 
         # check unsafe action
-        if Perception.is_ahead_of_worldobj(obs, Hazard, 1) and action == 2:
+        if ExMiniGridEnv.worldobj_in_front_agent(env, 0) == 'unsafe' and action == 2:
             reward = -100
             done = True
             info = {'unsafe_action': 1}
