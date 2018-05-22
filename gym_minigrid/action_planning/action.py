@@ -16,22 +16,26 @@ class Action:
                 self.effects = current_cell.north_cell.states
                 self.preconditions = ((StateEnum.north_is_safe, True),
                                       (StateEnum.north_is_clear, True),
-                                      (StateEnum.orientation_north, True))
+                                      (StateEnum.orientation_north, True),
+                                      (StateEnum.north_is_none, False))
             elif orientation == StateEnum.orientation_south and current_cell.south_cell is not None:
                 self.effects = current_cell.south_cell.states
                 self.preconditions = ((StateEnum.south_is_safe, True),
                                       (StateEnum.south_is_clear, True),
-                                      (StateEnum.orientation_south, True))
+                                      (StateEnum.orientation_south, True),
+                                      (StateEnum.south_is_none, False))
             elif orientation == StateEnum.orientation_west and current_cell.west_cell is not None:
                 self.effects = current_cell.west_cell.states
                 self.preconditions = ((StateEnum.west_is_safe, True),
                                       (StateEnum.west_is_clear, True),
-                                      (StateEnum.orientation_west, True))
+                                      (StateEnum.orientation_west, True),
+                                      (StateEnum.west_is_none, False))
             elif orientation == StateEnum.orientation_east and current_cell.east_cell is not None:
                 self.effects = current_cell.east_cell.states
                 self.preconditions = ((StateEnum.east_is_safe, True),
                                       (StateEnum.east_is_clear, True),
-                                      (StateEnum.orientation_east, True))
+                                      (StateEnum.orientation_east, True),
+                                      (StateEnum.east_is_none, False))
 
         elif name == ExMiniGridEnv.Actions.left:
             if orientation == StateEnum.orientation_north and current_cell.north_cell is not None:
@@ -49,10 +53,7 @@ class Action:
 
         elif name == ExMiniGridEnv.Actions.right:
             if orientation == StateEnum.orientation_north:
-                self.preconditions = (
-                    (StateEnum.east_is_clear, True),
-                    (StateEnum.east_is_safe, True),
-                    (StateEnum.orientation_north, True))
+                self.preconditions = ((StateEnum.orientation_north, True),)
                 self.effects = ((StateEnum.orientation_east, True), (StateEnum.orientation_north, False))
             elif orientation == StateEnum.orientation_south:
                 self.preconditions = ((StateEnum.orientation_south, True),)

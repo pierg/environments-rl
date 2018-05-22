@@ -20,12 +20,11 @@ class StateEnum(IntEnum):
     current_is_clear = 12
     current_is_safe = 13
     current_is_goal = 14
-    front_is_safe = 15
-    front_is_clear = 16
-    left_is_safe = 17
-    left_is_clear = 18
-    right_is_safe = 19
-    right_is_clear = 20
+    north_is_none = 15
+    south_is_none = 16
+    west_is_none = 17
+    east_is_none = 18
+
 
 
 """"
@@ -106,14 +105,14 @@ class ObservationParser:
                         if y > 0:
                             current_cell.west_cell = self.parsed_observation[x][y-1]
                     elif self.orientation == StateEnum.orientation_south:
-                        if x > 0:
-                            current_cell.west_cell = self.parsed_observation[x-1][y]
-                        if x < AGENT_VIEW_SIZE - 1:
-                            current_cell.east_cell = self.parsed_observation[x+1][y]
                         if y < AGENT_VIEW_SIZE - 1:
-                            current_cell.north_cell = self.parsed_observation[x][y+1]
+                            current_cell.west_cell = self.parsed_observation[x][y+1]
                         if y > 0:
-                            current_cell.south_cell = self.parsed_observation[x][y-1]
+                            current_cell.east_cell = self.parsed_observation[x][y-1]
+                        if x < AGENT_VIEW_SIZE - 1:
+                            current_cell.north_cell = self.parsed_observation[x+1][y]
+                        if x > 0:
+                            current_cell.south_cell = self.parsed_observation[x-1][y]
                     elif self.orientation == StateEnum.orientation_west:
                         if x < AGENT_VIEW_SIZE - 1:
                             current_cell.east_cell = self.parsed_observation[x+1][y]
@@ -137,17 +136,32 @@ class ObservationParser:
                     states[StateEnum.current_is_clear] = True if current_cell.is_clear else False
                     states[StateEnum.current_is_safe] = True if current_cell.is_safe else False
                     if current_cell.west_cell is not None:
+                        states[StateEnum.west_is_none] = False
                         states[StateEnum.west_is_clear] = True if current_cell.west_cell.is_clear else False
                         states[StateEnum.west_is_safe] = True if current_cell.west_cell.is_safe else False
+                    else:
+                        states[StateEnum.west_is_none] = True
+
                     if current_cell.east_cell is not None:
+                        states[StateEnum.east_is_none] = False
                         states[StateEnum.east_is_clear] = True if current_cell.east_cell.is_clear else False
                         states[StateEnum.east_is_safe] = True if current_cell.east_cell.is_safe else False
+                    else:
+                        states[StateEnum.east_is_none] = True
+
                     if current_cell.north_cell is not None:
+                        states[StateEnum.north_is_none] = False
                         states[StateEnum.north_is_clear] = True if current_cell.north_cell.is_clear else False
                         states[StateEnum.north_is_safe] = True if current_cell.north_cell.is_safe else False
+                    else:
+                        states[StateEnum.north_is_none] = True
+
                     if current_cell.south_cell is not None:
+                        states[StateEnum.south_is_none] = False
                         states[StateEnum.south_is_clear] = True if current_cell.south_cell.is_clear else False
                         states[StateEnum.south_is_safe] = True if current_cell.south_cell.is_safe else False
+                    else:
+                        states[StateEnum.south_is_none] = True
 
                     states[StateEnum.current_is_goal] = True if isinstance(current_cell.type, Goal) else False
                     current_cell.states = tuple(states.items())
