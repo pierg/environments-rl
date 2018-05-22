@@ -1,13 +1,9 @@
 import collections
 from .perception import Perception
-from helpers import config_grabber as cg
-from .action_planning import *
-from .extendedminigrid import *
-import gym
 
 from configurations import config_grabber as cg
 
-from .action_planning import ActionPlanner, Evaluator
+from .action_planning import *
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.monitors.patterns.absence import *
 from gym_minigrid.monitors.patterns.precedence import *
@@ -23,7 +19,6 @@ class SafetyEnvelope(gym.core.Wrapper):
     Safety envelope for safe exploration.
     The purpose is to detect dangerous actions and block them sending back a modified reward
     """
-
 
     def __init__(self, env):
         super(SafetyEnvelope, self).__init__(env)
@@ -241,10 +236,12 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
         self.proposed_history.append((current_obs, action))
 
+        planned_actions = run(current_obs, current_dir, goal_clear_west)
+        action = planned_actions.pop()
         if self.config.action_planner:
 
-            if Perception.is_ahead_of_worldobj(current_obs, Hazard, 1):
-                planned_actions = run(current_obs, current_dir, goal_safe_east)
+            if Perception.is_ahead_of_worldobj(current_obs, Unsafe, 1):
+                planned_actions = run(current_obs, current_dir, goal_clear_west)
                 action = planned_actions.pop()
                 # action = MiniGridEnv.Actions.forward
                 obs, reward, done, info = self.env.step(action.value)

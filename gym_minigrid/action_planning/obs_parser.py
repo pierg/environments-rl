@@ -70,7 +70,7 @@ class ObservationParser:
             # Check if the cell is clear and safe and set it, needs improvement
             if isinstance(cell.type, WorldObj) and isinstance(cell.type, Wall):
                 cell.is_clear = False
-            if isinstance(cell.type, WorldObj) and isinstance(cell.type, Hazard):
+            if isinstance(cell.type, WorldObj) and isinstance(cell.type, Unsafe):
                 cell.is_safe = False
 
             self.parsed_observation[pos_x][pos_y] = cell

@@ -186,7 +186,7 @@ class ExGrid(Grid):
                     v = Goal()
                 elif objType == 'water':
                     v = Water()
-                    elif objType == 'unsafe':
+                elif objType == 'unsafe':
                     v = Unsafe()
                 elif objType == 'lightSwitch':
                     v = LightSwitch()
