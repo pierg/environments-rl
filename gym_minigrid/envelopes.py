@@ -190,17 +190,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         suitable_action = self.action_planner(unsafe_actions)
         logging.info("actions possibles =%s",suitable_action)
 
-        # Reset if agent step on water without knowing it
-        if suitable_action == ExMiniGridEnv.Actions.forward \
-            and ExMiniGridEnv.worldobj_in_front_agent_noDark(self.env) == "water":
-                reward = sum(shaped_rewards)
-                reward += self.death_reward
-                obs = self.env.reset()
-                done = True
-                info = "died"
-                self.step_number = 0
-                return obs, reward, done, info
-
         # Send a suitable action to the environment
         obs, reward, done, info = self.env.step(suitable_action)
         logging.info("____verify AFTER action is applied to the environment")
