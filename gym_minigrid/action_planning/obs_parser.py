@@ -1,8 +1,9 @@
 from gym_minigrid.extendedminigrid import *
 from typing import Tuple, List
-from enum import IntEnum
+from enum import IntEnum, unique
 
 
+@unique
 class StateEnum(IntEnum):
     orientation_east = 0
     orientation_south = 1
@@ -18,12 +19,13 @@ class StateEnum(IntEnum):
     west_is_clear = 11
     current_is_clear = 12
     current_is_safe = 13
-    front_is_safe = 14
-    front_is_clear = 15
-    left_is_safe = 16
-    left_is_clear = 17
-    right_is_safe = 18
-    right_is_clear = 19
+    current_is_goal = 14
+    front_is_safe = 15
+    front_is_clear = 16
+    left_is_safe = 17
+    left_is_clear = 18
+    right_is_safe = 19
+    right_is_clear = 20
 
 
 """"
@@ -67,6 +69,8 @@ class ObservationParser:
         """
         if self.parsed_observation[pos_x][pos_y] is None:
             cell = Cell(self.observation[pos_x][pos_y])
+            cell.x = pos_x
+            cell.y = pos_y
             # Check if the cell is clear and safe and set it, needs improvement
             if isinstance(cell.type, WorldObj) and isinstance(cell.type, Wall):
                 cell.is_clear = False
@@ -144,6 +148,8 @@ class ObservationParser:
                     if current_cell.south_cell is not None:
                         states[StateEnum.south_is_clear] = True if current_cell.south_cell.is_clear else False
                         states[StateEnum.south_is_safe] = True if current_cell.south_cell.is_safe else False
+
+                    states[StateEnum.current_is_goal] = True if isinstance(current_cell.type, Goal) else False
                     current_cell.states = tuple(states.items())
 
     def get_current_cell(self) -> 'Cell':
@@ -162,3 +168,5 @@ class Cell:
         self.is_safe: bool = True
         self.type = cell_type
         self.states: Tuple[Tuple[StateEnum, bool]] = tuple()
+        self.x: int = 0
+        self.y: int = 0

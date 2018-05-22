@@ -22,6 +22,8 @@ class Graph:
             self.edges[current.tuple()] = []
             for action in actions:
                 next_state = current.apply_action(action)
+                if (StateEnum.current_is_goal, True) in next_state.states:
+                    print(next_state)
                 self.edges[current.tuple()].append((next_state.tuple(), action))
                 self.update(next_state)
 

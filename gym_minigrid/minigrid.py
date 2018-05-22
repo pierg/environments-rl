@@ -107,6 +107,7 @@ class WorldObj:
         r.setLineColor(c[0], c[1], c[2])
         r.setColor(c[0], c[1], c[2])
 
+
 class Goal(WorldObj):
     def __init__(self):
         super(Goal, self).__init__('goal', 'green')

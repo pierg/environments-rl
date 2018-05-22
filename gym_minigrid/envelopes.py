@@ -255,7 +255,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
             if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
 
-                self.action_plan = run(current_obs, current_dir, goal_safe_east)
+                self.action_plan = run(current_obs, current_dir, goal_green_square)
                 print(self.action_plan)
 
         #reward, done, info = Evaluator.evaluate(action, self.env, reward, done, info)
