@@ -61,6 +61,8 @@ def run(current_obs, direction, goal: Tuple[Tuple[StateEnum, bool]]):
     goal_cell = planner.graph.find_state(goal)
     if goal_cell is None:
         raise ValueError('Goal state not found in graph!')
+    if goal_cell == current_cell_state.tuple():
+        raise ValueError('Trying to create a plan for the current state!')
     came_from, cost_so_far = planner.plan(current_cell_state.tuple(), goal_cell)
     action_stack = reconstruct_path(came_from, goal_cell, current_cell_state.tuple())
     return action_stack
