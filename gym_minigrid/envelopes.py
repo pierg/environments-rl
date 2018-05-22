@@ -122,13 +122,11 @@ class SafetyEnvelope(gym.core.Wrapper):
             logging.info("safe action : %s",str(self.env.actions.wait))
             return self.env.actions.wait
 
-
     def resetMonitors(self):
         for monitor in self.absence_monitors:
             monitor.initial_state = None
         for monitor in self.precedence_monitors:
             monitor.initial_state = None
-
 
     def step(self, proposed_action, reset_on_catastrophe=False):
         # To be returned to the agent
@@ -223,6 +221,17 @@ class SafetyEnvelope(gym.core.Wrapper):
                 reward = self.goal_reward
                 info = "goal"
                 self.step_number = 0
+
+        # Check if normal step, if yes add normal_reward
+        if reward == 0:
+            reward = self.normal_reward
+
+        if end:
+            info = "end"
+
+        # Return everything to the agent
+        return obs, reward, done, info
+
 #######################################################################################
 
 
@@ -272,14 +281,10 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             # do we need this?
             # self.proposed_history.append((current_obs, action))
 
-        if end:
-            info = "end"
-
-        # Return everything to the agent
-        return obs, reward, done, info
             if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
                 self.action_plan = run(current_obs, current_dir, goal_safe_zone)
-                self.critical_actions = [ExMiniGridEnv.Actions.forward, ExMiniGridEnv.Actions.pickup, ExMiniGridEnv.Actions.toggle]
+                self.critical_actions = [ExMiniGridEnv.Actions.forward, ExMiniGridEnv.Actions.pickup,
+                                         ExMiniGridEnv.Actions.toggle]
                 print(self.action_plan)
 
             print(reward)
