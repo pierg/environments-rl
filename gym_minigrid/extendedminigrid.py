@@ -51,9 +51,6 @@ class Room:
                 return True
         return False
 
-    def getSwitchPos(self,position):
-        self.switch = position
-
 
 class Water(WorldObj):
     def __init__(self):
@@ -78,11 +75,11 @@ class LightSwitch(WorldObj):
     def affectRoom(self,room):
         self.room = room
 
-    def getSwitchPos(self,position):
+    def setSwitchPos(self,position):
         self.position = position
 
-    def Elements(self,room):
-        self.els = room
+    def elements_in_room(self,room):
+        self.elements = room
 
     def toggle(self, env, pos):
         self.room.setLight(not self.room.getLight())
@@ -105,21 +102,23 @@ class LightSwitch(WorldObj):
         self.dark_light(r)
 
     def dark_light(self,r):
-        (xl, yl) = self.position
+
         if self.room.getLight() == False:
             r.setColor(255,0,0)
             r.drawCircle(0.5*CELL_PIXELS,0.5*CELL_PIXELS,0.2*CELL_PIXELS)
-            #r.fillRect((x-xl)*CELL_PIXELS,(y-yl)*CELL_PIXELS,width*CELL_PIXELS,height*CELL_PIXELS,0,0,0,100)
-            for i in range(0,len(self.els)):
-                if self.els[i][2] == 1:
-                    r.setLineColor(10, 10, 10)
-                    r.setColor(10,10,10)
-                    r.drawPolygon([
-                        ((self.els[i][0]-xl)*CELL_PIXELS, (self.els[i][1]-yl+1)*CELL_PIXELS),
-                        ((self.els[i][0]-xl+1)*CELL_PIXELS,(self.els[i][1]-yl+1)*CELL_PIXELS),
-                        ((self.els[i][0] - xl + 1) * CELL_PIXELS, (self.els[i][1] - yl) * CELL_PIXELS),
-                        ((self.els[i][0] - xl) * CELL_PIXELS, (self.els[i][1] - yl) * CELL_PIXELS)
-                    ])
+            if hasattr(self, 'position'):
+                if hasattr(self, 'elements'):
+                    (xl, yl) = self.position
+                    for i in range(0,len(self.elements)):
+                        if self.elements[i][2] == 1:
+                            r.setLineColor(10, 10, 10)
+                            r.setColor(10,10,10)
+                            r.drawPolygon([
+                                ((self.elements[i][0]-xl)*CELL_PIXELS, (self.elements[i][1]-yl+1)*CELL_PIXELS),
+                                ((self.elements[i][0]-xl+1)*CELL_PIXELS,(self.elements[i][1]-yl+1)*CELL_PIXELS),
+                                ((self.elements[i][0] - xl + 1) * CELL_PIXELS, (self.elements[i][1] - yl) * CELL_PIXELS),
+                                ((self.elements[i][0] - xl) * CELL_PIXELS, (self.elements[i][1] - yl) * CELL_PIXELS)
+                        ])
         else :
             r.setColor(0,255,0)
             r.drawCircle(0.5*CELL_PIXELS,0.5*CELL_PIXELS,0.2*CELL_PIXELS)
@@ -128,7 +127,6 @@ class LightSwitch(WorldObj):
 class Dirt(WorldObj):
     def __init__(self):
         super(Dirt, self).__init__('dirt', 'yellow')
-        self.clean = 0
 
     def can_overlap(self):
         return True
@@ -137,7 +135,6 @@ class Dirt(WorldObj):
         self.list = list
 
     def toggle(self, env, pos):
-        self.clean = 1
         x,y = ExMiniGridEnv.get_grid_coords_from_view(env,(0,1))
         env.grid.set(x,y,None)
         del self.list[len(self.list)-1]
@@ -147,7 +144,6 @@ class Dirt(WorldObj):
         self._set_color(r)
         r.setColor(240 ,150 , 0)
         r.setLineColor(81, 41, 0)
-        self.clean == 0
         r.drawPolygon([
             (0, CELL_PIXELS),
             (CELL_PIXELS, CELL_PIXELS),
@@ -160,14 +156,7 @@ class Vase(WorldObj):
     def __init__(self):
         super(Vase, self).__init__('vase','grey')
         self.content = Dirt()
-    """
-    def can_overlap(self):
-        (x, y) = self.position
-        self.grid.set(x,y,self.content)
-        self.list.append(Dirt())
-        self.content.affect_list(self.list)
-        return False
-    """
+
     def toggle(self, env, pos):
         x, y = ExMiniGridEnv.get_grid_coords_from_view(env, (0, 1))
         env.grid.set(x, y, self.content)
@@ -194,18 +183,9 @@ class Vase(WorldObj):
             (0.32 * CELL_PIXELS, 0.32 * CELL_PIXELS)
         ])
 
-    """
-    def affect_grid(self,grid,position):
-        self.grid = grid
-        self.position = position
-    """
-
     def list_dirt(self,list):
         self.list = list
 
-#class ExWorldObj(WorldObj):
-    #def change_class(self, env, pos):
-        #return False
 def worldobj_name_to_object(worldobj_name):
     if worldobj_name == 'water':
         return Water()
@@ -214,10 +194,7 @@ def worldobj_name_to_object(worldobj_name):
     elif worldobj_name == "lightSwitch":
         return LightSwitch()
     elif worldobj_name == "dirt":
-        if Dirt.get_clean() == 0:
-            return Dirt()
-        else:
-            return None
+        return Dirt()
     elif worldobj_name == "vase":
         return Vase()
     elif worldobj_name == "goal":

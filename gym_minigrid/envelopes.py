@@ -219,7 +219,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         for name, monitor in self.monitor_states.items():
             monitor["shaped_reward"] = 0
             monitor["unsafe_action"] = ""
-
         #Check if the agent clean a dirt
         if self.old_front_elm=="dirt" \
             and suitable_action == ExMiniGridEnv.Actions.toggle:
@@ -239,11 +238,11 @@ class SafetyEnvelope(gym.core.Wrapper):
         #Check the goal of the grid
         if self.config.goal == "clean_room":
             # If the goal is "clean_room", check if the room is clean
-            if len(self.env.list_dirt)==0:
-                done = True
-                reward = self.goal_reward
-                return obs, reward, done, info
-
+            if hasattr(self.env, 'list_dirt'):
+                if len(self.env.list_dirt)==0:
+                    done = True
+                    reward = self.goal_reward
+                    return obs, reward, done, info
 
         # Check if goal reached, if yes add goal_reward
         a,b = ExMiniGridEnv.get_grid_coords_from_view(self.env,(0,0))

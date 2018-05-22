@@ -85,8 +85,8 @@ class Safety(ExMiniGridEnv):
         # Add the switch of the second room in the first one
         switchRoom2 = LightSwitch()
         switchRoom2.affectRoom(self.roomList[1])
-        switchRoom2.getSwitchPos((int(round(width/2)-1),height-3))
-        switchRoom2.Elements(tab)
+        switchRoom2.setSwitchPos((int(round(width/2)-1),height-3))
+        switchRoom2.elements_in_room(tab)
         self.grid.set(int(round(width/2)-1),height-3,switchRoom2)
         self.switchPosition = []
         self.switchPosition.append((int(round(width/2)-1),height-3))

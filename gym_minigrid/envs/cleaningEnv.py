@@ -26,7 +26,7 @@ class CleaningEnv(ExMiniGridEnv):
 
 
         #self.list_dirt: name of the list who envelopes.py check to know if the room is clean
-        # WARNING don't change the name
+        # WARNING don't change the name of list_dirt if you want to use the cleaning robot
         self.list_dirt = []
         #Place dirt
         self.number_dirt = 10
