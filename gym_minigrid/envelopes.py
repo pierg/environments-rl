@@ -131,13 +131,14 @@ class SafetyEnvelope(gym.core.Wrapper):
     def step(self, proposed_action, reset_on_catastrophe=False):
         # To be returned to the agent
         obs, reward, done, info = None, None, None, None
-
+        end = False
         if self.step_number == 0:
             self.resetMonitors()
 
         self.step_number += 1
 
         if self.step_number == self.env.max_steps:
+            end = True
             self.step_number = 0
 
         self.propsed_action = proposed_action
@@ -224,6 +225,9 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Check if normal step, if yes add normal_reward
         if reward == 0:
             reward = self.normal_reward
+
+        if end:
+            info = "end"
 
         # Return everything to the agent
         return obs, reward, done, info
