@@ -48,6 +48,8 @@ class CellState:
                     if precondition == state:
                         preconditions_met += 1
             if preconditions_met == preconditions_total:
+                if action.name == ExMiniGridEnv.Actions.forward and self.states[StateEnum.orientation_north]:
+                    print("Action = forward")
                 available_actions.append(action)
 
         return tuple(available_actions)
