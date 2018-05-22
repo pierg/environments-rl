@@ -54,7 +54,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.dirt_reward = self.config.cleaning_dirt.reward.toggle
 
         # Set reward for breaking vase
-        self.vase_reward = self.config.breaking_vase.reward.overlap
+        self.vase_reward = self.config.breaking_vase.reward.toggle
 
         # Generates absence-based monitors
         for avoid_obj in self.config.monitors.absence.monitored:

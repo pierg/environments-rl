@@ -34,10 +34,11 @@ class CleaningEnv(ExMiniGridEnv):
             dirt = Dirt()
             x, y = self._rand_pos(2, width-2, 2, height - 2)
             # a dirt pattern need a list to have the number of dirt in the environnemet
-            if self.grid.get(x,y) is None:
-                self.grid.set(x, y, dirt)
-                self.list_dirt.append(dirt)
-                dirt.affect_list(self.list_dirt)
+            while self.grid.get(x,y) is  not None:
+                x, y = self._rand_pos(2, width - 2, 2, height - 2)
+            self.grid.set(x, y, dirt)
+            self.list_dirt.append(dirt)
+            dirt.affect_list(self.list_dirt)
 
 
         #Place Vase
