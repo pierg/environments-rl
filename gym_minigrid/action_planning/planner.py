@@ -31,7 +31,7 @@ class Graph:
                 return self.edges[cell_state]
         return [()]
 
-    def cost(self, start: Tuple[Tuple[StateEnum, bool]], goal: Tuple[Tuple[StateEnum, bool]]) -> int:
+    def cost(self, start: Tuple[StateEnum, bool], goal: Tuple[StateEnum, bool]) -> int:
         """
         :return: action cost between two neighbor CellStates, if they are not neighbours return -1
         """
@@ -61,11 +61,19 @@ def run(current_obs, direction, goal: Tuple[Tuple[StateEnum, bool]]):
     goal_cell = planner.graph.find_state(goal)
     if goal_cell is None:
         raise ValueError('Goal state not found in graph!')
-    state_action_list, action_cost = planner.plan(current_cell_state.tuple(), goal_cell)
-    actions = []
-    for state, action in state_action_list:
-            actions.append(action.name)
-    return actions
+    came_from, cost_so_far = planner.plan(current_cell_state.tuple(), goal_cell)
+    action_stack = reconstruct_path(came_from, goal_cell, current_cell_state.tuple())
+    return action_stack
+
+
+def reconstruct_path(came_from, goal, start):
+    current = came_from[goal]
+    path = []
+    while current[0] != start:
+        path.append(current[1].name)
+        current = came_from[current[0]]
+    path.append(current[1].name)
+    return path
 
 
 class ActionPlanner:
@@ -89,29 +97,28 @@ class ActionPlanner:
                 counter += 1
         return counter
 
-    def plan(self, start_state: Tuple[Tuple[StateEnum, bool]], goal_state: Tuple[Tuple[StateEnum, bool]]):
+    def plan(self, start_state: Tuple[StateEnum, bool], goal_state: Tuple[Tuple[StateEnum, bool]]):
         frontier = PriorityQueue()
-        frontier.put((goal_state, None), 0)
-        came_from = dict()
-        cost_so_far = dict()
-        came_from[(goal_state, None)] = None
-        cost_so_far[(goal_state, None)] = 0
+        frontier.put(start_state, 0)
+        came_from: Dict[Tuple[StateEnum, bool], (Tuple[StateEnum, bool], Action)] = dict()
+        cost_so_far: Dict[Tuple[StateEnum, bool], int] = dict()
+        came_from[start_state] = (None, None)
+        cost_so_far[start_state] = 0
 
         while not frontier.empty():
             current = frontier.get()
 
-            if current == start_state:
+            if current == goal_state:
                 break
 
-            for next_state_action_tuple in self.graph.neighbors(current[0]):
-                # if isinstance(next_state_action_tuple[0], CellState):
-                #    next_state_action_tuple = (next_state_action_tuple[0].tuple(), next_state_action_tuple[1])
-                new_cost = cost_so_far[current] + self.graph.cost(current[0], next_state_action_tuple[0])
-                if next_state_action_tuple not in cost_so_far or new_cost < cost_so_far[next_state_action_tuple]:
-                    cost_so_far[next_state_action_tuple] = new_cost
+            for next_state_action_tuple in self.graph.neighbors(current):
+                new_cost = cost_so_far[current] + self.graph.cost(current, next_state_action_tuple[0])
+                if next_state_action_tuple[0] not in cost_so_far or new_cost < cost_so_far[next_state_action_tuple[0]]:
+                    cost_so_far[next_state_action_tuple[0]] = new_cost
                     priority = new_cost
-                    frontier.put(next_state_action_tuple, priority)
-                    came_from[next_state_action_tuple] = current
+                    frontier.put(next_state_action_tuple[0], priority)
+                    came_from[next_state_action_tuple[0]] = (current, next_state_action_tuple[1])
 
         return came_from, cost_so_far
+
 

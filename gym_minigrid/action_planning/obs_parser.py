@@ -137,13 +137,13 @@ class ObservationParser:
                         states[StateEnum.west_is_safe] = True if current_cell.west_cell.is_safe else False
                     if current_cell.east_cell is not None:
                         states[StateEnum.east_is_clear] = True if current_cell.east_cell.is_clear else False
-                        states[StateEnum.east_is_safe] = True if current_cell.east_cell.is_clear else False
+                        states[StateEnum.east_is_safe] = True if current_cell.east_cell.is_safe else False
                     if current_cell.north_cell is not None:
                         states[StateEnum.north_is_clear] = True if current_cell.north_cell.is_clear else False
-                        states[StateEnum.north_is_safe] = True if current_cell.north_cell.is_clear else False
+                        states[StateEnum.north_is_safe] = True if current_cell.north_cell.is_safe else False
                     if current_cell.south_cell is not None:
                         states[StateEnum.south_is_clear] = True if current_cell.south_cell.is_clear else False
-                        states[StateEnum.south_is_safe] = True if current_cell.south_cell.is_clear else False
+                        states[StateEnum.south_is_safe] = True if current_cell.south_cell.is_safe else False
                     current_cell.states = tuple(states.items())
 
     def get_current_cell(self) -> 'Cell':

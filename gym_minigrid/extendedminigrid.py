@@ -138,7 +138,6 @@ class ExMiniGridEnv(MiniGridEnv):
         # turn around
         turnaround = 7
 
-
     def get_obs_render(self, obs):
         """
         Render an agent observation for visualization
