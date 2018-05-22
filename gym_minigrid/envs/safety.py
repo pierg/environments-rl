@@ -74,8 +74,8 @@ class Safety(ExMiniGridEnv):
 
         # Add the rooms
         self.roomList = []
-        self.roomList.append(Room(0,(width//2-1, height-2),(1,1),True))
-        self.roomList.append(Room(1,(width//2-2, height-2),(width//2+1,1),False))
+        self.roomList.append(Room(0,(width//2-1, height-1),(1,1),True))
+        self.roomList.append(Room(1,(width//2-2, height-1),(width//2+1,1),False))
 
         # Set room entry and exit that are needed
         self.roomList[1].setEntryDoor((5,6))
