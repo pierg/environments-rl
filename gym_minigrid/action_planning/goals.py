@@ -21,5 +21,12 @@ goal_clear_west = (
     (StateEnum.orientation_south, True)
 )
 
+goal_safe_zone = (
+    (StateEnum.west_is_safe, True),
+    (StateEnum.east_is_safe, True),
+    (StateEnum.north_is_safe, True),
+    (StateEnum.south_is_safe, True)
+)
+
 
 

@@ -232,13 +232,6 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         self.actual_history = collections.deque(N * [(None, None)], N)
 
     def step(self, action):
-        obs = self.env.gen_obs()
-        current_obs = ExGrid.decode(obs['image'])
-        current_dir = obs['direction']
-        if self.config.num_processes == 1 and self.config.rendering:
-            self.env.render('human')
-
-        self.proposed_history.append((current_obs, action))
 
         # reward for this step
         our_reward = 0
@@ -247,27 +240,23 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             if self.action_plan.pop() != action:
                 our_reward = -100
                 self.action_plan = []
-        # action = planned_actions.pop()
 
         obs, reward, done, info = self.env.step(action)
+
+        obs = self.env.gen_obs()
+        current_obs = ExGrid.decode(obs['image'])
+        current_dir = obs['direction']
+        if self.config.num_processes == 1 and self.config.rendering:
+            self.env.render('human')
+
+        self.proposed_history.append((current_obs, action))
 
         if self.config.action_planner:
 
             if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
 
-                self.action_plan = run(current_obs, current_dir, goal_clear_west)
+                self.action_plan = run(current_obs, current_dir, goal_safe_zone)
                 print(self.action_plan)
-
-                # if Perception.is_ahead_of_worldobj(current_obs, Unsafe, 1):
-                #     planned_actions = run(current_obs, current_dir, goal_clear_west)
-                #     action = planned_actions.pop()
-                #     # action = MiniGridEnv.Actions.forward
-                #     obs, reward, done, info = self.env.step(action.value)
-                #     reward, done, info = Evaluator.evaluate(action, current_obs, reward, done, info)
-                # else:
-                #     obs, reward, done, info = self.env.step(action)
-                #     reward, done, info = Evaluator.evaluate(action, current_obs, reward, done, info)
-
 
         #reward, done, info = Evaluator.evaluate(action, self.env, reward, done, info)
         # Return everything to the agent
