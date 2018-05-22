@@ -275,6 +275,13 @@ class ExMiniGridEnv(MiniGridEnv):
         except AttributeError:
             return False
 
+    def step(self,action):
+        # Reset if agent step on water without knowing it
+        if action == self.actions.forward and self.worldobj_in_front_agent_noDark(1) == "water" :
+            return self.gen_obs(), 0, True, "died"
+        else:
+            return super().step(action)
+
 
     def worldobj_in_front_agent(self, distance=1):
         """

@@ -1,5 +1,4 @@
 import collections
-from .perception import Perception
 
 from configurations import config_grabber as cg
 
@@ -52,8 +51,10 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         self.death_reward = self.config.reward.death
 
+        self.step_number = 0
+
         # Generates absence-based monitors
-        if 'absence' in self.config.monitors:
+        if hasattr(self.config.monitors, 'absence'):
             for avoid_obj in self.config.monitors.absence.monitored:
                 if avoid_obj.active:
                     new_absence_monitor = Absence("absence_" + avoid_obj.name, avoid_obj.name, self.on_monitoring,avoid_obj.reward)
@@ -64,7 +65,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                     self.monitor_states[new_absence_monitor.name]["unsafe_action"] = ""
 
         # Generates precedence-based monitors
-        if 'precedence' in self.config.monitors:
+        if hasattr(self.config.monitors, 'precedence'):
             for precedence_obj in self.config.monitors.precedence.monitored:
                 if precedence_obj.active:
                     new_precedence_monitor = Precedence("precedence_"+precedence_obj.name,precedence_obj,self.on_monitoring,precedence_obj.reward)
@@ -122,10 +123,25 @@ class SafetyEnvelope(gym.core.Wrapper):
             return self.env.actions.wait
 
 
+    def resetMonitors(self):
+        for monitor in self.absence_monitors:
+            monitor.initial_state = None
+        for monitor in self.precedence_monitors:
+            monitor.initial_state = None
+
 
     def step(self, proposed_action, reset_on_catastrophe=False):
         # To be returned to the agent
         obs, reward, done, info = None, None, None, None
+        end = False
+        if self.step_number == 0:
+            self.resetMonitors()
+
+        self.step_number += 1
+
+        if self.step_number == self.env.max_steps:
+            end = True
+            self.step_number = 0
 
         self.propsed_action = proposed_action
 
@@ -167,6 +183,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         # If have to reset
         if done:
             reward = sum(shaped_rewards)
+            self.step_number = 0
             return obs, reward, done, info
 
         logging.info("unsafe actions = %s",unsafe_actions)
@@ -175,19 +192,9 @@ class SafetyEnvelope(gym.core.Wrapper):
         suitable_action = self.action_planner(unsafe_actions)
         logging.info("actions possibles =%s",suitable_action)
 
-        # Reset if agent step on water without knowing it
-        if suitable_action == ExMiniGridEnv.Actions.forward \
-            and ExMiniGridEnv.worldobj_in_front_agent_noDark(self.env)=="water":
-                reward = sum(shaped_rewards)
-                reward += self.death_reward
-                obs = self.env.reset()
-                done = True
-                info = "died"
-                return obs, reward, done, info
-
         # Send a suitable action to the environment
         obs, reward, done, info = self.env.step(suitable_action)
-        logging.info("____verify AFTER action is applyed to the environment")
+        logging.info("____verify AFTER action is applied to the environment")
         # Notify the monitors of the new state reached in the environment and the applied action
         for monitor in self.absence_monitors:
             monitor.verify(self.env, suitable_action)
@@ -208,6 +215,14 @@ class SafetyEnvelope(gym.core.Wrapper):
             monitor["shaped_reward"] = 0
             monitor["unsafe_action"] = ""
 
+        # Check if goal reached, if yes add goal_reward
+        a,b = ExMiniGridEnv.get_grid_coords_from_view(self.env,(0,0))
+        current_cell = Grid.get(self.env.grid,a,b)
+        if current_cell is not None:
+            if current_cell.type == "goal":
+                reward = self.goal_reward
+                info = "goal"
+                self.step_number = 0
 #######################################################################################
 
 
@@ -257,6 +272,11 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             # do we need this?
             # self.proposed_history.append((current_obs, action))
 
+        if end:
+            info = "end"
+
+        # Return everything to the agent
+        return obs, reward, done, info
             if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
                 self.action_plan = run(current_obs, current_dir, goal_safe_zone)
                 self.critical_actions = [ExMiniGridEnv.Actions.forward, ExMiniGridEnv.Actions.pickup, ExMiniGridEnv.Actions.toggle]
