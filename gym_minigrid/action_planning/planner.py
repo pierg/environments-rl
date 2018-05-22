@@ -13,20 +13,17 @@ class Graph:
             As values it has lists containing pairs of cellStates and the action taken to reach them from the key
         """
         self.edges: Dict[Tuple[Tuple[StateEnum, bool]], List[Tuple[Tuple[StateEnum, bool], Action]]] = dict()
+        self.updated: Dict[Tuple[StateEnum, int, int], bool] = dict()
 
     def update(self, cell_state: CellState):
         current = cell_state
-        print(current.cell.x, current.cell.y)
-        if current.tuple() not in self.edges:
-            if current.cell.x == 4 and current.cell.y == 2:
-                print("stop!!")
+        if (current.get_orientation(current.states), current.cell.x, current.cell.y) not in self.updated:
             # Find all cell states that are connected to this one with an action
             actions = current.get_available_actions()
             self.edges[current.tuple()] = []
             for action in actions:
                 next_state = current.apply_action(action)
-                if (StateEnum.current_is_goal, True) in next_state.states:
-                    print(next_state)
+                self.updated[(current.get_orientation(current.states), current.cell.x, current.cell.y)] = True
                 self.edges[current.tuple()].append((next_state.tuple(), action))
                 self.update(next_state)
 
