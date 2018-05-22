@@ -83,7 +83,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.monitor_states[name]["state"] = state
 
         if state == "mismatch":
-            print(name,state,kwargs)
             logging.warning("%s mismatch!!!!",name)
 
         if state == "monitoring":
