@@ -206,14 +206,14 @@ class ExMiniGridEnv(MiniGridEnv):
         forward = 2
 
         # Pick up an object
-        pickup = 3
+        #pickup = 3
         # Drop an object
-        drop = 4
+        #drop = 4
         # Toggle/activate an object
-        toggle = 5
+        #toggle = 5
 
         # Wait/stay put/do nothing
-        wait = 6
+        #wait = 6
 
         # turn around
         #turnaround = 7

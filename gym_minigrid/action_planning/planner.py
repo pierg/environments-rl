@@ -16,12 +16,17 @@ class Graph:
 
     def update(self, cell_state: CellState):
         current = cell_state
+        print(current.cell.x, current.cell.y)
         if current.tuple() not in self.edges:
+            if current.cell.x == 4 and current.cell.y == 2:
+                print("stop!!")
             # Find all cell states that are connected to this one with an action
             actions = current.get_available_actions()
             self.edges[current.tuple()] = []
             for action in actions:
                 next_state = current.apply_action(action)
+                if (StateEnum.current_is_goal, True) in next_state.states:
+                    print(next_state)
                 self.edges[current.tuple()].append((next_state.tuple(), action))
                 self.update(next_state)
 

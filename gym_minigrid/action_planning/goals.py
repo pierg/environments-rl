@@ -28,5 +28,9 @@ goal_safe_zone = (
     (StateEnum.south_is_safe, True)
 )
 
+goal_green_square = (
+    (StateEnum.current_is_goal, True),
+)
+
 
 

@@ -40,6 +40,7 @@ class CellState:
 
         available_actions: List[Action] = []
         for action in possible_actions:
+
             preconditions_total = len(action.preconditions)
             preconditions_met = 0
             for precondition in action.preconditions:
@@ -47,6 +48,8 @@ class CellState:
                     if precondition == state:
                         preconditions_met += 1
             if preconditions_met == preconditions_total:
+                if action.name == ExMiniGridEnv.Actions.forward:
+                    print("Stop!!!!")
                 available_actions.append(action)
 
         return tuple(available_actions)
