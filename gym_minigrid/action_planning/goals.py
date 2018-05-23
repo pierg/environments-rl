@@ -6,31 +6,27 @@ from .obs_parser import StateEnum
 """
 
 
-goal_safe_east = (
+goal_safe_east = [
     (StateEnum.east_is_safe, True),
     (StateEnum.east_is_clear, True),
-    (StateEnum.current_is_clear, True),
-    (StateEnum.current_is_safe, True),
     (StateEnum.orientation_east, True)
-)
+]
 
-goal_clear_west = (
+goal_clear_west = [
     (StateEnum.west_is_clear, True),
-    (StateEnum.current_is_clear, True),
-    (StateEnum.current_is_safe, True),
     (StateEnum.orientation_south, True)
-)
+]
 
-goal_safe_zone = (
+goal_safe_zone = [
     (StateEnum.west_is_safe, True),
     (StateEnum.east_is_safe, True),
     (StateEnum.north_is_safe, True),
     (StateEnum.south_is_safe, True)
-)
+]
 
-goal_green_square = (
+goal_green_square = [
     (StateEnum.current_is_goal, True),
-)
+]
 
 
 

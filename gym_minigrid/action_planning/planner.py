@@ -56,22 +56,6 @@ class Graph:
         return None
 
 
-def run(current_obs, direction, goal: State):
-    parser = ObservationParser(current_obs, direction)
-    current_cell = parser.get_current_cell()
-    current_cell_state = CellState(current_cell, direction)
-    planner = ActionPlanner(current_cell_state)
-    goal_cell = planner.graph.find_state(goal)
-    if goal_cell is None:
-        raise ValueError('Goal state not found in graph!')
-        #return []
-    if goal_cell == current_cell_state.tuple():
-        raise ValueError('Trying to create a plan for the current state!')
-    came_from, cost_so_far = planner.plan(current_cell_state.tuple(), goal_cell)
-    action_stack = reconstruct_path(came_from, goal_cell, current_cell_state.tuple())
-    return action_stack
-
-
 def reconstruct_path(came_from, goal, start):
     current = came_from[goal]
     path = []
