@@ -5,8 +5,6 @@ import copy
 def run(current_obs, direction, goal):
     goals = create_goals(goal, [])
 
-    print(goals)
-
     parser = ObservationParser(current_obs, direction)
     current_cell = parser.get_current_cell()
     current_cell_state = CellState(current_cell, direction)
@@ -16,7 +14,7 @@ def run(current_obs, direction, goal):
     while goal_cell is None and goals:
         goal_cell = planner.graph.find_state(goals.pop())
     if goal_cell is None:
-        raise ValueError('Goal state not found in graph!')
+        raise ValueError('No goal found in graph!')
         # return []
     if goal_cell == current_cell_state.tuple():
         raise ValueError('Trying to create a plan for the current state!')
