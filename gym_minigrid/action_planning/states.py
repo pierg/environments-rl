@@ -1,4 +1,4 @@
-from .obs_parser import Cell, StateEnum
+from .obs_parser import Cell, StateEnum, State
 from .action import Action
 from typing import Dict, Tuple, List
 from gym_minigrid.extendedminigrid import ExMiniGridEnv
@@ -88,10 +88,10 @@ class CellState:
 
             return CellState(self.cell, self.get_orientation(resulting_state))
 
-    def tuple(self):
+    def tuple(self) -> Tuple[Tuple[StateEnum, ...], Tuple[int, int]]:
         """
         Returns the dict of states as a tuple, to be used when you need a hashable worldState
         :return: Tuple containing the individual states and coordinates of the cell
         """
-        #return tuple(self.states.items()), (self.cell.x, self.cell.y)
-        return tuple(self.states.items())
+        return tuple(self.states.items()), (self.cell.x, self.cell.y)
+        #  return tuple(self.states.items())

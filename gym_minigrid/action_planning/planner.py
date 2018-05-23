@@ -15,24 +15,22 @@ class Graph:
             As values it has lists containing pairs of cellStates and the action taken to reach them from the key
         """
 
-        self.edges: Dict[State, List[Tuple[Tuple[StateEnum, bool], Action]]] = dict()
+        self.edges: Dict[Tuple[Tuple[StateEnum, ...], Coordinates], List[Tuple[Tuple[Tuple[StateEnum, ...], Coordinates], Action]]] = dict()
         self.updated = dict()
 
     def update(self, cell_state: CellState):
         current = cell_state
-        if (current.get_orientation(current.states), current.cell.x, current.cell.y) not in self.updated:
-            # Find all cell states that are connected to this one with an action
-            actions = current.get_available_actions()
+        if current.tuple() not in self.edges:
+            actions = current.get_available_actions()  #  Find all cell states that are connected to current with an action
             self.edges[current.tuple()] = []
             for action in actions:
                 next_state = current.apply_action(action)
-                self.updated[(current.get_orientation(current.states), current.cell.x, current.cell.y)] = True
                 self.edges[current.tuple()].append((next_state.tuple(), action))
                 self.update(next_state)
 
-    def neighbors(self, cell_state: State) -> List[Tuple[State, Action]]:
+    def neighbors(self, cell_state: Tuple[Tuple[StateEnum, bool]]) -> List[Tuple[Tuple[State, Coordinates], Action]]:
         if cell_state is not None:
-            if (StateEnum.current_is_clear, True) in cell_state:  # Walls lead nowhere thus they have no neighbours
+            if (StateEnum.current_is_clear, True) in cell_state[0]:  # Walls lead nowhere thus they have no neighbours
                 return self.edges[cell_state]
         return [()]
 
@@ -51,7 +49,7 @@ class Graph:
         for node in self.edges.keys():
             states_met = 0
             for state in goal_states:
-                if state in node:
+                if state in node[0]:
                     states_met += 1
             if states_met == states_total:
                 return node
@@ -65,8 +63,8 @@ def run(current_obs, direction, goal: State):
     planner = ActionPlanner(current_cell_state)
     goal_cell = planner.graph.find_state(goal)
     if goal_cell is None:
-        # raise ValueError('Goal state not found in graph!')
-        return []
+        raise ValueError('Goal state not found in graph!')
+        #return []
     if goal_cell == current_cell_state.tuple():
         raise ValueError('Trying to create a plan for the current state!')
     came_from, cost_so_far = planner.plan(current_cell_state.tuple(), goal_cell)
