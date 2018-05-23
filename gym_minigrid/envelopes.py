@@ -139,6 +139,7 @@ class SafetyEnvelope(gym.core.Wrapper):
     def step(self, proposed_action, reset_on_catastrophe=False):
         # To be returned to the agent
         obs, reward, done, info = None, None, None, None
+        saved = False
         end = False
         if self.step_number == 0:
             self.resetMonitors()
@@ -168,9 +169,13 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Check observation and proposed action in all running monitors
         for monitor in self.absence_monitors:
             monitor.check(current_obs_env, proposed_action)
+            if monitor.state == "immediate":
+                saved = True
 
         for monitor in self.precedence_monitors:
             monitor.check(current_obs_env, proposed_action)
+            if monitor.state == "disobey":
+                saved = True
 
 
         # Check for unsafe actions before sending them to the environment:
@@ -207,6 +212,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         for monitor in self.precedence_monitors:
             monitor.verify(self.env, suitable_action)
+
 
         # Get the shaped rewards from the monitors in the new state
         shaped_rewards = []
@@ -258,8 +264,13 @@ class SafetyEnvelope(gym.core.Wrapper):
         if reward == 0:
             reward = self.normal_reward
 
+        if saved and suitable_action != ExMiniGridEnv.Actions.wait:
+            saved = False
+
         if end:
             info = "end"
+        elif not info and saved:
+                info = "saved"
 
         # Return everything to the agent
         return obs, reward, done, info
