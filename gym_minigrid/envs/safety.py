@@ -8,7 +8,7 @@ You need the function saveElements to send to the lightswitch paterns
 You need before create the lightswitch with gid.set:
     -create a LightSwitch object (X=LightSwitch())
     -affect the room to the lightswitch (X.affectRoom(numberRoom))
-    -send to this object the lightswitch's position ( X.getSwitchPos( x, y)) and the tab save with saveElements (X.Elements(tab))
+    -For visual: send to this object the lightswitch's position ( X.getSwitchPos( x, y)) and the tab save with saveElements (X.Elements(tab))
 You can create the lightswitch
 """
 
@@ -85,8 +85,8 @@ class Safety(ExMiniGridEnv):
         # Add the switch of the second room in the first one
         switchRoom2 = LightSwitch()
         switchRoom2.affectRoom(self.roomList[1])
-        switchRoom2.setSwitchPos((int(round(width/2)-1),height-3))
-        switchRoom2.elements_in_room(tab)
+        #switchRoom2.setSwitchPos((int(round(width/2)-1),height-3))
+        #switchRoom2.elements_in_room(tab)
         self.grid.set(int(round(width/2)-1),height-3,switchRoom2)
         self.switchPosition = []
         self.switchPosition.append((int(round(width/2)-1),height-3))
