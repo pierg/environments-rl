@@ -1,5 +1,5 @@
 from gym_minigrid.extendedminigrid import *
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 from enum import IntEnum, unique
 
 
@@ -25,6 +25,8 @@ class StateEnum(IntEnum):
     west_is_none = 17
     east_is_none = 18
 
+
+State = Tuple[StateEnum, bool]
 
 
 """"
@@ -132,7 +134,7 @@ class ObservationParser:
                         if y < AGENT_VIEW_SIZE - 1:
                             current_cell.south_cell = self.parsed_observation[x][y+1]
 
-                    states = dict()
+                    states = current_cell.states
                     states[StateEnum.current_is_clear] = True if current_cell.is_clear else False
                     states[StateEnum.current_is_safe] = True if current_cell.is_safe else False
                     if current_cell.west_cell is not None:
@@ -164,7 +166,6 @@ class ObservationParser:
                         states[StateEnum.south_is_none] = True
 
                     states[StateEnum.current_is_goal] = True if isinstance(current_cell.type, Goal) else False
-                    current_cell.states = tuple(states.items())
 
     def get_current_cell(self) -> 'Cell':
         agent_pos_x = int(AGENT_VIEW_SIZE - 1)
@@ -181,6 +182,6 @@ class Cell:
         self.is_clear: bool = True  # These change when the cell is created
         self.is_safe: bool = True
         self.type = cell_type
-        self.states: Tuple[Tuple[StateEnum, bool]] = tuple()
+        self.states: Dict[StateEnum, bool] = dict()
         self.x: int = 0
         self.y: int = 0
