@@ -42,7 +42,7 @@ def main():
     env = gym.make(options.env_name)
 
     if config.monitors:
-        env = SafetyEnvelope(env)
+        env = ActionPlannerEnvelope(env)
 
 
     # # Maxime: until RL code supports dict observations, squash observations into a flat vector
