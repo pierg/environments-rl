@@ -58,6 +58,7 @@ class Perception():
 
         elif condition == "deadend-in-front":
             # Returns true if the agent is in front of a deadend
+            # deadend = all the tiles surrounding the agent view are 'wall' and the tiles in the middle are 'None'
             return True
 
 
