@@ -18,13 +18,8 @@ class Perception():
         :param distance: number of cells from the agent (1 = the one next to the agent cell)
         :return: True / False
         """
-        if object_type == "deadend":
-            return obs.worldpattern_in_front_agent(object_type)
-        return object_type == obs.worldobj_in_front_agent(1)
+        return object_type == obs.worldobj_in_agent(1, 0)
 
-    @staticmethod
-    def precedence_condition(obs,object_type):
-        return obs.check_precedence_condition(object_type)
 
     @staticmethod
     def is_near_to_worldobj(obs, object_type):
@@ -34,8 +29,35 @@ class Perception():
         :param object_type: type of WorldObj
         :return: True / False
         """
-        if object_type == "deadend":
-            return obs.worldpattern_is_near_agent(object_type)
-        return  object_type == obs.worldobj_in_front_agent(2) or \
-                object_type == obs.worldobj_in_left_agent(1) or \
-                object_type == obs.worldobj_in_right_agent(1)
+        return  object_type == obs.worldobj_in_agent(2, 0) or \
+                object_type == obs.worldobj_in_agent(1, 1) or \
+                object_type == obs.worldobj_in_agent(1, 1)
+
+    @staticmethod
+    def is_condition_satisfied(env, condition):
+        """
+
+        :param env: instance of ExMiniGridEnv
+        :return:
+        """
+        if condition == "light-on-current-room":
+            # Returns true if the lights are on in the room the agent is currently in
+            return True
+
+        elif condition == "light-switch-turned-on":
+            # It looks for a light switch around its field of view and returns true if it is on
+            return True
+
+        elif condition == "door-opened-in-front":
+            # Returns true if the agent is in front of an opened door
+            return True
+
+        elif condition == "door-closed-in-front":
+            # Returns true if the agent is in front of an opened door
+            return True
+
+        elif condition == "deadend-in-front":
+            # Returns true if the agent is in front of a deadend
+            return True
+
+
