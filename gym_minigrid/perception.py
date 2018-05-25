@@ -34,7 +34,7 @@ class Perception():
                 object_type == obs.worldobj_in_agent(1, 1)
 
     @staticmethod
-    def is_condition_satisfied(env, condition):
+    def is_condition_satisfied(env, action_proposed, condition):
         """
 
         :param env: instance of ExMiniGridEnv
@@ -59,6 +59,11 @@ class Perception():
         elif condition == "deadend-in-front":
             # Returns true if the agent is in front of a deadend
             # deadend = all the tiles surrounding the agent view are 'wall' and the tiles in the middle are 'None'
+            return True
+
+        elif condition == "entering-a-room":
+            # Returns true if the agent is entering a room
+            # Meaning there is a door in front and its action is to move forward
             return True
 
 

@@ -31,7 +31,7 @@ class StateTypes(SafetyStateMachine):
     transitions = []
 
     # Convert the observations stored in self.current_obs in a state a saves the state in current_state
-    def _obs_to_state(self, obs):
+    def _obs_to_state(self, obs, action_proposed):
         self.curret_state = ''
 
     def __init__(self, name, notify):

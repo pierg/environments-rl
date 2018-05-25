@@ -242,12 +242,11 @@ class SafetyStateMachine(object):
 
         # Function to be called when violation is detected (on_block) or when observations are needed (uncertainty)
         self.notify = notify
-        # self.on_uncertainty_notify = on_uncertainty_notify
 
         # MiniGrid Actions and unsafe_actions list to be returned by the on_block
         self.actions = MiniGridEnv.Actions
 
-    def _obs_to_state(self, obs):
+    def _obs_to_state(self, obs, action_proposed):
         raise NotImplementedError
 
 
@@ -268,7 +267,7 @@ class SafetyStateMachine(object):
         self.notify(self.name, "mismatch")
 
     def draw(self):
-        abs_file_path = os.path.abspath(__file__ + "/../patterns/" + self.pattern + "_" + self.name + ".png")
+        abs_file_path = os.path.abspath(__file__ + "/../draws/" + self.pattern + "_" + self.name + ".png")
         self.machine.get_graph(title=self.name).draw(abs_file_path, prog='dot')
 
     # Called before the action is going to be performed on the environment and obs are the current observations
@@ -278,11 +277,9 @@ class SafetyStateMachine(object):
         self.env_state = self.state
 
         # Map the observation to a state
-        self.env_state = self._obs_to_state(obs_pre)
+        self.env_state = self._obs_to_state(obs_pre, action_proposed)
 
         if self.initial_state is None:
-            # First time
-            # print("first time!")
             self.initial_state = self.env_state
             self.machine.set_state(self.env_state)
             self.trigger('*')

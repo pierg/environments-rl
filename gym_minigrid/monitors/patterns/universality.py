@@ -7,9 +7,7 @@ from monitors.safetystatemachine import SafetyStateMachine
 
 class Universality(SafetyStateMachine):
     """
-    It makes sure that the agent will never enter in the state of type 'violated'
-    This pattern is the dual of the Existence pattern
-    It takes as input the type of cell that the agent must avoid at all states
+    Always true
     """
 
     states = [
@@ -57,91 +55,28 @@ class Universality(SafetyStateMachine):
         "respected": False
     }
 
-    def __init__(self, name, condition, notify, reward):
-        self.reward = reward.near
+    def __init__(self, name, condition, notify, rewards):
+        self.respectd_rwd = rewards.respected
+        self.violated_rwd = rewards.violated
         self.condition = condition
         super().__init__(name, "universally", self.states, self.transitions, 'initial', notify)
 
     # Convert obseravions to state and populate the obs_conditions
-    def _obs_to_state(self, obs):
+    def _obs_to_state(self, obs, action_proposed):
 
-        # Get observations conditions
-        near = p.is_near_to_worldobj(obs, self.worldobj_avoid)
-        immediate = p.is_immediate_to_worldobj(obs, self.worldobj_avoid)
-
-        # Save them in the obs_conditions dictionary
-        Absence.obs["near"] = near
-        Absence.obs["immediate"] = immediate
-
-        # Return the state
-        if immediate:
-            return 'immediate'
-        elif near:
-            return 'near'
+        if p.is_condition_satisfied(obs, action_proposed, self.condition):
+            Universality.obs["respected"] = True
+            return 'respected'
         else:
-            return'safe'
+            Universality.obs["respected"] = False
+            return 'violated'
 
-    def _on_safe(self):
+    def _on_monitoring(self):
         super()._on_monitoring()
 
-    def _on_near(self):
-        super()._on_shaping(self.nearReward)
-
-    def _on_immediate(self):
-        super()._on_shaping(self.immediateReward)
+    def _on_respected(self):
+        super()._on_shaping(self.respectd_rwd)
 
     def _on_violated(self):
-        logging.warning("absence %s violated", self.name)
-        super()._on_violated(self.violatedReward)
-
-    def obs_near(self):
-        return Absence.obs["near"]
-
-    def obs_immediate(self):
-        return Absence.obs["immediate"]
-
-
-
-
-
-
-class StateTypes(SafetyStateMachine):
-    """ Testing """
-
-    states = [
-
-        {'name': 'initial',
-         'type': 'inf_ctrl'},
-
-        {'name': 'satisfied',
-         'type': 'satisfied'},
-
-        {'name': 'inf_ctrl',
-         'type': 'inf_ctrl'},
-
-        {'name': 'sys_fin_ctrl',
-         'type': 'sys_fin_ctrl'},
-
-        {'name': 'sys_urg_ctrl',
-         'type': 'sys_urg_ctrl'},
-
-        {'name': 'env_fin_ctrl',
-         'type': 'env_fin_ctrl'},
-
-        {'name': 'env_urg_ctrl',
-         'type': 'env_urg_ctrl'},
-
-        {'name': 'violated',
-         'type': 'violated'}
-    ]
-
-    transitions = []
-
-    # Convert the observations stored in self.current_obs in a state a saves the state in current_state
-    def _obs_to_state(self, obs):
-        self.curret_state = ''
-
-    def __init__(self, name, notify):
-        # Initializing the SafetyStateMachine
-        super().__init__(name, self.states, self.transitions, 'initial', notify)
+        super()._on_violated(self.violated_rwd)
 
