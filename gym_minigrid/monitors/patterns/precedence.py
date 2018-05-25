@@ -71,28 +71,28 @@ class Precedence(SafetyStateMachine):
     ]
 
     obs = {
-        "precedenceRespected": False
+        "respected": False
     }
 
     def __init__(self, name, conditions, notify, rewards):
-        self.precedenceRespectedReward = rewards.precedenceRespected
-        self.precedenceViolatedReward = rewards.precedenceViolated
-        self.precondition = conditions.preCondition
-        self.postcondition = conditions.postCondition
+        self.respectd_rwd = rewards.respected
+        self.violated_rwd = rewards.violated
+        self.precondition = conditions.pre
+        self.postcondition = conditions.post
         self.active = False
-        super().__init__(conditions.name, "precedence", self.states, self.transitions, 'initial', notify)
+        super().__init__(name, "precedence", self.states, self.transitions, 'initial', notify)
 
     # Convert observations to state and populate the obs_conditions
-    def _obs_to_state(self, obs):
+    def _obs_to_state(self, obs, action_proposed):
         # Get observations conditions
-        self.active = p.is_condition_satisfied(obs, self.postcondition)
+        self.active = p.is_condition_satisfied(obs, action_proposed, self.postcondition)
 
         if self.active:
-            if p.is_condition_satisfied(obs, self.precondition):
-                Precedence.obs["precedenceRespected"] = True
+            if p.is_condition_satisfied(obs, action_proposed, self.precondition):
+                Precedence.obs["respected"] = True
                 return 'respected'
             else:
-                Precedence.obs["precedenceRespected"] = False
+                Precedence.obs["respected"] = False
                 return 'violated'
         else:
             return 'idle'
@@ -104,17 +104,17 @@ class Precedence(SafetyStateMachine):
         super()._on_monitoring()
 
     def _on_respected(self):
-        super()._on_shaping(self.precedenceRespectedReward)
+        super()._on_shaping(self.respectd_rwd)
 
     def _on_violated(self):
-        super()._on_violated(self.precedenceViolatedReward)
+        super()._on_violated(self.violated_rwd)
 
     def activated(self):
         return self.active
 
     def respected(self):
-        return self.active and Precedence.obs["precedenceRespected"] == True
+        return self.active and Precedence.obs["respected"] == True
 
     def violated(self):
-        return self.active and Precedence.obs["precedenceRespected"] == False
+        return self.active and Precedence.obs["respected"] == False
 
