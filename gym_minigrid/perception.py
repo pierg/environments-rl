@@ -42,24 +42,24 @@ class Perception():
         """
         if condition == "light-on-current-room":
             # Returns true if the lights are on in the room the agent is currently in
-            return True
+            return Perception.light_on_current_room(env)
 
         elif condition == "light-switch-turned-on":
             # It looks for a light switch around its field of view and returns true if it is on
-            return True
+            return Perception.light_switch_turned_on(env)
 
         elif condition == "door-opened-in-front":
             # Returns true if the agent is in front of an opened door
-            return True
+            return Perception.door_opened_in_front(env)
 
         elif condition == "door-closed-in-front":
             # Returns true if the agent is in front of an opened door
-            return True
+            return Perception.door_closed_in_front(env)
 
         elif condition == "deadend-in-front":
             # Returns true if the agent is in front of a deadend
             # deadend = all the tiles surrounding the agent view are 'wall' and the tiles in the middle are 'None'
-            return True
+            return Perception.deadend_in_front(env)
 
         elif condition == "entering-a-room":
             # Returns true if the agent is entering a room
@@ -67,3 +67,63 @@ class Perception():
             return True
 
 
+    def door_opened_in_front(env):
+        if env.worldobj_in_front_agent() == "door":
+            x, y = env.get_grid_coords_from_view((0, 1))
+            if env.grid.get(x, y).is_open:
+                return True
+        return False
+
+    def door_closed_in_front(env):
+        if env.worldobj_in_front_agent() == "door":
+            x, y = env.get_grid_coords_from_view((0, 1))
+            if not env.grid.get(x, y).is_open:
+                return True
+        return False
+
+    def check(env,coordinates):
+        wx, wy = ExMiniGridEnv.get_grid_coords_from_view(env, coordinates)
+        if wx >= 0 and wx < env.grid.width and 0 <= wy < env.grid.height:
+            front = env.grid.get(wx, wy)
+            return front
+
+    def deadend_in_front(env):
+        i = 1
+        while i < 4:
+            left = Perception.check(env, (-1, i - 1))
+            right = Perception.check(env, (1, i - 1))
+            front = Perception.check(env, (0, i))
+            if left is None or right is None:
+                return False
+            if front is not None:
+                if front is Goal:
+                    return False
+                if left is None or right is None:
+                    return False
+                if left is not None and right is not None:
+                    if left.type == "goal" or right.type == "goal":
+                        return False
+                    return True
+                else:
+                    return False
+            i = i + 1
+        return False
+
+    def light_on_current_room(env):
+        try:
+            if env.roomList:
+                for x in env.roomList:
+                    if x.objectInRoom(env.agent_pos):
+                        return x.getLight()
+            return False
+        except AttributeError:
+            return False
+
+    def light_switch_turned_on(env):
+        agent_obs = ExGrid.decode(env.gen_obs()['image'])
+        for i in range (0,len(agent_obs.grid)):
+            if agent_obs.grid[i] is not None:
+                if agent_obs.grid[i].type == "lightSwitch":
+                    j,k = ExMiniGridEnv.get_grid_coords_from_view(env,((i%4)%2, 3-int(i/4)))
+                    return env.grid.get(j,k).state
+        return False

@@ -12,8 +12,9 @@ def extended_dic(obj_names=[]):
             biggest_idx = key
     new_obj_idx = biggest_idx + 1
     for obj_name in obj_names:
-        OBJECT_TO_IDX.update({obj_name: new_obj_idx})
-        new_obj_idx = new_obj_idx + 1
+        if not obj_name in OBJECT_TO_IDX.keys():
+            OBJECT_TO_IDX.update({obj_name: new_obj_idx})
+            new_obj_idx = new_obj_idx + 1
 
 
 extended_dic(["water","lightSwitch"])
@@ -47,6 +48,10 @@ class Room:
         k,l = self.position
         x += k
         y += l
+        print("agentpos", position)
+        print("end", x, y)
+        print("start",k,l)
+        print(self)
         if ax < x and ax >= k:
             if ay < y and ay >= l:
                 return True
@@ -70,6 +75,7 @@ class Water(WorldObj):
 
 class LightSwitch(WorldObj):
     def __init__(self):
+        self.state = False
         super(LightSwitch, self).__init__('lightSwitch', 'yellow')
 
     def affectRoom(self,room):
@@ -77,6 +83,7 @@ class LightSwitch(WorldObj):
 
     def toggle(self, env, pos):
         self.room.setLight(not self.room.getLight())
+        self.state = not self.state
         return True
 
     def getRoomNumber(self):
@@ -125,7 +132,6 @@ class ExGrid(Grid):
         """
         Decode an array grid encoding back into a grid
         """
-
         width = array.shape[0]
         height = array.shape[1]
         assert array.shape[2] == 3
@@ -165,7 +171,6 @@ class ExGrid(Grid):
                     v = LightSwitch()
                 else:
                     assert False, "unknown obj type in decode '%s'" % objType
-
                 grid.set(i, j, v)
         return grid
 
@@ -197,62 +202,49 @@ class ExMiniGridEnv(MiniGridEnv):
         """
         Generate the agent's view (partially observable, low-resolution encoding)
         """
-
         grid, vis_mask = self.gen_obs_grid()
-        if self.check_if_agent_in_dark_room():
-            for i in range(0,len(grid.grid)):
-                    if grid.grid[i] is not None:
-                        if grid.grid[i].type != "wall":
-                            grid.grid[i] = None
-        # Encode the partially observable view into a numpy array
-        image = grid.encode()
-
-        assert hasattr(self, 'mission'), "environments must define a textual mission string"
-
-        # Observations are dictionaries containing:
-        # - an image (partially observable view of the environment)
-        # - the agent's direction/orientation (acting as a compass)
-        # - a textual mission string (instructions for the agent)
-        obs = {
-            'image': image,
-            'direction': self.agent_dir,
-            'mission': self.mission
-        }
-
-        return obs
-
-    def check_if_agent_in_dark_room(self):
+        """if Perception.light_on_current_room(self):"""
+        print("method called")
         try:
             if self.roomList:
+                i = 0
                 for x in self.roomList:
-                    if not x.getLight():
-                        position = self.agent_pos
-                        if x.objectInRoom(position):
-                            return True
-            return False
+                    print("chambre n ",i)
+                    i += 1
+                    print(len(self.roomList))
+                    if x.objectInRoom(self.agent_pos):
+                        if not x.getLight():
+                            for i in range(0, len(grid.grid)):
+                                if grid.grid[i] is not None:
+                                    if grid.grid[i].type != "wall":
+                                        grid.grid[i] = None
+                            # Encode the partially observable view into a numpy array
+                        image = grid.encode()
+
+                        assert hasattr(self, 'mission'), "environments must define a textual mission string"
+
+                        # Observations are dictionaries containing:
+                        # - an image (partially observable view of the environment)
+                        # - the agent's direction/orientation (acting as a compass)
+                        # - a textual mission string (instructions for the agent)
+                        obs = {
+                            'image': image,
+                            'direction': self.agent_dir,
+                            'mission': self.mission
+                        }
+                        return obs
         except AttributeError:
-            return False
+            return super().gen_obs()
+
 
     def step(self,action):
         # Reset if agent step on water without knowing it
-        if action == self.actions.forward and self.worldobj_in_front_agent_noDark(1) == "water" :
+        if action == self.actions.forward and self.worldobj_in_front_agent(1) == "water" :
             return self.gen_obs(), 0, True, "died"
         else:
             return super().step(action)
 
-
-    def worldobj_in_front_agent(self, distance=1):
-        """
-        Returns the type of the worldobj in the cell in front of the agent
-        :param distance: integer, how many cells in front
-        :return: string: worldobj type
-        """
-
-        if self.check_if_agent_in_dark_room():
-           return None
-        return self.worldobj_in_front_agent_noDark(distance)
-
-    def worldobj_in_front_agent_noDark(self,distance=1):
+    def worldobj_in_front_agent(self,distance=1):
         ax, ay = self.agent_pos
         wx, wy = ax, ay
 
@@ -284,10 +276,6 @@ class ExMiniGridEnv(MiniGridEnv):
         :param distance: integer, how many cells in right
         :return: string: worldobj type
         """
-
-        if self.check_if_agent_in_dark_room():
-           return None
-
         ax, ay = self.agent_pos
         ad = self.agent_dir
         wx, wy = ax, ay
@@ -322,9 +310,6 @@ class ExMiniGridEnv(MiniGridEnv):
         :return: string: worldobj type
         """
 
-        if self.check_if_agent_in_dark_room():
-           return None
-
         ax, ay = self.agent_pos
         ad = self.agent_dir
         wx, wy = ax, ay
@@ -357,28 +342,30 @@ class ExMiniGridEnv(MiniGridEnv):
         Dual of "get_view_coords". Translate and rotate relative to the agent coordinates (i, j) into the
         absolute grid coordinates.
         Need to have tuples of integers for the position of the agent and its direction
-        :param coordinates: tuples of integers (horizontal,vertical) position from the agent relative to its position
+        :param coordinates: tuples of integers (vertical,horizontal) position from the agent relative to its position
         :return : coordinates translated into the absolute grid coordinates.
         """
         ax, ay = self.agent_pos
+        bx,by = self.agent_pos
         ad = self.agent_dir
         x,y = coordinates
         # agent facing down
         if ad == 1:
-            ax -= x
-            ay += y
+            ax -= y
+            ay += x
         # agent facing right
         elif  ad == 0:
-            ax += y
-            ay += x
+            ax += x
+            ay += y
         # agent facing left
         elif ad == 2:
-            ax -= y
-            ay -= x
+            ax -= x
+            ay -= y
         # agent facing up
         elif ad == 3:
-            ax += x
-            ay -= y
+            ax += y
+            ay -= x
+
         return ax,ay
 
 
@@ -390,8 +377,6 @@ class ExMiniGridEnv(MiniGridEnv):
         :param side: integer, if positive represents the cells to the right, negative to the left of the agent
         :return: string: worldobj type
         """
-        if self.check_if_agent_in_dark_room():
-           return None
 
         coordinates = (front,side)
         worldobj = None
@@ -405,18 +390,6 @@ class ExMiniGridEnv(MiniGridEnv):
                 return worldobj_type
         return None
 
-    def check_precedence_condition(self,object_type):
-        try :
-            if self.roomList:
-                if object_type == "light-on":
-                    return self.check_light_are_on()
-                elif object_type == "door-opened":
-                    return self.check_door_is_opened()
-                elif object_type == "enter-room":
-                    return self.agent_want_to_enter_room()
-                return False
-        except AttributeError:
-            return True
 
     def worldpattern_in_front_agent(self, object_type):
         if object_type == "deadend":
@@ -428,71 +401,10 @@ class ExMiniGridEnv(MiniGridEnv):
             return self.deadend_is_near_agent()
         return False
 
-    def check(self,coordinates):
-        wx, wy = ExMiniGridEnv.get_grid_coords_from_view(self, coordinates)
-        if wx >= 0 and wx < self.grid.width and 0 <= wy < self.grid.height:
-            front = self.grid.get(wx, wy)
-            return front
 
-    def deadend_in_front_agent(self):
-        if self.check_if_agent_in_dark_room():
-           return False
-        i = 1
-        while i < 4:
-            left = self.check((-1, i - 1))
-            right = self.check((1, i - 1))
-            front = self.check((0, i))
-            if left is None or right is None:
-                return False
-            if front is not None:
-                if front is Goal:
-                    return False
-                if left is None or right is None:
-                    return False
-                if left is not None and right is not None:
-                    if left.type == "goal" or right.type == "goal":
-                        return False
-                    return True
-                else :
-                    return False
-            i = i+1
-        return False
 
-    def deadend_is_near_agent(self):
-        if self.check_if_agent_in_dark_room():
-           return False
-        i = 1
-        while i < 4:
-            front = self.check((0,i))
-            left = self.check((-1,i))
-            right = self.check((1,i))
-            closeLeft = self.check((-1,0))
-            closeRight = self.check((1,0))
-            if front is not None:
-                if closeLeft is None or closeRight is None :
-                    if front.type == "goal":
-                        return False
-                    return True
-            if left is None or right is None:
-                return False
-            elif left is not None and right is not None:
-                if left.type == "goal" or right.type == "goal":
-                    return False
-                if front is not None:
-                    return False
-            elif front is not None:
-                return True
-            i = i+1
-        return True
 
-    def agent_want_to_enter_room(self):
-        if self.worldobj_in_front_agent() == "door":
-            x,y = self.get_grid_coords_from_view((0,1))
-            if self.grid.get(x,y).is_open:
-                return True
-            else:
-                return False
-        return False
+
 
     def check_light_are_on(self):
         try:

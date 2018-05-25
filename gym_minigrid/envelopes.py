@@ -165,7 +165,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         for monitor in self.precedence_monitors:
             monitor.check(current_obs_env, proposed_action)
-            if monitor.state == "disobey":
+            if monitor.state == "violated":
                 saved = True
 
         # Check for unsafe actions before sending them to the environment:
