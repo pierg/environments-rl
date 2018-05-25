@@ -127,6 +127,9 @@ class Absence(SafetyStateMachine):
 
     def _on_violated(self):
         logging.warning("absence %s violated", self.name)
+        # Rollback to the state before the violation:
+        self.machine.set_state(self.env_state)
+        logging.warning("Rolled-back state to: %s", self.state)
         super()._on_violated(self.violatedReward)
 
     def obs_near(self):
