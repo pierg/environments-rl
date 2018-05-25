@@ -21,14 +21,10 @@ class Precedence(SafetyStateMachine):
          'on_enter': '_on_safe'},
 
         {'name': 'respected',
-         'type': 'sys_fin_ctrl',
+         'type': 'satisfied',
          'on_enter': '_on_respected'},
 
-        {'name': 'disobey',
-         'type': 'sys_urg_ctrl',
-         'on_enter': '_on_disobeyed'},
-
-        {'name': 'fail',
+        {'name': 'violated',
          'type': 'violated',
          'on_enter': '_on_violated'}
     ]
@@ -40,41 +36,42 @@ class Precedence(SafetyStateMachine):
 
         {'trigger': '*',
          'source': 'safe',
-         'dest': 'disobey',
-         'conditions': 'obs_precedence_disobeyed',
-         'unless': 'obs_precedence_respected'},
+         'dest': 'safe',
+         'unless': 'obs_precedence_active'},
 
         {'trigger': '*',
          'source': 'safe',
          'dest': 'respected',
-         'conditions': 'obs_precedence_respected',
-         'unless': 'obs_precedence_disobeyed'},
+         'conditions': ['obs_precedence_active','obs_precedence_respected']},
+
+        {'trigger': '*',
+         'source': 'safe',
+         'dest': 'violated',
+         'conditions': ['obs_precedence_active', 'obs_precedence_violated']},
+
+        {'trigger': '*',
+         'source': 'respected',
+         'dest': 'violated',
+         'conditions': ['obs_precedence_active', 'obs_precedence_violated']},
+
+        {'trigger': '*',
+         'source': 'violated',
+         'dest': 'respected',
+         'conditions': ['obs_precedence_active', 'obs_precedence_respected']},
+
+        {'trigger': '*',
+         'source': 'violated',
+         'dest': 'safe',
+         'unless': 'obs_precedence_active'},
 
         {'trigger': '*',
          'source': 'respected',
          'dest': 'safe',
-         'unless': ['obs_precedence_disobeyed', 'obs_precedence_respected']},
-
-        {'trigger': '*',
-         'source': 'disobey',
-         'dest': 'safe',
-         'unless': ['obs_precedence_disobeyed', 'obs_precedence_respected']},
-
-        {'trigger': '*',
-         'source': 'disobey',
-         'dest': 'respected',
-         'conditions': 'obs_precedence_respected',
-         'unless': 'obs_precedence_disobeyed'},
-
-        {'trigger': '*',
-         'source': 'disobey',
-         'dest': 'fail',
-         'conditions': ['forward','obs_precedence_disobeyed']}
+         'unless': 'obs_precedence_active'},
     ]
 
     obs = {
-        "precedenceRespected": False,
-        "precedenceViolated": False
+        "precedenceRespected": False
     }
 
     def __init__(self, name, object_prec, notify, reward):
@@ -82,53 +79,43 @@ class Precedence(SafetyStateMachine):
         self.precedenceViolatedReward = reward.precedenceViolated
         self.precondition = object_prec.preCondition
         self.postcondition = object_prec.postCondition
+        self.active = False
         super().__init__(object_prec.name, "precedence", self.states, self.transitions, 'initial', notify)
 
     # Convert observations to state and populate the obs_conditions
     def _obs_to_state(self, obs):
-
         # Get observations conditions
-        precondition = p.precedence_condition(obs, self.precondition)
-        postcondition = p.precedence_condition(obs, self.postcondition)
-        if precondition and postcondition:
-            Precedence.obs["precedenceRespected"] = True
-            Precedence.obs["precedenceViolated"] = False
-        elif not precondition and postcondition:
-            Precedence.obs["precedenceRespected"] = False
-            Precedence.obs["precedenceViolated"] = True
+        self.active = p.precedence_condition(obs,self.postcondition)
+        if self.active :
+            if p.precedence_condition(obs,self.precondition):
+                Precedence.obs["precedenceRespected"]=True
+                return 'respected'
+            else:
+                Precedence.obs["precedenceRespected"] = False
+                return 'violated'
         else:
-            Precedence.obs["precedenceRespected"] = False
-            Precedence.obs["precedenceViolated"] = False
-        logging.info("precedence %s : Conditions Respected ->%s Conditions Violated ->%s", self.name,
-                     Precedence.obs["precedenceRespected"], Precedence.obs["precedenceViolated"])
-        # Return the state
-        if Precedence.obs["precedenceViolated"]:
-            return 'disobey'
-        elif Precedence.obs["precedenceRespected"]:
-            return 'respected'
-        else:
-            return'safe'
+            return 'safe'
 
     def _on_safe(self):
+        super()._on_monitoring()
+
+    def _on_active(self):
         super()._on_monitoring()
 
     def _on_respected(self):
         super()._on_shaping(self.precedenceRespectedReward)
 
-    def _on_disobeyed(self):
-        super()._on_shaping(self.precedenceViolatedReward)
-
     def _on_violated(self):
-        logging.warning("precedence %s violated", self.name)
         super()._on_violated(self.precedenceViolatedReward)
 
+    def obs_precedence_active(self):
+        return self.active
+
     def obs_precedence_respected(self):
-        return Precedence.obs["precedenceRespected"]
+        return self.active and Precedence.obs["precedenceRespected"]==True
 
-    def obs_precedence_disobeyed(self):
-        return Precedence.obs["precedenceViolated"]
-
-
+    def obs_precedence_violated(self):
+        return self.active and Precedence.obs["precedenceRespected"]==False
 
 class StateTypes(SafetyStateMachine):
     """ Testing """
