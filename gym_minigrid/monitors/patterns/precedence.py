@@ -16,9 +16,9 @@ class Precedence(SafetyStateMachine):
          'type': 'inf_ctrl',
          'on_enter': '_on_monitoring'},
 
-        {'name': 'safe',
+        {'name': 'idle',
          'type': 'inf_ctrl',
-         'on_enter': '_on_safe'},
+         'on_enter': '_on_idle'},
 
         {'name': 'respected',
          'type': 'satisfied',
@@ -35,68 +35,69 @@ class Precedence(SafetyStateMachine):
          'dest': '*'},
 
         {'trigger': '*',
-         'source': 'safe',
-         'dest': 'safe',
-         'unless': 'obs_precedence_active'},
+         'source': 'idle',
+         'dest': 'idle',
+         'unless': 'activated'},
 
         {'trigger': '*',
-         'source': 'safe',
+         'source': 'idle',
          'dest': 'respected',
-         'conditions': ['obs_precedence_active','obs_precedence_respected']},
+         'conditions': ['activated', 'respected']},
 
         {'trigger': '*',
-         'source': 'safe',
+         'source': 'idle',
          'dest': 'violated',
-         'conditions': ['obs_precedence_active', 'obs_precedence_violated']},
+         'conditions': ['activated', 'violated']},
 
         {'trigger': '*',
          'source': 'respected',
          'dest': 'violated',
-         'conditions': ['obs_precedence_active', 'obs_precedence_violated']},
+         'conditions': ['activated', 'violated']},
 
         {'trigger': '*',
          'source': 'violated',
          'dest': 'respected',
-         'conditions': ['obs_precedence_active', 'obs_precedence_respected']},
+         'conditions': ['activated', 'respected']},
 
         {'trigger': '*',
          'source': 'violated',
-         'dest': 'safe',
-         'unless': 'obs_precedence_active'},
+         'dest': 'idle',
+         'unless': 'activated'},
 
         {'trigger': '*',
          'source': 'respected',
-         'dest': 'safe',
-         'unless': 'obs_precedence_active'},
+         'dest': 'idle',
+         'unless': 'activated'},
     ]
 
     obs = {
         "precedenceRespected": False
     }
 
-    def __init__(self, name, object_prec, notify, reward):
-        self.precedenceRespectedReward = reward.precedenceRespected
-        self.precedenceViolatedReward = reward.precedenceViolated
-        self.precondition = object_prec.preCondition
-        self.postcondition = object_prec.postCondition
+    def __init__(self, name, conditions, notify, rewards):
+        self.precedenceRespectedReward = rewards.precedenceRespected
+        self.precedenceViolatedReward = rewards.precedenceViolated
+        self.precondition = conditions.preCondition
+        self.postcondition = conditions.postCondition
         self.active = False
-        super().__init__(object_prec.name, "precedence", self.states, self.transitions, 'initial', notify)
+        super().__init__(conditions.name, "precedence", self.states, self.transitions, 'initial', notify)
 
     # Convert observations to state and populate the obs_conditions
     def _obs_to_state(self, obs):
         # Get observations conditions
-        self.active = p.precedence_condition(obs,self.postcondition)
-        if self.active :
-            if p.precedence_condition(obs,self.precondition):
-                Precedence.obs["precedenceRespected"]=True
+        self.active = p.is_condition_satisfied(obs, self.postcondition)
+
+        if self.active:
+            if p.is_condition_satisfied(obs, self.precondition):
+                Precedence.obs["precedenceRespected"] = True
                 return 'respected'
             else:
                 Precedence.obs["precedenceRespected"] = False
                 return 'violated'
         else:
-            return 'safe'
+            return 'idle'
 
-    def _on_safe(self):
+    def _on_idle(self):
         super()._on_monitoring()
 
     def _on_active(self):
@@ -108,46 +109,12 @@ class Precedence(SafetyStateMachine):
     def _on_violated(self):
         super()._on_violated(self.precedenceViolatedReward)
 
-    def obs_precedence_active(self):
+    def activated(self):
         return self.active
 
-    def obs_precedence_respected(self):
-        return self.active and Precedence.obs["precedenceRespected"]==True
+    def respected(self):
+        return self.active and Precedence.obs["precedenceRespected"] == True
 
-    def obs_precedence_violated(self):
-        return self.active and Precedence.obs["precedenceRespected"]==False
-
-class StateTypes(SafetyStateMachine):
-    """ Testing """
-
-    states = [
-
-        {'name': 'initial',
-         'type': 'inf_ctrl'},
-
-        {'name': 'satisfied',
-         'type': 'satisfied'},
-
-        {'name': 'inf_ctrl',
-         'type': 'inf_ctrl'},
-
-        {'name': 'sys_fin_ctrl',
-         'type': 'sys_fin_ctrl'},
-
-        {'name': 'env_fin_ctrl',
-         'type': 'env_fin_ctrl'},
-
-        {'name': 'violated',
-         'type': 'violated'}
-    ]
-
-    transitions = []
-
-    # Convert the observations stored in self.current_obs in a state a saves the state in current_state
-    def _obs_to_state(self, obs):
-        self.curret_state = ''
-
-    def __init__(self, name, notify):
-        # Initializing the SafetyStateMachine
-        super().__init__(name, self.states, self.transitions, 'initial', notify)
+    def violated(self):
+        return self.active and Precedence.obs["precedenceRespected"] == False
 
