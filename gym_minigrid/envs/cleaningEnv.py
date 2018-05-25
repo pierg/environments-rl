@@ -1,5 +1,6 @@
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
+from gym_minigrid.envelopes import *
 
 class CleaningEnv(ExMiniGridEnv):
 
@@ -23,6 +24,9 @@ class CleaningEnv(ExMiniGridEnv):
         self.start_pos = (1, 1)
         self.start_dir = 0
 
+        self.agent_pos = (1, 1)
+        self.agent_dir = 0
+
 
 
         #self.list_dirt: name of the list who envelopes.py check to know if the room is clean
@@ -33,7 +37,7 @@ class CleaningEnv(ExMiniGridEnv):
         for k in range(self.number_dirt):
             dirt = Dirt()
             x, y = self._rand_pos(2, width-2, 2, height - 2)
-            # a dirt pattern need a list to have the number of dirt in the environnemet
+            # a dirt pattern need    a list to have the number of dirt in the environnemet
             while self.grid.get(x,y) is  not None:
                 x, y = self._rand_pos(2, width - 2, 2, height - 2)
             self.grid.set(x, y, dirt)
@@ -56,7 +60,30 @@ class CleaningEnv(ExMiniGridEnv):
         self.start_pos = (1, 1)
         self.start_dir = 0
 
+        self.old_front_elm = self.worldobj_in_front_agent_noDark()
+
         self.mission = "Clean the room"
+
+    def step(self, action):
+        obs, reward, done, info = super().step(action)
+
+        # Check if the agent clean a dirt
+        if self.old_front_elm == "dirt" \
+                and action == self.actions.toggle:
+            info = {}
+            reward = 0.5
+        self.old_front_elm = self.worldobj_in_front_agent_noDark()
+
+
+        # Check the goal of the grid
+        #if hasattr(self, 'list_dirt'):
+        if len(self.list_dirt) == 0:
+                done = True
+                reward = reward + 1
+                self.step_number = 0
+
+
+        return obs, reward, done, info
 
 register(
     id='MiniGrid-CleaningEnv-8x8-v0',

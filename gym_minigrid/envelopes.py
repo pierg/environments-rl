@@ -53,8 +53,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Set reward for the goal
         self.goal_reward = self.config.reward.goal
 
-        # Set reward for cleaning dirt
-        self.dirt_reward = self.config.cleaning_dirt.reward.toggle
 
         self.death_reward = self.config.reward.death
 
@@ -130,7 +128,6 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         if state == "disobey":
             if kwargs:
-                print("bad action")
                 logging.warning("%s unrespected", name)
                 unsafe_action = kwargs.get('unsafe_action')
                 shaped_reward = kwargs.get('shaped_reward', 0)
@@ -263,33 +260,6 @@ class SafetyEnvelope(gym.core.Wrapper):
             monitor["shaped_reward"] = 0
             monitor["unsafe_action"] = ""
 
-        #Check if the agent clean a dirt
-        if self.old_front_elm=="dirt" \
-            and suitable_action == ExMiniGridEnv.Actions.toggle:
-                info = {}
-                reward = self.dirt_reward
-        """
-        # Check if the agent break a vase
-        if self.old_front_elm == "vase" \
-            and suitable_action == ExMiniGridEnv.Actions.toggle:
-                print("bad action")
-                info = {}
-                reward = self.vase_reward
-                return obs, reward, done, info
-        """
-
-        self.old_front_elm = ExMiniGridEnv.worldobj_in_front_agent_noDark(self.env)
-
-        #Check the goal of the grid
-        if self.config.goal == "clean_room":
-            # If the goal is "clean_room", check if the room is clean
-            if hasattr(self.env, 'list_dirt'):
-                if len(self.env.list_dirt)==0:
-                    print("goal achieve")
-                    done = True
-                    reward = reward + self.goal_reward
-                    self.step_number = 0
-                    return obs, reward, done, info
 
         # Check if goal reached, if yes add goal_reward
         a,b = ExMiniGridEnv.get_grid_coords_from_view(self.env,(0,0))

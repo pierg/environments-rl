@@ -95,7 +95,6 @@ class Avoid(SafetyStateMachine):
 
     def _on_disobey(self):
         super()._on_shaping(self.disobeyReward)
-        print("disobey")
 
     def obs_warning(self):
         return Avoid.obs["warning"]
