@@ -107,14 +107,6 @@ def worldobj_name_to_object(worldobj_name):
     else:
         return None
 
-def worldobj_name_can_be_toggled(worldobj_name):
-    if worldobj_name == "lightSwitch":
-        return True
-    elif worldobj_name == "door":
-        return True
-    else:
-        return False
-
 class ExGrid(Grid):
     """
     Extending Grid methods to support the new objects
@@ -193,6 +185,33 @@ class ExMiniGridEnv(MiniGridEnv):
         # Ex:
         clean = 7
 
+    def gen_obs(self):
+        """
+        Generate the agent's view (partially observable, low-resolution encoding)
+        """
+
+        grid, vis_mask = self.gen_obs_grid()
+        if self.check_if_agent_in_dark_room():
+            for i in range(0,len(grid.grid)):
+                    if grid.grid[i] is not None:
+                        grid.grid[i] = None
+        # Encode the partially observable view into a numpy array
+        image = grid.encode()
+
+        assert hasattr(self, 'mission'), "environments must define a textual mission string"
+
+        # Observations are dictionaries containing:
+        # - an image (partially observable view of the environment)
+        # - the agent's direction/orientation (acting as a compass)
+        # - a textual mission string (instructions for the agent)
+        obs = {
+            'image': image,
+            'direction': self.agent_dir,
+            'mission': self.mission
+        }
+
+        return obs
+
     def check_if_agent_in_dark_room(self):
         try:
             if self.roomList:
@@ -207,7 +226,7 @@ class ExMiniGridEnv(MiniGridEnv):
 
     def step(self,action):
         # Reset if agent step on water without knowing it
-        if action == self.actions.forward and self.worldobj_in_front_agent_noDark(1) == "water" :
+        if action == self.actions.forward and self.worldobj_in_front_agent(1) == "water" :
             return self.gen_obs(), 0, True, "died"
         else:
             return super().step(action)
@@ -219,12 +238,6 @@ class ExMiniGridEnv(MiniGridEnv):
         :param distance: integer, how many cells in front
         :return: string: worldobj type
         """
-
-        if self.check_if_agent_in_dark_room():
-           return None
-        return self.worldobj_in_front_agent_noDark(distance)
-
-    def worldobj_in_front_agent_noDark(self,distance=1):
         ax, ay = self.agent_pos
         wx, wy = ax, ay
 
@@ -249,6 +262,35 @@ class ExMiniGridEnv(MiniGridEnv):
                 worldobj_type = worldobj.type
                 return worldobj_type
         return None
+        """if self.check_if_agent_in_dark_room():
+           return None
+        return self.worldobj_in_front_agent_noDark(distance)"""
+
+    """def worldobj_in_front_agent_noDark(self,distance=1):
+        ax, ay = self.agent_pos
+        wx, wy = ax, ay
+
+        worldobj = None
+
+        # agent facing down
+        if self.agent_dir == 1:
+            wy += distance
+        # agent facing right
+        elif self.agent_dir == 0:
+            wx += distance
+        # agent facing left
+        elif self.agent_dir == 2:
+            wx -= distance
+        # agent facing up
+        elif self.agent_dir == 3:
+            wy -= distance
+
+        if wx >= 0 and wx < self.grid.width and wy >=0 and wy < self.grid.height:
+            worldobj = self.grid.get(wx, wy)
+            if worldobj is not None:
+                worldobj_type = worldobj.type
+                return worldobj_type
+        return None"""
 
     def worldobj_in_right_agent(self, distance=1):
         """
@@ -257,8 +299,8 @@ class ExMiniGridEnv(MiniGridEnv):
         :return: string: worldobj type
         """
 
-        if self.check_if_agent_in_dark_room():
-           return None
+        """if self.check_if_agent_in_dark_room():
+           return None"""
 
         ax, ay = self.agent_pos
         ad = self.agent_dir
@@ -294,8 +336,8 @@ class ExMiniGridEnv(MiniGridEnv):
         :return: string: worldobj type
         """
 
-        if self.check_if_agent_in_dark_room():
-           return None
+        """if self.check_if_agent_in_dark_room():
+           return None"""
 
         ax, ay = self.agent_pos
         ad = self.agent_dir
@@ -362,8 +404,8 @@ class ExMiniGridEnv(MiniGridEnv):
         :param side: integer, if positive represents the cells to the right, negative to the left of the agent
         :return: string: worldobj type
         """
-        if self.check_if_agent_in_dark_room():
-           return None
+        """if self.check_if_agent_in_dark_room():
+           return None"""
 
         coordinates = (front,side)
         worldobj = None
@@ -407,8 +449,8 @@ class ExMiniGridEnv(MiniGridEnv):
             return front
 
     def deadend_in_front_agent(self):
-        if self.check_if_agent_in_dark_room():
-           return False
+        """if self.check_if_agent_in_dark_room():
+           return False"""
         i = 1
         while i < 4:
             left = self.check((-1, i - 1))
@@ -431,8 +473,8 @@ class ExMiniGridEnv(MiniGridEnv):
         return False
 
     def deadend_is_near_agent(self):
-        if self.check_if_agent_in_dark_room():
-           return False
+        """if self.check_if_agent_in_dark_room():
+           return False"""
         i = 1
         while i < 4:
             front = self.check((0,i))
