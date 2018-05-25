@@ -1,5 +1,6 @@
 from monitors.patterns.absence import *
 from monitors.patterns.precedence import *
+from monitors.patterns.avoid import *
 from configurations import config_grabber as cg
 
 
@@ -43,4 +44,8 @@ class PrintMonitors:
 
         for precedence_obj in config.monitors.precedence.monitored:
             new_precedence_monitor = Precedence("precedence_" + precedence_obj.name, precedence_obj, on_monitoring, precedence_obj.reward)
+            new_precedence_monitor.draw()
+
+        for avoid_obj in config.monitors.avoid.monitored:
+            new_avoid_monitor = Avoid("avoid_" + avoid_obj.name, avoid_obj, on_monitoring, avoid_obj.reward)
             new_precedence_monitor.draw()

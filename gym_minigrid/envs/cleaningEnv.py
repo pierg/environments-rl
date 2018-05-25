@@ -3,7 +3,7 @@ from gym_minigrid.register import register
 
 class CleaningEnv(ExMiniGridEnv):
 
-    def __init__(self, size=12):
+    def __init__(self, size=8):
         super().__init__(
             grid_size=size,
             max_steps=4*size*size,
@@ -29,7 +29,7 @@ class CleaningEnv(ExMiniGridEnv):
         # WARNING don't change the name of list_dirt if you want to use the cleaning robot
         self.list_dirt = []
         #Place dirt
-        self.number_dirt = 10
+        self.number_dirt = 3
         for k in range(self.number_dirt):
             dirt = Dirt()
             x, y = self._rand_pos(2, width-2, 2, height - 2)
@@ -58,8 +58,7 @@ class CleaningEnv(ExMiniGridEnv):
 
         self.mission = "Clean the room"
 
-
 register(
-    id='MiniGrid-CleaningEnv-12x12-v0',
+    id='MiniGrid-CleaningEnv-8x8-v0',
     entry_point='gym_minigrid.envs:CleaningEnv'
 )
