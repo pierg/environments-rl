@@ -228,6 +228,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         if end:
             info = "end"
+            done = True
 
         # Return everything to the agent
         return obs, reward, done, info
@@ -273,6 +274,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         # check if episode is finished
         if self.step_number == self.env.max_steps:
             end = True
+            done = True
             self.step_number = 0
 
         ##### PLANNER
@@ -282,7 +284,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             # check if critical action
             if action in self.critical_actions:
                 self.critical_actions = []
-                return obs, self.config.reward.unsafe, True, "violation"
+                return obs, self.config.reward.unsafe, False, "violation"
 
             # check if following the plan
             reward = self.check_plan(action)
@@ -295,12 +297,13 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             # activate planner
             if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
                 self.action_plan = run(current_obs, current_dir, goal_safe_zone)
-                self.critical_actions = [ExMiniGridEnv.Actions.forward]
-                # self.critical_actions = [
-                #     ExMiniGridEnv.Actions.forward,
-                #     ExMiniGridEnv.Actions.pickup,
-                #     ExMiniGridEnv.Actions.toggle
-                # ]
+                # self.critical_actions = [ExMiniGridEnv.Actions.forward]
+                self.critical_actions = [
+                    ExMiniGridEnv.Actions.forward,
+                    ExMiniGridEnv.Actions.pickup,
+                    ExMiniGridEnv.Actions.drop,
+                    ExMiniGridEnv.Actions.toggle
+                ]
                 # print(self.action_plan)
 
             self.critical_actions = []
@@ -312,13 +315,16 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             if current_cell.type == "goal":
                 reward = self.config.reward.goal
                 info = "goal"
+                self.reset()
             elif current_cell.type == "unsafe":
                 reward = self.config.reward.unsafe
                 info = "violation"
-                done = True
+                # done = True
 
         if end:
             info = "end"
+            done = True
+            self.reset()
 
         return obs, reward, done, info
 
