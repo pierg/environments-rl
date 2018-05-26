@@ -1,4 +1,5 @@
-from .planner import ObservationParser, ActionPlanner, reconstruct_path, CellState, State, StateEnum
+from .planner import ObservationParser, ActionPlanner, reconstruct_path, CellState
+from .goals import *
 import copy
 
 
@@ -18,6 +19,21 @@ def run(current_obs, direction, goals):
     goal_cell = None
 
     for goal in goals:
+
+        if goal == goal_turn:
+            if direction == StateEnum.orientation_east.value:
+                goal_cell = planner.graph.find_state(((StateEnum.orientation_west, True),))
+                break
+            elif direction == StateEnum.orientation_west.value:
+                goal_cell = planner.graph.find_state(((StateEnum.orientation_east, True),))
+                break
+            elif direction == StateEnum.orientation_north.value:
+                goal_cell = planner.graph.find_state(((StateEnum.orientation_south, True),))
+                break
+            elif direction == StateEnum.orientation_south.value:
+                goal_cell = planner.graph.find_state(((StateEnum.orientation_north, True),))
+                break
+
         goal_list = create_goals(goal, [])
         while goal_cell is None and goal_list:
             goal_cell = planner.graph.find_state(goal_list.pop())
@@ -27,6 +43,7 @@ def run(current_obs, direction, goals):
     if goal_cell is None:
         #  raise ValueError('No goal found in graph!')
         return []
+
 
     if goal_cell == current_cell_state.tuple():
         raise ValueError('Trying to create a plan for the current state!')
