@@ -57,8 +57,11 @@ class UnsafeEnv(ExMiniGridEnv):
                     i += 1
 
         else:
+            self.grid.set(width - 4, height - 2, Unsafe())
             self.grid.set(width - 4, height - 3, Unsafe())
-            self.grid.set(width - 3, height - 4, Unsafe())
+            self.grid.set(width - 4, height - 5, Unsafe())
+            self.grid.set(width - 4, height - 6, Unsafe())
+            self.grid.set(width - 4, height - 7, Unsafe())
 
         self.mission = "get to the green goal square"
 
