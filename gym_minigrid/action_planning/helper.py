@@ -2,20 +2,32 @@ from .planner import ObservationParser, ActionPlanner, reconstruct_path, CellSta
 import copy
 
 
-def run(current_obs, direction, goal):
-    goals = create_goals(goal, [])
-
+def run(current_obs, direction, goals):
+    """
+    Runs the planner
+    :param current_obs: obs as created by decoding the grid
+    :param direction: Direction to which the agent points
+    :param goals: List of goals, the lower the index the highest priority
+    :return: plan containing the actions
+    """
     parser = ObservationParser(current_obs, direction)
     current_cell = parser.get_current_cell()
     current_cell_state = CellState(current_cell, direction)
     planner = ActionPlanner(current_cell_state)
 
     goal_cell = None
-    while goal_cell is None and goals:
-        goal_cell = planner.graph.find_state(goals.pop())
+
+    for goal in goals:
+        goal_list = create_goals(goal, [])
+        while goal_cell is None and goal_list:
+            goal_cell = planner.graph.find_state(goal_list.pop())
+        if goal_cell is not None:
+            break
+
     if goal_cell is None:
-        raise ValueError('No goal found in graph!')
-        # return []
+        #  raise ValueError('No goal found in graph!')
+        return []
+
     if goal_cell == current_cell_state.tuple():
         raise ValueError('Trying to create a plan for the current state!')
     came_from, cost_so_far = planner.plan(current_cell_state.tuple(), goal_cell)
