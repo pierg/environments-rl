@@ -16,3 +16,4 @@ from gym_minigrid.envs.bigEnv import *
 from gym_minigrid.envs.firstEvalEnv import *
 from gym_minigrid.envs.doorEnv import *
 from gym_minigrid.envs.doorWaterEnv import *
+from gym_minigrid.envs.unsafeMazeEnv import *
