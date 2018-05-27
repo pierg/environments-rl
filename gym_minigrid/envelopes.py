@@ -290,7 +290,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             # check if critical action
             if action in self.critical_actions:
                 self.critical_actions = []
-                return obs, self.config.reward.unsafe, False, "violation"
+                return obs, self.config.reward.unsafe, True, "violation"
 
             # check if following the plan
             reward, info = self.check_plan(action, info)
@@ -326,7 +326,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             elif current_cell.type == "unsafe":
                 reward = self.config.reward.unsafe
                 info = "violation"
-                # done = True
+                done = True
 
         if end:
             info = "end"
