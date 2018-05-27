@@ -334,19 +334,19 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             self.reset()
 
         #  STIMULUS for exploration
+        env = self.unwrapped
+        tup = ((int(env.agent_pos[0]), int(env.agent_pos[1])), env.agent_dir, action)
+
+        # Get the count for this key
+        preCnt = 0
+        if tup in self.counts:
+            preCnt = self.counts[tup]
+
+        # Update the count for this key
+        newCnt = preCnt + 1
+        self.counts[tup] = newCnt
+
         if reward == self.config.reward.step:
-            env = self.unwrapped
-            tup = ((int(env.agent_pos[0]), int(env.agent_pos[1])), env.agent_dir, action)
-
-            # Get the count for this key
-            preCnt = 0
-            if tup in self.counts:
-                preCnt = self.counts[tup]
-
-            # Update the count for this key
-            newCnt = preCnt + 1
-            self.counts[tup] = newCnt
-
             bonus = 1 / math.sqrt(newCnt)
             reward += bonus
 

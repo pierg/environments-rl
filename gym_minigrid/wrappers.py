@@ -15,7 +15,7 @@ class ActionBonus(gym.core.Wrapper):
     """
 
     def __init__(self, env):
-        super().__init__(env)
+        super(self).__init__(env)
         self.counts = {}
 
     def step(self, action):
