@@ -252,6 +252,8 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
         self.plan_tracker = 0
 
+        self.counts = {}
+
         # List of unsafe actions an agent might do at current step. Will reset when step is finished
         self.critical_actions = []
 
@@ -260,8 +262,6 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         self.reward_range = (self.config.reward.range[0], self.config.reward.range[1])
 
         self.step_number = 0
-
-        self.counts = dict()
 
     def step(self, action):
 
@@ -316,13 +316,13 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         current_cell = self.get_current_cell()
         if current_cell is not None:
             if current_cell.type == "goal":
-                reward = self.config.reward.goal
                 if info == "plan_finished":
-                    info = "goal+plan_finished"
+                    self.reset()
+                    return obs, self.config.reward.goal, True, "goal+plan_finished"
                     # print("goal+plan_finished")
                 else:
-                    info = "goal"
-                self.reset()
+                    self.reset()
+                    return obs, self.config.reward.goal, True, "goal"
             elif current_cell.type == "unsafe":
                 reward = self.config.reward.unsafe
                 info = "violation"
