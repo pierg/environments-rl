@@ -261,6 +261,8 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
         self.step_number = 0
 
+        self.counts = dict()
+
     def step(self, action):
 
         if self.config.num_processes == 1 and self.config.rendering:
@@ -300,7 +302,8 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
             # activate planner
             if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
-                self.action_plan = run(current_obs, current_dir, (goal_green_square, goal_turn))
+                # self.action_plan = run(current_obs, current_dir, (goal_green_square, goal_safe_zone))
+                self.action_plan = run(current_obs, current_dir, (goal_green_square, ))
                 self.action_plan_size = len(self.action_plan)
                 self.critical_actions = [ExMiniGridEnv.Actions.forward]
                 # print(self.action_plan)
@@ -330,6 +333,23 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             done = True
             self.reset()
 
+        #  STIMULUS for exploration
+        if reward == self.config.reward.step:
+            env = self.unwrapped
+            tup = ((int(env.agent_pos[0]), int(env.agent_pos[1])), env.agent_dir, action)
+
+            # Get the count for this key
+            preCnt = 0
+            if tup in self.counts:
+                preCnt = self.counts[tup]
+
+            # Update the count for this key
+            newCnt = preCnt + 1
+            self.counts[tup] = newCnt
+
+            bonus = 1 / math.sqrt(newCnt)
+            reward += bonus
+
         return obs, reward, done, info
 
     # Helpers
@@ -341,8 +361,14 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
                 if self.plan_tracker > 0:
                     info = "plan_followed:" + str(self.plan_tracker) + "," + str(self.action_plan_size)
                     # print("plan_followed: " + str(self.plan_tracker) + " " + str(self.action_plan_size))
+                multiplier = 0
+                i = self.plan_tracker
+
+                while i > 0:
+                    multiplier = multiplier + (self.config.reward.off_plan * i)
+                    i -= 1
                 self.reset_planner()
-                return self.config.reward.off_plan, info
+                return multiplier, info
             else:
                 self.plan_tracker += 1
                 # print("plan_tracker: " + str(self.plan_tracker))
@@ -351,7 +377,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
                     # print("plan_finished")
                     return self.config.reward.on_plan, "plan_finished"
                 else:
-                    return self.config.reward.on_plan, info
+                    return self.config.reward.on_plan * self.plan_tracker, info
         else:
             return self.config.reward.step, info
 
