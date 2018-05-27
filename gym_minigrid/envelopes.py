@@ -298,7 +298,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             # observations
             obs = self.env.gen_obs()
             current_obs = ExGrid.decode(obs['image'])
-            current_dir = obs['direction']
+            current_dir = obs['direction'] 
 
             # activate planner
             if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
