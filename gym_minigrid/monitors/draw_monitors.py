@@ -41,17 +41,17 @@ class PrintMonitors:
 
 
         for avoid_obj in config.monitors.properties.avoid:
-            monitor = Avoid("absence_" + avoid_obj.name, avoid_obj.name, on_monitoring, avoid_obj.rewards)
+            monitor = Avoid(avoid_obj.name, avoid_obj.name, on_monitoring, avoid_obj.rewards)
             monitor.draw()
 
         for precedence_obj in config.monitors.patterns.precedence:
-            monitor = Precedence("precedence_" + precedence_obj.name, precedence_obj.conditions, on_monitoring, precedence_obj.rewards)
+            monitor = Precedence(precedence_obj.name, precedence_obj.conditions, on_monitoring, precedence_obj.rewards)
             monitor.draw()
 
         for universality_obj in config.monitors.patterns.universality:
-            monitor = Universality("universality_" + universality_obj.name, universality_obj, on_monitoring, universality_obj.rewards)
+            monitor = Universality(universality_obj.name, universality_obj, on_monitoring, universality_obj.rewards)
             monitor.draw()
 
         for absence_obj in config.monitors.patterns.absence:
-            monitor = Absence("absence_" + absence_obj.name, absence_obj, on_monitoring, absence_obj.rewards)
+            monitor = Absence(absence_obj.name, absence_obj, on_monitoring, absence_obj.rewards)
             monitor.draw()
