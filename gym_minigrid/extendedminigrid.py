@@ -213,7 +213,7 @@ class ExMiniGridEnv(MiniGridEnv):
         # toggle = 5
 
         # Wait/stay put/do nothing
-        wait = 6
+        # wait = 6
 
         # turn around
         #turnaround = 7

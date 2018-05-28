@@ -6,6 +6,7 @@ from .action_planning import *
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.monitors.patterns.absence import *
 from gym_minigrid.monitors.patterns.precedence import *
+from gym_minigrid.minigrid import Goal
 
 import gym
 
@@ -263,6 +264,12 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
         self.step_number = 0
 
+        self.actions = ExMiniGridEnv.Actions
+
+        self.action_space = spaces.Discrete(len(self.actions))
+
+        self.last_cell = ()
+
     def step(self, action):
 
         if self.config.num_processes == 1 and self.config.rendering:
@@ -283,37 +290,49 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             done = True
             self.step_number = 0
 
+        # observations
+        obs = self.env.gen_obs()
+        current_obs = ExGrid.decode(obs['image'])
+        current_dir = obs['direction']
+
         ##### PLANNER START
 
         if self.config.action_planner:
 
             # check if critical action
-            if action in self.critical_actions:
-                self.critical_actions = []
-                return obs, self.config.reward.unsafe, False, "violation"
+            # if action in self.critical_actions:
+            #     self.critical_actions = []
+            #     return obs, self.config.reward.unsafe, False, "violation"
 
             # check if following the plan
             reward, info = self.check_plan(action, info)
 
-            # observations
-            obs = self.env.gen_obs()
-            current_obs = ExGrid.decode(obs['image'])
-            current_dir = obs['direction']
-
             # activate planner
-            if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
-                # self.action_plan = run(current_obs, current_dir, (goal_green_square, goal_safe_zone))
-                self.action_plan = run(current_obs, current_dir, (goal_green_square, ))
-                self.action_plan_size = len(self.action_plan)
-                self.critical_actions = [ExMiniGridEnv.Actions.forward]
-                # print(self.action_plan)
-                info = "plan_created"
+            # if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
+            for obj in current_obs.grid:
+                if isinstance(obj, Goal) and len(self.action_plan) == 0:
+                    self.action_plan = run(current_obs, current_dir, (goal_green_square, ))
+                    self.action_plan_size = len(self.action_plan)
+                    self.critical_actions = [ExMiniGridEnv.Actions.forward]
+                    # print(self.action_plan)
+                    info = "plan_created"
+                    # print(self.action_plan)
 
-            self.critical_actions = []
+                self.critical_actions = []
 
         ##### PLANNER END
 
-        current_cell = self.get_current_cell()
+        if len(self.action_plan) == 0 and action == ExMiniGridEnv.Actions.forward:
+            reward = reward + 2
+        if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'wall' and action == ExMiniGridEnv.Actions.forward:
+            reward = reward - 5
+
+        a, b = ExMiniGridEnv.get_grid_coords_from_view(self.env, (0, 0))
+        if self.last_cell == (a, b):
+            reward = -10
+        self.last_cell = (a, b)
+        current_cell = Grid.get(self.env.grid, a, b)
+
         if current_cell is not None:
             if current_cell.type == "goal":
                 if info == "plan_finished":
@@ -333,22 +352,22 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             done = True
             self.reset()
 
-        #  STIMULUS for exploration
-        env = self.unwrapped
-        tup = ((int(env.agent_pos[0]), int(env.agent_pos[1])), env.agent_dir, action)
-
-        # Get the count for this key
-        preCnt = 0
-        if tup in self.counts:
-            preCnt = self.counts[tup]
-
-        # Update the count for this key
-        newCnt = preCnt + 1
-        self.counts[tup] = newCnt
-
-        if reward == self.config.reward.step:
-            bonus = 1 / math.sqrt(newCnt)
-            reward += bonus
+        # #  STIMULUS for exploration
+        # env = self.unwrapped
+        # tup = ((int(env.agent_pos[0]), int(env.agent_pos[1])), env.agent_dir, action)
+        #
+        # # Get the count for this key
+        # preCnt = 0
+        # if tup in self.counts:
+        #     preCnt = self.counts[tup]
+        #
+        # # Update the count for this key
+        # newCnt = preCnt + 1
+        # self.counts[tup] = newCnt
+        #
+        # if reward == self.config.reward.step:
+        #     bonus = 1 / math.sqrt(newCnt)
+        #     reward += bonus
 
         return obs, reward, done, info
 
@@ -380,10 +399,6 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
                     return self.config.reward.on_plan * self.plan_tracker, info
         else:
             return self.config.reward.step, info
-
-    def get_current_cell(self):
-        a, b = ExMiniGridEnv.get_grid_coords_from_view(self.env, (0, 0))
-        return Grid.get(self.env.grid, a, b)
 
     def reset_planner(self):
         self.action_plan = []

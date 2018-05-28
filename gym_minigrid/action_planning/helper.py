@@ -37,6 +37,8 @@ def run(current_obs, direction, goals):
         goal_list = create_goals(goal, [])
         while goal_cell is None and goal_list:
             goal_cell = planner.graph.find_state(goal_list.pop())
+            if goal_cell == current_cell_state.tuple():
+                goal_cell = None
         if goal_cell is not None:
             break
 

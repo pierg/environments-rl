@@ -43,17 +43,15 @@ class UnsafeEnv(ExMiniGridEnv):
         if self.random > 0:
 
             i = 0
-            taken_height = []
-            taken_width = []
+            taken_cell = [[1, 1], [width - 2, height - 2]]
 
             while i < self.random:
-                w = randint(3, width - 3)
-                h = randint(3, height - 3)
+                w = randint(1, width - 2)
+                h = randint(1, height - 2)
 
-                if w not in taken_width and h not in taken_height:
+                if [w, h] not in taken_cell:
                     self.grid.set(w, h, Unsafe())
-                    taken_height.append(h)
-                    taken_width.append(w)
+                    taken_cell.append([w, h])
                     i += 1
 
         else:
