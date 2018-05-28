@@ -59,7 +59,7 @@ class Absence(SafetyStateMachine):
         self.respectd_rwd = rewards.respected
         self.violated_rwd = rewards.violated
         self.condition = condition
-        super().__init__(name, "universally", self.states, self.transitions, 'initial', notify)
+        super().__init__(name, "absemce", self.states, self.transitions, 'initial', notify)
 
     # Convert obseravions to state and populate the obs_conditions
     def _obs_to_state(self, obs, action_proposed):
