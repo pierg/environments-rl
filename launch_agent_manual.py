@@ -6,6 +6,7 @@ import sys
 import time
 from optparse import OptionParser
 
+
 try:
     import gym_minigrid
     from gym_minigrid.wrappers import *

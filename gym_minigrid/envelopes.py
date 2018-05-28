@@ -3,7 +3,7 @@ import collections
 from configurations import config_grabber as cg
 
 from extendedminigrid import *
-from properties.avoid import *
+from monitors.properties.avoid import *
 from monitors.patterns.precedence import *
 
 import gym
@@ -43,12 +43,12 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.monitor_states = {}
 
         # Set reward for a normal step
-        self.normal_reward = self.config.reward.step
+        self.normal_reward = self.config.rewards.step
 
         # Set reward for the goal
-        self.goal_reward = self.config.reward.goal
+        self.goal_reward = self.config.rewards.goal
 
-        self.death_reward = self.config.reward.death
+        self.death_reward = self.config.rewards.death
 
         self.step_number = 0
 

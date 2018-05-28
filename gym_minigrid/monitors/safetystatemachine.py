@@ -293,7 +293,7 @@ class SafetyStateMachine(object):
     def verify(self, obs_post, applied_action):
 
         # Map the observation to a state
-        self.env_state = self._obs_to_state(obs_post)
+        self.env_state = self._obs_to_state(obs_post,applied_action)
 
         if self.state != self.env_state:
             # Switched to a new state

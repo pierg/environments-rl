@@ -48,12 +48,8 @@ class Room:
         k,l = self.position
         x += k
         y += l
-        print("agentpos", position)
-        print("end", x, y)
-        print("start",k,l)
-        print(self)
-        if ax < x and ax >= k:
-            if ay < y and ay >= l:
+        if ax <= x and ax >= k:
+            if ay <= y and ay >= l:
                 return True
         return False
 
@@ -204,19 +200,17 @@ class ExMiniGridEnv(MiniGridEnv):
         """
         grid, vis_mask = self.gen_obs_grid()
         """if Perception.light_on_current_room(self):"""
-        print("method called")
         try:
             if self.roomList:
                 i = 0
                 for x in self.roomList:
-                    print("chambre n ",i)
                     i += 1
-                    print(len(self.roomList))
                     if x.objectInRoom(self.agent_pos):
+                        print("agent in room ",i)
                         if not x.getLight():
+                            print("light off")
                             for i in range(0, len(grid.grid)):
                                 if grid.grid[i] is not None:
-                                    if grid.grid[i].type != "wall":
                                         grid.grid[i] = None
                             # Encode the partially observable view into a numpy array
                         image = grid.encode()
