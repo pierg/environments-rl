@@ -110,14 +110,6 @@ def worldobj_name_to_object(worldobj_name):
     else:
         return None
 
-def worldobj_name_can_be_toggled(worldobj_name):
-    if worldobj_name == "lightSwitch":
-        return True
-    elif worldobj_name == "door":
-        return True
-    else:
-        return False
-
 class ExGrid(Grid):
     """
     Extending Grid methods to support the new objects
@@ -228,107 +220,6 @@ class ExMiniGridEnv(MiniGridEnv):
         except AttributeError:
             return super().gen_obs()
 
-
-    def step(self,action):
-        # Reset if agent step on water without knowing it
-        if action == self.actions.forward and self.worldobj_in_front_agent(1) == "water" :
-            return self.gen_obs(), 0, True, "died"
-        else:
-            return super().step(action)
-
-    def worldobj_in_front_agent(self,distance=1):
-        ax, ay = self.agent_pos
-        wx, wy = ax, ay
-
-        worldobj = None
-
-        # agent facing down
-        if self.agent_dir == 1:
-            wy += distance
-        # agent facing right
-        elif self.agent_dir == 0:
-            wx += distance
-        # agent facing left
-        elif self.agent_dir == 2:
-            wx -= distance
-        # agent facing up
-        elif self.agent_dir == 3:
-            wy -= distance
-
-        if wx >= 0 and wx < self.grid.width and wy >=0 and wy < self.grid.height:
-            worldobj = self.grid.get(wx, wy)
-            if worldobj is not None:
-                worldobj_type = worldobj.type
-                return worldobj_type
-        return None
-
-    def worldobj_in_right_agent(self, distance=1):
-        """
-        Returns the type of the worldobj in the cell in right of the agent
-        :param distance: integer, how many cells in right
-        :return: string: worldobj type
-        """
-        ax, ay = self.agent_pos
-        ad = self.agent_dir
-        wx, wy = ax, ay
-
-        worldobj = None
-
-        # agent facing down
-        if self.agent_dir == 1:
-            wx -= distance
-        # agent facing right
-        elif self.agent_dir == 0:
-            wy += distance
-        # agent facing left
-        elif self.agent_dir == 2:
-            wy -= distance
-        # agent facing up
-        elif self.agent_dir == 3:
-            wx += distance
-
-        if wx >= 0 and wx < self.grid.width and wy >= 0 and wy < self.grid.height:
-            worldobj = self.grid.get(wx, wy)
-
-            if worldobj is not None:
-                worldobj_type = worldobj.type
-                return worldobj_type
-        return None
-
-    def worldobj_in_left_agent(self, distance=1):
-        """
-        Returns the type of the worldobj in the cell in left of the agent
-        :param distance: integer, how many cells in left
-        :return: string: worldobj type
-        """
-
-        ax, ay = self.agent_pos
-        ad = self.agent_dir
-        wx, wy = ax, ay
-
-        worldobj = None
-
-        # agent facing down
-        if self.agent_dir == 1:
-            wx += distance
-        # agent facing right
-        elif self.agent_dir == 0:
-            wy -= distance
-        # agent facing left
-        elif self.agent_dir == 2:
-            wy += distance
-        # agent facing up
-        elif self.agent_dir == 3:
-            wx -= distance
-
-        if wx >= 0 and wx < self.grid.width and wy >= 0 and wy < self.grid.height:
-            worldobj = self.grid.get(wx, wy)
-
-            if worldobj is not None:
-                worldobj_type = worldobj.type
-                return worldobj_type
-        return None
-
     def get_grid_coords_from_view(self,coordinates):
         """
         Dual of "get_view_coords". Translate and rotate relative to the agent coordinates (i, j) into the
@@ -338,9 +229,8 @@ class ExMiniGridEnv(MiniGridEnv):
         :return : coordinates translated into the absolute grid coordinates.
         """
         ax, ay = self.agent_pos
-        bx,by = self.agent_pos
         ad = self.agent_dir
-        x,y = coordinates
+        x, y = coordinates
         # agent facing down
         if ad == 1:
             ax -= y
@@ -358,7 +248,7 @@ class ExMiniGridEnv(MiniGridEnv):
             ax += y
             ay -= x
 
-        return ax,ay
+        return ax, ay
 
 
     def worldobj_in_agent(self, front, side):
@@ -371,87 +261,12 @@ class ExMiniGridEnv(MiniGridEnv):
         """
 
         coordinates = (front,side)
-        worldobj = None
-        wx,wy = ExMiniGridEnv.get_grid_coords_from_view(self,coordinates)
+        wx, wy = ExMiniGridEnv.get_grid_coords_from_view(self,coordinates)
 
-        if wx >= 0 and wx < self.grid.width and wy >= 0 and wy < self.grid.height:
+        if 0 <= wx < self.grid.width and 0 <= wy < self.grid.height:
             worldobj = self.grid.get(wx, wy)
 
             if worldobj is not None:
                 worldobj_type = worldobj.type
                 return worldobj_type
         return None
-
-
-    def worldpattern_in_front_agent(self, object_type):
-        if object_type == "deadend":
-            return self.deadend_in_front_agent()
-        return False
-
-    def worldpattern_is_near_agent(self, object_type):
-        if object_type == "deadend":
-            return self.deadend_is_near_agent()
-        return False
-
-
-
-
-
-
-    def check_light_are_on(self):
-        try:
-            if self.roomList:
-                canToggleLight,number = self.agent_can_toggle_light()
-                if canToggleLight:
-                    return self.roomList[number].getLight()
-            return True
-        except AttributeError:
-            return False
-
-    def agent_can_toggle_light(self):
-        try:
-            allIlluminated = True
-            if self.roomList:
-                for room in self.roomList:
-                    for switch in self.switchPosition:
-                        if room.objectInRoom(switch):
-                            x,y = switch
-                            number = self.grid.get(x,y).getRoomNumber()
-                            if room.objectInRoom(self.agent_pos):
-                                return True, number
-                            else:
-                                return False,0
-                    if not room.getLight():
-                        allIlluminated = False
-            return allIlluminated,0
-        except AttributeError:
-            return False,0
-
-    def check_door_is_opened(self):
-        try:
-            if self.roomList:
-                for room in self.roomList:
-                    if room.objectInRoom(self.agent_pos):
-                        try:
-                            if room.exitDoor:
-                                x,y = room.exitDoor
-                                if self.grid.get(x,y).is_open:
-                                    return True
-                                else:
-                                    return False
-                        except AttributeError:
-                            try:
-                                if room.entryDoor:
-                                    x, y = room.entryDoor
-                                    if self.grid.get(x, y).is_open:
-                                        return True
-                                    else:
-                                        return False
-                            except AttributeError:
-                                return False
-            return True
-        except AttributeError:
-            if self.worldobj_in_front_agent() == "door":
-                x,y = self.get_grid_coords_from_view((0,1))
-                return self.grid.get(x,y).is_open
-            return False

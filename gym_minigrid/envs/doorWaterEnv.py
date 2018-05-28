@@ -62,6 +62,12 @@ class DoorWaterEnv(ExMiniGridEnv):
 
         self.mission = "get to the green goal square without moving on water"
 
+    def step(self,action):
+        # Reset if agent step on water without knowing it
+        if action == self.actions.forward and self.worldobj_in_agent(1,0) == "water" :
+            return self.gen_obs(), 0, True, "died"
+        else:
+            return super().step(action)
 
 register(
     id='MiniGrid-DoorWaterEnv-10x10-v0',
