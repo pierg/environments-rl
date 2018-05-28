@@ -315,6 +315,34 @@ class ExMiniGridEnv(MiniGridEnv):
         # Ex:
         clean = 7
 
+    def gen_obs(self):
+        """
+        Generate the agent's view (partially observable, low-resolution encoding)
+        """
+
+        grid, vis_mask = self.gen_obs_grid()
+        if self.check_if_agent_in_dark_room():
+            for i in range(0,len(grid.grid)):
+                    if grid.grid[i] is not None:
+                        if grid.grid[i].type != "wall":
+                            grid.grid[i] = None
+        # Encode the partially observable view into a numpy array
+        image = grid.encode()
+
+        assert hasattr(self, 'mission'), "environments must define a textual mission string"
+
+        # Observations are dictionaries containing:
+        # - an image (partially observable view of the environment)
+        # - the agent's direction/orientation (acting as a compass)
+        # - a textual mission string (instructions for the agent)
+        obs = {
+            'image': image,
+            'direction': self.agent_dir,
+            'mission': self.mission
+        }
+
+        return obs
+
     def check_if_agent_in_dark_room(self):
         try:
             if self.roomList:
