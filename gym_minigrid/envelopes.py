@@ -190,7 +190,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         current_obs = (agent_obs, agent_pos, agent_dir)
         current_obs_env = self.env
 
-
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 

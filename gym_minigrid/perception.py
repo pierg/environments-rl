@@ -71,7 +71,6 @@ class Perception():
             # Returns true if the agent is entering a room
             # Meaning there is a door in front and its action is to move forward
             if Perception.door_opened_in_front(env) and action_proposed == ExMiniGridEnv.Actions.forward:
-                print("entering a room",True)
                 return True
             return False
 
@@ -83,14 +82,14 @@ class Perception():
         return False
 
     def door_closed_in_front(env):
-        if ExMiniGridEnv.worldobj_in_agent(env, 1, 0) == "door":
+        if env.worldobj_in_agent(1, 0) == "door":
             x, y = env.get_grid_coords_from_view((1, 0))
             if not env.grid.get(x, y).is_open:
                 return True
         return False
 
-    def check(env,coordinates):
-        wx, wy = ExMiniGridEnv.get_grid_coords_from_view(env, coordinates)
+    def check(env, coordinates):
+        wx, wy = env.get_grid_coords_from_view(coordinates)
         if 0 <= wx < env.grid.width and 0 <= wy < env.grid.height:
             front = env.grid.get(wx, wy)
             return front
@@ -127,14 +126,12 @@ class Perception():
         except AttributeError:
             return False
 
-    # Todo Fix bug (formula not correct)
+    # Todo Fix bug (formula not correct ?)
     def light_switch_turned_on(env):
         agent_obs = ExGrid.decode(env.gen_obs()['image'])
         for i in range (0, len(agent_obs.grid)):
             if agent_obs.grid[i] is not None:
                 if agent_obs.grid[i].type == "lightSwitch":
-                    j, k = ExMiniGridEnv.get_grid_coords_from_view(env,
-                                                                   (3-int(i/math.sqrt(len(agent_obs.grid))), (i%4)-2))
-                    print("light is ",env.grid.get(j, k).state)
+                    j, k = env.get_grid_coords_from_view((3-int(i/math.sqrt(len(agent_obs.grid))), (i%4)-2))
                     return env.grid.get(j, k).state
         return False

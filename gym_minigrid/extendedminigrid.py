@@ -194,9 +194,7 @@ class ExMiniGridEnv(MiniGridEnv):
         """if Perception.light_on_current_room(self):"""
         try:
             if self.roomList:
-                i = 0
                 for x in self.roomList:
-                    i += 1
                     if x.objectInRoom(self.agent_pos):
                         if not x.getLight():
                             for i in range(0, len(grid.grid)):
@@ -247,7 +245,6 @@ class ExMiniGridEnv(MiniGridEnv):
         elif ad == 3:
             ax += y
             ay -= x
-
         return ax, ay
 
 
