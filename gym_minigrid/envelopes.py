@@ -5,6 +5,8 @@ from configurations import config_grabber as cg
 from extendedminigrid import *
 from monitors.properties.avoid import *
 from monitors.patterns.precedence import *
+from monitors.patterns.absence import *
+from monitors.patterns.universality import *
 
 import gym
 
@@ -36,6 +38,12 @@ class SafetyEnvelope(gym.core.Wrapper):
         # List of absence-based monitors with their states, rewards and unsafe-actions
         self.absence_monitors = []
 
+        # List of avoid-based monitors with their states, rewards and unsafe-actions
+        self.avoid_monitors = []
+
+        # List of universality-based monitors with their states, rewards and unsafe-actions
+        self.universality_monitors = []
+
         # List of precedence-based monitors with their stats, rewards and unsafe-actions
         self.precedence_monitors = []
 
@@ -52,12 +60,24 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         self.step_number = 0
 
-        # Generates absence-based monitors
-        if hasattr(self.config.monitors, 'absence'):
-            for avoid_obj in self.config.monitors.absence.monitored:
+        # Generates avoid-based monitors
+        if hasattr(self.config.monitors.properties, 'avoid'):
+            for avoid_obj in self.config.monitors.properties.avoid:
                 if avoid_obj.active:
-                    new_absence_monitor = Avoid("absence_" + avoid_obj.name, avoid_obj.name, self.on_monitoring,
-                                                avoid_obj.reward)
+                    new_avoid_monitor = Avoid("avoid_" + avoid_obj.name, avoid_obj.name, self.on_monitoring,
+                                              avoid_obj.rewards)
+                    self.avoid_monitors.append(new_avoid_monitor)
+                    self.monitor_states[new_avoid_monitor.name] = {}
+                    self.monitor_states[new_avoid_monitor.name]["state"] = ""
+                    self.monitor_states[new_avoid_monitor.name]["shaped_reward"] = 0
+                    self.monitor_states[new_avoid_monitor.name]["unsafe_action"] = ""
+
+        # Generates absence-based monitors
+        if hasattr(self.config.monitors.patterns, 'absence'):
+            for absence_obj in self.config.monitors.patterns.absence:
+                if absence_obj.active:
+                    new_absence_monitor = Absence("absence_" + absence_obj.name, absence_obj.name, self.on_monitoring,
+                                                  absence_obj.rewards)
                     self.absence_monitors.append(new_absence_monitor)
                     self.monitor_states[new_absence_monitor.name] = {}
                     self.monitor_states[new_absence_monitor.name]["state"] = ""
@@ -65,16 +85,29 @@ class SafetyEnvelope(gym.core.Wrapper):
                     self.monitor_states[new_absence_monitor.name]["unsafe_action"] = ""
 
         # Generates precedence-based monitors
-        if hasattr(self.config.monitors, 'precedence'):
-            for precedence_obj in self.config.monitors.precedence.monitored:
+        if hasattr(self.config.monitors.patterns, 'precedence'):
+            for precedence_obj in self.config.monitors.patterns.precedence:
                 if precedence_obj.active:
-                    new_precedence_monitor = Precedence("precedence_" + precedence_obj.name, precedence_obj,
-                                                        self.on_monitoring, precedence_obj.reward)
+                    new_precedence_monitor = Precedence("precedence_" + precedence_obj.name, precedence_obj.conditions,
+                                                        self.on_monitoring, precedence_obj.rewards)
                     self.precedence_monitors.append(new_precedence_monitor)
                     self.monitor_states[new_precedence_monitor.name] = {}
                     self.monitor_states[new_precedence_monitor.name]["state"] = ""
                     self.monitor_states[new_precedence_monitor.name]["shaped_reward"] = 0
                     self.monitor_states[new_precedence_monitor.name]["unsafe_action"] = ""
+
+        # Generates universality-based monitors
+        if hasattr(self.config.monitors.patterns, 'universality'):
+            for universality_obj in self.config.monitors.patterns.universality:
+                if universality_obj.active:
+                    new_universality_monitor = Universality("universality_" + universality_obj.name,
+                                                            universality_obj.name, self.on_monitoring,
+                                                            universality_obj.rewards)
+                    self.universality_monitors.append(new_universality_monitor)
+                    self.monitor_states[new_universality_monitor.name] = {}
+                    self.monitor_states[new_universality_monitor.name]["state"] = ""
+                    self.monitor_states[new_universality_monitor.name]["shaped_reward"] = 0
+                    self.monitor_states[new_universality_monitor.name]["unsafe_action"] = ""
 
     def on_monitoring(self, name, state, **kwargs):
         """
@@ -128,6 +161,10 @@ class SafetyEnvelope(gym.core.Wrapper):
             monitor.initial_state = None
         for monitor in self.precedence_monitors:
             monitor.initial_state = None
+        for monitor in self.avoid_monitors:
+            monitor.initial_state = None
+        for monitor in self.universality_monitors:
+            monitor.initial_state = None
 
     def step(self, proposed_action, reset_on_catastrophe=False):
         # To be returned to the agent
@@ -151,14 +188,25 @@ class SafetyEnvelope(gym.core.Wrapper):
         agent_pos = self.env.agent_pos
         agent_dir = self.env.get_dir_vec()
         current_obs = (agent_obs, agent_pos, agent_dir)
-
         current_obs_env = self.env
+
+
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
         logging.info("___check BEFORE action is applyed to the environmnent")
         # Check observation and proposed action in all running monitors
         for monitor in self.absence_monitors:
+            monitor.check(current_obs_env, proposed_action)
+            if monitor.state == "immediate":
+                saved = True
+
+        for monitor in self.universality_monitors:
+            monitor.check(current_obs_env, proposed_action)
+            if monitor.state == "immediate":
+                saved = True
+
+        for monitor in self.avoid_monitors:
             monitor.check(current_obs_env, proposed_action)
             if monitor.state == "immediate":
                 saved = True
@@ -201,6 +249,12 @@ class SafetyEnvelope(gym.core.Wrapper):
             monitor.verify(self.env, suitable_action)
 
         for monitor in self.precedence_monitors:
+            monitor.verify(self.env, suitable_action)
+
+        for monitor in self.avoid_monitors:
+            monitor.verify(self.env, suitable_action)
+
+        for monitor in self.universality_monitors:
             monitor.verify(self.env, suitable_action)
 
         # Get the shaped rewards from the monitors in the new state

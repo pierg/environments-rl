@@ -18,7 +18,10 @@ class Perception():
         :param distance: number of cells from the agent (1 = the one next to the agent cell)
         :return: True / False
         """
-        return object_type == obs.worldobj_in_agent(1, 0)
+        # Todo : Ask pier if the monitors using env instead of agent_obs is normal ? if yes delete condition
+        if Perception.light_on_current_room(obs):
+            return object_type == obs.worldobj_in_agent(1, 0)
+        return object_type == "None"
 
 
     @staticmethod
@@ -29,9 +32,12 @@ class Perception():
         :param object_type: type of WorldObj
         :return: True / False
         """
-        return  object_type == obs.worldobj_in_agent(2, 0) or \
-                object_type == obs.worldobj_in_agent(1, 1) or \
-                object_type == obs.worldobj_in_agent(1, 1)
+        # Todo : Ask pier if the monitors using env instead of agent_obs is normal ? if yes delete condition
+        if Perception.light_on_current_room(obs):
+            return  object_type == obs.worldobj_in_agent(2, 0) or \
+                    object_type == obs.worldobj_in_agent(0, 1) or \
+                    object_type == obs.worldobj_in_agent(0, -1)
+        return object_type == "None"
 
     @staticmethod
     def is_condition_satisfied(env, action_proposed, condition):
@@ -64,19 +70,23 @@ class Perception():
         elif condition == "entering-a-room":
             # Returns true if the agent is entering a room
             # Meaning there is a door in front and its action is to move forward
-            return True
+            if Perception.door_opened_in_front(env) and action_proposed == ExMiniGridEnv.Actions.forward:
+                print("entering a room",True)
+                return True
+            return False
+
 
 
     def door_opened_in_front(env):
         if env.worldobj_in_front_agent() == "door":
-            x, y = env.get_grid_coords_from_view((0, 1))
+            x, y = env.get_grid_coords_from_view((1, 0))
             if env.grid.get(x, y).is_open:
                 return True
         return False
 
     def door_closed_in_front(env):
         if env.worldobj_in_front_agent() == "door":
-            x, y = env.get_grid_coords_from_view((0, 1))
+            x, y = env.get_grid_coords_from_view((1, 0))
             if not env.grid.get(x, y).is_open:
                 return True
         return False
@@ -124,6 +134,7 @@ class Perception():
         for i in range (0,len(agent_obs.grid)):
             if agent_obs.grid[i] is not None:
                 if agent_obs.grid[i].type == "lightSwitch":
-                    j,k = ExMiniGridEnv.get_grid_coords_from_view(env,((i%4)%2, 3-int(i/4)))
+                    j,k = ExMiniGridEnv.get_grid_coords_from_view(env,(3-int(i/math.sqrt(len(agent_obs.grid))),(i%4)-2))
+                    print("light is ",env.grid.get(j,k).state)
                     return env.grid.get(j,k).state
         return False
