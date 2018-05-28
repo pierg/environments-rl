@@ -323,7 +323,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
                             # print(self.action_plan)
                             break
 
-            if not self.action_plan:
+            elif not self.action_plan:
                 if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
                     self.action_plan, self.goal_cell = run(current_obs, current_dir, (goal_safe_zone,))
                     self.action_plan_size = len(self.action_plan)
