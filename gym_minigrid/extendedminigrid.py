@@ -206,9 +206,7 @@ class ExMiniGridEnv(MiniGridEnv):
                 for x in self.roomList:
                     i += 1
                     if x.objectInRoom(self.agent_pos):
-                        print("agent in room ",i)
                         if not x.getLight():
-                            print("light off")
                             for i in range(0, len(grid.grid)):
                                 if grid.grid[i] is not None:
                                         grid.grid[i] = None
