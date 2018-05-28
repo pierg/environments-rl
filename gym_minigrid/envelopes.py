@@ -268,7 +268,9 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
         self.action_space = spaces.Discrete(len(self.actions))
 
-        self.last_cell = ()
+        self.last_cell = {0: (0, 0), 1: (0, 0), 2: (0, 1)}
+
+        self.goal_cell = None
 
     def step(self, action):
 
@@ -309,14 +311,24 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
             # activate planner
             # if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
-            for obj in current_obs.grid:
-                if isinstance(obj, Goal) and len(self.action_plan) == 0:
-                    self.action_plan = run(current_obs, current_dir, (goal_green_square, ))
+            if self.goal_cell is not None:
+                if goal_green_square[0] not in self.goal_cell:
+                    for obj in current_obs.grid:
+                        if isinstance(obj, Goal):
+                            self.action_plan, self.goal_cell = run(current_obs, current_dir, (goal_green_square,))
+                            self.action_plan_size = len(self.action_plan)
+                            self.critical_actions = [ExMiniGridEnv.Actions.forward]
+                            # print(self.action_plan)
+                            info = "plan_created"
+                            # print(self.action_plan)
+                            break
+
+            if not self.action_plan:
+                if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
+                    self.action_plan, self.goal_cell = run(current_obs, current_dir, (goal_safe_zone,))
                     self.action_plan_size = len(self.action_plan)
-                    self.critical_actions = [ExMiniGridEnv.Actions.forward]
-                    # print(self.action_plan)
-                    info = "plan_created"
-                    # print(self.action_plan)
+
+
 
                 self.critical_actions = []
 
@@ -328,10 +340,16 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             reward = reward - 5
 
         a, b = ExMiniGridEnv.get_grid_coords_from_view(self.env, (0, 0))
-        if self.last_cell == (a, b):
-            reward = -10
-        self.last_cell = (a, b)
+
+        # if self.last_cell == (a, b):
+            # Stay in the same cell
+        #     reward = reward - 2
+        # self.last_cell = (a, b)
+
+        if self.last_cell[0] == (a, b) and self.last_cell[1] == (a, b) and self.last_cell[2] == (a, b):
+            return obs, self.config.reward.unsafe, done, info
         current_cell = Grid.get(self.env.grid, a, b)
+        self.last_cell[self.step_number % 3] = (a, b)
 
         if current_cell is not None:
             if current_cell.type == "goal":
@@ -353,21 +371,21 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             self.reset()
 
         # #  STIMULUS for exploration
-        # env = self.unwrapped
-        # tup = ((int(env.agent_pos[0]), int(env.agent_pos[1])), env.agent_dir, action)
-        #
-        # # Get the count for this key
-        # preCnt = 0
-        # if tup in self.counts:
-        #     preCnt = self.counts[tup]
-        #
-        # # Update the count for this key
-        # newCnt = preCnt + 1
-        # self.counts[tup] = newCnt
-        #
-        # if reward == self.config.reward.step:
-        #     bonus = 1 / math.sqrt(newCnt)
-        #     reward += bonus
+        env = self.unwrapped
+        tup = ((int(env.agent_pos[0]), int(env.agent_pos[1])), env.agent_dir, action)
+
+        # Get the count for this key
+        preCnt = 0
+        if tup in self.counts:
+            preCnt = self.counts[tup]
+
+        # Update the count for this key
+        newCnt = preCnt + 1
+        self.counts[tup] = newCnt
+
+        if reward == self.config.reward.step:
+            bonus = 1 / math.sqrt(newCnt)
+            reward += bonus
 
         return obs, reward, done, info
 
