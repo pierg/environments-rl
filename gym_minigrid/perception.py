@@ -126,7 +126,6 @@ class Perception():
         except AttributeError:
             return False
 
-    # Todo Fix bug (Vision left of the agent not correct)
     def light_switch_turned_on(env):
         agent_obs = ExGrid.decode(env.gen_obs()['image'])
         for i in range (0, len(agent_obs.grid)):
