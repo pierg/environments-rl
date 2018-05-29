@@ -2,6 +2,7 @@ from properties.avoid import *
 from monitors.patterns.precedence import *
 from monitors.patterns.absence import *
 from monitors.patterns.universality import *
+from monitors.patterns.avoid import *
 from configurations import config_grabber as cg
 
 

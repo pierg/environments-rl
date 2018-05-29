@@ -7,12 +7,12 @@ from monitors.properties.avoid import *
 from monitors.patterns.precedence import *
 from monitors.patterns.absence import *
 from monitors.patterns.universality import *
+from monitors.patterns.avoid import *
 
 import gym
 
 # Size of the history collection
 N = 5
-
 
 class SafetyEnvelope(gym.core.Wrapper):
     """
@@ -144,6 +144,18 @@ class SafetyEnvelope(gym.core.Wrapper):
             else:
                 logging.warning("%s ERROR. missing action and reward", name)
 
+        if state == "disobey":
+            if kwargs:
+                logging.warning("%s unrespected", name)
+                unsafe_action = kwargs.get('unsafe_action')
+                shaped_reward = kwargs.get('shaped_reward', 0)
+                self.monitor_states[name]["unsafe_action"] = unsafe_action
+                self.monitor_states[name]["shaped_reward"] = shaped_reward
+                logging.info("shaped_reward=%s unsafe_action=%s", str(shaped_reward), str(unsafe_action))
+            else:
+                logging.warning("%s ERROR. missing action and reward", name)
+
+
     def action_planner(self, unsafe_actions):
         """
         Return a suitable action that (that is not one of the 'unsafe_action')
@@ -193,6 +205,9 @@ class SafetyEnvelope(gym.core.Wrapper):
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
+        # Store obs/action in history
+        self.proposed_history.append((current_obs, proposed_action))
+
         logging.info("___check BEFORE action is applyed to the environmnent")
         # Check observation and proposed action in all running monitors
         for monitor in self.absence_monitors:
@@ -214,6 +229,7 @@ class SafetyEnvelope(gym.core.Wrapper):
             monitor.check(current_obs_env, proposed_action)
             if monitor.state == "violated":
                 saved = True
+
 
         # Check for unsafe actions before sending them to the environment:
         unsafe_actions = []
