@@ -165,7 +165,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         obs, reward, done, info = None, None, None, None
         saved = False
         end = False
-        breaking = False
         if self.step_number == 0:
             self.resetMonitors()
 
@@ -204,8 +203,6 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         for monitor in self.avoid_monitors:
             monitor.check(current_obs_env, proposed_action)
-            if monitor.state == "disobey":
-                breaking = True
 
 
         # Check for unsafe actions before sending them to the environment:
@@ -282,7 +279,5 @@ class SafetyEnvelope(gym.core.Wrapper):
             info = "end"
         elif not info and saved:
                 info = "saved"
-        elif not info and breaking:
-                info = "break"
         # Return everything to the agent
         return obs, reward, done, info

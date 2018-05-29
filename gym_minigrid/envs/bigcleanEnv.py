@@ -2,9 +2,9 @@ from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
 from gym_minigrid.envelopes import *
 
-class CleaningEnv(ExMiniGridEnv):
+class BigCleaningEnv(ExMiniGridEnv):
 
-    def __init__(self, size=8):
+    def __init__(self, size=16):
         super().__init__(
             grid_size=size,
             max_steps=4*size*size,
@@ -33,7 +33,7 @@ class CleaningEnv(ExMiniGridEnv):
         # WARNING don't change the name of list_dirt if you want to use the cleaning robot
         self.list_dirt = []
         #Place dirt
-        self.number_dirt = 3
+        self.number_dirt = 15
         for k in range(self.number_dirt):
             dirt = Dirt()
             x, y = self._rand_pos(2, width-2, 2, height - 2)
@@ -47,7 +47,7 @@ class CleaningEnv(ExMiniGridEnv):
 
         #Place Vase
 
-        for i in range(1):
+        for i in range(5):
             vase = Vase()
             x2, y2 = self._rand_pos(2, width - 2, 2, height - 2)
             while self.grid.get(x2, y2) is not None:
@@ -75,11 +75,6 @@ class CleaningEnv(ExMiniGridEnv):
             reward = 0.5
         self.old_front_elm = self.worldobj_in_front_agent_noDark()
 
-        if self.old_front_elm == "dirt" \
-                and action == self.actions.toggle:
-            info = "break"
-        self.old_front_elm = self.worldobj_in_front_agent_noDark()
-
 
 
         # Check the goal of the grid
@@ -88,9 +83,10 @@ class CleaningEnv(ExMiniGridEnv):
                 done = True
                 reward = reward + 1
                 self.step_number = 0
+
         return obs, reward, done, info
 
 register(
-    id='MiniGrid-CleaningEnv-8x8-v0',
+    id='MiniGrid-BigCleaningEnv-16x16-v0',
     entry_point='gym_minigrid.envs:CleaningEnv'
 )
