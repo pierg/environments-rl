@@ -48,6 +48,7 @@ class Perception():
         """
         if condition == "light-on-current-room":
             # Returns true if the lights are on in the room the agent is currently in
+            print("test")
             return Perception.light_on_current_room(env)
 
         elif condition == "light-switch-turned-on":
@@ -121,10 +122,13 @@ class Perception():
             if env.roomList:
                 for x in env.roomList:
                     if x.objectInRoom(env.agent_pos):
-                        return x.getLight()
-            return False
+                        #print(x.position)
+                        #print(x.lightOn)
+                        return x.lightOn
+                return True
+            return True
         except AttributeError:
-            return False
+            return True
 
     def light_switch_turned_on(env):
         agent_obs = ExGrid.decode(env.gen_obs()['image'])

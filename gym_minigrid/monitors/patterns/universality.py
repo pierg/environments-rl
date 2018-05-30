@@ -33,22 +33,22 @@ class Universality(SafetyStateMachine):
         {'trigger': '*',
          'source': 'respected',
          'dest': 'respected',
-         'conditions': 'cond_respected'},
+         'unless': 'obs_violated'},
 
         {'trigger': '*',
          'source': 'respected',
          'dest': 'violated',
-         'unless': 'cond_respected'},
+         'conditions': 'obs_violated'},
 
         {'trigger': '*',
          'source': 'violated',
          'dest': 'violated',
-         'unless': 'cond_respected'},
+         'conditions': 'obs_violated'},
 
         {'trigger': '*',
          'source': 'violated',
          'dest': 'respected',
-         'conditions': 'cond_respected'},
+         'unless': 'obs_violated'},
     ]
 
     obs = {
@@ -63,7 +63,6 @@ class Universality(SafetyStateMachine):
 
     # Convert obseravions to state and populate the obs_conditions
     def _obs_to_state(self, obs, action_proposed):
-
         if p.is_condition_satisfied(obs, action_proposed, self.condition):
             Universality.obs["respected"] = True
             return 'respected'
@@ -78,5 +77,9 @@ class Universality(SafetyStateMachine):
         super()._on_shaping(self.respectd_rwd)
 
     def _on_violated(self):
-        super()._on_violated(self.violated_rwd)
+        super()._on_shaping(self.violated_rwd)
+
+    def obs_violated(self):
+        return not Universality.obs["respected"]
+
 

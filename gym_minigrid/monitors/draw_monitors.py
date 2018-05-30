@@ -1,4 +1,5 @@
-from properties.avoid import *
+from monitors.properties.avoid import *
+from monitors.properties.avert import *
 from monitors.patterns.precedence import *
 from monitors.patterns.absence import *
 from monitors.patterns.universality import *
@@ -54,4 +55,8 @@ class PrintMonitors:
 
         for absence_obj in config.monitors.patterns.absence:
             monitor = Absence(absence_obj.name, absence_obj, on_monitoring, absence_obj.rewards)
+            monitor.draw()
+
+        for avert_obj in config.monitors.properties.avert:
+            monitor = Avert(avert_obj.name, avert_obj, on_monitoring, avert_obj.rewards)
             monitor.draw()

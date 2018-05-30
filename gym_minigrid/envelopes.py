@@ -4,14 +4,13 @@ from configurations import config_grabber as cg
 
 from extendedminigrid import *
 from monitors.properties.avoid import *
+from monitors.properties.avert import *
 from monitors.patterns.precedence import *
 from monitors.patterns.absence import *
 from monitors.patterns.universality import *
 from monitors.patterns.response import *
 
 import gym
-
-import json
 
 # Size of the history collection
 N = 5
@@ -40,6 +39,9 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # List of all monitors with their states, rewards and unsafe-actions
         self.monitors = []
+
+        # List of avert-based monitors with their states, rewards and unsafe-actions
+        self.avert_monitors = []
 
         # Dictionary that gets populated with information by all the monitors at runtime
         self.monitor_states = {}
@@ -78,6 +80,18 @@ class SafetyEnvelope(gym.core.Wrapper):
                         self.monitor_states[new_monitor.name]["unsafe_action"] = ""
         print(self.monitors)
 
+        # Generates avert-based monitors
+        if hasattr(self.config.monitors.properties, 'avert'):
+            for avert_obj in self.config.monitors.properties.avert:
+                if avert_obj.active:
+                    new_avert_monitor = Avert("avert_" + avert_obj.name, avert_obj.name, self.on_monitoring,
+                                              avert_obj.rewards)
+                    self.avert_monitors.append(new_avert_monitor)
+                    self.monitor_states[new_avert_monitor.name] = {}
+                    self.monitor_states[new_avert_monitor.name]["state"] = ""
+                    self.monitor_states[new_avert_monitor.name]["shaped_reward"] = 0
+                    self.monitor_states[new_avert_monitor.name]["unsafe_action"] = ""
+
     def on_monitoring(self, name, state, **kwargs):
         """
         Callback function called by the monitors
@@ -112,6 +126,18 @@ class SafetyEnvelope(gym.core.Wrapper):
                 logging.info("     shaped_reward=%s     unsafe_action=%s", str(shaped_reward), str(unsafe_action))
             else:
                 logging.warning("%s ERROR. missing action and reward", name)
+
+        if state == "disobey":
+            if kwargs:
+                logging.warning("%s unrespected", name)
+                unsafe_action = kwargs.get('unsafe_action')
+                shaped_reward = kwargs.get('shaped_reward', 0)
+                self.monitor_states[name]["unsafe_action"] = unsafe_action
+                self.monitor_states[name]["shaped_reward"] = shaped_reward
+                logging.info("shaped_reward=%s unsafe_action=%s", str(shaped_reward), str(unsafe_action))
+            else:
+                logging.warning("%s ERROR. missing action and reward", name)
+
 
     def action_planner(self, unsafe_actions):
         """
@@ -158,6 +184,9 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
+
+        # Store obs/action in history
+        self.proposed_history.append((current_obs, proposed_action))
 
         logging.info("___check BEFORE action is applyed to the environmnent")
 

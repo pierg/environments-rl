@@ -18,6 +18,19 @@ class bigEnv(ExMiniGridEnv):
     def getRooms(self):
         return self.roomList
 
+    def saveElements(self,room):
+        tab=[]
+        (x , y) = room.position
+        (width , height) = room.size
+        for i in range(x , x + width):
+            for j in range(y , y + height):
+                objType = self.grid.get(i,j)
+                if objType is not None:
+                    tab.append((i,j,0))
+                else:
+                    tab.append((i, j, 1))
+        return tab
+
     def _gen_grid(self, width, height):
         # Create an empty grid
 
@@ -68,10 +81,13 @@ class bigEnv(ExMiniGridEnv):
         self.roomList.append(Room(1,(width//2-2, height-2),(width//2+1,1),False))
         self.roomList[1].setEntryDoor((int(round(width/2)),height-12))
         self.roomList[0].setExitDoor((int(round(width/2)),height-12))
+        tab = self.saveElements(self.roomList[1])
 
         #Add the light switch next to the door
         switchRoom2 = LightSwitch()
         switchRoom2.affectRoom(self.roomList[1])
+        switchRoom2 .setSwitchPos((int(round(width/2)-1),height-11))
+        switchRoom2.elements_in_room(tab)
         self.grid.set(int(round(width/2)-1),height-11,switchRoom2)
         self.switchPosition = []
         self.switchPosition.append((int(round(width/2)-1),height-11))
