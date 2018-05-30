@@ -40,9 +40,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         # List of all monitors with their states, rewards and unsafe-actions
         self.monitors = []
 
-        # List of avert-based monitors with their states, rewards and unsafe-actions
-        self.avert_monitors = []
-
         # Dictionary that gets populated with information by all the monitors at runtime
         self.monitor_states = {}
 
@@ -58,7 +55,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Dictionary that contains all the type of monitors you can use
         dict_monitors = {'avoid': Avoid, 'precedence': Precedence, 'response': Response,
-                        'universality': Universality, 'absence': Absence}
+                        'universality': Universality, 'absence': Absence, 'avert': Avert}
 
         for typeOfMonitor in self.config.monitors:
             for monitors in typeOfMonitor:
@@ -69,7 +66,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                             new_monitor = dict_monitors[monitor.type](monitor.type + "_" + monitor.name,
                                                                      monitor.conditions, self.on_monitoring,
                                                                      monitor.rewards)
-                        # Others
+                        # Monitors without condition (Avoid / Avert)
                         else:
                             new_monitor = dict_monitors[monitor.type](monitor.type+"_"+monitor.name,monitor.name,
                                                                      self.on_monitoring,monitor.rewards)
@@ -79,18 +76,6 @@ class SafetyEnvelope(gym.core.Wrapper):
                         self.monitor_states[new_monitor.name]["shaped_reward"] = 0
                         self.monitor_states[new_monitor.name]["unsafe_action"] = ""
         print(self.monitors)
-
-        # Generates avert-based monitors
-        if hasattr(self.config.monitors.properties, 'avert'):
-            for avert_obj in self.config.monitors.properties.avert:
-                if avert_obj.active:
-                    new_avert_monitor = Avert("avert_" + avert_obj.name, avert_obj.name, self.on_monitoring,
-                                              avert_obj.rewards)
-                    self.avert_monitors.append(new_avert_monitor)
-                    self.monitor_states[new_avert_monitor.name] = {}
-                    self.monitor_states[new_avert_monitor.name]["state"] = ""
-                    self.monitor_states[new_avert_monitor.name]["shaped_reward"] = 0
-                    self.monitor_states[new_avert_monitor.name]["unsafe_action"] = ""
 
     def on_monitoring(self, name, state, **kwargs):
         """
