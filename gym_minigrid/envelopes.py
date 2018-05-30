@@ -4,10 +4,10 @@ from configurations import config_grabber as cg
 
 from extendedminigrid import *
 from monitors.properties.avoid import *
+from monitors.properties.avert import *
 from monitors.patterns.precedence import *
 from monitors.patterns.absence import *
 from monitors.patterns.universality import *
-from monitors.patterns.avoid import *
 
 import gym
 
@@ -47,6 +47,9 @@ class SafetyEnvelope(gym.core.Wrapper):
         # List of precedence-based monitors with their stats, rewards and unsafe-actions
         self.precedence_monitors = []
 
+        # List of avert-based monitors with their states, rewards and unsafe-actions
+        self.avert_monitors = []
+
         # Dictionary that gets populated with information by all the monitors at runtime
         self.monitor_states = {}
 
@@ -76,7 +79,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         if hasattr(self.config.monitors.patterns, 'absence'):
             for absence_obj in self.config.monitors.patterns.absence:
                 if absence_obj.active:
-                    new_absence_monitor = Absence("absence_" + absence_obj.name, absence_obj.name, self.on_monitoring,
+                    new_absence_monitor = Absence("absence_" + absence_obj.name, absence_obj.condition, self.on_monitoring,
                                                   absence_obj.rewards)
                     self.absence_monitors.append(new_absence_monitor)
                     self.monitor_states[new_absence_monitor.name] = {}
@@ -101,13 +104,25 @@ class SafetyEnvelope(gym.core.Wrapper):
             for universality_obj in self.config.monitors.patterns.universality:
                 if universality_obj.active:
                     new_universality_monitor = Universality("universality_" + universality_obj.name,
-                                                            universality_obj.name, self.on_monitoring,
+                                                            universality_obj.condition, self.on_monitoring,
                                                             universality_obj.rewards)
                     self.universality_monitors.append(new_universality_monitor)
                     self.monitor_states[new_universality_monitor.name] = {}
                     self.monitor_states[new_universality_monitor.name]["state"] = ""
                     self.monitor_states[new_universality_monitor.name]["shaped_reward"] = 0
                     self.monitor_states[new_universality_monitor.name]["unsafe_action"] = ""
+
+        # Generates avert-based monitors
+        if hasattr(self.config.monitors.properties, 'avert'):
+            for avert_obj in self.config.monitors.properties.avert:
+                if avert_obj.active:
+                    new_avert_monitor = Avert("avert_" + avert_obj.name, avert_obj.name, self.on_monitoring,
+                                              avert_obj.rewards)
+                    self.avert_monitors.append(new_avert_monitor)
+                    self.monitor_states[new_avert_monitor.name] = {}
+                    self.monitor_states[new_avert_monitor.name]["state"] = ""
+                    self.monitor_states[new_avert_monitor.name]["shaped_reward"] = 0
+                    self.monitor_states[new_avert_monitor.name]["unsafe_action"] = ""
 
     def on_monitoring(self, name, state, **kwargs):
         """
@@ -177,6 +192,8 @@ class SafetyEnvelope(gym.core.Wrapper):
             monitor.initial_state = None
         for monitor in self.universality_monitors:
             monitor.initial_state = None
+        for monitor in self.avert_monitors:
+            monitor.initial_state = None
 
     def step(self, proposed_action, reset_on_catastrophe=False):
         # To be returned to the agent
@@ -230,6 +247,9 @@ class SafetyEnvelope(gym.core.Wrapper):
             if monitor.state == "violated":
                 saved = True
 
+        for monitor in self.avert_monitors:
+            monitor.check(current_obs_env, proposed_action)
+
 
         # Check for unsafe actions before sending them to the environment:
         unsafe_actions = []
@@ -270,6 +290,9 @@ class SafetyEnvelope(gym.core.Wrapper):
             monitor.verify(self.env, suitable_action)
 
         for monitor in self.universality_monitors:
+            monitor.verify(self.env, suitable_action)
+
+        for monitor in self.avert_monitors:
             monitor.verify(self.env, suitable_action)
 
         # Get the shaped rewards from the monitors in the new state

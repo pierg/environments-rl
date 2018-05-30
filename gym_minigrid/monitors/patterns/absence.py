@@ -33,22 +33,22 @@ class Absence(SafetyStateMachine):
         {'trigger': '*',
          'source': 'respected',
          'dest': 'respected',
-         'conditions': 'cond_respected'},
+         'unless': 'obs_violated'},
 
         {'trigger': '*',
          'source': 'respected',
          'dest': 'violated',
-         'unless': 'cond_respected'},
+         'conditions': 'obs_violated'},
 
         {'trigger': '*',
          'source': 'violated',
          'dest': 'violated',
-         'unless': 'cond_respected'},
+         'conditions': 'obs_violated'},
 
         {'trigger': '*',
          'source': 'violated',
          'dest': 'respected',
-         'conditions': 'cond_respected'},
+         'unless': 'obs_violated'},
     ]
 
     obs = {
@@ -59,17 +59,16 @@ class Absence(SafetyStateMachine):
         self.respectd_rwd = rewards.respected
         self.violated_rwd = rewards.violated
         self.condition = condition
-        super().__init__(name, "absemce", self.states, self.transitions, 'initial', notify)
+        super().__init__(name, "absence", self.states, self.transitions, 'initial', notify)
 
     # Convert obseravions to state and populate the obs_conditions
     def _obs_to_state(self, obs, action_proposed):
-
         if p.is_condition_satisfied(obs, action_proposed, self.condition):
             Absence.obs["respected"] = False
-            return 'respected'
+            return 'violated'
         else:
             Absence.obs["respected"] = True
-            return 'violated'
+            return 'respected'
 
 
     def _on_monitoring(self):
@@ -80,4 +79,9 @@ class Absence(SafetyStateMachine):
 
     def _on_violated(self):
         super()._on_violated(self.violated_rwd)
+
+    def obs_violated(self):
+        if Absence.obs["respected"]:
+            return False
+        return True
 

@@ -138,7 +138,7 @@ class Dirt(WorldObj):
         self.list = list
 
     def toggle(self, env, pos):
-        x,y = ExMiniGridEnv.get_grid_coords_from_view(env,(0,1))
+        x,y = ExMiniGridEnv.get_grid_coords_from_view(env,(1,0))
         env.grid.set(x,y,None)
         del self.list[len(self.list)-1]
         return True
@@ -159,9 +159,13 @@ class Vase(WorldObj):
     def __init__(self):
         super(Vase, self).__init__('vase','grey')
         self.content = Dirt()
+        self.list = []
+
+    def can_overlap(self):
+        return False
 
     def toggle(self, env, pos):
-        x, y = ExMiniGridEnv.get_grid_coords_from_view(env, (0, 1))
+        x, y = ExMiniGridEnv.get_grid_coords_from_view(env, (1, 0))
         env.grid.set(x, y, self.content)
         self.list.append(Dirt())
         self.content.affect_list(self.list)

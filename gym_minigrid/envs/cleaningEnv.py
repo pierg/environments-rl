@@ -62,7 +62,7 @@ class CleaningEnv(ExMiniGridEnv):
         self.start_pos = (1, 1)
         self.start_dir = 0
 
-        self.old_front_elm = self.worldobj_in_front_agent_noDark()
+        self.old_front_elm = self.worldobj_in_agent(1,0)
 
         self.mission = "Clean the room"
 
@@ -73,12 +73,12 @@ class CleaningEnv(ExMiniGridEnv):
         if self.old_front_elm == "dirt" \
                 and action == self.actions.toggle:
             reward = 0.5
-        self.old_front_elm = self.worldobj_in_front_agent_noDark()
+
 
         if self.old_front_elm == "dirt" \
                 and action == self.actions.toggle:
             info = "break"
-        self.old_front_elm = self.worldobj_in_front_agent_noDark()
+        self.old_front_elm = self.worldobj_in_agent(1, 0)
 
 
 
@@ -88,6 +88,7 @@ class CleaningEnv(ExMiniGridEnv):
                 done = True
                 reward = reward + 1
                 self.step_number = 0
+                info = "goal"
         return obs, reward, done, info
 
 register(

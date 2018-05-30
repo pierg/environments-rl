@@ -3,11 +3,11 @@ import logging
 
 from monitors.safetystatemachine import SafetyStateMachine
 
-class Avoid(SafetyStateMachine):
+class Avert(SafetyStateMachine):
     """
-        It makes sure that the agent will avoid an action which penalize it
+        It makes sure that the agent will avert an action which penalize it
         This pattern is the dual of the Existence pattern
-        It takes as input the type of cell that the agent must avoid at all states
+        It takes as input the type of cell that the agent must avert at all states
         """
     states = [
         {'name':'initial',
@@ -68,18 +68,18 @@ class Avoid(SafetyStateMachine):
         "warning": False
     }
 
-    def __init__(self, name, worldobj_avoid, notify,reward):
-        self.disobeyReward = reward
-        self.worldobj_avoid = worldobj_avoid
-        super().__init__(name, "avoid", self.states, self.transitions, 'initial', notify)
+    def __init__(self, name, worldobj_avert, notify, rewards):
+        self.disobeyReward = rewards
+        self.worldobj_avert = worldobj_avert
+        super().__init__(name, "avert", self.states, self.transitions, 'initial', notify)
 
     # Convert obsevravions to state and populate the obs_conditions
-    def _obs_to_state(self, obs):
+    def _obs_to_state(self, obs, action_proposed):
         # Get observations conditions
-        warning = p.is_immediate_to_worldobj(obs, self.worldobj_avoid.name)
+        warning = p.is_immediate_to_worldobj(obs, self.worldobj_avert)
 
         # Save them in the obs_conditions dictionary
-        Avoid.obs["warning"] = warning
+        Avert.obs["warning"] = warning
         # Return the state
         if warning:
             return 'warning'
@@ -94,48 +94,9 @@ class Avoid(SafetyStateMachine):
         super()._on_monitoring()
 
     def _on_disobey(self):
+        logging.warning("%s broken!!!!", self.worldobj_avert)
         super()._on_shaping(self.disobeyReward)
 
     def obs_warning(self):
-        return Avoid.obs["warning"]
+        return Avert.obs["warning"]
 
-
-class StateTypes(SafetyStateMachine):
-    """ Testing """
-
-    states = [
-
-        {'name': 'initial',
-         'type': 'inf_ctrl'},
-
-        {'name': 'satisfied',
-         'type': 'satisfied'},
-
-        {'name': 'inf_ctrl',
-         'type': 'inf_ctrl'},
-
-        {'name': 'sys_fin_ctrl',
-         'type': 'sys_fin_ctrl'},
-
-        {'name': 'sys_urg_ctrl',
-         'type': 'sys_urg_ctrl'},
-
-        {'name': 'env_fin_ctrl',
-         'type': 'env_fin_ctrl'},
-
-        {'name': 'env_urg_ctrl',
-         'type': 'env_urg_ctrl'},
-
-        {'name': 'violated',
-         'type': 'violated'}
-    ]
-
-    transitions = []
-
-    # Convert the observations stored in self.current_obs in a state a saves the state in current_state
-    def _obs_to_state(self, obs):
-        self.curret_state = ''
-
-    def __init__(self, name, notify):
-        # Initializing the SafetyStateMachine
-        super().__init__(name, self.states, self.transitions, 'initial', notify)
