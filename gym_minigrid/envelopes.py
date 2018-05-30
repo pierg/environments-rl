@@ -7,8 +7,11 @@ from monitors.properties.avoid import *
 from monitors.patterns.precedence import *
 from monitors.patterns.absence import *
 from monitors.patterns.universality import *
+from monitors.patterns.response import *
 
 import gym
+
+import json
 
 # Size of the history collection
 N = 5
@@ -35,17 +38,8 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         self.propsed_action = None
 
-        # List of absence-based monitors with their states, rewards and unsafe-actions
-        self.absence_monitors = []
-
-        # List of avoid-based monitors with their states, rewards and unsafe-actions
-        self.avoid_monitors = []
-
-        # List of universality-based monitors with their states, rewards and unsafe-actions
-        self.universality_monitors = []
-
-        # List of precedence-based monitors with their stats, rewards and unsafe-actions
-        self.precedence_monitors = []
+        # List of all monitors with their states, rewards and unsafe-actions
+        self.monitors = []
 
         # Dictionary that gets populated with information by all the monitors at runtime
         self.monitor_states = {}
@@ -60,54 +54,29 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         self.step_number = 0
 
-        # Generates avoid-based monitors
-        if hasattr(self.config.monitors.properties, 'avoid'):
-            for avoid_obj in self.config.monitors.properties.avoid:
-                if avoid_obj.active:
-                    new_avoid_monitor = Avoid("avoid_" + avoid_obj.name, avoid_obj.name, self.on_monitoring,
-                                              avoid_obj.rewards)
-                    self.avoid_monitors.append(new_avoid_monitor)
-                    self.monitor_states[new_avoid_monitor.name] = {}
-                    self.monitor_states[new_avoid_monitor.name]["state"] = ""
-                    self.monitor_states[new_avoid_monitor.name]["shaped_reward"] = 0
-                    self.monitor_states[new_avoid_monitor.name]["unsafe_action"] = ""
+        # Dictionary that contains all the type of monitors you can use
+        dict_monitors = {'avoid': Avoid, 'precedence': Precedence, 'response': Response,
+                        'universality': Universality, 'absence': Absence}
 
-        # Generates absence-based monitors
-        if hasattr(self.config.monitors.patterns, 'absence'):
-            for absence_obj in self.config.monitors.patterns.absence:
-                if absence_obj.active:
-                    new_absence_monitor = Absence("absence_" + absence_obj.name, absence_obj.name, self.on_monitoring,
-                                                  absence_obj.rewards)
-                    self.absence_monitors.append(new_absence_monitor)
-                    self.monitor_states[new_absence_monitor.name] = {}
-                    self.monitor_states[new_absence_monitor.name]["state"] = ""
-                    self.monitor_states[new_absence_monitor.name]["shaped_reward"] = 0
-                    self.monitor_states[new_absence_monitor.name]["unsafe_action"] = ""
-
-        # Generates precedence-based monitors
-        if hasattr(self.config.monitors.patterns, 'precedence'):
-            for precedence_obj in self.config.monitors.patterns.precedence:
-                if precedence_obj.active:
-                    new_precedence_monitor = Precedence("precedence_" + precedence_obj.name, precedence_obj.conditions,
-                                                        self.on_monitoring, precedence_obj.rewards)
-                    self.precedence_monitors.append(new_precedence_monitor)
-                    self.monitor_states[new_precedence_monitor.name] = {}
-                    self.monitor_states[new_precedence_monitor.name]["state"] = ""
-                    self.monitor_states[new_precedence_monitor.name]["shaped_reward"] = 0
-                    self.monitor_states[new_precedence_monitor.name]["unsafe_action"] = ""
-
-        # Generates universality-based monitors
-        if hasattr(self.config.monitors.patterns, 'universality'):
-            for universality_obj in self.config.monitors.patterns.universality:
-                if universality_obj.active:
-                    new_universality_monitor = Universality("universality_" + universality_obj.name,
-                                                            universality_obj.name, self.on_monitoring,
-                                                            universality_obj.rewards)
-                    self.universality_monitors.append(new_universality_monitor)
-                    self.monitor_states[new_universality_monitor.name] = {}
-                    self.monitor_states[new_universality_monitor.name]["state"] = ""
-                    self.monitor_states[new_universality_monitor.name]["shaped_reward"] = 0
-                    self.monitor_states[new_universality_monitor.name]["unsafe_action"] = ""
+        for typeOfMonitor in self.config.monitors:
+            for monitors in typeOfMonitor:
+                for monitor in monitors:
+                    if monitor.active:
+                        # Monitors with condition(s) (Precedence / Response / Universality)
+                        if hasattr(monitor,'conditions'):
+                            new_monitor = dict_monitors[monitor.type](monitor.type + "_" + monitor.name,
+                                                                     monitor.conditions, self.on_monitoring,
+                                                                     monitor.rewards)
+                        # Others
+                        else:
+                            new_monitor = dict_monitors[monitor.type](monitor.type+"_"+monitor.name,monitor.name,
+                                                                     self.on_monitoring,monitor.rewards)
+                        self.monitors.append(new_monitor)
+                        self.monitor_states[new_monitor.name] = {}
+                        self.monitor_states[new_monitor.name]["state"] = ""
+                        self.monitor_states[new_monitor.name]["shaped_reward"] = 0
+                        self.monitor_states[new_monitor.name]["unsafe_action"] = ""
+        print(self.monitors)
 
     def on_monitoring(self, name, state, **kwargs):
         """
@@ -157,13 +126,10 @@ class SafetyEnvelope(gym.core.Wrapper):
             return self.env.actions.wait
 
     def resetMonitors(self):
-        for monitor in self.absence_monitors:
-            monitor.initial_state = None
-        for monitor in self.precedence_monitors:
-            monitor.initial_state = None
-        for monitor in self.avoid_monitors:
-            monitor.initial_state = None
-        for monitor in self.universality_monitors:
+        """
+        Reset all monitors initial state to avoid mismatch errors on environment reset
+        """
+        for monitor in self.monitors:
             monitor.initial_state = None
 
     def step(self, proposed_action, reset_on_catastrophe=False):
@@ -194,25 +160,12 @@ class SafetyEnvelope(gym.core.Wrapper):
             self.env.render('human')
 
         logging.info("___check BEFORE action is applyed to the environmnent")
+
         # Check observation and proposed action in all running monitors
-        for monitor in self.absence_monitors:
+        for monitor in self.monitors:
             monitor.check(current_obs_env, proposed_action)
+            # This line need to be changed to work with all monitors
             if monitor.state == "immediate":
-                saved = True
-
-        for monitor in self.universality_monitors:
-            monitor.check(current_obs_env, proposed_action)
-            if monitor.state == "immediate":
-                saved = True
-
-        for monitor in self.avoid_monitors:
-            monitor.check(current_obs_env, proposed_action)
-            if monitor.state == "immediate":
-                saved = True
-
-        for monitor in self.precedence_monitors:
-            monitor.check(current_obs_env, proposed_action)
-            if monitor.state == "violated":
                 saved = True
 
         # Check for unsafe actions before sending them to the environment:
@@ -244,16 +197,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         obs, reward, done, info = self.env.step(suitable_action)
         logging.info("____verify AFTER action is applied to the environment")
         # Notify the monitors of the new state reached in the environment and the applied action
-        for monitor in self.absence_monitors:
-            monitor.verify(self.env, suitable_action)
-
-        for monitor in self.precedence_monitors:
-            monitor.verify(self.env, suitable_action)
-
-        for monitor in self.avoid_monitors:
-            monitor.verify(self.env, suitable_action)
-
-        for monitor in self.universality_monitors:
+        for monitor in self.monitors:
             monitor.verify(self.env, suitable_action)
 
         # Get the shaped rewards from the monitors in the new state

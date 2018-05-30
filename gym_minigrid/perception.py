@@ -88,7 +88,7 @@ class Perception():
                 return True
         return False
 
-    def check(env, coordinates):
+    def check_if_coordinates_in_env(env, coordinates):
         wx, wy = env.get_grid_coords_from_view(coordinates)
         if 0 <= wx < env.grid.width and 0 <= wy < env.grid.height:
             front = env.grid.get(wx, wy)
@@ -97,9 +97,9 @@ class Perception():
     def deadend_in_front(env):
         i = 1
         while i < 4:
-            left = Perception.check(env, (-1, i - 1))
-            right = Perception.check(env, (1, i - 1))
-            front = Perception.check(env, (0, i))
+            left = Perception.check_if_coordinates_in_env(env, (-1, i - 1))
+            right = Perception.check_if_coordinates_in_env(env, (1, i - 1))
+            front = Perception.check_if_coordinates_in_env(env, (0, i))
             if left is None or right is None:
                 return False
             if front is not None:
