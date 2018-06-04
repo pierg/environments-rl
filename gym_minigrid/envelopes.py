@@ -4,7 +4,6 @@ from configurations import config_grabber as cg
 
 from extendedminigrid import *
 from monitors.properties.avoid import *
-from monitors.properties.avert import *
 from monitors.patterns.precedence import *
 from monitors.patterns.absence import *
 from monitors.patterns.universality import *
@@ -49,8 +48,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                          'precedence': Precedence,
                          'response': Response,
                          'universality': Universality,
-                         'absence': Absence,
-                         'avert': Avert}
+                         'absence': Absence}
 
         for monitor_types in self.config.monitors:
             for monitors in monitor_types:
