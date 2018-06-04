@@ -1,5 +1,4 @@
 from monitors.properties.avoid import *
-from monitors.properties.avert import *
 from monitors.patterns.precedence import *
 from monitors.patterns.absence import *
 from monitors.patterns.universality import *
