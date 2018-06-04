@@ -55,7 +55,7 @@ class Avert(SafetyStateMachine):
 
         {'trigger': '*',
          'source': 'warning',
-         'dest': 'disobey',
+         'dest': 'violated',
          'conditions': ['toggle', 'obs_warning']},
 
         {'trigger': '*',

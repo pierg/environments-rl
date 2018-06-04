@@ -33,22 +33,22 @@ class Absence(SafetyStateMachine):
         {'trigger': '*',
          'source': 'respected',
          'dest': 'respected',
-         'unless': 'obs_violated'},
+         'unless': ['obs_violated','forward']},
 
         {'trigger': '*',
          'source': 'respected',
          'dest': 'violated',
-         'conditions': 'obs_violated'},
+         'conditions': ['obs_violated']},
 
         {'trigger': '*',
          'source': 'violated',
          'dest': 'violated',
-         'conditions': 'obs_violated'},
+         'conditions': ['obs_violated','forward']},
 
         {'trigger': '*',
          'source': 'violated',
          'dest': 'respected',
-         'unless': 'obs_violated'},
+         'unless': ['forward','obs_violated']},
     ]
 
     obs = {
@@ -81,7 +81,4 @@ class Absence(SafetyStateMachine):
         super()._on_violated(self.violated_rwd)
 
     def obs_violated(self):
-        if Absence.obs["respected"]:
-            return False
-        return True
-
+        return not Absence.obs["respected"]

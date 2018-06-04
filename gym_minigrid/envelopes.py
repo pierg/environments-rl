@@ -1,10 +1,9 @@
 import collections
-
+from test_perception import *
 from configurations import config_grabber as cg
 
 from extendedminigrid import *
 from monitors.properties.avoid import *
-from monitors.properties.avert import *
 from monitors.patterns.precedence import *
 from monitors.patterns.absence import *
 from monitors.patterns.universality import *
@@ -55,7 +54,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Dictionary that contains all the type of monitors you can use
         dict_monitors = {'avoid': Avoid, 'precedence': Precedence, 'response': Response,
-                        'universality': Universality, 'absence': Absence, 'avert': Avert}
+                        'universality': Universality, 'absence': Absence}
 
         for typeOfMonitor in self.config.monitors:
             for monitors in typeOfMonitor:
@@ -66,9 +65,9 @@ class SafetyEnvelope(gym.core.Wrapper):
                             new_monitor = dict_monitors[monitor.type](monitor.type + "_" + monitor.name,
                                                                      monitor.conditions, self.on_monitoring,
                                                                      monitor.rewards)
-                        # Monitors without condition (Avoid / Avert)
+                        # Monitors without condition (Avoid)
                         else:
-                            new_monitor = dict_monitors[monitor.type](monitor.type+"_"+monitor.name,monitor.name,
+                            new_monitor = dict_monitors[monitor.type](monitor.type+"_"+monitor.name,monitor.name,monitor.violated_action,
                                                                      self.on_monitoring,monitor.rewards)
                         self.monitors.append(new_monitor)
                         self.monitor_states[new_monitor.name] = {}
@@ -112,17 +111,6 @@ class SafetyEnvelope(gym.core.Wrapper):
             else:
                 logging.warning("%s ERROR. missing action and reward", name)
 
-        if state == "disobey":
-            if kwargs:
-                logging.warning("%s unrespected", name)
-                unsafe_action = kwargs.get('unsafe_action')
-                shaped_reward = kwargs.get('shaped_reward', 0)
-                self.monitor_states[name]["unsafe_action"] = unsafe_action
-                self.monitor_states[name]["shaped_reward"] = shaped_reward
-                logging.info("shaped_reward=%s unsafe_action=%s", str(shaped_reward), str(unsafe_action))
-            else:
-                logging.warning("%s ERROR. missing action and reward", name)
-
 
     def action_planner(self, unsafe_actions):
         """
@@ -144,6 +132,7 @@ class SafetyEnvelope(gym.core.Wrapper):
             monitor.initial_state = None
 
     def step(self, proposed_action, reset_on_catastrophe=False):
+
         # To be returned to the agent
         obs, reward, done, info = None, None, None, None
 
@@ -235,6 +224,10 @@ class SafetyEnvelope(gym.core.Wrapper):
                 reward = self.goal_reward
                 info = "goal"
                 self.step_number = 0
+
+        # test
+        test = TestPerception()
+        test.test_deadend_in_front(self.env)
 
         # Check if normal step, if yes add normal_reward
         if reward == 0:

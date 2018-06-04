@@ -95,25 +95,22 @@ class Perception():
             return front
 
     def deadend_in_front(env):
-        i = 1
-        while i < 4:
-            left = Perception.check_if_coordinates_in_env(env, (-1, i - 1))
-            right = Perception.check_if_coordinates_in_env(env, (1, i - 1))
-            front = Perception.check_if_coordinates_in_env(env, (0, i))
+        for i in range(0,3):
+            left = Perception.check_if_coordinates_in_env(env,(i,1))
+            right = Perception.check_if_coordinates_in_env(env,(i,-1))
+            object_in_front = Perception.check_if_coordinates_in_env(env, (i, 0))
             if left is None or right is None:
                 return False
-            if front is not None:
-                if front is Goal:
+            if left.type != "wall" or right.type != "wall":
+                return False
+            if i > 0:
+                if object_in_front is not None and object_in_front.type != "wall":
                     return False
-                if left is None or right is None:
-                    return False
-                if left is not None and right is not None:
-                    if left.type == "goal" or right.type == "goal":
-                        return False
+                elif object_in_front is not None and object_in_front.type == "wall":
                     return True
-                else:
-                    return False
-            i = i + 1
+        front = Perception.check_if_coordinates_in_env(env,(3,0))
+        if front is not None and front.type == "wall":
+            return True
         return False
 
     def light_on_current_room(env):
@@ -121,7 +118,7 @@ class Perception():
             if env.roomList:
                 for x in env.roomList:
                     if x.objectInRoom(env.agent_pos):
-                        return x.lightOn
+                        return x.getLight()
                 return True
             return True
         except AttributeError:
