@@ -169,7 +169,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if self.config.on_violation_reset:
                     obs = self.env.reset()
                     done = True
-                    info = "violation"
+                    info = ("violation",self.monitor_states)
                 if monitor["unsafe_action"]:
                     unsafe_actions.append(monitor["unsafe_action"])
                 shaped_rewards.append(monitor["shaped_reward"])
@@ -188,6 +188,9 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Send a suitable action to the environment
         obs, reward, done, info = self.env.step(suitable_action)
+        if info:
+            info = (info,self.monitor_states)
+
         logging.info("____verify AFTER action is applied to the environment")
         # Notify the monitors of the new state reached in the environment and the applied action
         for monitor in self.monitors:
@@ -212,7 +215,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         if current_cell is not None:
             if current_cell.type == "goal":
                 reward = self.goal_reward
-                info = "goal"
+                info = ("goal",self.monitor_states)
                 self.n_steps = 0
 
         # Check if normal step, if yes add normal_reward
@@ -223,9 +226,8 @@ class SafetyEnvelope(gym.core.Wrapper):
             saved = False
 
         if end:
-            info = "end"
+            info = ("end",self.monitor_states)
         elif not info and saved:
-            info = "saved"
-
+            info = ("saved",self.monitor_states)
         # Return everything to the agent
         return obs, reward, done, info

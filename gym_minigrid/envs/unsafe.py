@@ -15,6 +15,13 @@ class UnsafeEnv(ExMiniGridEnv):
             see_through_walls=True
         )
 
+    def step(self,action):
+        # Reset if agent step on water without knowing it
+        if action == self.actions.forward and self.worldobj_in_agent(1,0) == "water" :
+            return self.gen_obs(), 0, True, "died"
+        else:
+            return super().step(action)
+
     def _gen_grid(self, width, height):
         # Create an empty grid
         self.grid = Grid(width, height)
