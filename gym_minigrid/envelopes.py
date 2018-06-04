@@ -69,6 +69,9 @@ class SafetyEnvelope(gym.core.Wrapper):
                         self.monitor_states[new_monitor.name]["state"] = ""
                         self.monitor_states[new_monitor.name]["shaped_reward"] = 0
                         self.monitor_states[new_monitor.name]["unsafe_action"] = ""
+                        self.monitor_states[new_monitor.name]["mode"] = monitor.mode
+                        if hasattr(monitor, 'action_planner'):
+                            self.monitor_states[new_monitor.name]["action_planner"] = monitor.action_planner
 
         print("Active monitors:")
         for monitor in self.monitors:
@@ -114,11 +117,15 @@ class SafetyEnvelope(gym.core.Wrapper):
         :param unsafe_actions: list of actions that would bring one or more monitors in a fail state
         :return: safe action proposed by the action planner or proposed action in case unsafe_actions is empty
         """
+        safe_action = None
         if len(unsafe_actions) == 0:
-            return self.propsed_action
+            safe_action = self.propsed_action
         else:
-            logging.info("safe action : %s", str(self.env.actions.wait))
-            return self.env.actions.wait
+            for unsafe_action in unsafe_actions:
+                if unsafe_action[1] == "wait":
+                    logging.info("safe action : %s", str(self.env.actions.wait))
+                    safe_action = self.env.actions.wait
+        return safe_action
 
     def _reset_monitors(self):
         """
@@ -169,13 +176,16 @@ class SafetyEnvelope(gym.core.Wrapper):
                     done = True
                     info = ("violation", self.monitor_states)
                 if monitor["unsafe_action"]:
-                    unsafe_actions.append(monitor["unsafe_action"])
+                    # check if the monitor is in enforcing mode
+                    if monitor["mode"] == "enforcing":
+                        unsafe_actions.append((monitor["unsafe_action"], monitor["action_planner"]))
                 shaped_rewards.append(monitor["shaped_reward"])
 
         # If have to reset
         if done:
             reward = sum(shaped_rewards)
             self.n_steps = 0
+            self._reset_monitors()
             return obs, reward, done, info
 
         logging.info("unsafe actions = %s", unsafe_actions)
@@ -228,4 +238,8 @@ class SafetyEnvelope(gym.core.Wrapper):
         elif not info and saved:
             info = ("saved", self.monitor_states)
         # Return everything to the agent
+
+        if done:
+            self._reset_monitors()
+
         return obs, reward, done, info
