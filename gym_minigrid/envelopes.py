@@ -58,13 +58,14 @@ class SafetyEnvelope(gym.core.Wrapper):
                         # Monitors with condition(s) (Absence / Precedence / Response / Universality)
                         if hasattr(monitor, 'conditions'):
                             new_monitor = dict_monitors[monitor.type](monitor.type + "_" + monitor.name,
-                                                                     monitor.conditions, self._on_monitoring,
-                                                                     monitor.rewards)
+                                                                      monitor.conditions, self._on_monitoring,
+                                                                      monitor.rewards)
                         # Monitors without condition (Avoid)
                         else:
-                            new_monitor = dict_monitors[monitor.type](monitor.type+"_"+monitor.name,monitor.name,
-                                                                     monitor.violated_action,
-                                                                     self._on_monitoring,monitor.rewards)
+                            new_monitor = dict_monitors[monitor.type](monitor.type + "_" + monitor.obj_to_avoid,
+                                                                      monitor.obj_to_avoid,
+                                                                      monitor.act_to_avoid,
+                                                                      self._on_monitoring, monitor.rewards)
                         self.monitors.append(new_monitor)
                         self.monitor_states[new_monitor.name] = {}
                         self.monitor_states[new_monitor.name]["state"] = ""

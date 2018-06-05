@@ -41,7 +41,7 @@ class PrintMonitors:
 
 
         for avoid_obj in config.monitors.properties.avoid:
-            monitor = Avoid(avoid_obj.name, avoid_obj.name, on_monitoring, avoid_obj.rewards)
+            monitor = Avoid(avoid_obj.name, avoid_obj.obj_to_avoid, avoid_obj.act_to_avoid, on_monitoring, avoid_obj.rewards)
             monitor.draw()
 
         for precedence_obj in config.monitors.patterns.precedence:
