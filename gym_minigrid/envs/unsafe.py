@@ -10,14 +10,14 @@ class UnsafeEnv(ExMiniGridEnv):
     def __init__(self, size=8):
         super().__init__(
             grid_size=size,
-            max_steps=4*size*size,
+            max_steps=4 * size * size,
             # Set this to True for maximum speed
             see_through_walls=True
         )
 
-    def step(self,action):
+    def step(self, action):
         # Reset if agent step on water without knowing it
-        if action == self.actions.forward and self.worldobj_in_agent(1,0) == "water" :
+        if action == self.actions.forward and self.worldobj_in_agent(1, 0) == "water":
             return self.gen_obs(), 0, True, "died"
         else:
             return super().step(action)
@@ -45,13 +45,16 @@ class UnsafeEnv(ExMiniGridEnv):
 
         self.mission = "get to the green goal square without moving on water"
 
+
 class UnsafeEnv6x6(UnsafeEnv):
     def __init__(self):
         super().__init__(size=6)
 
+
 class UnsafeEnv16x16(UnsafeEnv):
     def __init__(self):
         super().__init__(size=16)
+
 
 register(
     id='MiniGrid-Unsafe-6x6-v0',

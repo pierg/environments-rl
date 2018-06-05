@@ -192,7 +192,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Build action to send to the environment
         suitable_action = self._action_planner(unsafe_actions)
-        logging.info("actions possibles =%s", suitable_action)
+        logging.info("actions possibles = %s", suitable_action)
 
         # Send a suitable action to the environment
         obs, reward, done, info = self.env.step(suitable_action)
@@ -237,9 +237,9 @@ class SafetyEnvelope(gym.core.Wrapper):
             info = ("end", self.monitor_states)
         elif not info and saved:
             info = ("saved", self.monitor_states)
-        # Return everything to the agent
 
         if done:
             self._reset_monitors()
 
+        # Returns to the agent
         return obs, reward, done, info
