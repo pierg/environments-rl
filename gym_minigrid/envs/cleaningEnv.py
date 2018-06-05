@@ -1,6 +1,5 @@
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
-from gym_minigrid.envelopes import *
 from configurations import config_grabber as cg
 
 class CleaningEnv(ExMiniGridEnv):

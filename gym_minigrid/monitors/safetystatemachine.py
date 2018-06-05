@@ -266,6 +266,10 @@ class SafetyStateMachine(object):
     def _on_mismatch(self):
         self.notify(self.name, "mismatch")
 
+    def reset(self):
+        self.initial_state = None
+        logging.info("reset() -> state machine has been resetted...")
+
     def draw(self):
         abs_file_path = os.path.abspath(__file__ + "/../draws/" + self.pattern + "_" + self.name + ".png")
         self.machine.get_graph(title=self.name).draw(abs_file_path, prog='dot')
@@ -287,7 +291,7 @@ class SafetyStateMachine(object):
             self.trigger('*')
         else:
             self._on_mismatch()
-        logging.info("monitor_state: %s" , self.state)
+        logging.info("check() -> monitor_state: %s", self.state)
 
     # Update the state after the action has been performed in the environment
     def verify(self, obs_post, applied_action):
@@ -295,14 +299,20 @@ class SafetyStateMachine(object):
         # Map the observation to a state
         self.env_state = self._obs_to_state(obs_post,applied_action)
 
-        if self.state != self.env_state:
+        if self.initial_state is None:
+            # state machine has been resetted
+            self.initial_state = self.env_state
+            self.machine.set_state(self.env_state)
+            self.trigger('*')
+
+        elif self.state != self.env_state:
             # Switched to a new state
             self.observations = obs_post
             self.trigger('*')
             # print("new_monitor_state: " + self.state)
             if self.state != self.env_state:
                 self._on_mismatch()
-        logging.info("monitor_state: %s" , self.state)
+        logging.info("verify() -> monitor_state: %s", self.state)
 
     """ Actions available to the agent - used for conditions checking """
     def forward(self):

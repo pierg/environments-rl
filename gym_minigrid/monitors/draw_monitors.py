@@ -37,11 +37,11 @@ def on_monitoring(name, state, **kwargs):
 
 class PrintMonitors:
     if __name__ == "__main__":
-        config = cg.Configuration.grab("test")
+        config = cg.Configuration.grab()
 
 
         for avoid_obj in config.monitors.properties.avoid:
-            monitor = Avoid(avoid_obj.name, avoid_obj.obj_to_avoid, avoid_obj.act_to_avoid, on_monitoring, avoid_obj.rewards)
+            monitor = Avoid(avoid_obj.obj_to_avoid, avoid_obj.obj_to_avoid, avoid_obj.act_to_avoid, on_monitoring, avoid_obj.rewards)
             monitor.draw()
 
         for precedence_obj in config.monitors.patterns.precedence:

@@ -1,4 +1,4 @@
-from perception import Perception as p
+from gym_minigrid.perception import Perception as p
 import logging
 
 from monitors.safetystatemachine import SafetyStateMachine
@@ -79,7 +79,7 @@ class Avoid(SafetyStateMachine):
          'source': 'immediate',
          'dest': 'fail',
          'conditions': ['violation_action', 'obs_immediate']
-         },
+         }
 
     ]
 
@@ -130,10 +130,8 @@ class Avoid(SafetyStateMachine):
         super()._on_shaping(self.immediate_rwd)
 
     def _on_violated(self):
-        logging.warning("avoid %s violated", self.name)
-        self.machine.set_state(self.env_state)
-        logging.warning("Rolled-back state to: %s", self.state)
         super()._on_violated(self.violated_rwd)
+        super().reset()
 
     def obs_near(self):
         return Avoid.obs["near"]

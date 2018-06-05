@@ -125,7 +125,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         else:
             for unsafe_action in unsafe_actions:
                 if unsafe_action[1] == "wait":
-                    logging.info("safe action : %s", str(self.env.actions.wait))
+                    logging.info("action_planner() -> safe action : %s", str(self.env.actions.wait))
                     safe_action = self.env.actions.wait
         return safe_action
 
@@ -159,7 +159,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
-        logging.info("___check BEFORE action is applyed to the environmnent")
+        # logging.info("___check BEFORE action is applyed to the environmnent")
 
         # Check observation and proposed action in all running monitors
         for monitor in self.monitors:
@@ -190,18 +190,18 @@ class SafetyEnvelope(gym.core.Wrapper):
             self._reset_monitors()
             return obs, reward, done, info
 
-        logging.info("unsafe actions = %s", unsafe_actions)
+        # logging.info("unsafe actions = %s", unsafe_actions)
 
         # Build action to send to the environment
         suitable_action = self._action_planner(unsafe_actions)
-        logging.info("actions possibles =%s", suitable_action)
+        # logging.info("actions possibles = %s", suitable_action)
 
         # Send a suitable action to the environment
         obs, reward, done, info = self.env.step(suitable_action)
         if info:
             info = (info, self.monitor_states)
 
-        logging.info("____verify AFTER action is applied to the environment")
+        # logging.info("____verify AFTER action is applied to the environment")
         # Notify the monitors of the new state reached in the environment and the applied action
         for monitor in self.monitors:
             monitor.verify(self.env, suitable_action)

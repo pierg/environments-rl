@@ -1,8 +1,7 @@
-import math
 from gym_minigrid.extendedminigrid import *
-from gym_minigrid.extendedminigrid import Water
 
 AGENT_GRID_LOCATION = 2
+
 
 # Helper class to analyse agent's observations
 # All the methods should return True/False
@@ -23,7 +22,6 @@ class Perception():
             return object_type == obs.worldobj_in_agent(1, 0)
         return object_type == "None"
 
-
     @staticmethod
     def is_near_to_worldobj(obs, object_type):
         """
@@ -34,9 +32,9 @@ class Perception():
         """
         # Todo : Ask pier if the monitors using env instead of agent_obs is normal ? if yes delete condition
         if Perception.light_on_current_room(obs):
-            return  object_type == obs.worldobj_in_agent(2, 0) or \
-                    object_type == obs.worldobj_in_agent(0, 1) or \
-                    object_type == obs.worldobj_in_agent(0, -1)
+            return object_type == obs.worldobj_in_agent(2, 0) or \
+                   object_type == obs.worldobj_in_agent(0, 1) or \
+                   object_type == obs.worldobj_in_agent(0, -1)
         return object_type == "None"
 
     @staticmethod
@@ -129,10 +127,10 @@ class Perception():
 
     def light_switch_turned_on(env):
         agent_obs = ExGrid.decode(env.gen_obs()['image'])
-        for i in range (0, len(agent_obs.grid)):
+        for i in range(0, len(agent_obs.grid)):
             if agent_obs.grid[i] is not None:
                 if agent_obs.grid[i].type == "lightSwitch":
-                    j, k = env.get_grid_coords_from_view((3-int(i/math.sqrt(len(agent_obs.grid))), (i%4)-2))
-                    if hasattr(env.grid.get(j, k),'state'):
+                    j, k = env.get_grid_coords_from_view((3 - int(i / math.sqrt(len(agent_obs.grid))), (i % 4) - 2))
+                    if hasattr(env.grid.get(j, k), 'state'):
                         return env.grid.get(j, k).state
         return False

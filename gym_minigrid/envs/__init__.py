@@ -18,4 +18,3 @@ from gym_minigrid.envs.doorWaterEnv import *
 from gym_minigrid.envs.safety import *
 from gym_minigrid.envs.cleaningEnv import *
 from gym_minigrid.envs.miniclean import *
-from gym_minigrid.envs.randoms.randomenv3062 import *

@@ -1,4 +1,4 @@
-from perception import Perception as p
+from gym_minigrid.perception import Perception as p
 import logging
 
 from monitors.safetystatemachine import SafetyStateMachine
