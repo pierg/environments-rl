@@ -93,7 +93,7 @@ class Avoid(SafetyStateMachine):
         self.violated_rwd = rewards.violated
         self.worldobj_avoid = worldobj_avoid
         self.action = action
-        self.test = False
+        self.violation_action = False
         super().__init__(name, "avoid", self.states, self.transitions, 'initial', notify)
 
     # Convert obseravions to state and populate the obs_conditions
@@ -107,9 +107,9 @@ class Avoid(SafetyStateMachine):
         Avoid.obs["immediate"] = immediate
 
         if str(action_proposed) == self.action :
-            self.test = True
+            self.violation_action = True
         else:
-            self.test = False
+            self.violation_action = False
 
         # Return the state
         if immediate:
@@ -141,4 +141,4 @@ class Avoid(SafetyStateMachine):
         return Avoid.obs["immediate"]
 
     def violated_action(self):
-        return self.test
+        return self.violation_action

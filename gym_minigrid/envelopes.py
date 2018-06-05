@@ -42,22 +42,26 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Dictionary that gets populated with information by all the monitors at runtime
         self.monitor_states = {}
 
-        # Set reward for a normal step
-        self.normal_reward = self.config.rewards.step
 
-        # Set reward for the goal
-        self.goal_reward = self.config.rewards.goal
+        # Set rewards
 
-        self.death_reward = self.config.rewards.death
+        self.step_reward = self.config.rewards.standart.step
+        self.goal_reward = self.config.rewards.standart.goal
+        self.death_reward = self.config.rewards.standart.death
 
-        self.step_number = 0
+        self.n_steps = 0
+
+        self.test = TestPerception()
 
         # Dictionary that contains all the type of monitors you can use
-        dict_monitors = {'avoid': Avoid, 'precedence': Precedence, 'response': Response,
-                        'universality': Universality, 'absence': Absence}
+        dict_monitors = {'avoid': Avoid,
+                         'precedence': Precedence,
+                         'response': Response,
+                         'universality': Universality,
+                         'absence': Absence}
 
-        for typeOfMonitor in self.config.monitors:
-            for monitors in typeOfMonitor:
+        for monitor_types in self.config.monitors:
+            for monitors in monitor_types:
                 for monitor in monitors:
                     if monitor.active:
                         # Monitors with condition(s) (Precedence / Response / Universality)
@@ -74,7 +78,12 @@ class SafetyEnvelope(gym.core.Wrapper):
                         self.monitor_states[new_monitor.name]["state"] = ""
                         self.monitor_states[new_monitor.name]["shaped_reward"] = 0
                         self.monitor_states[new_monitor.name]["unsafe_action"] = ""
-        print(self.monitors)
+                        self.monitor_states[new_monitor.name]["mode"] = monitor.mode
+                        if hasattr(monitor, 'action_planner'):
+                            self.monitor_states[new_monitor.name]["action_planner"] = monitor.action_planner
+        print("Active monitors:")
+        for monitor in self.monitors:
+            print(monitor)
 
     def on_monitoring(self, name, state, **kwargs):
         """
@@ -86,19 +95,18 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.monitor_states[name]["state"] = state
 
         if state == "mismatch":
-            logging.warning("%s mismatch!!!!", name)
+            logging.error("%s mismatch between agent's observations and monitor state!", name)
 
         if state == "monitoring":
-            logging.info("%s monitoring", name)
+            logging.info("%s is monitoring...", name)
 
         if state == "shaping":
             if kwargs:
-                logging.info("%s shaping", name)
                 shaped_reward = kwargs.get('shaped_reward', 0)
-                logging.info("     shaped_reward = %s", str(shaped_reward))
+                logging.info("%s is shaping... (shaped_reward = %s)", name, str(shaped_reward))
                 self.monitor_states[name]["shaped_reward"] = shaped_reward
             else:
-                logging.warning("%s ERROR. missing action and reward", name)
+                logging.error("%s is in shaping error. missing action and reward", name)
 
         if state == "violation":
             if kwargs:
@@ -118,13 +126,15 @@ class SafetyEnvelope(gym.core.Wrapper):
         :param unsafe_actions:
         :return: safe action or proposed action
         """
+        safe_action = None
         if len(unsafe_actions) == 0:
-            return self.propsed_action
+            safe_action = self.propsed_action
         else:
             logging.info("safe action : %s", str(self.env.actions.wait))
-            return self.env.actions.wait
+            safe_action = self.env.actions.wait
+        return safe_action
 
-    def resetMonitors(self):
+    def _reset_monitors(self):
         """
         Reset all monitors initial state to avoid mismatch errors on environment reset
         """
@@ -138,12 +148,12 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         saved = False
         end = False
-        if self.step_number == 0:
-            self.resetMonitors()
+        if self.n_steps == 0:
+            self._reset_monitors()
 
-        self.step_number += 1
+        self.n_steps += 1
 
-        if self.step_number == self.env.max_steps:
+        if self.n_steps == self.env.max_steps:
             end = True
             self.step_number = 0
 
@@ -226,12 +236,15 @@ class SafetyEnvelope(gym.core.Wrapper):
                 self.step_number = 0
 
         # test
-        test = TestPerception()
-        test.test_deadend_in_front(self.env)
+
+        self.test.test_light_switch_turned_on(self.env,proposed_action)
+        #self.test.test_light_on_current_room(self.env)
+        self.test.test_check_if_coordinates_in_env(self.env)
+        self.test.test_door_opened_in_front(self.env, proposed_action)
 
         # Check if normal step, if yes add normal_reward
         if reward == 0:
-            reward = self.normal_reward
+            reward = self.step_reward
 
         if saved and suitable_action != ExMiniGridEnv.Actions.wait:
             saved = False

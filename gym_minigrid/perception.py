@@ -2,6 +2,7 @@ import math
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.extendedminigrid import Water
 
+
 AGENT_GRID_LOCATION = 2
 
 # Helper class to analyse agent's observations
