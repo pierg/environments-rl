@@ -67,7 +67,7 @@ class Avoid(SafetyStateMachine):
          'source': 'immediate',
          'dest': 'immediate',
          'conditions': 'obs_immediate',
-         'unless': ['forward']},
+         'unless': ['violated_action']},
 
         {'trigger': '*',
          'source': 'immediate',
@@ -78,8 +78,9 @@ class Avoid(SafetyStateMachine):
         {'trigger': '*',
          'source': 'immediate',
          'dest': 'fail',
-         'conditions': ['forward', 'obs_immediate']
+         'conditions': ['violated_action', 'obs_immediate']
          },
+
     ]
 
     obs = {
@@ -87,11 +88,13 @@ class Avoid(SafetyStateMachine):
         "immediate": False
     }
 
-    def __init__(self, name, worldobj_avoid, notify, rewards):
+    def __init__(self, name, worldobj_avoid, action, notify, rewards):
         self.near_rwd = rewards.near
         self.immediate_rwd = rewards.immediate
         self.violated_rwd = rewards.violated
         self.worldobj_avoid = worldobj_avoid
+        self.action = action
+        self.violation_action = False
         super().__init__(name, "avoid", self.states, self.transitions, 'initial', notify)
 
     # Convert obseravions to state and populate the obs_conditions
@@ -103,6 +106,11 @@ class Avoid(SafetyStateMachine):
         # Save them in the obs_conditions dictionary
         Avoid.obs["near"] = near
         Avoid.obs["immediate"] = immediate
+
+        if str(action_proposed) == self.action :
+            self.violation_action = True
+        else:
+            self.violation_action = False
 
         # Return the state
         if immediate:
@@ -132,3 +140,6 @@ class Avoid(SafetyStateMachine):
 
     def obs_immediate(self):
         return Avoid.obs["immediate"]
+
+    def violated_action(self):
+        return self.violation_action
