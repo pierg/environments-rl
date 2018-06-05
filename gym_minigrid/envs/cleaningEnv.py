@@ -63,37 +63,30 @@ class CleaningEnv(ExMiniGridEnv):
         self.start_pos = (1, 1)
         self.start_dir = 0
 
-        #self.old_front_elm = self.worldobj_in_agent(1,0)
+        self.old_front_elm = self.worldobj_in_agent(1,0)
 
         self.mission = "Clean the room"
 
     def step(self, action):
+        obs, reward, done, info = super().step(action)
+
         # Check if the agent clean a dirt
-        reward = 0
-        info = {}
-        if self.worldobj_in_agent(1, 0) == "dirt" \
+        if self.old_front_elm == "dirt" \
                 and action == self.actions.toggle:
             reward = cg.Configuration.grab().rewards.cleaningenv.clean
 
-
-        if self.worldobj_in_agent(1, 0) == "vase" \
+        if self.old_front_elm == "vase" \
                 and action == self.actions.toggle:
             info = "break"
+        self.old_front_elm = self.worldobj_in_agent(1, 0)
 
-        if reward !=0:
-            obs, useless, done,  info = super().step(action)
-        elif info is not {}:
-            obs, reward, done, useless = super().step(action)
-        else:
-            obs, reward, done, info = super().step(action)
-
-        # Check if the room is clean
-        #if hasattr(self, 'list_dirt'):
+        # Check the room is clean
         if len(self.list_dirt) == 0:
-                done = True
-                reward = reward + cg.Configuration.grab().rewards.standart.goal
-                self.step_number = 0
-                info = "goal"
+            done = True
+            reward = reward + cg.Configuration.grab().rewards.standard.goal
+            self.step_number = 0
+            info = "goal"
+
         return obs, reward, done, info
 
 

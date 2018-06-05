@@ -1,5 +1,5 @@
 import collections
-from test_perception import *
+
 from configurations import config_grabber as cg
 
 from extendedminigrid import *
@@ -11,30 +11,24 @@ from monitors.patterns.response import *
 
 import gym
 
-# Size of the history collection
-N = 5
-
 
 class SafetyEnvelope(gym.core.Wrapper):
     """
     Safety envelope for safe exploration.
-    The purpose is to detect dangerous actions and block them sending back a modified reward
+    Uses monitors for avoiding unsafe actions and shaping rewards
     """
 
     def __init__(self, env):
         super(SafetyEnvelope, self).__init__(env)
-        # Stores history of the last N observation / proposed_actions
-        self.proposed_history = collections.deque(N * [(None, None)], N)
-        # Stores history of the last N observation / applied_actions
-        self.actual_history = collections.deque(N * [(None, None)], N)
 
         # Grab configuration
         self.config = cg.Configuration.grab()
 
-        # Action shaped by the action planner
-        self.shaped_action = None
-
+        # Action proposed by the agent
         self.propsed_action = None
+
+        # Action proposed by the monitor
+        self.shaped_action = None
 
         # List of all monitors with their states, rewards and unsafe-actions
         self.monitors = []
@@ -42,16 +36,13 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Dictionary that gets populated with information by all the monitors at runtime
         self.monitor_states = {}
 
-
         # Set rewards
+        self.step_reward = self.config.rewards.standard.step
+        self.goal_reward = self.config.rewards.standard.goal
+        self.death_reward = self.config.rewards.standard.death
 
-        self.step_reward = self.config.rewards.standart.step
-        self.goal_reward = self.config.rewards.standart.goal
-        self.death_reward = self.config.rewards.standart.death
-
+        # Counters of steps performed in an episode
         self.n_steps = 0
-
-        self.test = TestPerception()
 
         # Dictionary that contains all the type of monitors you can use
         dict_monitors = {'avoid': Avoid,
@@ -64,15 +55,17 @@ class SafetyEnvelope(gym.core.Wrapper):
             for monitors in monitor_types:
                 for monitor in monitors:
                     if monitor.active:
-                        # Monitors with condition(s) (Precedence / Response / Universality)
-                        if hasattr(monitor,'conditions'):
+                        # Monitors with condition(s) (Absence / Precedence / Response / Universality)
+                        if hasattr(monitor, 'conditions'):
                             new_monitor = dict_monitors[monitor.type](monitor.type + "_" + monitor.name,
-                                                                     monitor.conditions, self.on_monitoring,
-                                                                     monitor.rewards)
+                                                                      monitor.conditions, self._on_monitoring,
+                                                                      monitor.rewards)
                         # Monitors without condition (Avoid)
                         else:
-                            new_monitor = dict_monitors[monitor.type](monitor.type+"_"+monitor.name,monitor.name,monitor.violated_action,
-                                                                     self.on_monitoring,monitor.rewards)
+                            new_monitor = dict_monitors[monitor.type](monitor.type + "_" + monitor.obj_to_avoid,
+                                                                      monitor.obj_to_avoid,
+                                                                      monitor.act_to_avoid,
+                                                                      self._on_monitoring, monitor.rewards)
                         self.monitors.append(new_monitor)
                         self.monitor_states[new_monitor.name] = {}
                         self.monitor_states[new_monitor.name]["state"] = ""
@@ -81,11 +74,12 @@ class SafetyEnvelope(gym.core.Wrapper):
                         self.monitor_states[new_monitor.name]["mode"] = monitor.mode
                         if hasattr(monitor, 'action_planner'):
                             self.monitor_states[new_monitor.name]["action_planner"] = monitor.action_planner
+
         print("Active monitors:")
         for monitor in self.monitors:
             print(monitor)
 
-    def on_monitoring(self, name, state, **kwargs):
+    def _on_monitoring(self, name, state, **kwargs):
         """
         Callback function called by the monitors
         :param state: mismatch, violation
@@ -102,6 +96,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         if state == "shaping":
             if kwargs:
+                logging.info("%s shaping", name)
                 shaped_reward = kwargs.get('shaped_reward', 0)
                 logging.info("%s is shaping... (shaped_reward = %s)", name, str(shaped_reward))
                 self.monitor_states[name]["shaped_reward"] = shaped_reward
@@ -110,28 +105,29 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         if state == "violation":
             if kwargs:
-                logging.warning("%s violation", name)
                 unsafe_action = kwargs.get('unsafe_action')
                 shaped_reward = kwargs.get('shaped_reward', 0)
                 self.monitor_states[name]["unsafe_action"] = unsafe_action
                 self.monitor_states[name]["shaped_reward"] = shaped_reward
-                logging.info("     shaped_reward=%s     unsafe_action=%s", str(shaped_reward), str(unsafe_action))
+                logging.warning("%s is in violation...(shaped_reward=%s, unsafe_action=%s)",
+                                name, str(shaped_reward), str(unsafe_action))
             else:
-                logging.warning("%s ERROR. missing action and reward", name)
+                logging.error("%s is in violation error. missing action and reward", name)
 
-
-    def action_planner(self, unsafe_actions):
+    def _action_planner(self, unsafe_actions):
         """
         Return a suitable action that (that is not one of the 'unsafe_action')
-        :param unsafe_actions:
-        :return: safe action or proposed action
+        :param unsafe_actions: list of actions that would bring one or more monitors in a fail state
+        :return: safe action proposed by the action planner or proposed action in case unsafe_actions is empty
         """
         safe_action = None
         if len(unsafe_actions) == 0:
             safe_action = self.propsed_action
         else:
-            logging.info("safe action : %s", str(self.env.actions.wait))
-            safe_action = self.env.actions.wait
+            for unsafe_action in unsafe_actions:
+                if unsafe_action[1] == "wait":
+                    logging.info("safe action : %s", str(self.env.actions.wait))
+                    safe_action = self.env.actions.wait
         return safe_action
 
     def _reset_monitors(self):
@@ -141,7 +137,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         for monitor in self.monitors:
             monitor.initial_state = None
 
-    def step(self, proposed_action, reset_on_catastrophe=False):
+    def step(self, proposed_action):
 
         # To be returned to the agent
         obs, reward, done, info = None, None, None, None
@@ -155,22 +151,14 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         if self.n_steps == self.env.max_steps:
             end = True
-            self.step_number = 0
+            self.n_steps = 0
 
         self.propsed_action = proposed_action
 
-        # Get current observations from the environment and decode them
-        agent_obs = ExGrid.decode(self.env.gen_obs()['image'])
-        agent_pos = self.env.agent_pos
-        agent_dir = self.env.get_dir_vec()
-        current_obs = (agent_obs, agent_pos, agent_dir)
         current_obs_env = self.env
 
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
-
-        # Store obs/action in history
-        self.proposed_history.append((current_obs, proposed_action))
 
         logging.info("___check BEFORE action is applyed to the environmnent")
 
@@ -189,25 +177,31 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if self.config.on_violation_reset:
                     obs = self.env.reset()
                     done = True
-                    info = "violation"
+                    info = ("violation", self.monitor_states)
                 if monitor["unsafe_action"]:
-                    unsafe_actions.append(monitor["unsafe_action"])
+                    # check if the monitor is in enforcing mode
+                    if monitor["mode"] == "enforcing":
+                        unsafe_actions.append((monitor["unsafe_action"], monitor["action_planner"]))
                 shaped_rewards.append(monitor["shaped_reward"])
 
         # If have to reset
         if done:
             reward = sum(shaped_rewards)
-            self.step_number = 0
+            self.n_steps = 0
+            self._reset_monitors()
             return obs, reward, done, info
 
         logging.info("unsafe actions = %s", unsafe_actions)
 
         # Build action to send to the environment
-        suitable_action = self.action_planner(unsafe_actions)
+        suitable_action = self._action_planner(unsafe_actions)
         logging.info("actions possibles =%s", suitable_action)
 
         # Send a suitable action to the environment
         obs, reward, done, info = self.env.step(suitable_action)
+        if info:
+            info = (info, self.monitor_states)
+
         logging.info("____verify AFTER action is applied to the environment")
         # Notify the monitors of the new state reached in the environment and the applied action
         for monitor in self.monitors:
@@ -232,15 +226,8 @@ class SafetyEnvelope(gym.core.Wrapper):
         if current_cell is not None:
             if current_cell.type == "goal":
                 reward = self.goal_reward
-                info = "goal"
-                self.step_number = 0
-
-        # test
-
-        self.test.test_light_switch_turned_on(self.env,proposed_action)
-        #self.test.test_light_on_current_room(self.env)
-        self.test.test_check_if_coordinates_in_env(self.env)
-        self.test.test_door_opened_in_front(self.env, proposed_action)
+                info = ("goal", self.monitor_states)
+                self.n_steps = 0
 
         # Check if normal step, if yes add normal_reward
         if reward == 0:
@@ -250,9 +237,12 @@ class SafetyEnvelope(gym.core.Wrapper):
             saved = False
 
         if end:
-            info = "end"
+            info = ("end", self.monitor_states)
         elif not info and saved:
-            info = "saved"
-
+            info = ("saved", self.monitor_states)
         # Return everything to the agent
+
+        if done:
+            self._reset_monitors()
+
         return obs, reward, done, info
