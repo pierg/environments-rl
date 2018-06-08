@@ -1,6 +1,6 @@
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
-from gym_minigrid.envelopes import *
+from configurations import config_grabber as cg
 
 class BigCleaningEnv(ExMiniGridEnv):
 
@@ -67,22 +67,31 @@ class BigCleaningEnv(ExMiniGridEnv):
         self.mission = "Clean the room"
 
     def step(self, action):
-        obs, reward, done, info = super().step(action)
-
+        reward = 0
+        info = {}
         # Check if the agent clean a dirt
-        if self.old_front_elm == "dirt" \
+        if self.worldobj_in_agent(1,0)== "dirt" \
                 and action == self.actions.toggle:
-            reward = 0.5
-        self.old_front_elm = self.worldobj_in_front_agent_noDark()
+            reward = cg.Configuration.grab().rewards.cleaningenv.clean
+
+        if self.worldobj_in_agent(1,0) == "vase" \
+                and action == self.actions.toggle:
+            info = "break"
+
+        if reward != 0:
+            obs, useless, done, info = super().step(action)
+        elif info is not {}:
+            obs, reward, done, useless = super().step(action)
+        else:
+            obs, reward, done, info = super().step(action)
 
 
-
-        # Check the goal of the grid
-        #if hasattr(self, 'list_dirt'):
+        # Check the room is clean
         if len(self.list_dirt) == 0:
-                done = True
-                reward = reward + 1
-                self.step_number = 0
+            done = True
+            reward = reward + cg.Configuration.grab().rewards.standard.goal
+            self.step_number = 0
+            info = "goal"
 
         return obs, reward, done, info
 

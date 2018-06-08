@@ -1,6 +1,5 @@
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
-from gym_minigrid.envelopes import *
 from configurations import config_grabber as cg
 
 class CleaningEnv(ExMiniGridEnv):
@@ -63,22 +62,28 @@ class CleaningEnv(ExMiniGridEnv):
         self.start_pos = (1, 1)
         self.start_dir = 0
 
-        self.old_front_elm = self.worldobj_in_agent(1,0)
 
         self.mission = "Clean the room"
 
     def step(self, action):
-        obs, reward, done, info = super().step(action)
-
+        reward = 0
+        info = {}
         # Check if the agent clean a dirt
-        if self.old_front_elm == "dirt" \
+        if self.worldobj_in_agent(1,0)== "dirt" \
                 and action == self.actions.toggle:
             reward = cg.Configuration.grab().rewards.cleaningenv.clean
 
-        if self.old_front_elm == "vase" \
+        if self.worldobj_in_agent(1,0) == "vase" \
                 and action == self.actions.toggle:
             info = "break"
-        self.old_front_elm = self.worldobj_in_agent(1, 0)
+
+        if reward != 0:
+            obs, useless, done, info = super().step(action)
+        elif info is not {}:
+            obs, reward, done, useless = super().step(action)
+        else:
+            obs, reward, done, info = super().step(action)
+
 
         # Check the room is clean
         if len(self.list_dirt) == 0:
