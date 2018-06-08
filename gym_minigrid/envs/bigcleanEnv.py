@@ -1,8 +1,8 @@
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
-from gym_minigrid.envelopes import *
+from configurations import config_grabber as cg
 
-class BigCleaningEnv(ExMiniGridEnv):
+class BigCleanEnv(ExMiniGridEnv):
 
     def __init__(self, size=16):
         super().__init__(
@@ -33,7 +33,7 @@ class BigCleaningEnv(ExMiniGridEnv):
         # WARNING don't change the name of list_dirt if you want to use the cleaning robot
         self.list_dirt = []
         #Place dirt
-        self.number_dirt = 15
+        self.number_dirt = 16
         for k in range(self.number_dirt):
             dirt = Dirt()
             x, y = self._rand_pos(2, width-2, 2, height - 2)
@@ -47,46 +47,53 @@ class BigCleaningEnv(ExMiniGridEnv):
 
         #Place Vase
 
-        for i in range(5):
+        for i in range(6):
             vase = Vase()
             x2, y2 = self._rand_pos(2, width - 2, 2, height - 2)
             while self.grid.get(x2, y2) is not None:
                 x2, y2 = self._rand_pos(2, width - 2, 2, height - 2)
 
-        # a vase pattern need the greed and the position to change on dirt if the agent
+            # a vase pattern need the greed and the position to change on dirt if the agent
             self.grid.set(x2, y2, vase)
-        #vase.affect_grid(self.grid,(x2,y2))
+            #vase.affect_grid(self.grid,(x2,y2))
             vase.list_dirt(self.list_dirt)
 
         # Set start position
         self.start_pos = (1, 1)
         self.start_dir = 0
 
-        self.old_front_elm = self.worldobj_in_front_agent_noDark()
 
         self.mission = "Clean the room"
 
     def step(self, action):
-        obs, reward, done, info = super().step(action)
-
+        reward = 0
+        info = {}
         # Check if the agent clean a dirt
-        if self.old_front_elm == "dirt" \
+        if self.worldobj_in_agent(1, 0) == "dirt" \
                 and action == self.actions.toggle:
-            reward = 0.5
-        self.old_front_elm = self.worldobj_in_front_agent_noDark()
+            reward = cg.Configuration.grab().rewards.cleaningenv.clean
 
+        if self.worldobj_in_agent(1, 0) == "vase" \
+                and action == self.actions.toggle:
+            info = "break"
 
+        if reward != 0:
+            obs, useless, done, info = super().step(action)
+        elif info is not {}:
+            obs, reward, done, useless = super().step(action)
+        else:
+            obs, reward, done, info = super().step(action)
 
-        # Check the goal of the grid
-        #if hasattr(self, 'list_dirt'):
+            # Check the room is clean
         if len(self.list_dirt) == 0:
-                done = True
-                reward = reward + 1
-                self.step_number = 0
+            done = True
+            reward = reward + cg.Configuration.grab().rewards.standard.goal
+            self.step_number = 0
+            info = "goal"
 
         return obs, reward, done, info
 
 register(
-    id='MiniGrid-BigCleaningEnv-16x16-v0',
-    entry_point='gym_minigrid.envs:CleaningEnv'
+    id='MiniGrid-BigCleanEnv-16x16-v0',
+    entry_point='gym_minigrid.envs:BigCleanEnv'
 )
