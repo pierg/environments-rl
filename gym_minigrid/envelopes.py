@@ -275,8 +275,6 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
         self.config = cg.Configuration.grab()
 
-        self.reward_range = (self.config.reward.range[0], self.config.reward.range[1])
-
         self.step_number = 0
 
         self.actions = ExMiniGridEnv.Actions

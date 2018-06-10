@@ -5,7 +5,7 @@ def extended_dic(obj_names=[]):
     """
     Extend the OBJECT_TO_IDX dictionaries with additional objects
     :param obj_names: list of strings
-    :return: OBJECT_TO_IDX extended 
+    :return: OBJECT_TO_IDX extended
     """
     biggest_idx = list(OBJECT_TO_IDX.values())[-1]
     for key in OBJECT_TO_IDX.values():
