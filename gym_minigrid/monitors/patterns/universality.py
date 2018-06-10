@@ -5,7 +5,7 @@ from monitors.safetystatemachine import SafetyStateMachine
 
 
 
-class Absence(SafetyStateMachine):
+class Universality(SafetyStateMachine):
     """
     Always true
     """
@@ -59,17 +59,16 @@ class Absence(SafetyStateMachine):
         self.respectd_rwd = rewards.respected
         self.violated_rwd = rewards.violated
         self.condition = condition
-        super().__init__(name, "absence", self.states, self.transitions, 'initial', notify)
+        super().__init__(name, "universally", self.states, self.transitions, 'initial', notify)
 
     # Convert obseravions to state and populate the obs_conditions
     def _obs_to_state(self, obs, action_proposed):
         if p.is_condition_satisfied(obs, action_proposed, self.condition):
-            Absence.obs["respected"] = False
-            return 'violated'
-        else:
-            Absence.obs["respected"] = True
+            Universality.obs["respected"] = True
             return 'respected'
-
+        else:
+            Universality.obs["respected"] = False
+            return 'violated'
 
     def _on_monitoring(self):
         super()._on_monitoring()
@@ -78,10 +77,9 @@ class Absence(SafetyStateMachine):
         super()._on_shaping(self.respectd_rwd)
 
     def _on_violated(self):
-        super()._on_violated(self.violated_rwd)
+        super()._on_shaping(self.violated_rwd)
 
     def obs_violated(self):
-        if Absence.obs["respected"]:
-            return False
-        return True
+        return not Universality.obs["respected"]
+
 

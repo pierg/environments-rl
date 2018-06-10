@@ -1,5 +1,7 @@
-from monitors.patterns.absence import *
+from monitors.properties.avoid import *
 from monitors.patterns.precedence import *
+from monitors.patterns.absence import *
+from monitors.patterns.universality import *
 from configurations import config_grabber as cg
 
 
@@ -27,7 +29,7 @@ def on_monitoring(name, state, **kwargs):
     if state == "violation":
         if kwargs:
             logging.warning("%s violation blocked", name)
-            logging.info("shaped_reward=" + str(shaped_reward) + " unsafe_action=" + str(unsafe_action))
+            logging.info("shaped_reward=" + str(kwargs.get("shaped_reward")) + " unsafe_action=" + str(kwargs.get("unsafe_action")))
         else:
             logging.warning("%s ERROR. missing action and reward", name)
 
@@ -35,12 +37,21 @@ def on_monitoring(name, state, **kwargs):
 
 class PrintMonitors:
     if __name__ == "__main__":
-        # Grab configuration
         config = cg.Configuration.grab()
-        for avoid_obj in config.monitors.absence.monitored:
-            new_absence_monitor = Absence("absence_" + avoid_obj.name, avoid_obj.name, on_monitoring,avoid_obj.reward)
-            new_absence_monitor.draw()
 
-        for precedence_obj in config.monitors.precedence.monitored:
-            new_precedence_monitor = Precedence("precedence_" + precedence_obj.name, precedence_obj, on_monitoring, precedence_obj.reward)
-            new_precedence_monitor.draw()
+
+        for avoid_obj in config.monitors.properties.avoid:
+            monitor = Avoid(avoid_obj.obj_to_avoid, avoid_obj.obj_to_avoid, avoid_obj.act_to_avoid, on_monitoring, avoid_obj.rewards)
+            monitor.draw()
+
+        for precedence_obj in config.monitors.patterns.precedence:
+            monitor = Precedence(precedence_obj.name, precedence_obj.conditions, on_monitoring, precedence_obj.rewards)
+            monitor.draw()
+
+        for universality_obj in config.monitors.patterns.universality:
+            monitor = Universality(universality_obj.name, universality_obj, on_monitoring, universality_obj.rewards)
+            monitor.draw()
+
+        for absence_obj in config.monitors.patterns.absence:
+            monitor = Absence(absence_obj.name, absence_obj, on_monitoring, absence_obj.rewards)
+            monitor.draw()

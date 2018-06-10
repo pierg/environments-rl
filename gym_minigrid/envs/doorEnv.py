@@ -40,8 +40,8 @@ class DoorEnv(ExMiniGridEnv):
 
         # Add the rooms
         self.roomList = []
-        self.roomList.append(Room(0,(width/2,height),(1,1),True))
-        self.roomList.append(Room(1,(width,height),(width/2+1,1),False))
+        self.roomList.append(Room(0,(width/2-1,height),(0,0),True))
+        self.roomList.append(Room(1,(width,height),(width/2,0),False))
 
         # Set room entry and exit that are needed
         self.roomList[1].setEntryDoor((3,2))

@@ -242,12 +242,11 @@ class SafetyStateMachine(object):
 
         # Function to be called when violation is detected (on_block) or when observations are needed (uncertainty)
         self.notify = notify
-        # self.on_uncertainty_notify = on_uncertainty_notify
 
         # MiniGrid Actions and unsafe_actions list to be returned by the on_block
         self.actions = MiniGridEnv.Actions
 
-    def _obs_to_state(self, obs):
+    def _obs_to_state(self, obs, action_proposed):
         raise NotImplementedError
 
 
@@ -261,19 +260,18 @@ class SafetyStateMachine(object):
 
     # Triggered when it enters in a state of time 'violated'
     def _on_violated(self, shaped_reward=0):
-
-        # Rollback to the state before the violation:
-        self.machine.set_state(self.env_state)
-        logging.warning("Rolled-back state to: %s", self.state)
-
         # Notify
         self.notify(self.name, "violation", shaped_reward=shaped_reward, unsafe_action=self.action_proposed)
 
     def _on_mismatch(self):
         self.notify(self.name, "mismatch")
 
+    def reset(self):
+        self.initial_state = None
+        logging.info("reset() -> state machine has been resetted...")
+
     def draw(self):
-        abs_file_path = os.path.abspath(__file__ + "/../patterns/" + self.pattern + "_" + self.name + ".png")
+        abs_file_path = os.path.abspath(__file__ + "/../draws/" + self.pattern + "_" + self.name + ".png")
         self.machine.get_graph(title=self.name).draw(abs_file_path, prog='dot')
 
     # Called before the action is going to be performed on the environment and obs are the current observations
@@ -283,11 +281,9 @@ class SafetyStateMachine(object):
         self.env_state = self.state
 
         # Map the observation to a state
-        self.env_state = self._obs_to_state(obs_pre)
+        self.env_state = self._obs_to_state(obs_pre, action_proposed)
 
         if self.initial_state is None:
-            # First time
-            # print("first time!")
             self.initial_state = self.env_state
             self.machine.set_state(self.env_state)
             self.trigger('*')
@@ -295,22 +291,28 @@ class SafetyStateMachine(object):
             self.trigger('*')
         else:
             self._on_mismatch()
-        logging.info("monitor_state: %s" , self.state)
+        logging.info("check() -> monitor_state: %s", self.state)
 
     # Update the state after the action has been performed in the environment
     def verify(self, obs_post, applied_action):
 
         # Map the observation to a state
-        self.env_state = self._obs_to_state(obs_post)
+        self.env_state = self._obs_to_state(obs_post,applied_action)
 
-        if self.state != self.env_state:
+        if self.initial_state is None:
+            # state machine has been resetted
+            self.initial_state = self.env_state
+            self.machine.set_state(self.env_state)
+            self.trigger('*')
+
+        elif self.state != self.env_state:
             # Switched to a new state
             self.observations = obs_post
             self.trigger('*')
             # print("new_monitor_state: " + self.state)
             if self.state != self.env_state:
                 self._on_mismatch()
-        logging.info("monitor_state: %s" , self.state)
+        logging.info("verify() -> monitor_state: %s", self.state)
 
     """ Actions available to the agent - used for conditions checking """
     def forward(self):

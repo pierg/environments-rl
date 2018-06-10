@@ -1,10 +1,10 @@
 from gym_minigrid.perception import Perception as p
 import logging
 
-from ..safetystatemachine import SafetyStateMachine
+from monitors.safetystatemachine import SafetyStateMachine
 
 
-class Precedence(SafetyStateMachine):
+class Response(SafetyStateMachine):
     """
     To describe relationships between a pair of events/states where the occurrence of the first
     is a necessary pre-condition for an occurrence of the second. We say that an occurrence of
@@ -80,19 +80,19 @@ class Precedence(SafetyStateMachine):
         self.precondition = conditions.pre
         self.postcondition = conditions.post
         self.active = False
-        super().__init__(name, "precedence", self.states, self.transitions, 'initial', notify)
+        super().__init__(name, "Response", self.states, self.transitions, 'initial', notify)
 
     # Convert observations to state and populate the obs_conditions
     def _obs_to_state(self, obs, action_proposed):
         # Get observations conditions
-        self.active = p.is_condition_satisfied(obs, action_proposed, self.postcondition)
+        self.active = p.is_condition_satisfied(obs, action_proposed, self.precondition)
 
         if self.active:
-            if p.is_condition_satisfied(obs, action_proposed, self.precondition):
-                Precedence.obs["respected"] = True
+            if p.is_condition_satisfied(obs, action_proposed, self.postcondition):
+                Response.obs["respected"] = True
                 return 'respected'
             else:
-                Precedence.obs["respected"] = False
+                Response.obs["respected"] = False
                 return 'violated'
         else:
             return 'idle'
@@ -113,8 +113,8 @@ class Precedence(SafetyStateMachine):
         return self.active
 
     def respected(self):
-        return self.active and Precedence.obs["respected"] == True
+        return self.active and Response.obs["respected"] == True
 
     def violated(self):
-        return self.active and Precedence.obs["respected"] == False
+        return self.active and Response.obs["respected"] == False
 

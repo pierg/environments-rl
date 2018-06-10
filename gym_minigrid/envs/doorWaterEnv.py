@@ -42,8 +42,8 @@ class DoorWaterEnv(ExMiniGridEnv):
 
         # Add the rooms
         self.roomList = []
-        self.roomList.append(Room(0, (width/2, height), (1, 1), True))
-        self.roomList.append(Room(1, (width, height), (width/2+1, 1), False))
+        self.roomList.append(Room(0, (width/2-1, height), (0, 0), True))
+        self.roomList.append(Room(1, (width, height), (width/2, 0), False))
 
         # Set room entry and exit that are needed
         self.roomList[1].setEntryDoor((3, 2))
@@ -54,7 +54,7 @@ class DoorWaterEnv(ExMiniGridEnv):
         switchRoom2.affectRoom(self.roomList[1])
         self.grid.set(2, 3, switchRoom2)
         self.switchPosition = []
-        self.switchPosition.append((2, 4))
+        self.switchPosition.append((2, 3))
 
         self.grid.set(1, 4, Water())
         self.grid.set(4, 4, Water())
@@ -62,6 +62,12 @@ class DoorWaterEnv(ExMiniGridEnv):
 
         self.mission = "get to the green goal square without moving on water"
 
+    def step(self,action):
+        # Reset if agent step on water without knowing it
+        if action == self.actions.forward and self.worldobj_in_agent(1,0) == "water" :
+            return self.gen_obs(), 0, True, "died"
+        else:
+            return super().step(action)
 
 register(
     id='MiniGrid-DoorWaterEnv-10x10-v0',

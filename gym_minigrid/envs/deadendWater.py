@@ -46,6 +46,13 @@ class DeadEndWaterEnv(ExMiniGridEnv):
 
         self.mission = "get to the green goal square without going into the deadend"
 
+    def step(self,action):
+        # Reset if agent step on water without knowing it
+        if action == self.actions.forward and self.worldobj_in_agent(1,0) == "water" :
+            return self.gen_obs(), 0, True, "died"
+        else:
+            return super().step(action)
+
 class DeadEndWaterEnv6x6(DeadEndWaterEnv):
     def __init__(self):
         super().__init__(size=6)
