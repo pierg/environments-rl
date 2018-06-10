@@ -4,15 +4,12 @@ from configurations import config_grabber as cg
 
 from .action_planning import *
 from gym_minigrid.extendedminigrid import *
-from gym_minigrid.monitors.patterns.absence import *
-from gym_minigrid.monitors.patterns.precedence import *
 from gym_minigrid.minigrid import Goal
-from extendedminigrid import *
-from monitors.properties.avoid import *
-from monitors.patterns.precedence import *
-from monitors.patterns.absence import *
-from monitors.patterns.universality import *
-from monitors.patterns.response import *
+from gym_minigrid.monitors.properties.avoid import *
+from gym_minigrid.monitors.patterns.precedence import *
+from gym_minigrid.monitors.patterns.absence import *
+from gym_minigrid.monitors.patterns.universality import *
+from gym_minigrid.monitors.patterns.response import *
 
 import gym
 
