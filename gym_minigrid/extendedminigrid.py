@@ -17,7 +17,7 @@ def extended_dic(obj_names=[]):
             new_obj_idx = new_obj_idx + 1
 
 
-extended_dic(["water","lightSwitch","dirt","vase"])
+extended_dic(["water","unsafe","lightSwitch","dirt","vase"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 
@@ -51,6 +51,26 @@ class Room:
             if ay <= y and ay >= l:
                 return True
         return False
+
+
+class Unsafe(WorldObj):
+    def __init__(self):
+        super(Unsafe, self).__init__('unsafe', 'red')
+
+    def can_overlap(self):
+        return True
+
+    def toggle(self, env, pos):
+        return True
+
+    def render(self, r):
+        self._set_color(r)
+        r.drawPolygon([
+            (0, CELL_PIXELS / 2),
+            (CELL_PIXELS, CELL_PIXELS),
+            (CELL_PIXELS / 2, 0),
+            (0, 0)
+        ])
 
 
 class Water(WorldObj):
@@ -194,7 +214,9 @@ class Vase(WorldObj):
         self.list = list
 
 def worldobj_name_to_object(worldobj_name):
-    if worldobj_name == 'water':
+    if worldobj_name == 'unsafe':
+        return Unsafe()
+    elif worldobj_name == 'water':
         return Water()
     elif worldobj_name == 'wall':
         return Wall()
@@ -252,6 +274,8 @@ class ExGrid(Grid):
                     v = LockedDoor(color, is_open)
                 elif objType == 'goal':
                     v = Goal()
+                elif objType == 'unsafe':
+                    v = Unsafe()
                 elif objType == 'water':
                     v = Water()
                 elif objType == 'lightSwitch':
@@ -276,18 +300,18 @@ class ExMiniGridEnv(MiniGridEnv):
         forward = 2
 
         # Pick up an object
-        pickup = 3
+        #pickup = 3
         # Drop an object
-        drop = 4
+        #drop = 4
         # Toggle/activate an object
-        toggle = 5
+        #toggle = 5
 
         # Wait/stay put/do nothing
-        wait = 6
+        #wait = 6
 
         # More actions:
         # Ex:
-        clean = 7
+        #clean = 7
 
     def gen_obs(self):
         """
@@ -379,7 +403,6 @@ class ExMiniGridEnv(MiniGridEnv):
             ax += y
             ay -= x
         return ax, ay
-
 
     def worldobj_in_agent(self, front, side):
         """

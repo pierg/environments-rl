@@ -1022,7 +1022,7 @@ class MiniGridEnv(gym.Env):
             pass
 
         else:
-            assert False, "unknown action"
+            assert False, "unknown action" + str(action)
 
         if self.step_count >= self.max_steps:
             done = True
