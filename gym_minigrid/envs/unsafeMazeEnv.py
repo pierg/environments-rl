@@ -31,7 +31,7 @@ class UnsafeMazeEnv(ExMiniGridEnv):
         # Grab configuration
         self.config = cg.Configuration.grab()
 
-        self.random = self.config.random_unsafe_obj
+        self.random = self.config.action_planning.random_unsafe_obj
 
         # Create an empty grid
         self.grid = Grid(width, height)
