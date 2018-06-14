@@ -321,36 +321,6 @@ class ExMiniGridEnv(MiniGridEnv):
         except AttributeError:
             return super().gen_obs()
 
-    def get_view_exts(self):
-        """
-        Get the extents of the square set of tiles visible to the agent
-        Note: the bottom extent indices are not included in the set
-        """
-
-        # Facing right
-        if self.agent_dir == 0:
-            topX = self.agent_pos[0]
-            topY = self.agent_pos[1] - AGENT_VIEW_SIZE // 2
-        # Facing down
-        elif self.agent_dir == 1:
-            topX = self.agent_pos[0] - AGENT_VIEW_SIZE // 2 + 1
-            topY = self.agent_pos[1]
-        # Facing left
-        elif self.agent_dir == 2:
-            topX = self.agent_pos[0] - AGENT_VIEW_SIZE + 1
-            topY = self.agent_pos[1] - AGENT_VIEW_SIZE // 2 + 1
-        # Facing up
-        elif self.agent_dir == 3:
-            topX = self.agent_pos[0] - AGENT_VIEW_SIZE // 2
-            topY = self.agent_pos[1] - AGENT_VIEW_SIZE + 1
-        else:
-            assert False, "invalid agent direction"
-
-        botX = topX + AGENT_VIEW_SIZE
-        botY = topY + AGENT_VIEW_SIZE
-
-        return (topX, topY, botX, botY)
-
     def get_grid_coords_from_view(self,coordinates):
         """
         Dual of "get_view_coords". Translate and rotate relative to the agent coordinates (i, j) into the
