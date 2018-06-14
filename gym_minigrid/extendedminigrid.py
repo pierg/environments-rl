@@ -313,6 +313,47 @@ class ExMiniGridEnv(MiniGridEnv):
         # Ex:
         #clean = 7
 
+    def get_obs_render(self, obs):
+        """
+        Render an agent observation for visualization
+        """
+
+        if self.obs_render == None:
+            self.obs_render = Renderer(
+                AGENT_VIEW_SIZE * CELL_PIXELS // 2,
+                AGENT_VIEW_SIZE * CELL_PIXELS // 2
+            )
+
+        r = self.obs_render
+
+        r.beginFrame()
+
+        grid = ExGrid.decode(obs)
+
+        # Render the whole grid
+        grid.render(r, CELL_PIXELS // 2)
+
+        # Draw the agent
+        r.push()
+        r.scale(0.5, 0.5)
+        r.translate(
+            CELL_PIXELS * (0.5 + AGENT_VIEW_SIZE // 2),
+            CELL_PIXELS * (AGENT_VIEW_SIZE - 0.5)
+        )
+        r.rotate(3 * 90)
+        r.setLineColor(255, 0, 0)
+        r.setColor(255, 0, 0)
+        r.drawPolygon([
+            (-12, 10),
+            (12, 0),
+            (-12, -10)
+        ])
+        r.pop()
+
+        r.endFrame()
+
+        return r.getPixmap()
+
     def gen_obs(self):
         """
         Generate the agent's view (partially observable, low-resolution encoding)
