@@ -107,7 +107,7 @@ class Avoid(SafetyStateMachine):
         Avoid.obs["near"] = near
         Avoid.obs["immediate"] = immediate
 
-        if str(action_proposed) == self.action_to_avoid :
+        if action_proposed == self.action_to_avoid :
             self.is_action_to_avoid = True
         else:
             self.is_action_to_avoid = False
