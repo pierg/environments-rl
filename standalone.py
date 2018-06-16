@@ -17,7 +17,7 @@ def main():
         "--env-name",
         dest="env_name",
         help="gym environment to load",
-        default='MiniGrid-UnsafeRandomLevels-8x8-v0'
+        default='MiniGrid-UnsafeMazeEnv-8x8-v0'
     )
     (options, args) = parser.parse_args()
 
