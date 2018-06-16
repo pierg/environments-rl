@@ -66,9 +66,9 @@ class Unsafe(WorldObj):
     def render(self, r):
         self._set_color(r)
         t = CELL_PIXELS
-        d = 0.1 * CELL_PIXELS
-        e = (CELL_PIXELS + 2 * d)/12
-        f = 0.7 * e
+        d = 0.2 * CELL_PIXELS
+        e = (CELL_PIXELS + 2 * d)/18
+        f = 0.85 * e
     
         r.drawPolygon([
             (d, t-d),  # A

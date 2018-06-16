@@ -219,7 +219,6 @@ class SafetyEnvelope(gym.core.Wrapper):
                                 self.action_plan, self.goal_cell = run(current_obs, current_dir, (goal_green_square,))
                                 self.action_plan_size = len(self.action_plan)
                                 self.critical_actions = [ExMiniGridEnv.Actions.forward]
-                                print("Plan goal created")
                                 info = "plan_created"
                                 # print(self.action_plan)
                                 break
