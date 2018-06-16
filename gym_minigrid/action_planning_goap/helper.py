@@ -46,7 +46,6 @@ def run(current_obs, direction, goals):
         #  raise ValueError('No goal found in graph!')
         return [], None
 
-
     if goal_cell == current_cell_state.tuple():
         raise ValueError('Trying to create a plan for the current state!')
     came_from, cost_so_far = planner.plan(current_cell_state.tuple(), goal_cell)

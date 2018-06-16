@@ -3,6 +3,7 @@ from .obs_parser import ObservationParser, StateEnum, State
 from .states import CellState
 from .action import Action
 from typing import Tuple, List, Dict, TypeVar
+from .goals import goal_green_square
 
 Coordinates = Tuple[int, int]
 
@@ -20,12 +21,22 @@ class Graph:
 
     def update(self, cell_state: CellState):
         current = cell_state
-        if current.tuple() not in self.edges:
+        current_tuple = tuple()
+        if goal_green_square[0] in tuple(current.states.items()):
+            current_tuple = self.node_without_orientation(current.tuple())
+        else:
+            current_tuple = current.tuple()
+
+        if current_tuple not in self.edges:
             actions = current.get_available_actions()  #  Find all cell states that are connected to current with an action
-            self.edges[current.tuple()] = []
+            self.edges[current_tuple] = []
             for action in actions:
                 next_state = current.apply_action(action)
-                self.edges[current.tuple()].append((next_state.tuple(), action))
+                if goal_green_square[0] in tuple(next_state.states.items()):
+                    node = self.node_without_orientation(next_state.tuple())
+                else:
+                    node = next_state.tuple()
+                self.edges[current_tuple].append((node, action))
                 self.update(next_state)
 
     def neighbors(self, cell_state: Tuple[Tuple[StateEnum, bool]]) -> List[Tuple[Tuple[State, Coordinates], Action]]:
@@ -52,8 +63,23 @@ class Graph:
                 if state in node[0]:
                     states_met += 1
             if states_met == states_total:
-                return node
+                    return node
         return None
+
+    def node_without_orientation(self, node):
+        orientations = [StateEnum.orientation_south,
+                        StateEnum.orientation_north,
+                        StateEnum.orientation_east,
+                        StateEnum.orientation_west]
+        result = []
+        for state, value in node[0]:
+            if state in orientations:
+                continue
+            else:
+                result.append((state, value))
+
+        return tuple(result), node[1]
+
 
 
 def reconstruct_path(came_from, goal, start):
