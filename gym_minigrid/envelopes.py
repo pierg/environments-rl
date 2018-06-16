@@ -1,4 +1,5 @@
 import collections
+import copy
 
 from configurations import config_grabber as cg
 
@@ -52,6 +53,20 @@ class SafetyEnvelope(gym.core.Wrapper):
             self.last_cell = {0: (0, 0), 1: (0, 0), 2: (0, 1)}
 
             self.goal_cell = None
+
+            self.secondary_goals = []
+
+            for goal in self.config.action_planning.secondary_goals:
+                if goal == 'goal_safe_zone':
+                    self.secondary_goals.append(goal_safe_zone)
+                elif goal == 'goal_turn_around':
+                    self.secondary_goals.append(goal_turn_around)
+                elif goal == 'goal_safe_east':
+                    self.secondary_goals.append(goal_safe_east)
+                elif goal == 'goal_clear_west':
+                    self.secondary_goals.append(goal_clear_west)
+
+            self.secondary_goals = tuple(self.secondary_goals)
 
             # ---------------------- ACTION PLANNER END ----------------------#
         else:
@@ -212,20 +227,18 @@ class SafetyEnvelope(gym.core.Wrapper):
 
                 # activate planner
                 # if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
-                if self.goal_cell is not None:
-                    if goal_green_square[0] not in self.goal_cell:
+                if (self.goal_cell is not None and goal_green_square[0] not in self.goal_cell) or not self.action_plan:
                         for obj in current_obs.grid:
                             if isinstance(obj, Goal):
                                 self.action_plan, self.goal_cell = run(current_obs, current_dir, (goal_green_square,))
                                 self.action_plan_size = len(self.action_plan)
                                 self.critical_actions = [ExMiniGridEnv.Actions.forward]
                                 info = "plan_created"
-                                # print(self.action_plan)
                                 break
 
                 elif not self.action_plan:
-                    if ExMiniGridEnv.worldobj_in_agent(self.env, 1, 0) == 'unsafe':
-                        self.action_plan, self.goal_cell = run(current_obs, current_dir, (goal_safe_zone,))
+                    if self.secondary_goals:
+                        self.action_plan, self.goal_cell = run(current_obs, current_dir, self.secondary_goals)
                         self.action_plan_size = len(self.action_plan)
 
                     self.critical_actions = []

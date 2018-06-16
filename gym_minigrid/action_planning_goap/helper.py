@@ -20,7 +20,7 @@ def run(current_obs, direction, goals):
 
     for goal in goals:
 
-        if goal == goal_turn:
+        if goal == goal_turn_around:
             if direction == StateEnum.orientation_east.value:
                 goal_cell = planner.graph.find_state(((StateEnum.orientation_west, True),))
                 break

@@ -28,7 +28,7 @@ goal_green_square = [
     (StateEnum.current_is_goal, True),
 ]
 
-goal_turn = [
+goal_turn_around = [
     (StateEnum.orientation_west, True),
     (StateEnum.orientation_north, True),
     (StateEnum.orientation_south, True),
