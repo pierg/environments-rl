@@ -55,7 +55,7 @@ class Room:
 
 class Unsafe(WorldObj):
     def __init__(self):
-        super(Unsafe, self).__init__('unsafe', 'red')
+        super(Unsafe, self).__init__('unsafe', 'yellow')
 
     def can_overlap(self):
         return True
@@ -65,11 +65,37 @@ class Unsafe(WorldObj):
 
     def render(self, r):
         self._set_color(r)
+        t = CELL_PIXELS
+        d = 0.1 * CELL_PIXELS
+        e = (CELL_PIXELS + 2 * d)/12
+        f = 0.7 * e
+    
         r.drawPolygon([
-            (0, CELL_PIXELS / 2),
-            (CELL_PIXELS, CELL_PIXELS),
-            (CELL_PIXELS / 2, 0),
-            (0, 0)
+            (d, t-d),  # A
+            (t/2, t - d),  # B
+            (t/2, t - d - 0.5 * e),  # Z
+            (t/2 - f, t - d - 0.5 * e),  # C
+            (t/2 - f, t - d - 2*e),  # D
+            (t/2, t - d - 2*e),  # E
+            (t/2, t - d - 3*e),  # F
+            (t/2 - f, t - d - 3*e),  # G
+            (t/2 - f, t - d - 6*e),  # H
+            (t/2, t - d - 6*e),  # I
+            (t/2, d)
+        ])
+        
+        r.drawPolygon([
+            (t - d, t - d),  # A
+            (t/2, t - d),  # B
+            (t/2, t - d - 0.5 * e),  # Z
+            (t/2 + f, t - d - 0.5 * e),  # C
+            (t/2 + f, t - d - 2*e),  # D
+            (t/2, t - d - 2*e),  # E
+            (t/2, t - d - 3*e),  # F
+            (t/2 + f, t - d - 3*e),  # G
+            (t/2 + f, t - d - 6*e),  # H
+            (t/2, t - d - 6*e),  # I
+            (t/2, d)  # J
         ])
 
 
