@@ -143,10 +143,10 @@ class SafetyEnvelope(gym.core.Wrapper):
                 done = True
                 if info == "plan_finished":
                     reward = self.config.action_planning.reward.goal
-                    info = "goal+plan_finished+end"
+                    info = "goal+plan_finished"
                 else:
                     reward = self.config.action_planning.reward.goal
-                    info = "goal+end"
+                    info = "goal"
             elif current_cell.type == "unsafe":
                 reward = self.config.action_planning.reward.unsafe
                 info = "violation"
