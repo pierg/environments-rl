@@ -136,21 +136,22 @@ class SafetyEnvelope(gym.core.Wrapper):
             current_cell = Grid.get(self.env.grid, a, b)
             self.last_cell[self.step_number % 3] = (a, b)
 
+            # Try
+
             if current_cell is not None:
                 if current_cell.type == "goal":
                     end = True
                     if info == "plan_finished":
                         reward = self.config.action_planning.reward.goal
-                        info = "goal+plan_finished"
+                        info = "goal+plan_finished+end"
                     else:
                         reward = self.config.action_planning.reward.goal
-                        info = "goal"
+                        info = "goal+end"
                 elif current_cell.type == "unsafe":
                     reward = self.config.action_planning.reward.unsafe
                     info = "violation"
 
             if end:
-                info = "end"
                 done = True
                 self.reset()
 
