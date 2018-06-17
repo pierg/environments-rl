@@ -74,17 +74,18 @@ class SafetyEnvelope(gym.core.Wrapper):
             # proceed with the step
             obs, reward, done, info = self.env.step(action)
 
-            # end of episode
-            end = False
+            if self.step_number == 0:
+                self.reset_planner()
 
             self.step_number += 1
             reward = self.config.action_planning.reward.step
 
             # check if episode is finished
             if self.step_number == self.env.max_steps:
-                end = True
+                info = "end"
                 done = True
                 self.step_number = 0
+                return obs, reward, done, info
 
             # observations
             obs = self.env.gen_obs()
@@ -140,7 +141,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
             if current_cell is not None:
                 if current_cell.type == "goal":
-                    end = True
+                    done = True
                     if info == "plan_finished":
                         reward = self.config.action_planning.reward.goal
                         info = "goal+plan_finished+end"
@@ -151,9 +152,9 @@ class SafetyEnvelope(gym.core.Wrapper):
                     reward = self.config.action_planning.reward.unsafe
                     info = "violation"
 
-            if end:
-                done = True
-                self.reset()
+            if done:
+                self.step_number = 0
+                return obs, reward, done, info
 
             # #  STIMULUS for exploration
             env = self.unwrapped
