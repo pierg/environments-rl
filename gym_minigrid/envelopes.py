@@ -108,7 +108,6 @@ class SafetyEnvelope(gym.core.Wrapper):
                         self.action_plan_size = len(self.action_plan)
                         self.critical_actions = [ExMiniGridEnv.Actions.forward]
                         info = "plan_created"
-                        # print(self.action_plan)
                         break
 
             if not self.action_plan and self.secondary_goals:
@@ -117,19 +116,9 @@ class SafetyEnvelope(gym.core.Wrapper):
 
             self.critical_actions = []
 
-            if len(self.action_plan) == 0 and action == ExMiniGridEnv.Actions.forward:
-                reward = reward + 2
-            if ExMiniGridEnv.worldobj_in_agent(self.env, 1, 0) == 'wall' and action == ExMiniGridEnv.Actions.forward:
-                reward = reward - 5
-
             #  PLANNER END
 
         a, b = ExMiniGridEnv.get_grid_coords_from_view(self.env, (0, 0))
-
-        # if self.last_cell == (a, b):
-        # Stay in the same cell
-        #     reward = reward - 2
-        # self.last_cell = (a, b)
 
         if self.last_cell[0] == (a, b) and self.last_cell[1] == (a, b) and self.last_cell[2] == (a, b):
             return obs, self.config.action_planning.reward.unsafe, done, info
@@ -142,13 +131,13 @@ class SafetyEnvelope(gym.core.Wrapper):
             if current_cell.type == "goal":
                 done = True
                 if info == "plan_finished":
-                    reward = self.config.action_planning.reward.goal
+                    reward += self.config.action_planning.reward.goal
                     info = "goal+plan_finished"
                 else:
-                    reward = self.config.action_planning.reward.goal
+                    reward += self.config.action_planning.reward.goal
                     info = "goal"
             elif current_cell.type == "unsafe":
-                reward = self.config.action_planning.reward.unsafe
+                reward += self.config.action_planning.reward.unsafe
                 info = "violation"
 
         if done:
@@ -156,21 +145,21 @@ class SafetyEnvelope(gym.core.Wrapper):
             return obs, reward, done, info
 
         # #  STIMULUS for exploration
-        env = self.unwrapped
-        tup = ((int(env.agent_pos[0]), int(env.agent_pos[1])), env.agent_dir, action)
-
-        # Get the count for this key
-        preCnt = 0
-        if tup in self.counts:
-            preCnt = self.counts[tup]
-
-        # Update the count for this key
-        newCnt = preCnt + 1
-        self.counts[tup] = newCnt
-
-        if reward == self.config.action_planning.reward.step:
-            bonus = 1 / math.sqrt(newCnt)
-            reward += bonus
+        # env = self.unwrapped
+        # tup = ((int(env.agent_pos[0]), int(env.agent_pos[1])), env.agent_dir, action)
+        #
+        # # Get the count for this key
+        # preCnt = 0
+        # if tup in self.counts:
+        #     preCnt = self.counts[tup]
+        #
+        # # Update the count for this key
+        # newCnt = preCnt + 1
+        # self.counts[tup] = newCnt
+        #
+        # if reward == self.config.action_planning.reward.step:
+        #     bonus = 1 / math.sqrt(newCnt)
+        #     reward += bonus
 
         return obs, reward, done, info
     # ---------------------- ACTION PLANNER END ----------------------#
@@ -199,7 +188,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if self.plan_tracker == self.action_plan_size:
                     self.reset_planner()
                     #print("plan_finished 2")
-                    return self.config.action_planning.reward.on_plan, "plan_finished"
+                    return self.config.action_planning.reward.on_plan * self.plan_tracker, "plan_finished"
                 else:
                     return self.config.action_planning.reward.on_plan * self.plan_tracker, info
         else:
