@@ -62,9 +62,12 @@ class SafetyEnvelope(gym.core.Wrapper):
                                                                       monitor.rewards)
                         # Monitors without condition (Avoid)
                         else:
+                            for j in ExMiniGridEnv.Actions:
+                                if monitor.act_to_avoid == str(j):
+                                    action_to_avoid = j
                             new_monitor = dict_monitors[monitor.type](monitor.type + "_" + monitor.obj_to_avoid,
                                                                       monitor.obj_to_avoid,
-                                                                      monitor.act_to_avoid,
+                                                                      action_to_avoid,
                                                                       self._on_monitoring, monitor.rewards)
                         self.monitors.append(new_monitor)
                         self.monitor_states[new_monitor.name] = {}
@@ -240,7 +243,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         elif not info and saved:
             info = ("saved", self.monitor_states)
         # Return everything to the agent
-
         if done:
             self._reset_monitors()
 
