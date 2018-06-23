@@ -2,7 +2,7 @@ from .obs_parser import StateEnum
 
 """"
     This file contains goals for action_planner
-    Goal defines states, which need to be fulfilled
+    Goal defines states which need to be fulfilled
 """
 
 

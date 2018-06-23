@@ -11,15 +11,20 @@ def run(current_obs, direction, goals):
     :param goals: List of goals, the lower the index the highest priority
     :return: plan containing the actions
     """
+    #  Parse the observation
     parser = ObservationParser(current_obs, direction)
     current_cell = parser.get_current_cell()
+    #  Create a cell_state for the current state
     current_cell_state = CellState(current_cell, direction)
+    #  Initialize the action planner and the graph and give it our current cell
+    #  So that it knows where to start
     planner = ActionPlanner(current_cell_state)
 
     goal_cell = None
 
     for goal in goals:
-
+        #  Translating the goals into a cellState that exists in the observation
+        #  For goal_turn_around this requires checking the agent's orientation
         if goal == goal_turn_around:
             if direction == StateEnum.orientation_east.value:
                 goal_cell = planner.graph.find_state(((StateEnum.orientation_west, True),))
@@ -34,12 +39,12 @@ def run(current_obs, direction, goals):
                 goal_cell = planner.graph.find_state(((StateEnum.orientation_north, True),))
                 break
 
-        goal_list = create_goals(goal, [])
-        while goal_cell is None and goal_list:
+        goal_list = create_goals(goal, [])  # get all combinations of the goal state
+        while goal_cell is None and goal_list:  # Look if any combination exists in the graph
             goal_cell = planner.graph.find_state(goal_list.pop())
-            if goal_cell == current_cell_state.tuple():
+            if goal_cell == current_cell_state.tuple(): 
                 goal_cell = None
-        if goal_cell is not None:
+        if goal_cell is not None:  # If it exists, stop looking for it
             break
 
     if goal_cell is None:
@@ -48,14 +53,22 @@ def run(current_obs, direction, goals):
 
     if goal_cell == current_cell_state.tuple():
         raise ValueError('Trying to create a plan for the current state!')
+    
     came_from, cost_so_far = planner.plan(current_cell_state.tuple(), goal_cell)
     action_stack = reconstruct_path(came_from, goal_cell, current_cell_state.tuple())
 
-    return (action_stack, goal_cell)
+    return action_stack, goal_cell
 
 
 def create_goals(states, result):
-
+    """
+    Recursively creates all possible variations of a goal.
+    This method adds every possible combination of the states and orders them by length
+    where the longest ones (containing more states) are more important than those shorter
+    :param states: List of desired states
+    :param result: Every combination of the desired states
+    :return: result
+    """
     if tuple(states) not in result:
         if states:
             result.append(tuple(states))

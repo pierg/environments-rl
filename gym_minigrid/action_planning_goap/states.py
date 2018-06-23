@@ -7,10 +7,17 @@ import copy
 
 class CellState:
     """
-        CellState represents the worldstate from the point of view of a cell
+        CellState puts together the Cell with the orientation of the agent.
+        In some sense it is more dynamic than the Cell because it changes
+        depending on what the agent does.
     """
 
     def __init__(self, current_cell: Cell, orientation: StateEnum):
+        """
+        Creates a cellState, which is a cell with all the states that the agent might have
+        :param current_cell: The cell being created as a cellState
+        :param orientation:  The orientation of the agent as a StateEnum
+        """
         self.states: Dict[StateEnum, bool] = dict(current_cell.states)
         self.cell: Cell = current_cell
         self.states[StateEnum.orientation_west] = False
@@ -32,11 +39,11 @@ class CellState:
 
     def get_available_actions(self) -> Tuple[Action, ...]:
         """
-        Returns all possible actions that can take place in the current state
-        :return: Actions whose prerequisites match the current state
+        Returns all possible actions that can take place in the current cellState
+        :return: Actions whose prerequisites match the current cellState
         """
         resulting_worldstate = copy.deepcopy(self.states)
-        possible_actions: Tuple[Action, ...] = Action.get_possible_actions(self.get_orientation(self.states), self.cell)
+        possible_actions: Tuple[Action, ...] = Action.get_all_actions(self.get_orientation(self.states), self.cell)
 
         available_actions: List[Action] = []
         for action in possible_actions:
@@ -54,10 +61,21 @@ class CellState:
 
     def apply_action(self, action: Action) -> 'CellState':
         """
-        Returns a worldstate containing the current state affected by the effects of an action
+        Applies an action to the current cellState and returns the result.
+        An action is applied by first seeing if the action's preconditions exist in the current cellState
+        And then cloning the current cellState but changing the states according to the action's effects.
         :param action: Action to be executed
-        :return: CellState after action was executed
+        :return: Changed cellState
         """
+        # First check if this worldstate has the preconditions for the action
+        preconditions_met = 0
+        for precondition_name, precondition_value in action.preconditions:
+            if precondition_name in self.states and \
+                    self.states[precondition_name] == precondition_value:
+                preconditions_met += 1
+            else:
+                raise KeyError('Tried to apply action when preconditions where not met: ' + action.name.value)
+
         if action.name == ExMiniGridEnv.Actions.forward:
             orientation = self.get_orientation(self.states)
             if orientation == StateEnum.orientation_north and self.cell.north_cell is not None:
@@ -73,16 +91,7 @@ class CellState:
 
         else:
             resulting_state: Dict[StateEnum, bool] = copy.deepcopy(self.states)
-            # First check if this worldstate has the preconditions for the action
-            preconditions_met = 0
-            for precondition_name, precondition_value in action.preconditions:
-                if precondition_name in resulting_state and \
-                        resulting_state[precondition_name] == precondition_value:
-                    preconditions_met += 1
-                else:
-                    raise KeyError('Tried to apply action when preconditions where not met: ' + action.name.value)
-
-            # Create new worldstate containing effects of action
+            # Create new cellState containing effects of action
             for effect_name, effect_value in action.effects:
                 resulting_state[effect_name] = effect_value
 
@@ -90,7 +99,7 @@ class CellState:
 
     def tuple(self) -> Tuple[Tuple[StateEnum, ...], Tuple[int, int]]:
         """
-        Returns the dict of states as a tuple, to be used when you need a hashable worldState
+        Returns the dict of states as a tuple, to be used when you need a hashable cellState
         :return: Tuple containing the individual states and coordinates of the cell
         """
         return tuple(self.states.items()), (self.cell.x, self.cell.y)

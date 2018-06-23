@@ -5,6 +5,11 @@ from enum import IntEnum, unique
 
 @unique
 class StateEnum(IntEnum):
+    """
+    State enums contain all possible states available in your world.
+    If your agent carries something or is in a specific state, that state should be added here
+    """
+
     orientation_east = 0
     orientation_south = 1
     orientation_west = 2
@@ -26,19 +31,20 @@ class StateEnum(IntEnum):
     east_is_none = 18
 
 
-State = Tuple[StateEnum, bool]
-
-
-""""
-    obs_parser takes agents observation and translates it to world states.
-    Output is a current state visible to the agent
 """
+    A State is a tuple of a stateEnum and a boolean.
+    for example, (east_is_clear, True) 
+"""
+State = Tuple[StateEnum, bool]
 
 AGENT_GRID_LOCATION = 2
 
 
 class ObservationParser:
-
+    """"
+        obs_parser takes agents observation and translates it to world states.
+        Output is a current state visible to the agent
+    """
     """
     Orientation:
         East = 0
@@ -48,15 +54,24 @@ class ObservationParser:
     """
 
     def __init__(self, obs, orientation):
+        """
+        Calls all the methods that parses the current observation. We need to know the orientation
+        because the observation depends on the agent's orientation. We then compensate for it and create a
+        map with objective orientations. For example, the "north" of a cell will be the actual north instead of being
+        linked to wherever the agent points towards.
+
+        :param obs: Observation as created by gym_minigrid
+        :param orientation: int containing information on which way the agent looks at
+        """
         observation = []
         self.orientation = orientation
+        #  Converts the orientation from being a list into a 2D array. Easier to work with.
         for x in range(0, AGENT_VIEW_SIZE):
             current_row = [None] * AGENT_VIEW_SIZE
             for y in range(0, AGENT_VIEW_SIZE):
                 current_row[y] = obs.grid[(x*AGENT_VIEW_SIZE) + y]
             observation.append(tuple(current_row))
         self.observation = tuple(observation)
-
         self.parsed_observation: List[List[Cell]] = [[None] * AGENT_VIEW_SIZE for i in range(AGENT_VIEW_SIZE)]
         agent_pos_x = int(AGENT_VIEW_SIZE - 1)
         agent_pos_y = int(AGENT_VIEW_SIZE / 2)
@@ -65,14 +80,19 @@ class ObservationParser:
 
     def parse_observation(self, pos_x: int, pos_y: int):
         """
-        Creates a map by flood-filling the observation
-        :return: 2D tuple with cells representing the world
+        Parses the map by flood-filling the observation.
+        The flood fill starts at the place the agent is standing because we only care about parsing to places the
+        agent can reach.
+
+        :param pos_x: Number of column the agent is located at
+        :param pos_y: Number of row the agent is at
+        :return: New observation containing cell classes, only filled with their own information
         """
         if self.parsed_observation[pos_x][pos_y] is None:
             cell = Cell(self.observation[pos_x][pos_y])
             cell.x = pos_x
             cell.y = pos_y
-            # Check if the cell is clear and safe and set it, needs improvement
+            # Check if the cell is clear and safe and set it.
             if isinstance(cell.type, WorldObj) and isinstance(cell.type, Wall):
                 cell.is_clear = False
             if isinstance(cell.type, WorldObj) and isinstance(cell.type, Unsafe):
@@ -93,10 +113,15 @@ class ObservationParser:
                     self.parse_observation(pos_x + 1, pos_y)
 
     def map_cells(self):
+        """
+        Provides the rest of the properties to the cells in self.parsed_observation.
+        :return:
+        """
         for x in range(0, AGENT_VIEW_SIZE):
             for y in range(0, AGENT_VIEW_SIZE):
                 if self.parsed_observation[x][y] is not None:
                     current_cell = self.parsed_observation[x][y]
+                    #  Putting pointers to the neighbouring cells
                     if self.orientation == StateEnum.orientation_north:
                         if x < AGENT_VIEW_SIZE - 1:
                             current_cell.south_cell = self.parsed_observation[x+1][y]
@@ -134,6 +159,8 @@ class ObservationParser:
                         if y < AGENT_VIEW_SIZE - 1:
                             current_cell.south_cell = self.parsed_observation[x][y+1]
 
+                    #  Translates the information about the neighboring cells into states
+
                     states = current_cell.states
                     states[StateEnum.current_is_clear] = True if current_cell.is_clear else False
                     states[StateEnum.current_is_safe] = True if current_cell.is_safe else False
@@ -168,12 +195,21 @@ class ObservationParser:
                     states[StateEnum.current_is_goal] = True if isinstance(current_cell.type, Goal) else False
 
     def get_current_cell(self) -> 'Cell':
+        """
+        This is used in helper.py to get the starting point of all the plans.
+        :return: Returns the cell where the agent stands
+        """
         agent_pos_x = int(AGENT_VIEW_SIZE - 1)
         agent_pos_y = int(AGENT_VIEW_SIZE / 2)
         return self.parsed_observation[agent_pos_x][agent_pos_y]
 
 
 class Cell:
+    """
+    Helper class used to make the transition from observation to usable information.
+    Contains states that are only present in the environment and doesn't store states
+    of the agent like orientation or what it is carrying.
+    """
     def __init__(self, cell_type):
         self.north_cell: Cell = None
         self.south_cell: Cell = None

@@ -4,6 +4,9 @@ from typing import Tuple, TypeVar
 
 
 class Action:
+    """
+    Actions are the Minigrid actions wrapped with preconditions, cost and effects.
+    """
 
     def __init__(self, name: ExMiniGridEnv.Actions, current_cell: Cell, orientation: StateEnum):
         self.name: ExMiniGridEnv.Actions = name
@@ -81,7 +84,12 @@ class Action:
     Action = TypeVar('Action')
 
     @staticmethod
-    def get_possible_actions(orientation: StateEnum, cell: Cell) -> Tuple[Action, ...]:
+    def get_all_actions(orientation: StateEnum, cell: Cell) -> Tuple[Action, ...]:
+        """
+        :param orientation: StateEnum containing information on the agents orientation
+        :param cell: Cell on which an action would take place
+        :return: Tuple containing all actions
+        """
         if cell is not None:
             if cell.is_clear:
                 actions = []

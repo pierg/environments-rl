@@ -11,7 +11,6 @@ import gym
 class SafetyEnvelope(gym.core.Wrapper):
     """
     Safety envelope for safe exploration.
-    Uses monitors for avoiding unsafe actions and shaping rewards
     """
 
     def __init__(self, env):
@@ -49,6 +48,8 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         self.secondary_goals = []
 
+        #  Every goal that is not going to the green square is a secondary goal
+        #  Here we parse them from the config
         for goal in self.config.action_planning.secondary_goals:
             if goal == 'goal_safe_zone':
                 self.secondary_goals.append(goal_safe_zone)
@@ -98,10 +99,9 @@ class SafetyEnvelope(gym.core.Wrapper):
             # check if following the plan
             reward, info = self.check_plan(action, info)
 
-            # activate planner
-            # if ExMiniGridEnv.worldobj_in_front_agent(self.env) == 'unsafe':
-            for obj in current_obs.grid:
+            for obj in current_obs.grid:    # Look if the green square is in the observation
                 if isinstance(obj, Goal):
+                    #  If the agent does not have a plan or if the plan is not to go to the green cell ...
                     if (self.goal_cell is not None and goal_green_square[0] not in self.goal_cell[0]) or\
                             not self.action_plan:
                         self.action_plan, self.goal_cell = run(current_obs, current_dir, (goal_green_square,))
@@ -110,9 +110,17 @@ class SafetyEnvelope(gym.core.Wrapper):
                         info = "plan_created"
                         break
 
+            # If the agent does not have a plan try to give him a secondary goal
             if not self.action_plan and self.secondary_goals:
                     self.action_plan, self.goal_cell = run(current_obs, current_dir, self.secondary_goals)
                     self.action_plan_size = len(self.action_plan)
+
+            """    
+            Currently an agent that has a plan for a secondary goal won't change the plan for a higher
+            ranking secondary goal like it does for going to the goal.
+            
+            It might be a good idea to implement that.
+            """
 
             self.critical_actions = []
 
@@ -120,6 +128,13 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         a, b = ExMiniGridEnv.get_grid_coords_from_view(self.env, (0, 0))
 
+        """
+            We track the position of the agent, if it is in the same cell for three consecutive moves it gets
+            punished. It has no logical reason to stay in the same cell for more than three steps. 
+            
+            We did this because the agent would not explore when we punished it for going into an unsafe tile,
+            it would instead run out of steps by spinning in the same cell.
+        """
         if self.last_cell[0] == (a, b) and self.last_cell[1] == (a, b) and self.last_cell[2] == (a, b):
             return obs, self.config.action_planning.reward.unsafe, done, info
         current_cell = Grid.get(self.env.grid, a, b)
@@ -143,6 +158,15 @@ class SafetyEnvelope(gym.core.Wrapper):
         if done:
             self.n_steps = 0
             return obs, reward, done, info
+
+        """
+        With every step we log the agent's position, direction and action.
+        We do not punish the agent the first time it is in a new set of position, direction and action.
+        This is an stimulus for exploration.
+        
+        However, the agent will be more punished the more times it is in the same set of
+        position, direction and action.
+        """
 
         #  STIMULUS for exploration
         env = self.unwrapped
@@ -168,26 +192,29 @@ class SafetyEnvelope(gym.core.Wrapper):
     # GOAP Helpers
 
     def check_plan(self, action, info):
+        """
+        Method that controls whether the agent is following a given plan
+        :param action: action the agent selected
+        :param info: Relevant info
+        :return: Rewards and info according to the agent's behavior
+        """
         if len(self.action_plan):
-            next_action_in_plan = self.action_plan.pop()
-            if next_action_in_plan != action:
-                if self.plan_tracker > 0:
+            next_action_in_plan = self.action_plan.pop()  # Pop the next action from the plan
+            if next_action_in_plan != action:   # If the agent did not follow the plan
+                if self.plan_tracker > 0:   # If it had followed the plan before
                     info = "plan_followed:" + str(self.plan_tracker) + "," + str(self.action_plan_size)
-                    # print("plan_followed: " + str(self.plan_tracker) + " " + str(self.action_plan_size))
                 multiplier = 0
                 i = self.plan_tracker
 
-                while i > 0:
+                while i > 0:    # Punish the agent for as many reward as it got following the plan
                     multiplier = multiplier + (self.config.action_planning.reward.off_plan * i)
                     i -= 1
                 self.reset_planner()
                 return multiplier, info
-            else:
-                self.plan_tracker += 1
-                # print("plan_tracker: " + str(self.plan_tracker))
-                if self.plan_tracker == self.action_plan_size:
+            else:      # If the agent followed the plan
+                self.plan_tracker += 1  # Track how far it has followed
+                if self.plan_tracker == self.action_plan_size:  # If the plan has been followed completely
                     self.reset_planner()
-                    #print("plan_finished 2")
                     return self.config.action_planning.reward.on_plan * self.plan_tracker, "plan_finished"
                 else:
                     return self.config.action_planning.reward.on_plan * self.plan_tracker, info
