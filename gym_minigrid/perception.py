@@ -17,7 +17,6 @@ class Perception():
         :param distance: number of cells from the agent (1 = the one next to the agent cell)
         :return: True / False
         """
-        # Todo : Ask pier if the monitors using env instead of agent_obs is normal ? if yes delete condition
         if Perception.light_on_current_room(obs):
             return object_type == obs.worldobj_in_agent(1, 0)
         return object_type == "None"
@@ -30,7 +29,6 @@ class Perception():
         :param object_type: type of WorldObj
         :return: True / False
         """
-        # Todo : Ask pier if the monitors using env instead of agent_obs is normal ? if yes delete condition
         if Perception.light_on_current_room(obs):
             return object_type == obs.worldobj_in_agent(2, 0) or \
                    object_type == obs.worldobj_in_agent(0, 1) or \
@@ -76,8 +74,7 @@ class Perception():
 
         elif condition == "light-on-current-room":
             # It returns true is the light in the current room is on
-            # TODO
-            raise NotImplementedError
+            return Perception.light_on_current_room(env)
 
         elif condition == "entering-a-room":
             # Returns true if the agent is entering a room
@@ -95,8 +92,11 @@ class Perception():
 
 
     def list_switch_in_front_off(env):
-    #     TODO: implement: Returns true if the agent is in front of a light-switch and it is off
-        raise NotImplementedError
+        if env.worldobj_in_agent(1,0) == "lightSwitch":
+            j, k = env.get_grid_coords_from_view((1, 0))
+            if hasattr(env.grid.get(j, k), 'state'):
+                return env.grid.get(j, k).state
+        return False
 
     def door_closed_in_front(env):
         if env.worldobj_in_agent(1, 0) == "door":
@@ -139,7 +139,6 @@ class Perception():
                 for x in env.roomList:
                     if x.objectInRoom(env.agent_pos):
                         return x.lightOn
-                return True
             return True
         except AttributeError:
             return True
