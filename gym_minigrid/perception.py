@@ -146,10 +146,11 @@ class Perception():
 
     def light_switch_turned_on(env):
         agent_obs = ExGrid.decode(env.gen_obs()['image'])
+        grid_len = int(math.sqrt(len(agent_obs.grid)))
         for i in range(0, len(agent_obs.grid)):
             if agent_obs.grid[i] is not None:
                 if agent_obs.grid[i].type == "lightSwitch":
-                    j, k = env.get_grid_coords_from_view((3 - int(i / math.sqrt(len(agent_obs.grid))), (i % 4) - 2))
+                    j, k = env.get_grid_coords_from_view((grid_len-1 - int(i / grid_len), (i % grid_len) - int(grid_len/2)))
                     if hasattr(env.grid.get(j, k), 'state'):
                         return env.grid.get(j, k).state
         return False

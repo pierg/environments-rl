@@ -21,6 +21,3 @@ from gym_minigrid.envs.miniclean import *
 from gym_minigrid.envs.bigcleanEnv import *
 from gym_minigrid.envs.randoms.randomenv9660 import *
 from gym_minigrid.envs.randoms.randomenv2133 import *
-from gym_minigrid.envs.randoms.randomenv1684 import *
-from gym_minigrid.envs.randoms.randomenv589 import *
-from gym_minigrid.envs.randoms.randomenv1847 import *
