@@ -246,7 +246,13 @@ class SafetyStateMachine(object):
         # MiniGrid Actions and unsafe_actions list to be returned by the on_block
         self.actions = MiniGridEnv.Actions
 
-    def _obs_to_state(self, obs, action_proposed):
+        # Stores if the state machine is active (based on the context)
+        self.context_active = False
+
+    def _map_conditions(self, obs, action_proposed):
+        raise NotImplementedError
+
+    def _map_context(self, obs, action_proposed):
         raise NotImplementedError
 
 
@@ -267,7 +273,7 @@ class SafetyStateMachine(object):
         self.notify(self.name, "mismatch")
 
     def reset(self):
-        self.initial_state = None
+        self.machine.set_state('idle')
         logging.info("reset() -> state machine has been resetted...")
 
     def draw(self):
@@ -278,41 +284,38 @@ class SafetyStateMachine(object):
     def check(self, obs_pre, action_proposed):
         self.observations = obs_pre
         self.action_proposed = action_proposed
-        self.env_state = self.state
+        print("     check() -> monitor_state before: " + self.state)
 
-        # Map the observation to a state
-        self.env_state = self._obs_to_state(obs_pre, action_proposed)
+        # Check if needs to be activated and trigger
+        self.context_active = self._map_context(obs_pre, action_proposed)
+        self.trigger('*')
 
-        if self.initial_state is None:
-            self.initial_state = self.env_state
-            self.machine.set_state(self.env_state)
+        if self.context_active:
+            print("     check() -> monitor_state context: " + self.state)
+
+            # Check the conditions and trigger
+            self._map_conditions(obs_pre, action_proposed)
             self.trigger('*')
-        elif self.state == self.env_state:
-            self.trigger('*')
-        else:
-            self._on_mismatch()
-        logging.info("check() -> monitor_state: %s", self.state)
+
+            print("     check() -> monitor_state conditions : " + self.state)
 
     # Update the state after the action has been performed in the environment
     def verify(self, obs_post, applied_action):
 
-        # Map the observation to a state
-        self.env_state = self._obs_to_state(obs_post,applied_action)
+        print("____________________________________")
 
-        if self.initial_state is None:
-            # state machine has been resetted
-            self.initial_state = self.env_state
-            self.machine.set_state(self.env_state)
+        if self.context_active:
+            # Check the conditions and trigger
+            self._map_conditions(obs_post, applied_action)
+            print("     verity() -> mon_state bef : " + self.state)
+
             self.trigger('*')
 
-        elif self.state != self.env_state:
-            # Switched to a new state
-            self.observations = obs_post
-            self.trigger('*')
-            # print("new_monitor_state: " + self.state)
-            if self.state != self.env_state:
-                self._on_mismatch()
-        logging.info("verify() -> monitor_state: %s", self.state)
+            print("     verity() -> mon_state aft : " + self.state)
+
+        # if self.state != self.env_state:
+        #     self._on_mismatch()
+
 
     """ Actions available to the agent - used for conditions checking """
     def forward(self):

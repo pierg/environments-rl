@@ -130,6 +130,9 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if unsafe_action[1] == "wait":
                     logging.info("action_planner() -> safe action : %s", str(self.env.actions.wait))
                     safe_action = self.env.actions.wait
+                if unsafe_action[1] == "turn_right":
+                    logging.info("action_planner() -> safe action : %s", str(self.env.actions.right))
+                    safe_action = self.env.actions.right
         return safe_action
 
     def _reset_monitors(self):
@@ -137,7 +140,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         Reset all monitors initial state to avoid mismatch errors on environment reset
         """
         for monitor in self.monitors:
-            monitor.initial_state = None
+            monitor.reset()
 
     def step(self, proposed_action):
 
@@ -167,9 +170,9 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Check observation and proposed action in all running monitors
         for monitor in self.monitors:
             monitor.check(current_obs_env, proposed_action)
-            # This line need to be changed to work with all monitors
-            if monitor.state == "immediate":
-                saved = True
+            # # This line need to be changed to work with all monitors
+            # if monitor.state == "immediate":
+            #     saved = True
 
         # Check for unsafe actions before sending them to the environment:
         unsafe_actions = []
@@ -181,7 +184,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                     done = True
                     info = ("violation", self.monitor_states)
                 if monitor["unsafe_action"]:
-                    # check if the monitor is in enforcing mode
+                    # Add them only if the monitor is in enforcing mode
                     if monitor["mode"] == "enforcing":
                         unsafe_actions.append((monitor["unsafe_action"], monitor["action_planner"]))
                 shaped_rewards.append(monitor["shaped_reward"])
@@ -245,5 +248,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Return everything to the agent
         if done:
             self._reset_monitors()
+
+        print("\n\n\n")
 
         return obs, reward, done, info

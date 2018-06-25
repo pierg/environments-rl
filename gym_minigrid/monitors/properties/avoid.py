@@ -98,7 +98,7 @@ class Avoid(SafetyStateMachine):
         super().__init__(name, "avoid", self.states, self.transitions, 'initial', notify)
 
     # Convert obseravions to state and populate the obs_conditions
-    def _obs_to_state(self, obs, action_proposed):
+    def _map_conditions(self, obs, action_proposed):
         # Get observations conditions
         near = p.is_near_to_worldobj(obs, self.worldobj_avoid)
         immediate = p.is_immediate_to_worldobj(obs, self.worldobj_avoid)

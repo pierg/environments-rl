@@ -52,6 +52,10 @@ class Perception():
             # It looks for a light switch around its field of view and returns true if it is on
             return Perception.light_switch_turned_on(env)
 
+        elif condition == "light-switch-in-front-off":
+            # Returns true if the agent is in front of a light-switch and it is off
+            return Perception.list_switch_in_front_off(env)
+
         elif condition == "door-opened-in-front":
             # Returns true if the agent is in front of an opened door
             return Perception.door_opened_in_front(env)
@@ -64,6 +68,16 @@ class Perception():
             # Returns true if the agent is in front of a deadend
             # deadend = all the tiles surrounding the agent view are 'wall' and the tiles in the middle are 'None'
             return Perception.deadend_in_front(env)
+
+        elif condition == "stepping-on-water":
+            # Returns true if the agent is in front of a water tile and its action is "Forward"
+            return ExMiniGridEnv.worldobj_in_agent(env, 1, 0) == "water" \
+                   and action_proposed == ExMiniGridEnv.Actions.forward
+
+        elif condition == "light-on-current-room":
+            # It returns true is the light in the current room is on
+            # TODO
+            raise NotImplementedError
 
         elif condition == "entering-a-room":
             # Returns true if the agent is entering a room
@@ -78,6 +92,11 @@ class Perception():
             if env.grid.get(x, y).is_open:
                 return True
         return False
+
+
+    def list_switch_in_front_off(env):
+    #     TODO: implement: Returns true if the agent is in front of a light-switch and it is off
+        raise NotImplementedError
 
     def door_closed_in_front(env):
         if env.worldobj_in_agent(1, 0) == "door":
