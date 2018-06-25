@@ -216,6 +216,7 @@ class SafetyEnvelope(gym.core.Wrapper):
             monitor.verify(self.env, suitable_action)
 
         # Get the shaped rewards from the monitors in the new state
+        shaped_rewards = []
         for name, monitor in self.monitor_states.items():
             shaped_rewards.append(monitor["shaped_reward"])
 
