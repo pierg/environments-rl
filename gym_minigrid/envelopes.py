@@ -77,6 +77,8 @@ class SafetyEnvelope(gym.core.Wrapper):
                         self.monitor_states[new_monitor.name]["mode"] = monitor.mode
                         if hasattr(monitor, 'action_planner'):
                             self.monitor_states[new_monitor.name]["action_planner"] = monitor.action_planner
+                        else:
+                            self.monitor_states[new_monitor.name]["action_planner"] = "wait"
 
         print("Active monitors:")
         for monitor in self.monitors:
