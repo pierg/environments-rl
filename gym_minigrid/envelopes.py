@@ -255,6 +255,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         if done:
             self._reset_monitors()
 
-        print("\n\n\n")
+        logging.info("\n\n\n")
 
         return obs, reward, done, info

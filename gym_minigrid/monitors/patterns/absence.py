@@ -101,21 +101,21 @@ class Absence(SafetyStateMachine):
 
     def _on_idle(self):
         self.active = False
-        print("entered state: " + self.state)
+        logging.info("entered state: " + self.state)
         super()._on_monitoring()
 
     def _on_monitoring(self):
-        print("entered state: " + self.state)
+        logging.info("entered state: " + self.state)
         super()._on_monitoring()
 
     def _on_active(self):
-        print("entered state: " + self.state)
+        logging.info("entered state: " + self.state)
         super()._on_monitoring()
 
     def _on_respected(self):
-        print("entered state: " + self.state)
+        logging.info("entered state: " + self.state)
         super()._on_shaping(self.respectd_rwd)
 
     def _on_violated(self):
-        print("entered state: " + self.state)
+        logging.info("entered state: " + self.state)
         super()._on_violated(self.violated_rwd)

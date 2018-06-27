@@ -284,34 +284,34 @@ class SafetyStateMachine(object):
     def check(self, obs_pre, action_proposed):
         self.observations = obs_pre
         self.action_proposed = action_proposed
-        print("     check() -> monitor_state before: " + self.state)
+        logging.info("     check() -> monitor_state before: " + self.state)
 
         # Check if needs to be activated and trigger
         self.context_active = self._map_context(obs_pre, action_proposed)
         self.trigger('*')
 
         if self.context_active:
-            print("     check() -> monitor_state context: " + self.state)
+            logging.info("     check() -> monitor_state context: " + self.state)
 
             # Check the conditions and trigger
             self._map_conditions(obs_pre, action_proposed)
             self.trigger('*')
 
-            print("     check() -> monitor_state conditions : " + self.state)
+            logging.info("     check() -> monitor_state conditions : " + self.state)
 
     # Update the state after the action has been performed in the environment
     def verify(self, obs_post, applied_action):
 
-        print("____________________________________")
+        logging.info("____________________________________")
 
         if self.context_active:
             # Check the conditions and trigger
             self._map_conditions(obs_post, applied_action)
-            print("     verity() -> mon_state bef : " + self.state)
+            logging.info("     verity() -> mon_state bef : " + self.state)
 
             self.trigger('*')
 
-            print("     verity() -> mon_state aft : " + self.state)
+            logging.info("     verity() -> mon_state aft : " + self.state)
 
         # if self.state != self.env_state:
         #     self._on_mismatch()
