@@ -114,9 +114,9 @@ class Perception():
     def deadend_in_front(env):
         i = 1
         while i < 4:
-            left = Perception.check_if_coordinates_in_env(env, (-1, i - 1))
-            right = Perception.check_if_coordinates_in_env(env, (1, i - 1))
-            front = Perception.check_if_coordinates_in_env(env, (0, i))
+            left = Perception.check_if_coordinates_in_env(env, (i - 1, - 1))
+            right = Perception.check_if_coordinates_in_env(env, (i - 1, 1))
+            front = Perception.check_if_coordinates_in_env(env, (i, 0))
             if left is None or right is None:
                 return False
             if front is not None:

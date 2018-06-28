@@ -39,7 +39,7 @@ class WaterTestEnv(ExMiniGridEnv):
         # Place water
         self.grid.set( 3, 1, Water())
         self.grid.set(1, 2, Water())
-        self.grid.set(3, 2, Water())
+        self.grid.set(4, 2, Water())
         self.grid.set(4, 3, Water())
         self.grid.set(1, 4, Water())
         self.grid.set(2, 4, Water())
