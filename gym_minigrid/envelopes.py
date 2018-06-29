@@ -154,6 +154,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         saved = False
         end = False
+        list_monitor = {}
         if self.n_steps == 0:
             self._reset_monitors()
 
@@ -177,6 +178,7 @@ class SafetyEnvelope(gym.core.Wrapper):
             monitor.check(current_obs_env, proposed_action)
             if monitor.state == "violated":
                 saved = True
+                list_monitor[len(list_monitor)] = monitor.name
 
         # Check for unsafe actions before sending them to the environment:
         unsafe_actions = []
@@ -249,7 +251,7 @@ class SafetyEnvelope(gym.core.Wrapper):
             info = ("end", self.monitor_states)
             reward += self.death_reward
         elif not info and saved:
-            info = ("saved", self.monitor_states)
+            info = ("saved", list_monitor)
         # Return everything to the agent
         if done:
             self._reset_monitors()
