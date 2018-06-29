@@ -175,9 +175,8 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Check observation and proposed action in all running monitors
         for monitor in self.monitors:
             monitor.check(current_obs_env, proposed_action)
-            # # This line need to be changed to work with all monitors
-            # if monitor.state == "immediate":
-            #     saved = True
+            if monitor.state == "violated":
+                saved = True
 
         # Check for unsafe actions before sending them to the environment:
         unsafe_actions = []

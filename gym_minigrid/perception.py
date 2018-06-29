@@ -65,7 +65,7 @@ class Perception():
         elif condition == "deadend-in-front":
             # Returns true if the agent is in front of a deadend
             # deadend = all the tiles surrounding the agent view are 'wall' and the tiles in the middle are 'None'
-            return Perception.deadend_in_front(env)
+            return Perception.deadend_in_front(env) and action_proposed == ExMiniGridEnv.Actions.forward
 
         elif condition == "stepping-on-water":
             # Returns true if the agent is in front of a water tile and its action is "Forward"
@@ -112,25 +112,24 @@ class Perception():
             return front
 
     def deadend_in_front(env):
-        i = 1
-        while i < 4:
-            left = Perception.check_if_coordinates_in_env(env, (i - 1, - 1))
-            right = Perception.check_if_coordinates_in_env(env, (i - 1, 1))
+        i = 2
+        agent_obs = ExGrid.decode(env.gen_obs()['image'])
+        grid_len = int(math.sqrt(len(agent_obs.grid)))
+        front = None
+        while i < grid_len and front is None:
             front = Perception.check_if_coordinates_in_env(env, (i, 0))
+            left = Perception.check_if_coordinates_in_env(env, (i - 1, -1))
+            right = Perception.check_if_coordinates_in_env(env, (i - 1, 1))
             if left is None or right is None:
                 return False
             if front is not None:
-                if front is Goal:
-                    return False
-                if left is None or right is None:
+                if front.type == "goal":
                     return False
                 if left is not None and right is not None:
                     if left.type == "goal" or right.type == "goal":
                         return False
-                    return True
-                else:
-                    return False
-            i = i + 1
+                return True
+            i += 1
         return False
 
     def light_on_current_room(env):
