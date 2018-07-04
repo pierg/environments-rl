@@ -24,3 +24,4 @@ from gym_minigrid.envs.randoms.randomenv2133 import *
 from gym_minigrid.envs.wa6_grid6 import *
 from gym_minigrid.envs.dnd2_grid6 import *
 from gym_minigrid.envs.li_grid6 import *
+from gym_minigrid.envs.lighttest import *
