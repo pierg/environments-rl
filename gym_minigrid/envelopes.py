@@ -113,8 +113,10 @@ class SafetyEnvelope(gym.core.Wrapper):
                 shaped_reward = kwargs.get('shaped_reward', 0)
                 self.monitor_states[name]["unsafe_action"] = unsafe_action
                 self.monitor_states[name]["shaped_reward"] = shaped_reward
-                logging.warning("%s is in violation...(shaped_reward=%s, unsafe_action=%s)",
-                                name, str(shaped_reward), str(unsafe_action))
+                #logging.warning("%s is in violation...(shaped_reward=%s, unsafe_action=%s)",
+                 #               name, str(shaped_reward), str(unsafe_action))
+                logging.info("%s is in violation...(shaped_reward=%s, unsafe_action=%s)",
+                               name, str(shaped_reward), str(unsafe_action))
             else:
                 logging.error("%s is in violation error. missing action and reward", name)
 
