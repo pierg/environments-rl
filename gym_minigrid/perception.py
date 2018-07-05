@@ -53,6 +53,10 @@ class Perception():
         elif condition == "light-switch-in-front-off":
             # Returns true if the agent is in front of a light-switch and it is off
             return Perception.list_switch_in_front_off(env)
+        
+        elif condition == "light-switch-in-front-on":
+            # Returns true if the agent is in front of a light-switch and it is off
+            return Perception.list_switch_in_front_off(env) and action_proposed == ExMiniGridEnv.Actions.toggle
 
         elif condition == "door-opened-in-front":
             # Returns true if the agent is in front of an opened door
@@ -92,6 +96,16 @@ class Perception():
 
 
     def list_switch_in_front_off(env):
+        if env.worldobj_in_agent(1,0) == "lightSwitch":
+            j, k = env.get_grid_coords_from_view((1, 0))
+            if hasattr(env.grid.get(j, k), 'state'):
+                if env.grid.get(j, k).state:
+                    return False
+                else:
+                    return True
+        return False
+    
+    def list_switch_in_front_on(env):
         if env.worldobj_in_agent(1,0) == "lightSwitch":
             j, k = env.get_grid_coords_from_view((1, 0))
             if hasattr(env.grid.get(j, k), 'state'):
