@@ -112,7 +112,7 @@ class Perception():
             return front
 
     def deadend_in_front(env):
-        i = 2
+        i = 1
         agent_obs = ExGrid.decode(env.gen_obs()['image'])
         grid_len = int(math.sqrt(len(agent_obs.grid)))
         front = None
