@@ -169,7 +169,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.propsed_action = proposed_action
 
         current_obs_env = self.env
-
+        current_obs_env.position = "check"
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
@@ -178,7 +178,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Check observation and proposed action in all running monitors
         for monitor in self.monitors:
             monitor.check(current_obs_env, proposed_action)
-            if monitor.state == "violated":
+            if monitor.state == "violated" or monitor.state == "precond_violated" or monitor.state == "postcond_violated" :
                 saved = True
                 list_monitor[len(list_monitor)] = monitor.name
 
@@ -186,12 +186,13 @@ class SafetyEnvelope(gym.core.Wrapper):
         unsafe_actions = []
         shaped_rewards = []
         for name, monitor in self.monitor_states.items():
-            if monitor["state"] == "violation":
+            if monitor["state"] == "violation" or monitor["state"] == "precond_violated" or monitor["state"] == "postcond_violated" :
                 if self.config.on_violation_reset:
                     obs = self.env.reset()
                     done = True
                     info = ("violation", self.monitor_states)
-                if monitor["unsafe_action"]:
+                if "unsafe_action" in monitor:
+                    print("coucou")
                     # Add them only if the monitor is in enforcing mode
                     if monitor["mode"] == "enforcing":
                         unsafe_actions.append((monitor["unsafe_action"], monitor["action_planner"]))
@@ -215,6 +216,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         if info:
             info = (info, self.monitor_states)
 
+        current_obs_env.position = "verify"
         # logging.info("____verify AFTER action is applied to the environment")
         # Notify the monitors of the new state reached in the environment and the applied action
         for monitor in self.monitors:

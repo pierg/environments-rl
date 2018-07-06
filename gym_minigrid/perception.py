@@ -50,9 +50,13 @@ class Perception():
             # It looks for a light switch around its field of view and returns true if it is on
             return Perception.light_switch_turned_on(env)
 
+        elif condition == "light-switch-in-front-on":
+            # Returns true if the agent is in front of a light-switch and it is on
+            return Perception.list_switch_in_front_on(env)
+
         elif condition == "light-switch-in-front-off":
             # Returns true if the agent is in front of a light-switch and it is off
-            return Perception.list_switch_in_front_off(env)
+            return Perception.list_switch_in_front_off(env) and env.position != "verify"
 
         elif condition == "door-opened-in-front":
             # Returns true if the agent is in front of an opened door
