@@ -192,7 +192,6 @@ class SafetyEnvelope(gym.core.Wrapper):
                     done = True
                     info = ("violation", self.monitor_states)
                 if "unsafe_action" in monitor:
-                    print("coucou")
                     # Add them only if the monitor is in enforcing mode
                     if monitor["mode"] == "enforcing":
                         unsafe_actions.append((monitor["unsafe_action"], monitor["action_planner"]))
