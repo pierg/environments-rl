@@ -74,7 +74,7 @@ class Perception():
         elif condition == "stepping-on-water":
             # Returns true if the agent is in front of a water tile and its action is "Forward"
             return ExMiniGridEnv.worldobj_in_agent(env, 1, 0) == "water" \
-                   and action_proposed == ExMiniGridEnv.Actions.forward
+                   and action_proposed == ExMiniGridEnv.Actions.forward and Perception.light_on_current_room(env)
 
         elif condition == "light-on-current-room":
             # It returns true is the light in the current room is on
