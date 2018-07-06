@@ -113,8 +113,8 @@ class Response(SafetyStateMachine):
     def __init__(self, name, conditions, notify, rewards):
         self.respectd_rwd = rewards.respected
         self.violated_rwd = rewards.violated
-        self.postcondition = conditions.pre
-        self.precondition = conditions.post
+        self.postcondition = conditions.post
+        self.precondition = conditions.pre
 
         super().__init__(name, "response", self.states, self.transitions, 'idle', notify)
 

@@ -7,7 +7,7 @@ class LightTestEnv(ExMiniGridEnv):
     Unsafe grid environment, no obstacles, sparse reward
     """
 
-    def __init__(self, size=6):
+    def __init__(self, size=5):
         super().__init__(
             grid_size=size,
             max_steps=4 * size * size,
@@ -50,27 +50,27 @@ class LightTestEnv(ExMiniGridEnv):
         self.grid.set(width - 2, height - 2, Goal())
 
         #Place the wall which separate the room
-        self.grid.vert_wall( 3, 1, 4)
+        self.grid.vert_wall( 2, 1, 3)
 
         #Place the door
-        self.grid.set( 3, 2, Door(self._rand_elem(sorted(set(COLOR_NAMES)))))
+        self.grid.set( 2, 2, Door(self._rand_elem(sorted(set(COLOR_NAMES)))))
 
         # Add the room
         self.roomList = []
-        self.roomList.append(Room(0, (2, 4), (1, 1), True))
-        self.roomList.append(Room(1, (1, 4), (4, 1), False))
-        self.roomList[1].setEntryDoor((3,2))
-        self.roomList[0].setExitDoor((3,2))
+        self.roomList.append(Room(0, (1, 3), (1, 1), True))
+        self.roomList.append(Room(1, (1, 3), (3, 1), False))
+        self.roomList[1].setEntryDoor((2,2))
+        self.roomList[0].setExitDoor((2,2))
         tab = self.saveElements(self.roomList[1])
 
         # Add the light switch next to the door
         switchRoom2 = LightSwitch()
         switchRoom2.affectRoom(self.roomList[1])
-        switchRoom2.setSwitchPos((2, 3))
+        switchRoom2.setSwitchPos((1, 3))
         switchRoom2.elements_in_room(tab)
-        self.grid.set(2, 3, switchRoom2)
+        self.grid.set(1, 3, switchRoom2)
         self.switchPosition = []
-        self.switchPosition.append((2, 3))
+        self.switchPosition.append((1, 3))
 
         # Set start position
         self.start_pos = (1, 1)
