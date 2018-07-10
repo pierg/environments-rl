@@ -140,6 +140,12 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if unsafe_action[1] == "toggle_light":
                     logging.info("action_planner() -> safe action : %s", str(self.env.actions.toggle))
                     safe_action = self.env.actions.toggle
+                if unsafe_action[1] == "turn_left":
+                    logging.info("action_planner() -> safe action : %s", str(self.env.actions.toggle))
+                    safe_action = self.env.actions.left
+                if unsafe_action[1] == "forward":
+                    logging.info("action_planner() -> safe action : %s", str(self.env.actions.toggle))
+                    safe_action = self.env.actions.forward
         return safe_action
 
     def _reset_monitors(self):

@@ -64,7 +64,7 @@ class Perception():
 
         elif condition == "door-closed-in-front":
             # Returns true if the agent is in front of an opened door
-            return Perception.door_closed_in_front(env)
+            return Perception.door_closed_in_front(env) and env.position != "verify"
 
         elif condition == "deadend-in-front":
             # Returns true if the agent is in front of a deadend
@@ -89,6 +89,15 @@ class Perception():
 
         elif condition == "action-is-toggle":
             return action_proposed == ExMiniGridEnv.Actions.toggle
+
+        elif condition == "action-is-forward":
+            return action_proposed == ExMiniGridEnv.Actions.forward
+
+        elif condition == "action-is-left":
+            return action_proposed == ExMiniGridEnv.Actions.left
+
+        elif condition == "action-is-right":
+            return action_proposed == ExMiniGridEnv.Actions.right
 
     def door_opened_in_front(env):
         if ExMiniGridEnv.worldobj_in_agent(env, 1, 0) == "door":
