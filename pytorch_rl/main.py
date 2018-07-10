@@ -5,22 +5,24 @@ import time
 import operator
 from functools import reduce
 
-import gym
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 
 from arguments import get_args
+from evaluator import Evaluator
 from vec_env.dummy_vec_env import DummyVecEnv
 from vec_env.subproc_vec_env import SubprocVecEnv
-from envs import make_env
 from kfac import KFACOptimizer
 from model import Policy
 from storage import RolloutStorage
 from visualize import visdom_plot
+
+from configurations import config_grabber as cg
+
+from envs import make_env
 
 args = get_args()
 
@@ -29,6 +31,12 @@ if args.recurrent_policy:
     assert args.algo in ['a2c', 'ppo'], 'Recurrent policy is not implemented for ACKTR'
 
 num_updates = int(args.num_frames) // args.num_steps // args.num_processes
+
+if args.stop:
+    num_updates = int(args.stop)
+
+if args.iterations:
+    iterations = int(args.iterations)
 
 torch.manual_seed(args.seed)
 if args.cuda:
@@ -42,6 +50,22 @@ except OSError:
         os.remove(f)
 
 def main():
+    # Getting configuration from file
+    config = cg.Configuration.grab()
+
+    # Overriding arguments with configuration file
+    args.num_processes = config.num_processes
+    args.num_steps = config.num_steps
+    args.env_name = config.env_name
+    args.algo = config.algorithm
+    args.vis = config.visdom
+    stop_learning = config.stop_learning
+
+    # Quick change @Todo find a better way to stop the learning
+    stop_learning = 240
+    # Initializing evaluation
+    evaluator = Evaluator()
+
     os.environ['OMP_NUM_THREADS'] = '1'
 
     envs = [make_env(args.env_name, args.seed, i, args.log_dir) for i in range(args.num_processes)]
@@ -93,17 +117,26 @@ def main():
     obs = envs.reset()
     update_current_obs(obs)
     rollouts.observations[0].copy_(current_obs)
-
+    numberOfStepBeforeDone = []
+    stepOnLastGoal = []
+    for i in range(0, config.num_processes):
+        numberOfStepBeforeDone.append(0)
+        stepOnLastGoal.append(0)
     # These variables are used to compute average rewards for all processes.
     episode_rewards = torch.zeros([args.num_processes, 1])
     final_rewards = torch.zeros([args.num_processes, 1])
-
+    last_reward_mean = 0
+    current_reward_mean = 0
+    identical_rewards = 0
+    first_time = True
     if args.cuda:
         current_obs = current_obs.cuda()
         rollouts.cuda()
-
     start = time.time()
     for j in range(num_updates):
+        if identical_rewards == stop_learning and last_reward_mean == 1:
+            print("stop learning")
+            break
         for step in range(args.num_steps):
             # Sample actions
             value, action, action_log_prob, states = actor_critic.act(
@@ -115,6 +148,25 @@ def main():
 
             # Obser reward and next obs
             obs, reward, done, info = envs.step(cpu_actions)
+            for x in range (0,len(done)):
+                if done[x]:
+                    numberOfStepBeforeDone[x] = (j*args.num_steps+step+1) - stepOnLastGoal[x]
+                    stepOnLastGoal[x] = (j*args.num_steps+step+1)
+            evaluator.update(reward, done, info,numberOfStepBeforeDone)
+
+            if stop_learning:
+                if first_time:
+                    first_time = False
+                    last_reward_mean = evaluator.get_reward_mean()
+                else:
+                    current_reward_mean = evaluator.get_reward_mean()
+                    if current_reward_mean == last_reward_mean:
+                        identical_rewards += 1
+                    else:
+                        identical_rewards = 0
+                    last_reward_mean = current_reward_mean
+            if identical_rewards == stop_learning:
+                break
             reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
             episode_rewards += reward
 
@@ -135,7 +187,8 @@ def main():
                 current_obs *= masks
 
             update_current_obs(obs)
-            rollouts.insert(step, current_obs, states.data, action.data, action_log_prob.data, value.data, reward, masks)
+            rollouts.insert(step, current_obs, states.data, action.data, action_log_prob.data, value.data, reward,
+                        masks)
 
         next_value = actor_critic(
             Variable(rollouts.observations[-1], volatile=True),
@@ -197,7 +250,7 @@ def main():
 
                 for sample in data_generator:
                     observations_batch, states_batch, actions_batch, \
-                       return_batch, masks_batch, old_action_log_probs_batch, \
+                        return_batch, masks_batch, old_action_log_probs_batch, \
                             adv_targ = sample
 
                     # Reshape to do in a single forward pass for all steps
@@ -237,12 +290,14 @@ def main():
 
             save_model = [save_model,
                             hasattr(envs, 'ob_rms') and envs.ob_rms or None]
-
             torch.save(save_model, os.path.join(save_path, args.env_name + ".pt"))
 
         if j % args.log_interval == 0:
             end = time.time()
             total_num_steps = (j + 1) * args.num_processes * args.num_steps
+
+            # Save in the evaluator
+            evaluator.save(j, start, end, dist_entropy, value_loss, action_loss)
             print(
                 "Updates {}, num timesteps {}, FPS {}, mean/median reward {:.2f}/{:.2f}, min/max reward {:.2f}/{:.2f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
                 format(
@@ -252,8 +307,10 @@ def main():
                     final_rewards.mean(),
                     final_rewards.median(),
                     final_rewards.min(),
-                    final_rewards.max(), dist_entropy.data[0],
-                    value_loss.data[0], action_loss.data[0]
+                    final_rewards.max(),
+                    dist_entropy.data[0],
+                    value_loss.data[0],
+                    action_loss.data[0]
                 )
             )
 
