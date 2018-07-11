@@ -1,0 +1,56 @@
+About the random generator :
+
+	Elements :
+		Deadend :
+			Int, you can set every number you want, but the maximum created is 4.
+			If the size of the grid is less than 10 then the generator will only create 1 deadend
+			There is 4 differents deadends that can be created (two at the bottom left,
+			and two at the top right)
+			
+		Water :
+			Int, you can set the number you want, if the number is too big the generator will set 
+			the maximum possible. However there is some limitations, water can't be positionned on 
+			another element or next to a wall. This was set to avoid problems and always let a possibility
+			to the agent to reach the goal
+			
+		LightSwitch :
+			Boolean, true if you want a lightSwitch, which means two rooms, with light off in the last one.
+			The lightSwitch position is random (above or under the door).
+			If the grid size is under 11 you can't create a lightSwitch. We set this limitation in order
+			to let a possibility to create other elements at the same time.
+			
+	Random at each episode :
+		Boolean, true if you want to have the elements positions random at each episode.
+		If false, the random generation will happen only at the creation of the environment.
+		This means you will be able to create this environment again if you want (too see what happens
+		if a problem occurs for example)
+		
+	About the config file :
+	
+		Reward file :
+			The needed elements are : rewards(standard,cleaningenv). If you use just the needed elements,
+			the generator will use the default values that are hard coded to avoid errors for every
+			missing elements
+			If you want to add rewards, you just need to use a json object like this:
+			"name_of_your_monitor":{
+				"name":"name_of_your_monitor",
+				------------------
+				"respected":int,
+				"violated":int,
+				------------------
+				or : 
+				------------------
+	    	"near": int,
+    		"immediate": int,
+    		"violated": int
+			}
+			The name field is needed, without it, it won't work !
+
+		Environmnent file :
+			The needed elements are grid_size, n_water, n_deadend, light_switch, random_each_episode
+			You don't need to set any monitors here, you can let it empty if you want.
+			Else you need to use all the elements :
+			for properties (type,mode,action_planner,active,name,obj_to_avoid,act_to_avoid)
+			for patterns  (type,mode,active,name,conditions(pre,post))
+			the variable name need to be different for each properties/patterns to avoid errors
+			
