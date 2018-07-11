@@ -270,24 +270,62 @@ class ExMiniGridEnv(MiniGridEnv):
 
     # Enumeration of possible actions
     class Actions(IntEnum):
-        # Turn left, turn right, move forward
+        # # Turn left, turn right, move forward
+        # left = 0
+        # right = 1
+        # forward = 2
+        #
+        # # Pick up an object
+        # pickup = 3
+        # # Drop an object
+        # drop = 4
+        # # Toggle/activate an object
+        # toggle = 5
+        #
+        # # Wait/stay put/do nothing
+        # wait = 6
+        #
+        # # More actions:
+        # # Ex:
+        # clean = 7
+
         left = 0
         right = 1
-        forward = 2
+        forward = 3
+        toggle = 4
+        wait = 5
+        clean = 6
 
-        # Pick up an object
-        pickup = 3
-        # Drop an object
-        drop = 4
-        # Toggle/activate an object
-        toggle = 5
 
-        # Wait/stay put/do nothing
-        wait = 6
+    def str_to_action(self, action_name):
+        if action_name == "left":
+            return self.actions.left
+        elif action_name == "right":
+            return self.actions.right
+        elif action_name == "forward":
+            return self.actions.forward
+        elif action_name == "toggle":
+            return self.actions.toggle
+        elif action_name == "wait":
+            return self.actions.wait
+        elif action_name == "clean":
+            return self.actions.clean
+        return None
 
-        # More actions:
-        # Ex:
-        clean = 7
+    def action_to_string(self, action):
+        if action == self.actions.left:
+            return "left"
+        elif action == self.actions.right:
+            return "right"
+        elif action == self.actions.forward:
+            return "forward"
+        elif action == self.actions.toggle:
+            return "toggle"
+        elif action == self.actions.wait:
+            return "wait"
+        elif action == self.actions.clean:
+            return "clean"
+        return None
 
     def gen_obs(self):
         """
