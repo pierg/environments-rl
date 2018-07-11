@@ -49,6 +49,16 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         print("available_actions: " + str(safe_actions))
 
+        # The four lines after this line were added temporarily
+
+        action = self.env.action_to_string(proposed_action)
+        print("action_to_execution: " + action)
+        obs, reward, done, info = self.env.step(proposed_action)
+        reward += self.respected_reward
+
+        # Original Code after this line (need to uncomment everything)
+
+        """"
         # check if the proposed action is safe
         if self.env.action_to_string(proposed_action) in safe_actions:
             action = self.env.action_to_string(proposed_action)
@@ -59,8 +69,8 @@ class SafetyEnvelope(gym.core.Wrapper):
             action = random.choice(safe_actions)
             print("action_to_execution: " + action)
             obs, reward, done, info = self.env.step(self.env.str_to_action(action))
-            reward += self.violated_reward
+            reward += self.violated_reward 
 
-        self.controller.act(action)
+        self.controller.act(action)"""
 
         return obs, reward, done, info

@@ -108,10 +108,6 @@ class Perception():
             return ExMiniGridEnv.worldobj_in_agent(env, 1, 0) == "water" \
                    and action_proposed == ExMiniGridEnv.Actions.forward and Perception.light_on_current_room(env)
 
-        elif condition == "light-on-current-room":
-            # It returns true is the light in the current room is on
-            return Perception.light_on_current_room(env)
-
         elif condition == "entering-a-room":
             # Returns true if the agent is entering a room
             # Meaning there is a door in front and its action is to move forward
@@ -133,17 +129,38 @@ class Perception():
 
         elif condition == "light-on-next-room":
             # It returns true is the light in the other room of the environment TODO
-            return False
+            return Perception.light_on_next_room(env)
 
         elif condition == "room-0":
             # Returns true if the agent is in the room where it first starts TODO
-            return False
+            return Perception.agent_in_room_number(env,0)
 
         elif condition == "room-1":
             # Returns true if the agent is in the room after it crossed the door TODO
-            return False
+            return Perception.agent_in_room_number(env,1)
 
+    def light_on_next_room(env):
+        try:
+            if env.roomList:
+                bCurrent = False
+                for x in env.roomList:
+                    if x.objectInRoom(env.agent_pos):
+                        bCurrent = True
+                    if bCurrent:
+                        return x.lightOn
+            return True
+        except AttributeError:
+            return True
 
+    def agent_in_room_number(env,number):
+        try:
+            if env.roomList:
+                for x in env.roomList:
+                    if x.objectInRoom(env.agent_pos):
+                        return x.number == number
+            return True
+        except AttributeError:
+            return True
 
     def is_condition_true(self):
         return True
