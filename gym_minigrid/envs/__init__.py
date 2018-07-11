@@ -19,10 +19,9 @@ from gym_minigrid.envs.safety import *
 from gym_minigrid.envs.cleaningEnv import *
 from gym_minigrid.envs.miniclean import *
 from gym_minigrid.envs.bigcleanEnv import *
-from gym_minigrid.envs.randoms.randomenv9660 import *
-from gym_minigrid.envs.randoms.randomenv2133 import *
 from gym_minigrid.envs.wa6_grid6 import *
 from gym_minigrid.envs.dnd2_grid6 import *
 from gym_minigrid.envs.li_grid6 import *
 from gym_minigrid.envs.lighttest import *
+from gym_minigrid.envs.randoms.randomenv6810 import *
 from gym_minigrid.envs.dirtwatlight import *

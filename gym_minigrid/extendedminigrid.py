@@ -291,10 +291,12 @@ class ExMiniGridEnv(MiniGridEnv):
 
         left = 0
         right = 1
-        forward = 3
-        toggle = 4
-        wait = 5
-        clean = 6
+        forward = 2
+        pickup = 3
+        drop = 4
+        toggle = 5
+        wait = 6
+        clean = 7
 
 
     def str_to_action(self, action_name):
@@ -326,6 +328,26 @@ class ExMiniGridEnv(MiniGridEnv):
         elif action == self.actions.clean:
             return "clean"
         return None
+
+    def __init__(self, grid_size=16, max_steps=100, see_through_walls=False, seed=1337):
+        super().__init__(grid_size, max_steps, see_through_walls, seed)
+        self.actions = ExMiniGridEnv.Actions
+
+    def step(self, action):
+        if action == self.actions.wait:
+            self.step_count += 1
+            reward = 0
+            done = False
+            # Get the position in front of the agent
+            fwd_pos = self.front_pos
+            # Get the contents of the cell in front of the agent
+            fwd_cell = self.grid.get(*fwd_pos)
+            if self.step_count >= self.max_steps:
+                done = True
+            obs = self.gen_obs()
+            return obs, reward, done, {}
+        else:
+            return super().step(action)
 
     def gen_obs(self):
         """

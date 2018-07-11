@@ -75,7 +75,6 @@ class Perception():
     @staticmethod
     def is_condition_satisfied(env, condition, action_proposed = None):
         """
-
         :param env: instance of ExMiniGridEnv
         :return:
         """
@@ -107,7 +106,7 @@ class Perception():
         elif condition == "stepping-on-water":
             # Returns true if the agent is in front of a water tile and its action is "Forward"
             return ExMiniGridEnv.worldobj_in_agent(env, 1, 0) == "water" \
-                   and action_proposed == ExMiniGridEnv.Actions.forward
+                   and action_proposed == ExMiniGridEnv.Actions.forward and Perception.light_on_current_room(env)
 
         elif condition == "light-on-current-room":
             # It returns true is the light in the current room is on
@@ -122,6 +121,15 @@ class Perception():
 
         elif condition == "action-is-toggle":
             return action_proposed == ExMiniGridEnv.Actions.toggle
+
+        elif condition == "action-is-forward":
+            return action_proposed == ExMiniGridEnv.Actions.forward
+
+        elif condition == "action-is-left":
+            return action_proposed == ExMiniGridEnv.Actions.left
+
+        elif condition == "action-is-right":
+            return action_proposed == ExMiniGridEnv.Actions.right
 
         elif condition == "light-on-next-room":
             # It returns true is the light in the other room of the environment TODO
@@ -148,9 +156,8 @@ class Perception():
                 return True
         return False
 
-
     def list_switch_in_front_off(env):
-        if env.worldobj_in_agent(1,0) == "lightSwitch":
+        if env.worldobj_in_agent(1, 0) == "lightSwitch":
             j, k = env.get_grid_coords_from_view((1, 0))
             if hasattr(env.grid.get(j, k), 'state'):
                 if env.grid.get(j, k).state:
@@ -158,9 +165,10 @@ class Perception():
                 else:
                     return True
         return False
-    
+
+
     def list_switch_in_front_on(env):
-        if env.worldobj_in_agent(1,0) == "lightSwitch":
+        if env.worldobj_in_agent(1, 0) == "lightSwitch":
             j, k = env.get_grid_coords_from_view((1, 0))
             if hasattr(env.grid.get(j, k), 'state'):
                 return env.grid.get(j, k).state
@@ -173,6 +181,7 @@ class Perception():
                 return True
         return False
 
+
     def check_if_coordinates_in_env(env, coordinates):
         wx, wy = env.get_grid_coords_from_view(coordinates)
         if 0 <= wx < env.grid.width and 0 <= wy < env.grid.height:
@@ -180,7 +189,7 @@ class Perception():
             return front
 
     def deadend_in_front(env):
-        i = 2
+        i = 1
         agent_obs = ExGrid.decode(env.gen_obs()['image'])
         grid_len = int(math.sqrt(len(agent_obs.grid)))
         front = None
@@ -216,7 +225,8 @@ class Perception():
         for i in range(0, len(agent_obs.grid)):
             if agent_obs.grid[i] is not None:
                 if agent_obs.grid[i].type == "lightSwitch":
-                    j, k = env.get_grid_coords_from_view((grid_len-1 - int(i / grid_len), (i % grid_len) - int(grid_len/2)))
+                    j, k = env.get_grid_coords_from_view(
+                    (grid_len - 1 - int(i / grid_len), (i % grid_len) - int(grid_len / 2)))
                     if hasattr(env.grid.get(j, k), 'state'):
                         return env.grid.get(j, k).state
         return False

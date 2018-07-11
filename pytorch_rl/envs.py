@@ -1,19 +1,26 @@
-import os
-import numpy
-import gym
-from gym import spaces
-
 try:
     import gym_minigrid
     from gym_minigrid.wrappers import *
-except:
+    from gym_minigrid.envelopes import *
+except Exception as e:
+    print(" =========== =========== IMPORT ERROR ===========")
+    print(e)
     pass
 
+from configurations import config_grabber as cg
+
+
 def make_env(env_id, seed, rank, log_dir):
+
+    config = cg.Configuration.grab()
+
     def _thunk():
         env = gym.make(env_id)
 
         env.seed(seed + rank)
+
+        if config.monitors:
+            env = SafetyEnvelope(env)
 
         # Maxime: until RL code supports dict observations, squash observations into a flat vector
         if isinstance(env.observation_space, spaces.Dict):
