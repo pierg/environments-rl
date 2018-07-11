@@ -96,7 +96,7 @@ class Universality(SafetyStateMachine):
 
     # Convert observations to state and populate the obs_conditions
     def _map_conditions(self, obs, action_proposed):
-        condition = p.is_condition_satisfied(obs, action_proposed, self.condition)
+        condition = p.is_condition_satisfied(obs, self.condition, action_proposed)
         Universality.obs["condition"] = condition
 
     def _on_idle(self):

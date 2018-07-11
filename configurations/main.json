@@ -24,7 +24,7 @@
       "precedence": {
         "lightPrecedence": {
           "action_planner": "turn_right",
-          "active": true,
+          "active": false,
           "conditions": {
             "post": "entering-a-room",
             "pre": "light-switch-turned-on"
@@ -39,45 +39,15 @@
         }
       },
       "response": {
-        "doorResponse": {
-          "action_planner": "forward",
-          "active": true,
-          "conditions": {
-            "post": "action-is-forward",
-            "pre": "door-opened-in-front"
-          },
-          "mode": "enforcing",
-          "name": "doorResponse",
-          "rewards": {
-            "respected": 0.1,
-            "violated": -0.1
-          },
-          "type": "response"
-        },
         "lightResponse": {
           "action_planner": "toggle_light",
-          "active": true,
+          "active": false,
           "conditions": {
             "post": "action-is-toggle",
             "pre": "light-switch-in-front-off"
           },
           "mode": "enforcing",
           "name": "lightResponse",
-          "rewards": {
-            "respected": 0.1,
-            "violated": -0.1
-          },
-          "type": "response"
-        },
-        "switchResponse": {
-          "action_planner": "turn_left",
-          "active": true,
-          "conditions": {
-            "post": "action-is-left",
-            "pre": "light-switch-in-front-on"
-          },
-          "mode": "enforcing",
-          "name": "switchResponse",
           "rewards": {
             "respected": 0.1,
             "violated": -0.1

@@ -129,12 +129,12 @@ class Response(SafetyStateMachine):
 
     # Convert observations to state and populate the obs_conditions
     def _map_conditions(self, obs, action_proposed):
-        precondition = p.is_condition_satisfied(obs, action_proposed, self.precondition)
+        precondition = p.is_condition_satisfied(obs, self.precondition, action_proposed)
         Response.obs["precondition"] = precondition
 
         # If precondition is true, check postcondition and trigger as one atomic operation
         if precondition:
-            Response.obs["postcondition"] = p.is_condition_satisfied(obs, action_proposed, self.postcondition)
+            Response.obs["postcondition"] = p.is_condition_satisfied(obs, self.postcondition, action_proposed)
             self.trigger("*")
 
     def _on_idle(self):

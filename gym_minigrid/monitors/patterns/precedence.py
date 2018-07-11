@@ -131,12 +131,12 @@ class Precedence(SafetyStateMachine):
     # Convert observations to state and populate the obs_conditions
     def _map_conditions(self, obs, action_proposed):
 
-        postcondition = p.is_condition_satisfied(obs, action_proposed, self.postcondition)
+        postcondition = p.is_condition_satisfied(obs, self.postcondition, action_proposed)
         Precedence.obs["postcondition"] = postcondition
 
         # If postcondition is true, check precondition and trigger as one atomic operation
         if postcondition:
-            Precedence.obs["precondition"] = p.is_condition_satisfied(obs, action_proposed, self.precondition)
+            Precedence.obs["precondition"] = p.is_condition_satisfied(obs, self.precondition, action_proposed)
             self.trigger("*")
 
 
