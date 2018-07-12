@@ -270,24 +270,84 @@ class ExMiniGridEnv(MiniGridEnv):
 
     # Enumeration of possible actions
     class Actions(IntEnum):
-        # Turn left, turn right, move forward
+        # # Turn left, turn right, move forward
+        # left = 0
+        # right = 1
+        # forward = 2
+        #
+        # # Pick up an object
+        # pickup = 3
+        # # Drop an object
+        # drop = 4
+        # # Toggle/activate an object
+        # toggle = 5
+        #
+        # # Wait/stay put/do nothing
+        # wait = 6
+        #
+        # # More actions:
+        # # Ex:
+        # clean = 7
+
         left = 0
         right = 1
         forward = 2
-
-        # Pick up an object
         pickup = 3
-        # Drop an object
         drop = 4
-        # Toggle/activate an object
         toggle = 5
-
-        # Wait/stay put/do nothing
         wait = 6
-
-        # More actions:
-        # Ex:
         clean = 7
+
+
+    def str_to_action(self, action_name):
+        if action_name == "left":
+            return self.actions.left
+        elif action_name == "right":
+            return self.actions.right
+        elif action_name == "forward":
+            return self.actions.forward
+        elif action_name == "toggle":
+            return self.actions.toggle
+        elif action_name == "wait":
+            return self.actions.wait
+        elif action_name == "clean":
+            return self.actions.clean
+        return None
+
+    def action_to_string(self, action):
+        if action == self.actions.left:
+            return "left"
+        elif action == self.actions.right:
+            return "right"
+        elif action == self.actions.forward:
+            return "forward"
+        elif action == self.actions.toggle:
+            return "toggle"
+        elif action == self.actions.wait:
+            return "wait"
+        elif action == self.actions.clean:
+            return "clean"
+        return None
+
+    def __init__(self, grid_size=16, max_steps=100, see_through_walls=False, seed=1337):
+        super().__init__(grid_size, max_steps, see_through_walls, seed)
+        self.actions = ExMiniGridEnv.Actions
+
+    def step(self, action):
+        if action == self.actions.wait:
+            self.step_count += 1
+            reward = 0
+            done = False
+            # Get the position in front of the agent
+            fwd_pos = self.front_pos
+            # Get the contents of the cell in front of the agent
+            fwd_cell = self.grid.get(*fwd_pos)
+            if self.step_count >= self.max_steps:
+                done = True
+            obs = self.gen_obs()
+            return obs, reward, done, {}
+        else:
+            return super().step(action)
 
     def gen_obs(self):
         """

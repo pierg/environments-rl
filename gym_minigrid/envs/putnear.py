@@ -93,7 +93,7 @@ class PutNearEnv(MiniGridEnv):
 
         obs, reward, done, info = super().step(action)
 
-        u, v = self.get_dir_vec()
+        u, v = self.dir_vec
         ox, oy = (self.agent_pos[0] + u, self.agent_pos[1] + v)
         tx, ty = self.target_pos
 
@@ -106,7 +106,7 @@ class PutNearEnv(MiniGridEnv):
         if action == self.actions.drop and preCarrying:
             if self.grid.get(ox, oy) is preCarrying:
                 if abs(ox - tx) <= 1 and abs(oy - ty) <= 1:
-                    reward = 1
+                    reward = self._reward()
             done = True
 
         return obs, reward, done, info

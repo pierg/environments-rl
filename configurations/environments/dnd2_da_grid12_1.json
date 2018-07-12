@@ -1,0 +1,66 @@
+{
+  "grid_size": 12,
+  "n_water": 0,
+  "n_deadend": 2,
+  "light_switch": false,
+  "random_each_episode": false,
+  "stop_learning": 720,
+  "number_of_iteration": 100,
+  "monitors": {
+    "patterns": {
+      "precedence": {
+        "precedence_1": {
+          "type": "precedence",
+          "mode": "shaping",
+          "active": false,
+          "name": "lightPrecedence",
+          "conditions": {
+            "pre": "light-switch-turned-on",
+            "post": "entering-a-room"
+          }
+        }
+      },
+      "response": {
+        "response_1": {
+          "type": "response",
+          "mode": "shaping",
+          "active": false,
+          "name": "lightResponse",
+          "conditions": {
+            "pre": "light-switch-turned-on",
+            "post": "entering-a-room"
+          }
+        }
+      },
+      "universality": {
+        "universality_1": {
+          "type": "universality",
+          "mode": "shaping",
+          "active": false,
+          "name": "lightUniversality",
+          "conditions": "light-on-current-room"
+        }
+      },
+      "absence": {
+        "waterAbsence": {
+          "active": false,
+          "conditions": "stepping-on-water",
+          "mode": "enforcing",
+          "action_planner": "wait",
+          "name": "waterAbsence",
+          "type": "absence"
+        }
+      },
+      "absence": {
+        "deadendAbsence": {
+          "active": true,
+          "conditions": "deadend-in-front",
+          "mode": "enforcing",
+          "action_planner": "wait",
+          "name": "deadendAbsence",
+          "type": "absence"
+        }
+      }
+    }
+  }
+}
