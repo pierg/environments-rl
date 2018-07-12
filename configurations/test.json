@@ -1,65 +1,6 @@
 {
   "config_name": "AllMonitors_near,1_immediate,2_violated,5_respected,2_violated,2_process32_numstep5_goal1_death1_step,1",
   "algorithm": "a2c",
-  "monitors": {
-    "properties": {
-      "avoid": {
-        "water": {
-          "mode": "enforcing",
-          "action_planner": "wait",
-          "active": true,
-          "name": "water",
-          "violated_action": "Actions.forward",
-          "rewards": {
-            "near": -0.1,
-            "immediate": -0.2,
-            "violated": -0.5
-          }
-        }
-      }
-    },
-    "patterns": {
-      "absence": {
-        "absence_1": {
-          "active": true,
-          "mode": "monitoring",
-          "name": "deadend",
-          "condition": "deadend-in-front",
-          "rewards": {
-            "respected": 0,
-            "violated": 0
-          }
-        }
-      },
-      "precedence": {
-        "precedence_1": {
-          "active": true,
-          "mode": "monitoring",
-          "name": "light-before-entering",
-          "conditions": {
-            "pre": "light-switch-turned-on",
-            "post": "entering-a-room"
-          },
-          "rewards": {
-            "respected": 0,
-            "violated": 0
-          }
-        }
-      },
-      "universality": {
-        "universality_1": {
-          "active": true,
-          "mode": "monitoring",
-          "name": "light",
-          "condition": "light-on-current-room",
-          "rewards": {
-            "respected": 0.2,
-            "violated": -0.2
-          }
-        }
-      }
-    }
-  },
   "env_name": "MiniGrid-Safety-10x10-v0",
   "num_processes": 48,
   "num_steps": 5,
