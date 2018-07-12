@@ -67,7 +67,7 @@ class Controller(Machine):
     def fill_observations(self):
         Controller.obs["light-on-next-room"] = p.is_condition_satisfied(self.observations, "light-on-next-room")
         Controller.obs["light-off-next-room"] = not p.is_condition_satisfied(self.observations, "light-on-next-room")
-        Controller.obs["door-opened"] = p.is_condition_satisfied(self.observations, "door-opened") or p.is_condition_satisfied(self.observations, "door-opened-in-front")
+        Controller.obs["door-opened"] = p.is_condition_satisfied(self.observations, "door-opened-in-front") or p.is_condition_satisfied(self.observations, "door-opened")
         Controller.obs["door-closed"] = p.is_condition_satisfied(self.observations, "door-closed")
         Controller.obs["room-0"] = p.is_condition_satisfied(self.observations, "room-0", self.tigger_action)
         Controller.obs["room-1"] = p.is_condition_satisfied(self.observations, "room-1", self.tigger_action)

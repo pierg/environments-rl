@@ -156,12 +156,11 @@ class Perception():
             # Returns true if the agent is in the room after it crossed the door
             return Perception.agent_in_room_number(env, 1)
 
-    # TODO CHECK THIS FUNCTION
     def light_on_next_room(env):
         try:
             if env.roomList:
-                bCurrent = False
                 for x in env.roomList:
+                    bCurrent = False
                     if x.objectInRoom(env.agent_pos):
                         bCurrent = True
                     if not bCurrent:
@@ -189,14 +188,12 @@ class Perception():
             if env.grid.get(x, y).is_open:
                 Perception.door_open = True
                 return True
+            Perception.door_open = False
         return False
 
-
-    # TODO: state of the door at all times from every position
     def door_closed(env):
         return not Perception.door_open
 
-    # TODO: state of the door at all times from every position
     def door_opened(env):
         return Perception.door_open
 
@@ -222,7 +219,9 @@ class Perception():
         if env.worldobj_in_agent(1, 0) == "door":
             x, y = env.get_grid_coords_from_view((1, 0))
             if not env.grid.get(x, y).is_open:
+                Perception.door_open = False
                 return True
+            Perception.door_open = True
         return False
 
     def check_if_coordinates_in_env(env, coordinates):
