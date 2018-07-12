@@ -16,10 +16,12 @@ except Exception as e:
     pass
 
 
+
 def main():
 
     # logging.getLogger().setLevel(logging.INFO)
 
+    observed = True
 
     parser = OptionParser()
     parser.add_option(
@@ -70,6 +72,8 @@ def main():
 
         action = 0
 
+        nonlocal observed
+
         if keyName == 'LEFT':
             action = env.env.actions.left
         elif keyName == 'RIGHT':
@@ -92,8 +96,10 @@ def main():
             return
 
         obs, reward, done, info = env.step(action)
+        observed = True
 
         print('step=%s, reward=%s' % (env.env.step_count, reward))
+        print("\n")
 
         if done:
             print('done!')
@@ -104,7 +110,9 @@ def main():
     while True:
         env.render('human')
         time.sleep(0.01)
-
+        if observed:
+            env.step("observe")
+            observed = False
         # If the window was closed
         if renderer.window == None:
             break

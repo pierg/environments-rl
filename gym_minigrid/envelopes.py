@@ -35,42 +35,43 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Counters of steps performed in an episode
         self.n_steps = 0
 
+        self.safe_actions = None
+
 
     def step(self, proposed_action):
 
-        action = None
-
-        # To be returned to the agent
-        obs, reward, done, info = None, None, None, None
-
-        self.controller.observe(self.env)
-
-        safe_actions = self.controller.get_available_actions()
-
-        print("available_actions: " + str(safe_actions))
-
-        # The four lines after this line were added temporarily
-
-        action = self.env.action_to_string(proposed_action)
-        print("action_to_execution: " + action)
-        obs, reward, done, info = self.env.step(proposed_action)
-        reward += self.respected_reward
-
-        # Original Code after this line (need to uncomment everything)
-
-        """"
-        # check if the proposed action is safe
-        if self.env.action_to_string(proposed_action) in safe_actions:
-            action = self.env.action_to_string(proposed_action)
-            print("action_to_execution: " + action)
-            obs, reward, done, info = self.env.step(proposed_action)
-            reward += self.respected_reward
+        if proposed_action == "observe":
+            self.controller.observe(self.env)
+            self.safe_actions = self.controller.get_available_actions()
+            print("available_actions: " + str(self.safe_actions))
         else:
-            action = random.choice(safe_actions)
-            print("action_to_execution: " + action)
-            obs, reward, done, info = self.env.step(self.env.str_to_action(action))
-            reward += self.violated_reward 
+            if self.config.num_processes == 1 and self.config.rendering:
+                self.env.render('human')
 
-        self.controller.act(action)"""
+            action = None
 
-        return obs, reward, done, info
+            # To be returned to the agent
+            obs, reward, done, info = None, None, None, None
+
+            # check if the proposed action is safe
+            if self.env.action_to_string(proposed_action) in self.safe_actions:
+                action = self.env.action_to_string(proposed_action)
+                print("action_to_execution: " + action)
+                obs, reward, done, info = self.env.step(proposed_action)
+                reward += self.respected_reward
+            else:
+                if 'observation' in self.safe_actions:
+                    print("MISMATCH! No available actions from these observations in the MTSA model")
+                    print("Going back to S01M1")
+                    action = "to_S0M1"
+                    obs, reward, done, info = self.env.step(proposed_action)
+                else:
+                    action = random.choice(self.safe_actions)
+                    print("the proposed action is not safe! Choosing a random safe action...")
+                    print("action_to_execution: " + action)
+                    obs, reward, done, info = self.env.step(self.env.str_to_action(action))
+                    reward += self.violated_reward
+
+            self.controller.act(action)
+
+            return obs, reward, done, info

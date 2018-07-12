@@ -40,6 +40,8 @@ class Controller(Machine):
 
     def observe(self, observations):
         self.observations = observations
+        self.fill_observations()
+        print("state: " + str(self.state) + "    obs: " + str([x for x in Controller.obs if Controller.obs[x] == True]))
         self.trigger('observation')
 
     def act(self, action):
@@ -61,115 +63,106 @@ class Controller(Machine):
                 self.is_toggle_a_switch = True
         return available_actions
 
+    
+    def fill_observations(self):
+        Controller.obs["light-on-next-room"] = p.is_condition_satisfied(self.observations, "light-on-next-room")
+        Controller.obs["light-off-next-room"] = not p.is_condition_satisfied(self.observations, "light-on-next-room")
+        Controller.obs["door-opened"] = p.is_condition_satisfied(self.observations, "door-opened") or p.is_condition_satisfied(self.observations, "door-opened-in-front")
+        Controller.obs["door-closed"] = p.is_condition_satisfied(self.observations, "door-closed")
+        Controller.obs["room-0"] = p.is_condition_satisfied(self.observations, "room-0", self.tigger_action)
+        Controller.obs["room-1"] = p.is_condition_satisfied(self.observations, "room-1", self.tigger_action)
+        Controller.obs["dirt-left"] = p.at_left_is(self.observations, "dirt")
+        Controller.obs["light-switch-left"] = p.at_left_is(self.observations, "lightSwitch")
+        Controller.obs["water-left"] = p.at_left_is(self.observations, "water")
+        Controller.obs["door-left"] = p.at_left_is(self.observations, "door")
+        Controller.obs["dirt-right"] = p.at_right_is(self.observations, "dirt")
+        Controller.obs["switch-right"] = p.at_right_is(self.observations, "lightSwitch")
+        Controller.obs["water-right"] = p.at_right_is(self.observations, "water")
+        Controller.obs["door-right"] = p.at_right_is(self.observations, "door")
+        Controller.obs["dirt-front"] = p.in_front_of(self.observations, "dirt")
+        Controller.obs["switch-front"] = p.in_front_of(self.observations, "lightSwitch")
+        Controller.obs["water-front"] = p.in_front_of(self.observations, "water")
+        Controller.obs["door-front"] = p.in_front_of(self.observations, "door")
+
+        
+
+    obs = {
+        "light-on-next-room": False,
+        "light-off-next-room": False,
+        "door-opened": False,
+        "door-closed": False,
+        "room-0": False,
+        "room-1": False,
+        "dirt-left": False,
+        "light-switch-left": False,
+        "water-left": False,
+        "door-left": False,
+        "dirt-right": False,
+        "switch-right": False,
+        "water-right": False,
+        "door-right": False,
+        "dirt-front": False,
+        "switch-front": False,
+        "water-front": False,
+        "door-front": False,
+    }
 
 
+    
+    
     # State machine conditions
 
     def light_on(self):
-        condition = p.is_condition_satisfied(self.observations, "light-on-next-room")
-        if condition:
-            self.logger("light_on")
-        return condition
+        return Controller.obs["light-on-next-room"]
 
     def light_off(self):
-        condition = not p.is_condition_satisfied(self.observations, "light-on-next-room")
-        if condition:
-            self.logger("light_off")
-        return condition
+        return Controller.obs["light-off-next-room"]
 
     def door_open(self):
-        condition = p.is_condition_satisfied(self.observations, "door-opened-in-front")
-        if condition:
-            self.logger("door_open")
-        return condition
+        return Controller.obs["door-opened"]
 
     def door_close(self):
-        condition = not p.is_condition_satisfied(self.observations, "door-opened-in-front")
-        if condition:
-            self.logger("door_close")
-        return condition
+        return Controller.obs["door-closed"]
 
     def room_0(self):
-        condition = p.is_condition_satisfied(self.observations, "room-0", self.tigger_action)
-        if condition:
-            self.logger("room_0")
-        return condition
+        return Controller.obs["room-0"]
 
     def room_1(self):
-        condition = p.is_condition_satisfied(self.observations, "room-1", self.tigger_action)
-        if condition:
-            self.logger("room_1")
-        return condition
+        return Controller.obs["room-1"]
 
     def dirt_left(self):
-        condition = p.at_left_is(self.observations, "dirt")
-        if condition:
-            self.logger("dirt_left")
-        return condition
+        return Controller.obs["dirt-left"]
 
     def switch_left(self):
-        condition = p.at_left_is(self.observations, "lightSwitch")
-        if condition:
-            self.logger("switch_left")
-        return condition
+        return Controller.obs["light-switch-left"]
 
     def water_left(self):
-        condition = p.at_left_is(self.observations, "water")
-        if condition:
-            self.logger("water_left")
-        return condition
+        return Controller.obs["water-left"]
 
     def door_left(self):
-        condition = p.at_left_is(self.observations, "door")
-        if condition:
-            self.logger("door_left")
-        return condition
+        return Controller.obs["door-left"]
 
     def dirt_right(self):
-        condition = p.at_right_is(self.observations, "dirt")
-        if condition:
-            self.logger("dirt_right")
-        return condition
+        return Controller.obs["dirt-right"]
 
     def switch_right(self):
-        condition = p.at_right_is(self.observations, "lightSwitch")
-        if condition:
-            self.logger("switch_right")
-        return condition
+        return Controller.obs["switch-right"]
 
     def water_right(self):
-        condition = p.at_right_is(self.observations, "water")
-        if condition:
-            self.logger("water_right")
-        return condition
+        return Controller.obs["water-right"]
 
     def door_right(self):
-        condition = p.at_right_is(self.observations, "door")
-        if condition:
-            self.logger("door_right")
-        return condition
+        return Controller.obs["door-right"]
 
     def dirt_forward(self):
-        condition = p.in_front_of(self.observations, "dirt")
-        if condition:
-            self.logger("dirt_forward")
-        return condition
+        return Controller.obs["dirt-front"]
 
     def switch_forward(self):
-        condition = p.in_front_of(self.observations, "lightSwitch")
-        if condition:
-            self.logger("switch_forward")
-        return condition
+        return Controller.obs["switch-front"]
 
     def water_forward(self):
-        condition = p.in_front_of(self.observations, "water")
-        if condition:
-            self.logger("water_forward")
-        return condition
+        return Controller.obs["water-front"]
 
     def door_forward(self):
-        condition = p.in_front_of(self.observations, "door")
-        if condition:
-            self.logger("door_forward")
-        return condition
+        return Controller.obs["door-front"]
 
