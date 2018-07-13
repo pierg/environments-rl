@@ -104,7 +104,7 @@ class Perception():
         """
         if not Perception.scanning_is_done:
             Perception.save_position_scan(env)
-        Perception.check_pos(env)
+        Perception.check_state(env)
 
         if condition == "light-on-current-room":
             # Returns true if the lights are on in the room the agent is currently in
