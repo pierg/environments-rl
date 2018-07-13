@@ -48,11 +48,6 @@ class SafetyEnvelope(gym.core.Wrapper):
             if self.config.num_processes == 1 and self.config.rendering:
                 self.env.render('human')
 
-            action = None
-
-            # To be returned to the agent
-            obs, reward, done, info = None, None, None, None
-
             # check if the proposed action is safe
             if self.env.action_to_string(proposed_action) in self.safe_actions:
                 action = self.env.action_to_string(proposed_action)

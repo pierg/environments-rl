@@ -4,6 +4,7 @@
   "debug_mode": false,
   "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
   "evaluation_directory_name": "evaluations",
+  "controller": true,
   "log_interval": 10,
   "num_processes": 1,
   "num_steps": 4,
