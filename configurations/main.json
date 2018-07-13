@@ -10,7 +10,7 @@
   "num_steps": 4,
   "number_of_iteration": 100,
   "on_violation_reset": false,
-  "rendering": false,
+  "rendering": true,
   "rewards": {
     "cleaningenv": {
       "clean": 0.1

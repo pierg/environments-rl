@@ -270,24 +270,11 @@ class ExMiniGridEnv(MiniGridEnv):
 
     # Enumeration of possible actions
     class Actions(IntEnum):
-        # # Turn left, turn right, move forward
-        # left = 0
-        # right = 1
-        # forward = 2
-        #
-        # # Pick up an object
-        # pickup = 3
-        # # Drop an object
-        # drop = 4
-        # # Toggle/activate an object
-        # toggle = 5
-        #
-        # # Wait/stay put/do nothing
-        # wait = 6
-        #
-        # # More actions:
-        # # Ex:
-        # clean = 7
+
+        # Used to observe the environment in the step() before the action
+        observe = -1
+        # Error state of the controller, no transitions are available from the current state
+        observation = -2
 
         left = 0
         right = 1
@@ -299,20 +286,27 @@ class ExMiniGridEnv(MiniGridEnv):
         clean = 7
 
 
-    def str_to_action(self, action_name):
-        if action_name == "left":
-            return self.actions.left
-        elif action_name == "right":
-            return self.actions.right
-        elif action_name == "forward":
-            return self.actions.forward
-        elif action_name == "toggle":
-            return self.actions.toggle
-        elif action_name == "wait":
-            return self.actions.wait
-        elif action_name == "clean":
-            return self.actions.clean
-        return None
+
+    def strings_to_actions(self, actions):
+        for i, action_name in enumerate(actions):
+            if action_name == "left":
+                actions[i] = self.actions.left
+            elif action_name == "right":
+                actions[i] = self.actions.right
+            elif action_name == "forward":
+                actions[i] = self.actions.forward
+            elif action_name == "toggle":
+                actions[i] = self.actions.toggle
+            elif action_name == "wait":
+                actions[i] = self.actions.wait
+            elif action_name == "clean":
+                actions[i] = self.actions.clean
+            elif action_name == "observation":
+                actions[i] = self.actions.observation
+            elif action_name == "observe":
+                actions[i] = self.actions.observe
+
+        return actions
 
     def action_to_string(self, action):
         if action == self.actions.left:
@@ -327,6 +321,10 @@ class ExMiniGridEnv(MiniGridEnv):
             return "wait"
         elif action == self.actions.clean:
             return "clean"
+        elif action == self.actions.observation:
+            return "observation"
+        elif action == self.actions.observe:
+            return "observe"
         return None
 
     def __init__(self, grid_size=16, max_steps=100, see_through_walls=False, seed=1337):
