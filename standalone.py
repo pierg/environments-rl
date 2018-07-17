@@ -59,7 +59,7 @@ def main():
             action = env.actions.drop
 
         elif keyName == 'CTRL':
-            action = env.actions.wait
+            action = env.actions.done
 
         else:
             print("unknown key %s" % keyName)
@@ -67,7 +67,7 @@ def main():
 
         obs, reward, done, info = env.step(action)
 
-        print('step=%s, reward=%s' % (env.step_count, reward))
+        print('step=%s, reward=%.2f' % (env.step_count, reward))
 
         if done:
             print('done!')

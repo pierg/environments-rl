@@ -2,6 +2,7 @@ from monitors.properties.avoid import *
 from monitors.patterns.precedence import *
 from monitors.patterns.absence import *
 from monitors.patterns.universality import *
+from monitors.patterns.response import *
 from configurations import config_grabber as cg
 
 
@@ -37,7 +38,7 @@ def on_monitoring(name, state, **kwargs):
 
 class PrintMonitors:
     if __name__ == "__main__":
-        config = cg.Configuration.grab()
+        config = cg.Configuration.grab("test_all_monitors")
 
 
         for avoid_obj in config.monitors.properties.avoid:
@@ -54,4 +55,8 @@ class PrintMonitors:
 
         for absence_obj in config.monitors.patterns.absence:
             monitor = Absence(absence_obj.name, absence_obj, on_monitoring, absence_obj.rewards)
+            monitor.draw()
+
+        for response_obj in config.monitors.patterns.response:
+            monitor = Response(response_obj.name, response_obj.conditions, on_monitoring, response_obj.rewards)
             monitor.draw()
