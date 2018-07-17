@@ -11,6 +11,7 @@
   "controller": true,
   "visdom": false,
   "debug_mode": false,
+  "training_mode": true,
   "rewards": {
     "standard": {
       "goal": 1,

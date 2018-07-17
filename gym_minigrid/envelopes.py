@@ -53,6 +53,9 @@ class SafetyEnvelope(gym.core.Wrapper):
         if proposed_action == self.env.actions.observe:
             self.observe()
         else:
+            if self.config.training_mode:
+                self.observe()
+
             # check if the proposed action is safe
             if proposed_action in self.safe_actions:
                 controller_action = self.env.action_to_string(proposed_action)
