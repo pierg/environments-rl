@@ -344,6 +344,20 @@ class ExMiniGridEnv(MiniGridEnv):
                 done = True
             obs = self.gen_obs()
             return obs, reward, done, {}
+        elif action == self.actions.clean:
+            self.step_count += 1
+            reward = 0
+            done = False
+            if ExMiniGridEnv.worldobj_in_agent(self,1,0) == "dirt":
+                print("dirt")
+                x,y = ExMiniGridEnv.get_grid_coords_from_view(self, (1, 0))
+                self.grid.set(x, y, None)
+            else:
+                print(ExMiniGridEnv.worldobj_in_agent(self,1,0))
+            if self.step_count >= self.max_steps:
+                done = True
+            obs = self.gen_obs()
+            return obs, reward, done, {}
         else:
             return super().step(action)
 
