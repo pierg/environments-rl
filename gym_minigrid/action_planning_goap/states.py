@@ -18,8 +18,8 @@ class CellState:
         :param current_cell: The cell being created as a cellState
         :param orientation:  The orientation of the agent as a StateEnum
         """
-        self.states: Dict[StateEnum, bool] = dict(current_cell.states)
-        self.cell: Cell = current_cell
+        self.states = dict(current_cell.states)
+        self.cell = current_cell
         self.states[StateEnum.orientation_west] = False
         self.states[StateEnum.orientation_east] = False
         self.states[StateEnum.orientation_north] = False
@@ -43,9 +43,9 @@ class CellState:
         :return: Actions whose prerequisites match the current cellState
         """
         resulting_worldstate = copy.deepcopy(self.states)
-        possible_actions: Tuple[Action, ...] = Action.get_all_actions(self.get_orientation(self.states), self.cell)
+        possible_actions = Action.get_all_actions(self.get_orientation(self.states), self.cell)
 
-        available_actions: List[Action] = []
+        available_actions = []
         for action in possible_actions:
 
             preconditions_total = len(action.preconditions)
@@ -90,7 +90,7 @@ class CellState:
                 return CellState(self.cell, orientation)
 
         else:
-            resulting_state: Dict[StateEnum, bool] = copy.deepcopy(self.states)
+            resulting_state = copy.deepcopy(self.states)
             # Create new cellState containing effects of action
             for effect_name, effect_value in action.effects:
                 resulting_state[effect_name] = effect_value

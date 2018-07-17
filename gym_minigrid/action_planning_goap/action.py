@@ -9,10 +9,10 @@ class Action:
     """
 
     def __init__(self, name: ExMiniGridEnv.Actions, current_cell: Cell, orientation: StateEnum):
-        self.name: ExMiniGridEnv.Actions = name
-        self.preconditions: State = tuple()
-        self.effects: State = tuple()
-        self.cost: int = 1
+        self.name = name
+        self.preconditions = tuple()
+        self.effects = tuple()
+        self.cost = 1
 
         if name == ExMiniGridEnv.Actions.forward:
             if orientation == StateEnum.orientation_north:

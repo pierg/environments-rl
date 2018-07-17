@@ -72,7 +72,7 @@ class ObservationParser:
                 current_row[y] = obs.grid[(x*AGENT_VIEW_SIZE) + y]
             observation.append(tuple(current_row))
         self.observation = tuple(observation)
-        self.parsed_observation: List[List[Cell]] = [[None] * AGENT_VIEW_SIZE for i in range(AGENT_VIEW_SIZE)]
+        self.parsed_observation = [[None] * AGENT_VIEW_SIZE for i in range(AGENT_VIEW_SIZE)]
         agent_pos_x = int(AGENT_VIEW_SIZE - 1)
         agent_pos_y = int(AGENT_VIEW_SIZE / 2)
         self.parse_observation(agent_pos_x, agent_pos_y)
@@ -211,13 +211,13 @@ class Cell:
     of the agent like orientation or what it is carrying.
     """
     def __init__(self, cell_type):
-        self.north_cell: Cell = None
-        self.south_cell: Cell = None
-        self.east_cell: Cell = None
-        self.west_cell: Cell = None
-        self.is_clear: bool = True  # These change when the cell is created
-        self.is_safe: bool = True
+        self.north_cell = None
+        self.south_cell = None
+        self.east_cell = None
+        self.west_cell = None
+        self.is_clear = True  # These change when the cell is created
+        self.is_safe = True
         self.type = cell_type
-        self.states: Dict[StateEnum, bool] = dict()
-        self.x: int = 0
-        self.y: int = 0
+        self.states = dict()
+        self.x = 0
+        self.y = 0

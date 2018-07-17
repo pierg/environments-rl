@@ -18,7 +18,5 @@ from gym_minigrid.envs.safety import *
 from gym_minigrid.envs.cleaningEnv import *
 from gym_minigrid.envs.miniclean import *
 from gym_minigrid.envs.bigcleanEnv import *
-from gym_minigrid.envs.randoms.randomenv9660 import *
-from gym_minigrid.envs.randoms.randomenv2133 import *
 from gym_minigrid.envs.unsafeRandomLevels import *
 from gym_minigrid.envs.unsafeEnv import *

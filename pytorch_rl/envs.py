@@ -20,7 +20,7 @@ def make_env(env_id, seed, rank, log_dir):
         env.seed(seed + rank)
 
         if config.monitors:
-            env = SafetyEnvelope(env)
+            env = ActionPlannerEnvelope(env)
 
         # Maxime: until RL code supports dict observations, squash observations into a flat vector
         if isinstance(env.observation_space, spaces.Dict):

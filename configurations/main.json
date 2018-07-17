@@ -1,35 +1,32 @@
 {
   "algorithm": "a2c",
-  "config_name": "randomEnv-7x7-6810-v0",
+  "config_name": "Unsafe-Random8x8-GOAP-1",
   "debug_mode": false,
-  "env_name": "MiniGrid-RandomEnv-7x7-6810-v0",
+  "env_name": "MiniGrid-UnsafeEnv-8x8-v0",
   "evaluation_directory_name": "evaluations",
   "log_interval": 10,
+  "action_planning":{
+    "active": true,
+    "random_unsafe_obj": 20,
+    "secondary_goals": [],
+    "reward": {
+      "goal": 1,
+      "step": 0,
+      "unsafe":-0.3,
+      "on_plan": 0.1,
+      "off_plan": -0.1
+    }
+  },
   "monitors": {
     "patterns": {
-      "absence": {
-        "waterAbsence": {
-          "action_planner": "wait",
-          "active": true,
-          "conditions": "stepping-on-water",
-          "mode": "enforcing",
-          "name": "waterAbsence",
-          "rewards": {
-            "respected": 0.1,
-            "violated": -0.1
-          },
-          "type": "absence"
-        }
-      },
       "precedence": {
         "lightPrecedence": {
-          "action_planner": "turn_right",
           "active": false,
           "conditions": {
             "post": "entering-a-room",
             "pre": "light-switch-turned-on"
           },
-          "mode": "enforcing",
+          "mode": "shaping",
           "name": "lightPrecedence",
           "rewards": {
             "respected": 0.1,
@@ -40,13 +37,12 @@
       },
       "response": {
         "lightResponse": {
-          "action_planner": "toggle_light",
           "active": false,
           "conditions": {
-            "post": "action-is-toggle",
-            "pre": "light-switch-in-front-off"
+            "post": "entering-a-room",
+            "pre": "light-switch-turned-on"
           },
-          "mode": "enforcing",
+          "mode": "shaping",
           "name": "lightResponse",
           "rewards": {
             "respected": 0.1,
@@ -57,7 +53,6 @@
       },
       "universality": {
         "lightUniversality": {
-          "action_planner": "wait",
           "active": false,
           "conditions": "light-on-current-room",
           "mode": "shaping",
@@ -70,16 +65,46 @@
         }
       }
     },
-    "properties": {}
+    "properties": {
+      "avoid": {
+        "vase": {
+          "act_to_avoid": "Actions.toggle",
+          "action_planner": "wait",
+          "active": false,
+          "mode": "enforcing",
+          "name": "vase",
+          "obj_to_avoid": "vase",
+          "rewards": {
+            "immediate": 0.0,
+            "near": 0.0,
+            "violated": -1.0
+          },
+          "type": "avoid"
+        },
+        "water": {
+          "act_to_avoid": "Actions.forward",
+          "action_planner": "wait",
+          "active": false,
+          "mode": "enforcing",
+          "name": "water",
+          "obj_to_avoid": "water",
+          "rewards": {
+            "immediate": 0.0,
+            "near": 0.0,
+            "violated": -1.0
+          },
+          "type": "avoid"
+        }
+      }
+    }
   },
-  "num_processes": 48,
-  "num_steps": 4,
-  "number_of_iteration": 100,
+  "num_processes": 10,
+  "num_steps": 5,
   "on_violation_reset": false,
   "rendering": false,
   "rewards": {
     "cleaningenv": {
-      "clean": 0.1
+      "clean": 0.5
     },
     "standard": {
       "death": -1.0,
@@ -87,6 +112,5 @@
       "step": 0.0
     }
   },
-  "stop_learning": 1200,
-  "visdom": false
+  "visdom": true
 }

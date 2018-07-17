@@ -58,8 +58,7 @@ def main():
     args.num_steps = config.num_steps
     args.env_name = config.env_name
     args.algo = config.algorithm
-    args.vis = config.visdom
-    stop_learning = config.stop_learning
+    #args.vis = config.visdom
 
     # Quick change @Todo find a better way to stop the learning
     stop_learning = 240
@@ -312,12 +311,6 @@ def main():
                     value_loss.data[0],
                     action_loss.data[0]
                 )
-            )
-
-        if args.vis and j % args.vis_interval == 0:
-            win = visdom_plot(
-                total_num_steps,
-                final_rewards.mean()
             )
 
 if __name__ == "__main__":

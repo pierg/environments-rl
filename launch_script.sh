@@ -3,7 +3,7 @@
 # Sets the main.json as default, if the -t is specifed
 # it will use that as config file.
 configuration_file="main.json"
-start_training=0
+start_training=1
 
 while getopts ":tlre:w:s:i:" opt; do
     case ${opt} in

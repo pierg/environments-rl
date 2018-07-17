@@ -8,14 +8,14 @@ from gym_minigrid.monitors.patterns.response import *
 import gym
 
 
-class SafetyEnvelope(gym.core.Wrapper):
+class ActionPlannerEnvelope(gym.core.Wrapper):
     """
     Safety envelope for safe exploration.
     """
 
     def __init__(self, env):
 
-        super(SafetyEnvelope, self).__init__(env)
+        super(ActionPlannerEnvelope, self).__init__(env)
 
         # Grab configuration
         self.config = cg.Configuration.grab()

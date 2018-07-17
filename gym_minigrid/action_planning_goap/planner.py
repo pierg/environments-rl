@@ -23,7 +23,7 @@ class Graph:
             As values it has the cellStates connected to the key cellState and the action that connects them
         """
 
-        self.edges: Dict[Tuple[CellState_tuple, List[Tuple[CellState_tuple, Action]]]] = dict()
+        self.edges = dict()
         self.updated = dict()
 
     def update(self, cell_state: CellState):
@@ -76,7 +76,7 @@ class Graph:
         """
         :return: action cost between two neighbor CellStates, if they are not neighbours return -1
         """
-        neighbor_list: List[Tuple[CellState, Action]] = self.edges[start]
+        neighbor_list = self.edges[start]
         for state_action_tuple in neighbor_list:
             if state_action_tuple[0] is goal:
                 return state_action_tuple[1].cost
@@ -159,7 +159,7 @@ class ActionPlanner:
 
         :return: int containing the amount of unsatisfied properties of the goal state present in start
         """
-        counter: int = 0
+        counter = 0
         for state in goal[0]:
             if state not in start[0]:
                     counter += 1
@@ -174,8 +174,8 @@ class ActionPlanner:
         """
         frontier = PriorityQueue()
         frontier.put(start_state, 0)
-        came_from: Dict[State, (State, Action)] = dict()
-        cost_so_far: Dict[State, int] = dict()
+        came_from = dict()
+        cost_so_far = dict()
         came_from[start_state] = (None, None)
         cost_so_far[start_state] = 0
 
