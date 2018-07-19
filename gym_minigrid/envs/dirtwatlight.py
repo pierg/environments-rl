@@ -15,12 +15,6 @@ class DirtWatLightEnv(ExMiniGridEnv):
             see_through_walls=True
         )
 
-    def step(self, action):
-        # Reset if agent step on water without knowing it
-        if action == self.actions.forward and self.worldobj_in_agent(1, 0) == "water":
-            return self.gen_obs(), 0, True, "died"
-        else:
-            return super().step(action)
 
     def saveElements(self, room):
         tab = []
@@ -76,6 +70,12 @@ class DirtWatLightEnv(ExMiniGridEnv):
         self.grid.set(1, 7, dirt3)
         self.list_dirt.append(dirt3)
         dirt3.affect_list(self.list_dirt)
+
+        # add vase
+        self.list_vase = []
+        vase1 = Vase()
+        self.grid.set(1, 3, vase1)
+        self.list_vase.append(vase1)
 
         # Add the room
         self.roomList = []

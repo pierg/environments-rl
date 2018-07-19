@@ -1,4 +1,6 @@
 from gym_minigrid.minigrid import *
+from configurations import config_grabber as cg
+
 
 def extended_dic(obj_names=[]):
     """
@@ -17,7 +19,7 @@ def extended_dic(obj_names=[]):
             new_obj_idx = new_obj_idx + 1
 
 
-extended_dic(["water","lightSwitch","dirt","vase"])
+extended_dic(["water", "lightSwitch", "dirt", "vase"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 
@@ -29,22 +31,22 @@ class Room:
         self.position = position
         self.lightOn = lightOn
 
-    def setLight(self,lightOn):
+    def setLight(self, lightOn):
         self.lightOn = lightOn
 
-    def setEntryDoor(self,position):
+    def setEntryDoor(self, position):
         self.entryDoor = position
 
-    def setExitDoor(self,position):
+    def setExitDoor(self, position):
         self.exitDoor = position
 
     def getLight(self):
         return self.lightOn
 
     def objectInRoom(self, position):
-        ax,ay = position
-        x,y = self.size
-        k,l = self.position
+        ax, ay = position
+        x, y = self.size
+        k, l = self.position
         x += k
         y += l
         if ax <= x and ax >= k:
@@ -63,24 +65,25 @@ class Water(WorldObj):
     def render(self, r):
         self._set_color(r)
         r.drawPolygon([
-            (0          , CELL_PIXELS),
+            (0, CELL_PIXELS),
             (CELL_PIXELS, CELL_PIXELS),
-            (CELL_PIXELS,           0),
-            (0          ,           0)
+            (CELL_PIXELS, 0),
+            (0, 0)
         ])
+
 
 class LightSwitch(WorldObj):
     def __init__(self):
         self.state = False
         super(LightSwitch, self).__init__('lightSwitch', 'yellow')
 
-    def affectRoom(self,room):
+    def affectRoom(self, room):
         self.room = room
 
-    def setSwitchPos(self,position):
+    def setSwitchPos(self, position):
         self.position = position
 
-    def elements_in_room(self,room):
+    def elements_in_room(self, room):
         self.elements = room
 
     def toggle(self, env, pos):
@@ -97,35 +100,41 @@ class LightSwitch(WorldObj):
     def render(self, r):
         self._set_color(r)
         r.drawPolygon([
-            (0          , CELL_PIXELS),
+            (0, CELL_PIXELS),
             (CELL_PIXELS, CELL_PIXELS),
-            (CELL_PIXELS,           0),
-            (0          ,           0)
+            (CELL_PIXELS, 0),
+            (0, 0)
         ])
         self.dark_light(r)
 
-    def dark_light(self,r):
+    def dark_light(self, r):
 
         if self.room.getLight() == False:
-            r.setColor(255,0,0)
-            r.drawCircle(0.5*CELL_PIXELS,0.5*CELL_PIXELS,0.2*CELL_PIXELS)
+            r.setColor(255, 0, 0)
+            r.drawCircle(0.5 * CELL_PIXELS, 0.5 * CELL_PIXELS, 0.2 * CELL_PIXELS)
             if hasattr(self, 'position'):
                 if hasattr(self, 'elements'):
                     (xl, yl) = self.position
-                    for i in range(0,len(self.elements)):
+                    for i in range(0, len(self.elements)):
                         if self.elements[i][2] == 1:
                             r.setLineColor(10, 10, 10)
-                            r.setColor(10,10,10)
+                            r.setColor(10, 10, 10)
                             r.drawPolygon([
-                                ((self.elements[i][0]-xl)*CELL_PIXELS, (self.elements[i][1]-yl+1)*CELL_PIXELS),
-                                ((self.elements[i][0]-xl+1)*CELL_PIXELS,(self.elements[i][1]-yl+1)*CELL_PIXELS),
-                                ((self.elements[i][0] - xl + 1) * CELL_PIXELS, (self.elements[i][1] - yl) * CELL_PIXELS),
+                                (
+                                    (self.elements[i][0] - xl) * CELL_PIXELS,
+                                    (self.elements[i][1] - yl + 1) * CELL_PIXELS),
+                                ((self.elements[i][0] - xl + 1) * CELL_PIXELS,
+                                 (self.elements[i][1] - yl + 1) * CELL_PIXELS),
+                                (
+                                    (self.elements[i][0] - xl + 1) * CELL_PIXELS,
+                                    (self.elements[i][1] - yl) * CELL_PIXELS),
                                 ((self.elements[i][0] - xl) * CELL_PIXELS, (self.elements[i][1] - yl) * CELL_PIXELS)
-                        ])
-        else :
-            r.setColor(0,255,0)
-            r.drawCircle(0.5*CELL_PIXELS,0.5*CELL_PIXELS,0.2*CELL_PIXELS)
+                            ])
+        else:
+            r.setColor(0, 255, 0)
+            r.drawCircle(0.5 * CELL_PIXELS, 0.5 * CELL_PIXELS, 0.2 * CELL_PIXELS)
             r.pop
+
 
 class Dirt(WorldObj):
     def __init__(self):
@@ -134,18 +143,18 @@ class Dirt(WorldObj):
     def can_overlap(self):
         return True
 
-    def affect_list(self,list):
+    def affect_list(self, list):
         self.list = list
 
     def toggle(self, env, pos):
-        x,y = ExMiniGridEnv.get_grid_coords_from_view(env,(1,0))
-        env.grid.set(x,y,None)
-        del self.list[len(self.list)-1]
+        x, y = ExMiniGridEnv.get_grid_coords_from_view(env, (1, 0))
+        env.grid.set(x, y, None)
+        del self.list[len(self.list) - 1]
         return True
 
-    def render(self,r):
+    def render(self, r):
         self._set_color(r)
-        r.setColor(240 ,150 , 0)
+        r.setColor(240, 150, 0)
         r.setLineColor(81, 41, 0)
         r.drawPolygon([
             (0, CELL_PIXELS),
@@ -157,7 +166,7 @@ class Dirt(WorldObj):
 
 class Vase(WorldObj):
     def __init__(self):
-        super(Vase, self).__init__('vase','grey')
+        super(Vase, self).__init__('vase', 'grey')
         self.content = Dirt()
         self.list = []
 
@@ -170,19 +179,19 @@ class Vase(WorldObj):
         self.list.append(Dirt())
         self.content.affect_list(self.list)
 
-    def render(self,r):
+    def render(self, r):
         self._set_color(r)
-        r.setColor(255,255,255)
+        r.setColor(255, 255, 255)
         QUARTER_CELL = 0.25 * CELL_PIXELS
         DEMI_CELL = 0.5 * CELL_PIXELS
-        r.drawCircle(DEMI_CELL,DEMI_CELL,DEMI_CELL)
+        r.drawCircle(DEMI_CELL, DEMI_CELL, DEMI_CELL)
         r.drawPolygon([
             (QUARTER_CELL, 3 * QUARTER_CELL),
             (3 * QUARTER_CELL, 3 * QUARTER_CELL),
             (3 * QUARTER_CELL, QUARTER_CELL),
             (QUARTER_CELL, QUARTER_CELL)
         ])
-        r.setColor(240,150,0)
+        r.setColor(240, 150, 0)
         r.drawPolygon([
             (0.32 * CELL_PIXELS, 0.7 * CELL_PIXELS),
             (0.7 * CELL_PIXELS, 0.7 * CELL_PIXELS),
@@ -190,8 +199,9 @@ class Vase(WorldObj):
             (0.32 * CELL_PIXELS, 0.32 * CELL_PIXELS)
         ])
 
-    def list_dirt(self,list):
+    def list_dirt(self, list):
         self.list = list
+
 
 def worldobj_name_to_object(worldobj_name):
     if worldobj_name == 'water':
@@ -208,6 +218,7 @@ def worldobj_name_to_object(worldobj_name):
         return Goal()
     else:
         return None
+
 
 class ExGrid(Grid):
     """
@@ -227,9 +238,9 @@ class ExGrid(Grid):
         for j in range(0, height):
             for i in range(0, width):
 
-                typeIdx  = array[i, j, 0]
+                typeIdx = array[i, j, 0]
                 colorIdx = array[i, j, 1]
-                openIdx  = array[i, j, 2]
+                openIdx = array[i, j, 2]
 
                 if typeIdx == 0:
                     continue
@@ -268,6 +279,7 @@ class ExGrid(Grid):
 
 class ExMiniGridEnv(MiniGridEnv):
 
+
     # Enumeration of possible actions
     class Actions(IntEnum):
 
@@ -283,9 +295,7 @@ class ExMiniGridEnv(MiniGridEnv):
         drop = 4
         toggle = 5
         wait = 6
-        clean = 7
-
-
+        # clean = 7
 
     def strings_to_actions(self, actions):
         for i, action_name in enumerate(actions):
@@ -331,35 +341,40 @@ class ExMiniGridEnv(MiniGridEnv):
         super().__init__(grid_size, max_steps, see_through_walls, seed)
         self.actions = ExMiniGridEnv.Actions
 
+        # Grab configuration
+        self.config = cg.Configuration.grab()
+
     def step(self, action):
-        if action == self.actions.wait:
-            self.step_count += 1
-            reward = 0
-            done = False
-            # Get the position in front of the agent
-            fwd_pos = self.front_pos
-            # Get the contents of the cell in front of the agent
-            fwd_cell = self.grid.get(*fwd_pos)
-            if self.step_count >= self.max_steps:
+
+        # Get the position in front of the agent
+        fwd_pos = self.front_pos
+        # Get the contents of the cell in front of the agent
+        fwd_cell = self.grid.get(*fwd_pos)
+
+        # Default actions and cells
+        obs, reward, done, info = super().step(action)
+
+        # Setting up costums cells and rewards
+
+        reward = self.config.rewards.standard.step
+
+        if action == self.actions.forward:
+            # Step into Water
+            if fwd_cell is not None and fwd_cell.type == 'water':
                 done = True
-            obs = self.gen_obs()
-            return obs, reward, done, {}
-        elif action == self.actions.clean:
-            self.step_count += 1
-            reward = 0
-            done = False
-            if ExMiniGridEnv.worldobj_in_agent(self,1,0) == "dirt":
-                print("dirt")
-                x,y = ExMiniGridEnv.get_grid_coords_from_view(self, (1, 0))
-                self.grid.set(x, y, None)
-            else:
-                print(ExMiniGridEnv.worldobj_in_agent(self,1,0))
-            if self.step_count >= self.max_steps:
+                reward = self.config.rewards.standard.death
+            # Step into Goal
+            if fwd_cell is not None and fwd_cell.type == 'goal':
                 done = True
-            obs = self.gen_obs()
-            return obs, reward, done, {}
-        else:
-            return super().step(action)
+                reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
+
+        if action == self.actions.toggle:
+            # Cleaning Dirt
+            if fwd_cell is not None and fwd_cell.type == 'dirt':
+                reward = self.config.rewards.cleaningenv.clean
+
+        print("reward: " + str(reward) + "\tinfo: " + str(info))
+        return obs, reward, done, info
 
     def gen_obs(self):
         """
@@ -374,7 +389,7 @@ class ExMiniGridEnv(MiniGridEnv):
                         if not x.getLight():
                             for i in range(0, len(grid.grid)):
                                 if grid.grid[i] is not None:
-                                        grid.grid[i] = None
+                                    grid.grid[i] = None
                             # Encode the partially observable view into a numpy array
                         image = grid.encode()
 
@@ -393,7 +408,7 @@ class ExMiniGridEnv(MiniGridEnv):
         except AttributeError:
             return super().gen_obs()
 
-    def get_grid_coords_from_view(self,coordinates):
+    def get_grid_coords_from_view(self, coordinates):
         """
         Dual of "get_view_coords". Translate and rotate relative to the agent coordinates (i, j) into the
         absolute grid coordinates.
@@ -409,7 +424,7 @@ class ExMiniGridEnv(MiniGridEnv):
             ax -= y
             ay += x
         # agent facing right
-        elif  ad == 0:
+        elif ad == 0:
             ax += x
             ay += y
         # agent facing left
@@ -422,7 +437,6 @@ class ExMiniGridEnv(MiniGridEnv):
             ay -= x
         return ax, ay
 
-
     def worldobj_in_agent(self, front, side):
         """
         Returns the type of the worldobject in the 'front' cells in front and 'side' cells right (positive) or left (negative)
@@ -432,8 +446,8 @@ class ExMiniGridEnv(MiniGridEnv):
         :return: string: worldobj type
         """
 
-        coordinates = (front,side)
-        wx, wy = ExMiniGridEnv.get_grid_coords_from_view(self,coordinates)
+        coordinates = (front, side)
+        wx, wy = ExMiniGridEnv.get_grid_coords_from_view(self, coordinates)
 
         if 0 <= wx < self.grid.width and 0 <= wy < self.grid.height:
             worldobj = self.grid.get(wx, wy)
