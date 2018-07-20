@@ -20,3 +20,4 @@ from gym_minigrid.envs.miniclean import *
 from gym_minigrid.envs.bigcleanEnv import *
 from gym_minigrid.envs.unsafeRandomLevels import *
 from gym_minigrid.envs.unsafeEnv import *
+from gym_minigrid.envs.wa6_grid6 import *

@@ -5,6 +5,11 @@
   "light_switch": true,
   "random_each_episode": false,
   "stop_learning":480,
+  "action_planning":{
+    "active": true,
+    "random_unsafe_obj": 20,
+    "secondary_goals": []
+  },
   "monitors": {
     "patterns": {
       "precedence": {

@@ -6,6 +6,11 @@
   "random_each_episode": false,
   "stop_learning": 960,
   "number_of_iteration": 100,
+  "action_planning": {
+    "active": true,
+    "random_unsafe_obj": 20,
+    "secondary_goals": []
+  },
   "monitors": {
     "patterns": {
       "precedence": {

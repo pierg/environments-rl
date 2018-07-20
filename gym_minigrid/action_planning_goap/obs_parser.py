@@ -97,6 +97,10 @@ class ObservationParser:
                 cell.is_clear = False
             if isinstance(cell.type, WorldObj) and isinstance(cell.type, Unsafe):
                 cell.is_safe = False
+            if isinstance(cell.type, WorldObj) and isinstance(cell.type, Water):
+                cell.is_safe = False
+            if isinstance(cell.type, WorldObj) and isinstance(cell.type, Vase):
+                cell.is_safe = False
 
             self.parsed_observation[pos_x][pos_y] = cell
 
