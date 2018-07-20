@@ -1,7 +1,7 @@
 {
   "standard": {
-    "goal": 1,
-    "step": 0,
+    "goal": 1000,
+    "step": -0.1,
     "death": -1
   },
   "absence":{
