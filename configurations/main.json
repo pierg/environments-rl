@@ -2,25 +2,33 @@
     "algorithm": "a2c",
     "config_name": "config-DirtWatLightExp-9x9-v0",
     "debug_mode": false,
-    "training_mode": false,
+    "training_mode": true,
     "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
     "evaluation_directory_name": "evaluations",
     "controller": true,
     "log_interval": 10,
-    "num_processes": 1,
+    "num_processes": 48,
     "num_steps": 4,
     "number_of_iteration": 100,
     "on_violation_reset": false,
     "rendering": true,
     "rewards": {
         "cleaningenv": {
-            "clean": 0.1
+            "clean": 0.0
         },
         "standard": {
             "death": -1.0,
-            "goal": 1.0,
-            "step": 0.0
+            "goal": 1000.0,
+            "step": -0.1
         }
+    },
+    "controllers": {
+        "reachability": [
+            "reach"
+        ],
+        "safety": [
+            "safe"
+        ]
     },
     "stop_learning": 1200,
     "visdom": false

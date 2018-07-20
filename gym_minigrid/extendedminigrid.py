@@ -285,8 +285,6 @@ class ExMiniGridEnv(MiniGridEnv):
 
         # Used to observe the environment in the step() before the action
         observe = -1
-        # Error state of the controller, no transitions are available from the current state
-        observation = -2
 
         left = 0
         right = 1
@@ -295,7 +293,7 @@ class ExMiniGridEnv(MiniGridEnv):
         drop = 4
         toggle = 5
         wait = 6
-        # clean = 7
+        clean = 7
 
     def strings_to_actions(self, actions):
         for i, action_name in enumerate(actions):
@@ -311,8 +309,6 @@ class ExMiniGridEnv(MiniGridEnv):
                 actions[i] = self.actions.wait
             elif action_name == "clean":
                 actions[i] = self.actions.clean
-            elif action_name == "observation":
-                actions[i] = self.actions.observation
             elif action_name == "observe":
                 actions[i] = self.actions.observe
 
@@ -331,8 +327,6 @@ class ExMiniGridEnv(MiniGridEnv):
             return "wait"
         elif action == self.actions.clean:
             return "clean"
-        elif action == self.actions.observation:
-            return "observation"
         elif action == self.actions.observe:
             return "observe"
         return None
@@ -365,6 +359,7 @@ class ExMiniGridEnv(MiniGridEnv):
                 reward = self.config.rewards.standard.death
             # Step into Goal
             if fwd_cell is not None and fwd_cell.type == 'goal':
+                print("GOAL REACHED!")
                 done = True
                 reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
 
@@ -373,7 +368,7 @@ class ExMiniGridEnv(MiniGridEnv):
             if fwd_cell is not None and fwd_cell.type == 'dirt':
                 reward = self.config.rewards.cleaningenv.clean
 
-        print("reward: " + str(reward) + "\tinfo: " + str(info))
+        if self.config.debug_mode: print("reward: " + str(reward) + "\tinfo: " + str(info))
         return obs, reward, done, info
 
     def gen_obs(self):

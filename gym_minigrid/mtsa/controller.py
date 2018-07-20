@@ -12,7 +12,14 @@ class Controller(Machine):
     states = []
     transitions = []
 
-    def __init__(self):
+    def __init__(self, name, type):
+
+        self.controller_name = name
+        self.controller_type = type
+
+        # active, end, inactive
+        self.controller_state = None
+
         self.observations = None
 
         self.tigger_action = None
@@ -20,8 +27,11 @@ class Controller(Machine):
         # The agent uses toggle for doors and light switch but the mtsa models does not
         self.is_toggle_a_switch = False
 
-        states_path = os.path.abspath(os.path.dirname(__file__) + "/states.txt")
-        transitions_path = os.path.abspath(os.path.dirname(__file__) + "/transitions.txt")
+        # The agent uses toggle for dirt but the mtsa models does not
+        self.is_toggle_a_clean = False
+
+        states_path = os.path.abspath(os.path.dirname(__file__) + "/" + self.controller_name + "_states.txt")
+        transitions_path = os.path.abspath(os.path.dirname(__file__) + "/" + self.controller_name + "_transitions.txt")
 
         # Loading the states
         with open(states_path, 'r') as inf:
@@ -31,8 +41,15 @@ class Controller(Machine):
         with open(transitions_path, 'r') as inf:
             self.transitions = eval(inf.read())
 
-        # super().__init__("mtsa", self.states, self.transitions, 'S0M1', notify)
-        Machine.__init__(self, states=self.states, transitions=self.transitions, initial='S0M1')
+        # super().__init__("mtsa", self.states, self.transitions, 'S0M1', notify )
+        Machine.__init__(self, states=self.states, transitions=self.transitions, initial='S0')
+
+
+    def get_name(self):
+        return self.controller_name
+
+    def is_active(self):
+        return self.controller_state is "active"
 
     def logger(self, message):
         print(message)
@@ -41,16 +58,31 @@ class Controller(Machine):
     def observe(self, observations):
         self.observations = observations
         self.fill_observations()
-        print("state: " + str(self.state) + "    obs: " + str([x for x in Controller.obs if Controller.obs[x] == True]))
+        # print("state: " + str(self.state) + "    obs: " + str([x for x in Controller.obs if Controller.obs[x] == True]))
         self.trigger('observation')
 
+        # Check if the controller is active
+        availabile_actions = self.get_triggers(self.state)
+        if "observation" in availabile_actions:
+            self.set_state("S0")
+            self.controller_state = "inactive"
+        elif len(availabile_actions) == 0:
+            self.set_state("S0")
+            self.controller_state = "end"
+        else:
+            self.controller_state = "active"
+
     def act(self, action):
-        self.tigger_action = action
-        if action == 'toggle':
-            if self.is_toggle_a_switch:
-                self.tigger_action = 'switch'
-                self.is_toggle_a_switch = False
-        self.trigger(self.tigger_action)
+        if self.is_active():
+            self.tigger_action = action
+            if action == 'toggle':
+                if self.is_toggle_a_switch:
+                    self.tigger_action = 'switch'
+                    self.is_toggle_a_switch = False
+                elif self.is_toggle_a_clean:
+                    self.tigger_action = 'clean'
+                    self.is_toggle_a_clean = False
+            self.trigger(self.tigger_action)
 
     def get_available_actions(self):
         available_actions = self.get_triggers(self.state)
@@ -61,6 +93,10 @@ class Controller(Machine):
                 id = available_actions.index(action)
                 available_actions[id] = 'toggle'
                 self.is_toggle_a_switch = True
+            elif action == ('clean'):
+                id = available_actions.index(action)
+                available_actions[id] = 'toggle'
+                self.is_toggle_a_clean = True
         return available_actions
 
     
@@ -83,8 +119,14 @@ class Controller(Machine):
         Controller.obs["switch-front"] = p.in_front_of(self.observations, "lightSwitch")
         Controller.obs["water-front"] = p.in_front_of(self.observations, "water")
         Controller.obs["door-front"] = p.in_front_of(self.observations, "door")
+        Controller.obs["vase-left"] = p.at_left_is(self.observations, "vase")
+        Controller.obs["vase-front"] = p.in_front_of(self.observations, "vase")
+        Controller.obs["vase-right"] = p.at_right_is(self.observations, "vase")
+        Controller.obs["wall-left"] = p.at_left_is(self.observations, "wall")
+        Controller.obs["wall-front"] = p.in_front_of(self.observations, "wall")
+        Controller.obs["wall-right"] = p.at_right_is(self.observations, "wall")
 
-        
+
 
     obs = {
         "light-on-next-room": False,
@@ -105,6 +147,12 @@ class Controller(Machine):
         "switch-front": False,
         "water-front": False,
         "door-front": False,
+        "vase-right": False,
+        "vase-front": False,
+        "vase-left": False,
+        "wall-right": False,
+        "wall-front": False,
+        "wall-left": False
     }
 
 
@@ -165,4 +213,22 @@ class Controller(Machine):
 
     def door_forward(self):
         return Controller.obs["door-front"]
+
+    def vase_left(self):
+        return Controller.obs["vase-left"]
+
+    def vase_right(self):
+        return Controller.obs["vase-right"]
+
+    def vase_forward(self):
+        return Controller.obs["vase-front"]
+
+    def wall_left(self):
+        return Controller.obs["wall-left"]
+
+    def wall_right(self):
+        return Controller.obs["wall-right"]
+
+    def wall_forward(self):
+        return Controller.obs["wall-front"]
 
