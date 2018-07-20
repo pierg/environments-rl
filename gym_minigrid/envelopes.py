@@ -73,7 +73,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                 self.observe()
 
             # The environment model is supported by the controllers
-            if len(self.safe_actions) > 0:
+            if self.safe_actions is not None and len(self.safe_actions) > 0:
                 if proposed_action in self.safe_actions:
                     controller_action = self.env.action_to_string(proposed_action)
                     if self.config.debug_mode: print("action_to_execution_1: " + controller_action)
