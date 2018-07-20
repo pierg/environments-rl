@@ -340,7 +340,7 @@ class ExMiniGridEnv(MiniGridEnv):
         pickup = 3
         drop = 4
         toggle = 5
-        wait = 6
+        done = 6
         # clean = 7
 
     def strings_to_actions(self, actions):
@@ -353,8 +353,8 @@ class ExMiniGridEnv(MiniGridEnv):
                 actions[i] = self.actions.forward
             elif action_name == "toggle":
                 actions[i] = self.actions.toggle
-            elif action_name == "wait":
-                actions[i] = self.actions.wait
+            elif action_name == "done":
+                actions[i] = self.actions.done
             elif action_name == "clean":
                 actions[i] = self.actions.clean
             elif action_name == "observation":
@@ -373,8 +373,8 @@ class ExMiniGridEnv(MiniGridEnv):
             return "forward"
         elif action == self.actions.toggle:
             return "toggle"
-        elif action == self.actions.wait:
-            return "wait"
+        elif action == self.actions.done:
+            return "done"
         elif action == self.actions.clean:
             return "clean"
         elif action == self.actions.observation:

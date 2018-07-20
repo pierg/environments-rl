@@ -8,7 +8,7 @@
   "number_of_iteration": 100,
   "action_planning":{
     "active": true,
-    "random_unsafe_obj": 20,
+    "random_unsafe_obj": 0,
     "secondary_goals": []
   },
   "monitors": {
@@ -49,10 +49,10 @@
       },
       "absence": {
         "waterAbsence": {
-          "active": true,
+          "active": false,
           "conditions": "stepping-on-water",
           "mode": "enforcing",
-          "action_planner": "wait",
+          "action_planner": "done",
           "name": "waterAbsence",
           "type": "absence"
         }
