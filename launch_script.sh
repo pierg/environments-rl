@@ -119,6 +119,8 @@ while [ $iterations -ne $i ]; do
 
     fi
     let "i+=1"
+
+    Rscript plot_result.R
 done
 
 
