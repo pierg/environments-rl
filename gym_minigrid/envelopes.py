@@ -25,12 +25,12 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Reachability controllers
         for controller in self.config.controllers.reachability:
-            new_controller = Controller(controller, "reachability")
+            new_controller = Controller(controller, "reach")
             self.controllers.append(new_controller)
 
         # Safety controllers
         for controller in self.config.controllers.safety:
-            new_controller = Controller(controller, "safety")
+            new_controller = Controller(controller, "safe")
             self.controllers.append(new_controller)
 
         print("active_controllers: " + str(self.controllers))

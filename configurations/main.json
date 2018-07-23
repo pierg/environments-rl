@@ -25,10 +25,10 @@
     },
     "controllers": {
         "reachability": [
-            "reach"
+            "config_1"
         ],
         "safety": [
-            "safe"
+            "config_1"
         ]
     },
     "stop_learning": 480,

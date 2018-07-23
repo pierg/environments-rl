@@ -30,8 +30,8 @@ class Controller(Machine):
         # The agent uses toggle for dirt but the mtsa models does not
         self.is_toggle_a_clean = False
 
-        states_path = os.path.abspath(os.path.dirname(__file__) + "/" + self.controller_name + "_states.txt")
-        transitions_path = os.path.abspath(os.path.dirname(__file__) + "/" + self.controller_name + "_transitions.txt")
+        states_path = os.path.abspath(os.path.dirname(__file__) + "/" + self.controller_name + "/" + self.controller_type + "_states.txt")
+        transitions_path = os.path.abspath(os.path.dirname(__file__) + "/" + self.controller_name + "/" + self.controller_type + "_transitions.txt")
 
         # Loading the states
         with open(states_path, 'r') as inf:
