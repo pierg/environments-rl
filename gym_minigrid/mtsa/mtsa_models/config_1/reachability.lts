@@ -126,7 +126,7 @@ controller ||C =(ENVIRONMENT)~{Goal}.
 minimal ||CC = (C).
 
 controllerSpec Goal = {
-	safety = {ToggleAllowed, SwitchAllowed, EnterRoom1WithLightOn}//, MustToggle, MustSwitch}//, DoNotReturn}//, DoNotRotateLeftThreeTimes}//, DoNotRotateRightThreeTimes}
+	//safety = {ToggleAllowed, SwitchAllowed, EnterRoom1WithLightOn}//, MustToggle, MustSwitch}//, DoNotReturn}//, DoNotRotateLeftThreeTimes}//, DoNotRotateRightThreeTimes}
 	//assumption = {ReachADoor, ReachASwitch}
 	liveness = {G}
 	reachability	
