@@ -48,6 +48,26 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
         self.last_cell = {0: (0, 0), 1: (0, 0), 2: (0, 1)}
 
+
+    def observe(self):
+        list_actions = []
+        for controller in self.controllers:
+            controller.observe(self.env)
+            safe_actions_strings = controller.get_available_actions()
+            if self.config.debug_mode: print("[" + controller.get_name() + "] available_actions: " + str(safe_actions_strings))
+            if controller.is_active():
+                list_actions.append(safe_actions_strings)
+
+        safe_actions = set(list_actions[0])
+        if len(list_actions) > 1:
+            for s in list_actions[1:]:
+                safe_actions.intersection_update(s)
+
+                if self.config.debug_mode: print("safe_actions: " + str(safe_actions))
+        self.safe_actions = self.env.strings_to_actions(list(safe_actions))
+
+
+    def step(self, proposed_action):
         self.goal_cell = None
 
         self.secondary_goals = []
@@ -74,7 +94,22 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         # ---------------------- ACTION PLANNER START ----------------------#
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
+        if self.config.num_processes == 1 and self.config.rendering:
+            self.env.render('human')
 
+        if proposed_action == self.env.actions.observe:
+            self.observe()
+        else:
+            if self.config.training_mode:
+                self.observe()
+
+            # The environment model is supported by the controllers
+            if self.safe_actions is not None and len(self.safe_actions) > 0:
+                if proposed_action in self.safe_actions:
+                    controller_action = self.env.action_to_string(proposed_action)
+                    if self.config.debug_mode: print("action_to_execution_1: " + controller_action)
+                    obs, reward, done, info = self.env.step(proposed_action)
+                    reward += self.respected_reward
         # proceed with the step
         obs, reward, done, info = self.env.step(action)
 
@@ -154,6 +189,13 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
                     reward += self.config.action_planning.reward.goal
                     info = "goal+plan_finished"
                 else:
+                    if self.config.debug_mode: print("the proposed action is not safe! Choosing a random safe action...")
+                    safe_action = random.choice(self.safe_actions)
+                    controller_action = self.env.action_to_string(safe_action)
+                    if self.config.debug_mode: print("action_to_execution_2: " + controller_action)
+                    obs, reward, done, info = self.env.step(safe_action)
+                    reward += self.violated_reward
+                    info = "violation"
                     reward += self.config.action_planning.reward.goal
                     info = "goal"
             elif current_cell.type == "unsafe":
@@ -177,6 +219,13 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         env = self.unwrapped
         tup = ((int(env.agent_pos[0]), int(env.agent_pos[1])), env.agent_dir, action)
 
+                for controller in self.controllers:
+                    controller.act(controller_action)
+
+            # The environment model is not supported by the controller, the agent is free to explore
+            else:
+                if self.config.debug_mode: print("##### Environment not modeled by the controllers -> free exploration! ######")
+                obs, reward, done, info = self.env.step(proposed_action)
         # Get the count for this key
         preCnt = 0
         if tup in self.counts:

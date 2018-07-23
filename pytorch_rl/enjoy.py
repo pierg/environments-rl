@@ -18,9 +18,9 @@ parser.add_argument('--num-stack', type=int, default=1,
                     help='number of frames to stack (default: 1)')
 parser.add_argument('--log-interval', type=int, default=10,
                     help='log interval, one log per n updates (default: 10)')
-parser.add_argument('--env-name', default='PongNoFrameskip-v4',
+parser.add_argument('--env-name', default='MiniGrid-DirtWatLightExp-9x9-v0',
                     help='environment to train on (default: PongNoFrameskip-v4)')
-parser.add_argument('--load-dir', default='./trained_models/',
+parser.add_argument('--load-dir', default='./trained_models/a2c/',
                     help='directory to save agent logs (default: ./trained_models/)')
 args = parser.parse_args()
 

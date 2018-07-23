@@ -68,7 +68,7 @@ RUN mkdir -p $HOME
 WORKDIR $HOME
 
 # Cloning the repositories
-RUN git clone https://github.com/pierg/gym-minigrid.git -b dev --single-branch
+RUN git clone https://github.com/pierg/gym-minigrid.git -b mtsa --single-branch
 
 
 RUN pip3 install --upgrade pip

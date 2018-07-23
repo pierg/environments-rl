@@ -110,11 +110,12 @@ class Water(WorldObj):
     def render(self, r):
         self._set_color(r)
         r.drawPolygon([
-            (0          , CELL_PIXELS),
+            (0, CELL_PIXELS),
             (CELL_PIXELS, CELL_PIXELS),
-            (CELL_PIXELS,           0),
-            (0          ,           0)
+            (CELL_PIXELS, 0),
+            (0, 0)
         ])
+
 
 class LightSwitch(WorldObj):
     def __init__(self):
@@ -144,10 +145,10 @@ class LightSwitch(WorldObj):
     def render(self, r):
         self._set_color(r)
         r.drawPolygon([
-            (0          , CELL_PIXELS),
+            (0, CELL_PIXELS),
             (CELL_PIXELS, CELL_PIXELS),
-            (CELL_PIXELS,           0),
-            (0          ,           0)
+            (CELL_PIXELS, 0),
+            (0, 0)
         ])
         self.dark_light(r)
 
@@ -178,6 +179,7 @@ class LightSwitch(WorldObj):
             r.setColor(0, 255, 0)
             r.drawCircle(0.5 * CELL_PIXELS, 0.5 * CELL_PIXELS, 0.2 * CELL_PIXELS)
             r.pop
+
 
 class Dirt(WorldObj):
     def __init__(self):
@@ -264,6 +266,7 @@ def worldobj_name_to_object(worldobj_name):
     else:
         return None
 
+
 class ExGrid(Grid):
     """
     Extending Grid methods to support the new objects
@@ -328,24 +331,9 @@ class ExMiniGridEnv(MiniGridEnv):
 
     # Enumeration of possible actions
     class Actions(IntEnum):
-        # # Turn left, turn right, move forward
-        # left = 0
-        # right = 1
-        # forward = 2
-        #
-        # # Pick up an object
-        # pickup = 3
-        # # Drop an object
-        # drop = 4
-        # # Toggle/activate an object
-        # toggle = 5
-        #
-        # # Wait/stay put/do nothing
-        # wait = 6
-        #
-        # # More actions:
-        # # Ex:
-        # clean = 7
+
+        # Used to observe the environment in the step() before the action
+        observe = -1
 
         left = 0
         right = 1
@@ -353,24 +341,27 @@ class ExMiniGridEnv(MiniGridEnv):
         pickup = 3
         drop = 4
         toggle = 5
-        wait = 6
+        done = 6
         clean = 7
 
+    def strings_to_actions(self, actions):
+        for i, action_name in enumerate(actions):
+            if action_name == "left":
+                actions[i] = self.actions.left
+            elif action_name == "right":
+                actions[i] = self.actions.right
+            elif action_name == "forward":
+                actions[i] = self.actions.forward
+            elif action_name == "toggle":
+                actions[i] = self.actions.toggle
+            elif action_name == "done":
+                actions[i] = self.actions.done
+            elif action_name == "clean":
+                actions[i] = self.actions.clean
+            elif action_name == "observe":
+                actions[i] = self.actions.observe
 
-    def str_to_action(self, action_name):
-        if action_name == "left":
-            return self.actions.left
-        elif action_name == "right":
-            return self.actions.right
-        elif action_name == "forward":
-            return self.actions.forward
-        elif action_name == "toggle":
-            return self.actions.toggle
-        elif action_name == "wait":
-            return self.actions.wait
-        elif action_name == "clean":
-            return self.actions.clean
-        return None
+        return actions
 
     def action_to_string(self, action):
         if action == self.actions.left:
@@ -381,10 +372,12 @@ class ExMiniGridEnv(MiniGridEnv):
             return "forward"
         elif action == self.actions.toggle:
             return "toggle"
-        elif action == self.actions.wait:
-            return "wait"
+        elif action == self.actions.done:
+            return "done"
         elif action == self.actions.clean:
             return "clean"
+        elif action == self.actions.observe:
+            return "observe"
         return None
 
     def __init__(self, grid_size=16, max_steps=100, see_through_walls=False, seed=1337):
@@ -395,42 +388,43 @@ class ExMiniGridEnv(MiniGridEnv):
         self.config = cg.Configuration.grab()
 
     def step(self, action):
-        if action == self.actions.wait:
-            self.step_count += 1
-            reward = 0
-            done = False
-            # Get the position in front of the agent
-            fwd_pos = self.front_pos
-            # Get the contents of the cell in front of the agent
-            fwd_cell = self.grid.get(*fwd_pos)
-            if self.step_count >= self.max_steps:
-                done = True
-            obs = self.gen_obs()
-            return obs, reward, done, {}
-        elif action == self.actions.clean:
-            self.step_count += 1
-            reward = 0
-            done = False
-            if ExMiniGridEnv.worldobj_in_agent(self,1,0) == "dirt":
-                print("dirt")
-                x,y = ExMiniGridEnv.get_grid_coords_from_view(self, (1, 0))
-                self.grid.set(x, y, None)
-            else:
-                print(ExMiniGridEnv.worldobj_in_agent(self,1,0))
-            if self.step_count >= self.max_steps:
+
+        # Get the position in front of the agent
+        fwd_pos = self.front_pos
+        # Get the contents of the cell in front of the agent
+        fwd_cell = self.grid.get(*fwd_pos)
+
+        # Default actions and cells
+        obs, reward, done, info = super().step(action)
+
+        if self.step_count == self.max_steps:
+            info = "end"
+            self.step_count = 0
+            done = True
+
+        # Setting up costums cells and rewards
+
+        reward = self.config.rewards.standard.step
+
+        if action == self.actions.forward:
+            # Step into Water
+            if fwd_cell is not None and fwd_cell.type == 'water':
                 done = True
                 reward = self.config.rewards.standard.death
+                info = "died"
             # Step into Goal
             if fwd_cell is not None and fwd_cell.type == 'goal':
+                print("GOAL REACHED!")
                 done = True
                 reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
+                info = "goal"
 
         if action == self.actions.toggle:
             # Cleaning Dirt
             if fwd_cell is not None and fwd_cell.type == 'dirt':
                 reward = self.config.rewards.cleaningenv.clean
 
-        print("reward: " + str(reward) + "\tinfo: " + str(info))
+        if self.config.debug_mode: print("reward: " + str(reward) + "\tinfo: " + str(info))
         return obs, reward, done, info
 
     def gen_obs(self):

@@ -6,6 +6,8 @@ import sys
 import time
 from optparse import OptionParser
 
+from configurations import config_grabber as cg
+
 
 try:
     import gym_minigrid
@@ -22,6 +24,8 @@ def main():
     # logging.getLogger().setLevel(logging.INFO)
 
     observed = True
+
+    cg.Configuration.set("training_mode", False)
 
     parser = OptionParser()
     parser.add_option(
@@ -111,7 +115,7 @@ def main():
         env.render('human')
         time.sleep(0.01)
         if observed:
-            env.step("observe")
+            env.step(env.env.actions.observe)
             observed = False
         # If the window was closed
         if renderer.window == None:

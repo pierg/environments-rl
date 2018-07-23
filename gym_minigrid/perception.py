@@ -13,6 +13,7 @@ class Perception():
     array_pos =[]
     door_open = False
     light_on = False
+    door_room = 0
 
     def save_position_scan(env):
         width = env.grid.width
@@ -23,6 +24,15 @@ class Perception():
                 if object_pos is not None:
                     if hasattr(object_pos, 'state') or hasattr(object_pos, 'is_open'):
                         Perception.array_pos.append([object_pos.type, i, j])
+                    if object_pos.type == 'door':
+                        try:
+                            if env.roomList:
+                                for x in env.roomList:
+                                    if x.objectInRoom((i,j)):
+                                        door_room = x.number
+                        except AttributeError:
+                            pass
+
         print(Perception.array_pos)
         Perception.scanning_is_done = True
 
