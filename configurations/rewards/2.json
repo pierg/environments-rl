@@ -1,6 +1,6 @@
 {
   "standard": {
-    "goal": 100,
+    "goal": 1000,
     "step": -0.1,
     "death": -1
   },
