@@ -332,9 +332,6 @@ class ExMiniGridEnv(MiniGridEnv):
     # Enumeration of possible actions
     class Actions(IntEnum):
 
-        # Used to observe the environment in the step() before the action
-        observe = -1
-
         left = 0
         right = 1
         forward = 2
@@ -342,7 +339,6 @@ class ExMiniGridEnv(MiniGridEnv):
         drop = 4
         toggle = 5
         done = 6
-        clean = 7
 
     def strings_to_actions(self, actions):
         for i, action_name in enumerate(actions):
@@ -356,10 +352,6 @@ class ExMiniGridEnv(MiniGridEnv):
                 actions[i] = self.actions.toggle
             elif action_name == "done":
                 actions[i] = self.actions.done
-            elif action_name == "clean":
-                actions[i] = self.actions.clean
-            elif action_name == "observe":
-                actions[i] = self.actions.observe
 
         return actions
 
@@ -374,10 +366,6 @@ class ExMiniGridEnv(MiniGridEnv):
             return "toggle"
         elif action == self.actions.done:
             return "done"
-        elif action == self.actions.clean:
-            return "clean"
-        elif action == self.actions.observe:
-            return "observe"
         return None
 
     def __init__(self, grid_size=16, max_steps=100, see_through_walls=False, seed=1337):

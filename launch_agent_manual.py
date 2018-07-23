@@ -114,9 +114,6 @@ def main():
     while True:
         env.render('human')
         time.sleep(0.01)
-        if observed:
-            env.step(env.env.actions.observe)
-            observed = False
         # If the window was closed
         if renderer.window == None:
             break
