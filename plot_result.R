@@ -57,8 +57,6 @@ autoPlot <- function(array,fileName)
   print("It's over")
 }
 
-
-
 #create the plot for each csv file in evaluation
 for (csvFile in Sys.glob("evaluations/*.csv")){
   array = read.csv(csvFile)
@@ -66,4 +64,3 @@ for (csvFile in Sys.glob("evaluations/*.csv")){
   Name = substr(Name,13, nchar(Name))
   autoPlot(array,Name)                            # call the function which plot each graphical curve
 }
-
