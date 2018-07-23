@@ -6,11 +6,35 @@ AGENT_GRID_LOCATION = 2
 # Helper class to analyse agent's observations
 # All the methods should return True/False
 
+
 class Perception():
 
-    room_0 = True
-    room_1 = False
+    scanning_is_done = False
+    array_pos =[]
+    door_open = False
+    light_on = False
 
+    def save_position_scan(env):
+        width = env.grid.width
+        height = env.grid.height
+        for i in range(height):
+            for j in range(width):
+                object_pos = env.grid.get(i, j)
+                if object_pos is not None:
+                    if hasattr(object_pos, 'state') or hasattr(object_pos, 'is_open'):
+                        Perception.array_pos.append([object_pos.type, i, j])
+        print(Perception.array_pos)
+        Perception.scanning_is_done = True
+
+    def check_state(env):
+        for k in  range(len(Perception.array_pos)):
+            object = env.grid.get(Perception.array_pos[k][1], Perception.array_pos[k][2])
+            if object.type == 'door':
+                Perception.door_open = object.is_open
+            elif object.type == 'lightSwitch':
+                Perception.light_on = object.state
+
+        
     @staticmethod
     def in_front_of(obs, object_name):
         """
@@ -78,6 +102,10 @@ class Perception():
         :param env: instance of ExMiniGridEnv
         :return:
         """
+        if not Perception.scanning_is_done:
+            Perception.save_position_scan(env)
+        Perception.check_state(env)
+
         if condition == "light-on-current-room":
             # Returns true if the lights are on in the room the agent is currently in
             return Perception.light_on_current_room(env)
@@ -89,6 +117,14 @@ class Perception():
         elif condition == "light-switch-in-front-off":
             # Returns true if the agent is in front of a light-switch and it is off
             return Perception.list_switch_in_front_off(env)
+
+        elif condition == "door-opened":
+            # Returns true if the agent is in front of an opened door
+            return Perception.door_opened(env)
+
+        elif condition == "door-closed":
+            # Returns true if the agent is in front of an opened door
+            return Perception.door_closed(env)
 
         elif condition == "door-opened-in-front":
             # Returns true if the agent is in front of an opened door
@@ -107,10 +143,6 @@ class Perception():
             # Returns true if the agent is in front of a water tile and its action is "Forward"
             return ExMiniGridEnv.worldobj_in_agent(env, 1, 0) == "water" \
                    and action_proposed == ExMiniGridEnv.Actions.forward and Perception.light_on_current_room(env)
-
-        elif condition == "light-on-current-room":
-            # It returns true is the light in the current room is on
-            return Perception.light_on_current_room(env)
 
         elif condition == "entering-a-room":
             # Returns true if the agent is entering a room
@@ -132,56 +164,61 @@ class Perception():
             return action_proposed == ExMiniGridEnv.Actions.right
 
         elif condition == "light-on-next-room":
-            # It returns true is the light in the other room of the environment TODO
-            return False
+            # It returns true is the light in the other room of the environment
+            return Perception.light_on_next_room(env)
 
         elif condition == "room-0":
-            # Returns true if the agent is in the room where it first starts TODO
-            return False
+            # Returns true if the agent is in the room where it first starts
+            return Perception.agent_in_room_number(env, 0)
 
         elif condition == "room-1":
-            # Returns true if the agent is in the room after it crossed the door TODO
+            # Returns true if the agent is in the room after it crossed the door
+            return Perception.agent_in_room_number(env, 1)
+
+    def light_on_next_room(env):
+        try:
+            if env.roomList:
+                for x in env.roomList:
+                    bCurrent = False
+                    if x.objectInRoom(env.agent_pos):
+                        bCurrent = True
+                    if not bCurrent:
+                        return x.lightOn
             return False
+        except AttributeError:
+            return True
 
-
+    def agent_in_room_number(env, number):
+        try:
+            if env.roomList:
+                for x in env.roomList:
+                    if x.objectInRoom(env.agent_pos):
+                        return x.number == number
+            return True
+        except AttributeError:
+            return True
 
     def is_condition_true(self):
         return True
 
-
     def door_opened_in_front(env):
-        if ExMiniGridEnv.worldobj_in_agent(env, 1, 0) == "door":
-            x, y = env.get_grid_coords_from_view((1, 0))
-            if env.grid.get(x, y).is_open:
-                return True
-        return False
+        return ExMiniGridEnv.worldobj_in_agent(env, 1, 0) == "door" and Perception.door_open
+
+    def door_closed(env):
+        return not Perception.door_open
+
+    def door_opened(env):
+        return Perception.door_open
 
 
     def list_switch_in_front_off(env):
-        if env.worldobj_in_agent(1, 0) == "lightSwitch":
-            j, k = env.get_grid_coords_from_view((1, 0))
-            if hasattr(env.grid.get(j, k), 'state'):
-                if env.grid.get(j, k).state:
-                    return False
-                else:
-                    return True
-        return False
-
+        return (env.worldobj_in_agent(1, 0) == "lightSwitch" and not Perception.light_on)
 
     def list_switch_in_front_on(env):
-        if env.worldobj_in_agent(1, 0) == "lightSwitch":
-            j, k = env.get_grid_coords_from_view((1, 0))
-            if hasattr(env.grid.get(j, k), 'state'):
-                return env.grid.get(j, k).state
-        return False
+        return (env.worldobj_in_agent(1, 0) == "lightSwitch" and Perception.light_on)
 
     def door_closed_in_front(env):
-        if env.worldobj_in_agent(1, 0) == "door":
-            x, y = env.get_grid_coords_from_view((1, 0))
-            if not env.grid.get(x, y).is_open:
-                return True
-        return False
-
+        return (env.worldobj_in_agent(1, 0) == "door" and not Perception.door_open)
 
     def check_if_coordinates_in_env(env, coordinates):
         wx, wy = env.get_grid_coords_from_view(coordinates)
@@ -222,12 +259,8 @@ class Perception():
 
     def light_switch_turned_on(env):
         agent_obs = ExGrid.decode(env.gen_obs()['image'])
-        grid_len = int(math.sqrt(len(agent_obs.grid)))
         for i in range(0, len(agent_obs.grid)):
             if agent_obs.grid[i] is not None:
                 if agent_obs.grid[i].type == "lightSwitch":
-                    j, k = env.get_grid_coords_from_view(
-                    (grid_len - 1 - int(i / grid_len), (i % grid_len) - int(grid_len / 2)))
-                    if hasattr(env.grid.get(j, k), 'state'):
-                        return env.grid.get(j, k).state
+                    return Perception.light_on
         return False

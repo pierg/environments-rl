@@ -3,53 +3,6 @@
   "algorithm": "a2c",
   "stop_learning":1440,
   "number_of_iteration": 20,
-  "monitors": {
-    "patterns": {
-      "precedence": {
-        "precedence_1": {
-          "type": "precedence",
-          "mode": "shaping",
-          "active": false,
-          "name": "lightPrecedence",
-          "conditions": {
-            "pre": "light-switch-turned-on",
-            "post": "entering-a-room"
-          }
-        }
-      },
-      "response": {
-        "response_1": {
-          "type": "response",
-          "mode": "shaping",
-          "active": false,
-          "name": "lightResponse",
-          "conditions": {
-            "pre": "light-switch-turned-on",
-            "post": "entering-a-room"
-          }
-        }
-      },
-      "universality": {
-        "universality_1": {
-          "type": "universality",
-          "mode": "shaping",
-          "active": false,
-          "name": "lightUniversality",
-          "conditions": "light-on-current-room"
-        }
-      },
-      "absence": {
-        "waterAbsence": {
-          "active": false,
-          "conditions": "stepping-on-water",
-          "mode": "enforcing",
-          "action_planner": "wait",
-          "name": "waterAbsence",
-          "type": "absence"
-        }
-      }
-    }
-  },
   "env_name": "MiniGrid-Safety-10x10-v0",
   "num_processes": 48,
   "num_steps": 5,
@@ -57,6 +10,7 @@
   "on_violation_reset": false,
   "rendering": false,
   "evaluation_directory_name": "evaluations",
+  "controller": true,
   "visdom": false,
   "debug_mode": false,
   "rewards": {
