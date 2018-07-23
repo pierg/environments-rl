@@ -11,6 +11,7 @@ const Water = 3
 const Dirt = 4
 const Vase = 5
 const Wall = 6
+const Goal = 7
 
 const LightOff = 0
 const LightOn = 1
@@ -36,27 +37,44 @@ fluent LightOn = <observation.[LightOn].[DoorStatus].[RoomStatus].[Elements].[El
 fluent DoorOpen = <observation.[LightStatus].[DoorOpen].[RoomStatus].[Elements].[Elements].[Elements], Observations\{observation.[LightStatus].[DoorOpen].[RoomStatus].[Elements].[Elements].[Elements]}> initially 0 
 fluent OnLeft[e:Elements] = <observation.[LightStatus].[DoorStatus].[RoomStatus].[e].[Elements].[Elements], Observations\{observation.[LightStatus].[DoorStatus].[RoomStatus].[e].[Elements].[Elements]}> initially 0 
 fluent OnRight[e:Elements] = <observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[Elements].[e], Observations\{observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[Elements].[e]}> initially 0 
+fluent Wait = <wait, AgentActions\{wait}>
 
-//ltl_property MustToggle = []!( {AgentActions}\{toggle} &&  (InFrontOf[Door] && !DoorOpen))
-//ltl_property MustSwitch = []!( {AgentActions}\{switch} &&  (InFrontOf[LightSwitch] && !LightOn))
-
-property DONT_CIRCLE_RIGHT = (right -> W), 
+property DONT_CIRCLE_RIGHT = (right -> W | AgentActions\{right} -> DONT_CIRCLE_RIGHT), 
 W = (right -> S | AgentActions\{right} -> DONT_CIRCLE_RIGHT),
 S = (right -> E | AgentActions\{right} -> DONT_CIRCLE_RIGHT), 
 E = (right -> ERROR | AgentActions\{right} -> DONT_CIRCLE_RIGHT).
 
-ltl_property DontTurnRight = [](right -> ! (OnRight[Wall] || OnRight[Water] ||OnRight[Vase]))
-ltl_property DontTurnLeft = [](left -> (OnRight[Wall] || OnRight[Water] ||OnRight[Vase]))
-ltl_property SafeForward = [](forward -> !InFrontOf[Water]  && !InFrontOf[Vase] && !InFrontOf[Dirt] && !InFrontOf[Wall])
+
+property DONT_CIRCLE_LEFT = (left -> W | AgentActions\{left} -> DONT_CIRCLE_LEFT), 
+W = (left -> S | AgentActions\{left} -> DONT_CIRCLE_LEFT),
+S = (left -> E | AgentActions\{left} -> DONT_CIRCLE_LEFT), 
+E = (left -> ERROR | AgentActions\{left} -> DONT_CIRCLE_LEFT).
+
+//Do not rotate to the side to the side where is a wall. 
+//I added the wait to avoid the case in which the Agent gets stucked in a corner. 
+//@@@
+//@A@
+//@ @
+ltl_property DontTurnRightToWall = [](right -> !(OnLeft[Wall] && !Wait)) //|| InFrontOf[Goal]
+ltl_property DontTurnLeftToWall = [](left -> !(OnRight[Wall] && !Wait)) 
+
+//When to go forward
+ltl_property SafeForward = [](forward -> InFrontOf[Nothing] || (InFrontOf[Door] && DoorOpen))
+ltl_property StepOnGoal = []!({AgentActions}\{forward} && InFrontOf[Goal])
+
+//When to clean
 ltl_property MustClean = []!({AgentActions}\{clean} && InFrontOf[Dirt] )
-ltl_property SwitchAllowed = [](switch -> ((InFrontOf[LightSwitch] && !LightOn)  && !InFrontOf[Vase]))
-ltl_property ToggleAllowed = [](toggle -> ((InFrontOf[Door] && !DoorOpen)  && !InFrontOf[Vase]))
-ltl_property CleanAllowed = [](clean -> InFrontOf[Dirt] && !InFrontOf[Vase])
-ltl_property WaitIfNeccesary = [] (wait -> (OnLeft[Wall] && OnRight[Wall] && (InFrontOf[Water]  || InFrontOf[Vase] || InFrontOf[Dirt] || InFrontOf[Wall])))
-ltl_property MustToggle = []!( {AgentActions}\{toggle} &&  (InFrontOf[Door] && !DoorOpen))
-ltl_property MustSwitch = []!( {AgentActions}\{switch} &&  (InFrontOf[LightSwitch] && !LightOn))
+ltl_property CleanAllowed = [](clean -> InFrontOf[Dirt])
 
+//When to toggle
+ltl_property MustToggle = []!({AgentActions}\{toggle} &&  (InFrontOf[Door] && !DoorOpen))
+ltl_property ToggleAllowed = [](toggle -> (InFrontOf[Door] && !DoorOpen))
 
+//When to switch
+ltl_property MustSwitch = []!({AgentActions}\{switch} &&  (InFrontOf[LightSwitch] && !LightOn))
+ltl_property SwitchAllowed = [](switch -> ((InFrontOf[LightSwitch] && !LightOn)))
+
+ltl_property WaitIfNeccesary = [] (wait -> (OnLeft[Wall] && OnRight[Wall] && !(InFrontOf[Nothing] || (InFrontOf[Door]  && DoorOpen))))
 
 //Defines the alternation between actions and observations.
 AGENT = AGENT_OBS,
@@ -73,13 +91,13 @@ DOOR = ( observation.[LightStatus].[DoorOpen].[RoomStatus].[Elements].[Elements]
 DOOR_CLOSE = (toggle -> DOOR_OPEN | observation.[LightStatus].[DoorClose].[RoomStatus].[Elements].[Elements].[Elements] -> DOOR_CLOSE),
 DOOR_OPEN = (toggle -> DOOR_CLOSE | observation.[LightStatus].[DoorOpen].[RoomStatus].[Elements].[Elements].[Elements] -> DOOR_OPEN).
 
-||ENVIRONMENT = (AGENT || DONT_CIRCLE). // || LIGHT || DOOR).
+||ENVIRONMENT = (AGENT). // || LIGHT || DOOR).
 
 controller ||C =(ENVIRONMENT)~{Goal}.  
 
 ||CC = (C).
 
 controllerSpec Goal = {
-	safety = {DONT_CIRCLE, CleanAllowed, SafeForward, MustClean, MustToggle, MustSwitch, ToggleAllowed, SwitchAllowed, DontTurnRight,DontTurnLeft, WaitIfNeccesary}
+	safety = {CleanAllowed, SafeForward, MustClean, MustToggle, MustSwitch, ToggleAllowed, SwitchAllowed, DontTurnRightToWall, DontTurnLeftToWall, WaitIfNeccesary}
 	controllable = {AgentActions}
 } 
