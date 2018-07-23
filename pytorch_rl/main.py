@@ -49,6 +49,7 @@ except OSError:
     for f in files:
         os.remove(f)
 
+
 def main():
     # Getting configuration from file
     config = cg.Configuration.grab()
@@ -148,11 +149,11 @@ def main():
 
             # Obser reward and next obs
             obs, reward, done, info = envs.step(cpu_actions)
-            for x in range (0,len(done)):
+            for x in range(0, len(done)):
                 if done[x]:
-                    numberOfStepBeforeDone[x] = (j*args.num_steps+step+1) - stepOnLastGoal[x]
-                    stepOnLastGoal[x] = (j*args.num_steps+step+1)
-            evaluator.update(reward, done, info,numberOfStepBeforeDone)
+                    numberOfStepBeforeDone[x] = (j * args.num_steps + step + 1) - stepOnLastGoal[x]
+                    stepOnLastGoal[x] = (j * args.num_steps + step + 1)
+            evaluator.update(reward, done, info, numberOfStepBeforeDone)
 
             if stop_learning:
                 if first_time:
@@ -163,19 +164,19 @@ def main():
                     current_reward_mean = evaluator.get_reward_mean()
                     current_reward_median = evaluator.get_reward_median()
 
-
                     # Rewards are close to the goal reward
-                    if current_reward_median > (config.rewards.standard.goal - abs(config.rewards.standard.step * config.optimal_num_steps)):
+                    if current_reward_median > (config.rewards.standard.goal - abs(
+                            config.rewards.standard.step * config.optimal_num_steps)):
                         identical_rewards += 1
                         print("--> rewards close to goal reward -> " + identical_rewards)
 
                     else:
                         identical_rewards = 0
-                   #
-                   # if current_reward_mean == last_reward_mean:
-                   #      identical_rewards += 1
-                   #  else:
-                   #      identical_rewards = 0
+                    #
+                    # if current_reward_mean == last_reward_mean:
+                    #      identical_rewards += 1
+                    #  else:
+                    #      identical_rewards = 0
                     last_reward_mean = current_reward_mean
                     last_reward_median = current_reward_median
             if identical_rewards == stop_learning:
@@ -201,7 +202,7 @@ def main():
 
             update_current_obs(obs)
             rollouts.insert(step, current_obs, states.data, action.data, action_log_prob.data, value.data, reward,
-                        masks)
+                            masks)
 
         next_value = actor_critic(
             Variable(rollouts.observations[-1], volatile=True),
@@ -263,8 +264,8 @@ def main():
 
                 for sample in data_generator:
                     observations_batch, states_batch, actions_batch, \
-                        return_batch, masks_batch, old_action_log_probs_batch, \
-                            adv_targ = sample
+                    return_batch, masks_batch, old_action_log_probs_batch, \
+                    adv_targ = sample
 
                     # Reshape to do in a single forward pass for all steps
                     values, action_log_probs, dist_entropy, states = actor_critic.evaluate_actions(
@@ -278,7 +279,7 @@ def main():
                     ratio = torch.exp(action_log_probs - Variable(old_action_log_probs_batch))
                     surr1 = ratio * adv_targ
                     surr2 = torch.clamp(ratio, 1.0 - args.clip_param, 1.0 + args.clip_param) * adv_targ
-                    action_loss = -torch.min(surr1, surr2).mean() # PPO's pessimistic surrogate (L^CLIP)
+                    action_loss = -torch.min(surr1, surr2).mean()  # PPO's pessimistic surrogate (L^CLIP)
 
                     value_loss = (Variable(return_batch) - values).pow(2).mean()
 
@@ -302,7 +303,7 @@ def main():
                 save_model = copy.deepcopy(actor_critic).cpu()
 
             save_model = [save_model,
-                            hasattr(envs, 'ob_rms') and envs.ob_rms or None]
+                          hasattr(envs, 'ob_rms') and envs.ob_rms or None]
             torch.save(save_model, os.path.join(save_path, args.env_name + ".pt"))
 
         if j % args.log_interval == 0:
@@ -313,7 +314,7 @@ def main():
             evaluator.save(j, start, end, dist_entropy, value_loss, action_loss)
             print(
                 "Updates {}, num timesteps {}, FPS {}, mean/median reward {:.2f}/{:.2f}, min/max reward {:.2f}/{:.2f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
-                format(
+                    format(
                     j,
                     total_num_steps,
                     int(total_num_steps / (end - start)),
@@ -332,6 +333,7 @@ def main():
                 total_num_steps,
                 final_rewards.mean()
             )
+
 
 if __name__ == "__main__":
     main()

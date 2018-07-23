@@ -58,6 +58,8 @@ autoPlot <- function(array,fileName)
 }
 
 
+setwd("/Users/pier/ProjectsLocal/gym-minigrid")
+
 #create the plot for each csv file in evaluation
 for (csvFile in Sys.glob("evaluations/*.csv")){
   array = read.csv(csvFile)
@@ -65,3 +67,4 @@ for (csvFile in Sys.glob("evaluations/*.csv")){
   Name = substr(Name,13, nchar(Name))
   autoPlot(array,Name)                            # call the function which plot each graphical curve
 }
+
