@@ -98,7 +98,7 @@ class RandomEnv(ExMiniGridEnv):
         #Place lightswitch
         lightswitch_is_posed = False
         test_goal = 0
-        if width > 6:
+        if width > 10:
             if {3}:
                 while not lightswitch_is_posed:
                     width_pos , height_pos = self._random_or_not_position(2, width - 3, 2, height - 1)
@@ -284,10 +284,6 @@ register(
     with open(configuration_path + "randoms/" + "randomEnv-{0}x{0}-{1}-v0.json".format(grid_size, random_token),
               'w') as config:
         action_planning = {}
-        list_of_json_properties = {}
-        list_of_json_patterns = {}
-        properties_map = {}
-        patterns_map = {}
         if hasattr(elements,"action_planning"):
             goal = 1
             step = 0
@@ -314,87 +310,13 @@ register(
                     "off_plan": float("{0:.2f}".format(off_plan)),
                 }
             }
-        if hasattr(elements, "monitors"):
-            if hasattr(elements.monitors, "properties"):
-                for type in elements.monitors.properties:
-                    for monitor in type:
-                        type_of_monitor = monitor.type
-                        near = 0
-                        immediate = 0
-                        violated = -1
-                        for current_monitor in rewards:
-                            if hasattr(current_monitor, "name"):
-                                if current_monitor.name == type_of_monitor:
-                                    near = current_monitor.near
-                                    immediate = current_monitor.immediate
-                                    violated = current_monitor.violated
-                        list_of_json_properties[monitor.name] = {
-                            "{0}".format(monitor.name): {
-                                "type": "{0}".format(monitor.type),
-                                "mode": "{0}".format(monitor.mode),
-                                "action_planner": "{0}".format(monitor.action_planner),
-                                "active": True if monitor.active else False,
-                                "name": "{0}".format(monitor.name),
-                                "obj_to_avoid": "{0}".format(monitor.obj_to_avoid),
-                                "act_to_avoid": "{0}".format(monitor.act_to_avoid),
-                                "rewards": {
-                                    "near": float(
-                                        "{0:.2f}".format(near)),
-                                    "immediate": float(
-                                        "{0:.2f}".format(immediate)),
-                                    "violated": float(
-                                        "{0:.2f}".format(violated)),
-                                }
-                            }
-                        }
-                        if monitor.type in properties_map:
-                            properties_map[monitor.type].append(monitor.name)
-                        else:
-                            properties_map[monitor.type] = [monitor.name]
-
-        if hasattr(elements, "monitors"):
-            if hasattr(elements.monitors, "patterns"):
-                for type in elements.monitors.patterns:
-                    for monitor in type:
-                        type_of_monitor = monitor.type
-                        respected = 1
-                        violated = -1
-                        for current_monitor in rewards:
-                            if hasattr(current_monitor, "name"):
-                                if current_monitor.name == type_of_monitor:
-                                    respected = current_monitor.respected
-                                    violated = current_monitor.violated
-                        list_of_json_patterns[monitor.name] = {
-                            "{0}".format(monitor.name): {
-                                "type": "{0}".format(monitor.type),
-                                "mode": "{0}".format(monitor.mode),
-                                "active": True if monitor.active else False,
-                                "name": "{0}".format(monitor.name),
-                                "action_planner": "{0}".format(monitor.action_planner) if hasattr(monitor,
-                                                                                                  "action_planner") else "wait",
-                                "conditions": "{0}".format(monitor.conditions) if not hasattr(monitor.conditions,
-                                                                                              "pre") else {
-                                    "pre": "{0}".format(monitor.conditions.pre),
-                                    "post": "{0}".format(monitor.conditions.post)
-                                },
-                                "rewards": {
-                                    "respected": float(
-                                        "{0:.2f}".format(respected)),
-                                    "violated": float(
-                                        "{0:.2f}".format(violated))
-                                }
-                            }
-                        }
-                        if monitor.type in patterns_map:
-                            patterns_map[monitor.type].append(monitor.name)
-                        else:
-                            patterns_map[monitor.type] = [monitor.name]
 
         json_object = json.dumps({
             "config_name": "randomEnv-{0}x{0}-{1}-v0".format(grid_size, random_token),
             "algorithm": "a2c",
             "env_name": "MiniGrid-RandomEnv-{0}x{0}-{1}-v0".format(grid_size, random_token),
-            "num_processes": 32,
+            "num_processes": 48,
+            "optimal_num_steps":40,
             "num_steps": 4,
             "log_interval": 10,
             "on_violation_reset": False,
@@ -430,38 +352,11 @@ register(
         }, indent=2)
 
         d = {}
-        dProperties = {}
-        dPatterns = {}
         daction_planning ={}
 
-        for p in properties_map:
-            if isinstance(properties_map[p], str):
-                if p in dProperties:
-                    dProperties[p].update(list_of_json_properties[properties_map[p]])
-                else:
-                    dProperties[p] = list_of_json_properties[properties_map[p]]
-            for value in properties_map[p]:
-                if p in dProperties:
-                    dProperties[p].update(list_of_json_properties[value])
-                else:
-                    dProperties[p] = list_of_json_properties[value]
-        for p in patterns_map:
-            if isinstance(patterns_map[p], str):
-                if p in dPatterns:
-                    dPatterns[p].update(list_of_json_patterns[patterns_map[p]])
-                else:
-                    dPatterns[p] = list_of_json_patterns[patterns_map[p]]
-            else:
-                for value in patterns_map[p]:
-                    if p in dPatterns:
-                        dPatterns[p].update(list_of_json_patterns[value])
-                    else:
-                        dPatterns[p] = list_of_json_patterns[value]
         for p in action_planning:
                 daction_planning[p] = action_planning[p]
         d = json.loads(json_object)
-        d['monitors']['properties'].update(dProperties)
-        d['monitors']['patterns'].update(dPatterns)
         d['action_planning'].update(daction_planning)
         config.write(json.dumps(d, sort_keys=True, indent=2))
         config.close()

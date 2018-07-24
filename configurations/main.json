@@ -1,106 +1,43 @@
 {
-    "num_steps": 4,
-    "debug_mode": false,
-    "on_violation_reset": false,
-    "algorithm": "a2c",
-    "num_processes": 1,
-    "optimal_num_steps": 40,
-    "visdom": false,
-    "rendering": false,
-    "number_of_iteration": 100,
+    "num_processes": 48,
+    "config_name": "randomEnv-10x10-2382-v0_2",
+    "training_mode": false,
     "evaluation_directory_name": "evaluations",
-    "config_name": "randomEnv-12x12-6923-v0_2",
-    "log_interval": 10,
-    "monitors": {
-        "properties": {},
-        "patterns": {
-            "precedence": {
-                "lightPrecedence": {
-                    "mode": "enforcing",
-                    "type": "precedence",
-                    "action_planner": "turn_right",
-                    "rewards": {
-                        "violated": -0.1,
-                        "respected": 0.0
-                    },
-                    "conditions": {
-                        "post": "entering-a-room",
-                        "pre": "light-switch-turned-on"
-                    },
-                    "active": false,
-                    "name": "lightPrecedence"
-                }
-            },
-            "response": {
-                "lightResponse": {
-                    "mode": "shaping",
-                    "type": "response",
-                    "action_planner": "wait",
-                    "rewards": {
-                        "violated": -0.1,
-                        "respected": 0.0
-                    },
-                    "conditions": {
-                        "post": "entering-a-room",
-                        "pre": "light-switch-turned-on"
-                    },
-                    "active": false,
-                    "name": "lightResponse"
-                }
-            },
-            "absence": {
-                "waterAbsence": {
-                    "mode": "enforcing",
-                    "type": "absence",
-                    "action_planner": "wait",
-                    "rewards": {
-                        "violated": -0.1,
-                        "respected": 0.0
-                    },
-                    "conditions": "stepping-on-water",
-                    "active": false,
-                    "name": "waterAbsence"
-                }
-            },
-            "universality": {
-                "lightUniversality": {
-                    "mode": "shaping",
-                    "type": "universality",
-                    "action_planner": "wait",
-                    "rewards": {
-                        "violated": -0.1,
-                        "respected": 0.0
-                    },
-                    "conditions": "light-on-current-room",
-                    "active": false,
-                    "name": "lightUniversality"
-                }
-            }
-        }
+    "action_planning": {
+        "active": true,
+        "random_unsafe_obj": 20,
+        "reward": {
+            "off_plan": -0.1,
+            "goal": 1.0,
+            "step": 0.0,
+            "on_plan": 0.1,
+            "unsafe": -0.3
+        },
+        "secondary_goals": "[]"
     },
-    "env_name": "MiniGrid-Safety-10x10-v0",
-    "stop_learning": 432,
+    "on_violation_reset": false,
+    "stop_learning": 480,
+    "number_of_iteration": 10,
+    "rendering": false,
+    "env_name": "MiniGrid-RandomEnv-10x10-2382-v0",
+    "visdom": false,
+    "optimal_num_steps": 40,
+    "debug_mode": false,
+    "log_interval": 10,
     "rewards": {
         "standard": {
             "death": -1.0,
-            "goal": 1.0,
-            "step": 0.0
+            "step": 0.0,
+            "goal": 1.0
         },
         "cleaningenv": {
             "clean": 0.1
         }
     },
-    "action_planning": {
-        "reward": {
-            "unsafe": -0.3,
-            "goal": 1.0,
-            "on_plan": 0.1,
-            "off_plan": -0.1,
-            "step": 0.0
-        },
-        "active": true,
-        "random_unsafe_obj": 0,
-        "secondary_goals": "[]"
+    "num_steps": 4,
+    "monitors": {
+        "patterns": {},
+        "properties": {}
     },
-    "training_mode": false
+    "algorithm": "a2c"
 }

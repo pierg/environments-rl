@@ -111,7 +111,7 @@ while [ $iterations -ne $i ]; do
             name=`grep -e '"config_name"' configurations/main.json`
             replace="v0_2\","
             replace=${name/v0\",/$replace}
-            sed -i 's/"controller": true,/"controller": false,/g' configurations/main.json
+            sed -i 's/"active": true,/"active": false,/g' configurations/main.json
             sed -i "s/$name/$replace/" configurations/main.json
             echo "\n\n...launching the training..."
             echo "------ Without Controller -----"

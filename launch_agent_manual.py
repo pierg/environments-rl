@@ -23,7 +23,6 @@ def main():
 
     # logging.getLogger().setLevel(logging.INFO)
 
-    observed = True
 
     cg.Configuration.set("training_mode", False)
 
@@ -48,7 +47,7 @@ def main():
     # Load the gym environment
     env = gym.make(options.env_name)
 
-    if config.monitors:
+    if config.action_planning.active:
         env = ActionPlannerEnvelope(env)
 
 
@@ -76,33 +75,31 @@ def main():
 
         action = 0
 
-        nonlocal observed
 
         if keyName == 'LEFT':
-            action = env.env.actions.left
+            action = env.actions.left
         elif keyName == 'RIGHT':
-            action = env.env.actions.right
+            action = env.actions.right
         elif keyName == 'UP':
-            action = env.env.actions.forward
+            action = env.actions.forward
 
         elif keyName == 'SPACE':
-            action = env.env.actions.toggle
+            action = env.actions.toggle
         elif keyName == 'PAGE_UP':
-            action = env.env.actions.pickup
+            action = env.actions.pickup
         elif keyName == 'PAGE_DOWN':
-            action = env.env.actions.drop
+            action = env.actions.drop
 
         elif keyName == 'CTRL':
-            action = env.env.actions.wait
+            action = env.actions.wait
 
         else:
             print("unknown key %s" % keyName)
             return
 
         obs, reward, done, info = env.step(action)
-        observed = True
 
-        print('step=%s, reward=%s' % (env.env.step_count, reward))
+        print('step=%s, reward=%s' % (env.step_count, reward))
         print("\n")
 
         if done:

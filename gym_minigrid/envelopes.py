@@ -40,7 +40,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         # List of unsafe actions an agent might do at current step. Will reset when step is finished
         self.critical_actions = []
 
-        self.n_steps = 0
+        self.step_count = 0
 
         self.actions = ExMiniGridEnv.Actions
 
@@ -88,7 +88,6 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
         self.secondary_goals = tuple(self.secondary_goals)
 
-    def step(self, proposed_action):
         end = False
         # To be returned to the agent
         obs, reward, done, info = None, None, None, None
@@ -96,24 +95,22 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         # ---------------------- ACTION PLANNER START ----------------------#
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
-        if self.config.num_processes == 1 and self.config.rendering:
-            self.env.render('human')
 
         # proceed with the step
         obs, reward, done, info = self.env.step(proposed_action)
 
-        if self.n_steps == 0:
+        if self.step_count == 0:
             self.reset_planner()
 
-        self.n_steps += 1
+        self.step_count += 1
         reward = self.config.action_planning.reward.step
 
         # check if episode is finished
-        if self.n_steps == self.env.max_steps:
+        if self.step_count == self.env.max_steps:
             info = "end"
             done = True
-            self.n_steps = 0
-            reward = self.death_reward
+            self.step_count = 0
+            reward += self.death_reward
             return obs, reward, done, info
 
         # observations
@@ -167,7 +164,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         if self.last_cell[0] == (a, b) and self.last_cell[1] == (a, b) and self.last_cell[2] == (a, b):
             return obs, self.config.action_planning.reward.unsafe, done, info
         current_cell = Grid.get(self.env.grid, a, b)
-        self.last_cell[self.n_steps % 3] = (a, b)
+        self.last_cell[self.step_count % 3] = (a, b)
 
         # Try
 
@@ -185,7 +182,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         info = "violation"
 
         if done:
-            self.n_steps = 0
+            self.step_count = 0
             return obs, reward, done, info
 
         """
