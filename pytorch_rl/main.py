@@ -168,7 +168,7 @@ def main():
                     if current_reward_median > (config.rewards.standard.goal - abs(
                             config.rewards.standard.step * config.optimal_num_steps)):
                         identical_rewards += 1
-                        print("--> rewards close to goal reward -> " + identical_rewards)
+                        print("--> rewards close to goal reward -> " + str(identical_rewards))
 
                     else:
                         identical_rewards = 0

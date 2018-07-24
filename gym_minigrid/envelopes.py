@@ -48,7 +48,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         for controller in self.controllers:
             controller.observe(self.env)
             safe_actions_strings = controller.get_available_actions()
-            if self.config.debug_mode: print("[" + controller.get_name() + "] available_actions: " + str(safe_actions_strings))
+            if self.config.debug_mode: print("  ---> available_actions: " + str(safe_actions_strings))
             if controller.is_active():
                 list_actions.append(safe_actions_strings)
 
@@ -96,4 +96,6 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if self.config.debug_mode: print("##### Environment not modeled by the controllers -> free exploration! ######")
                 obs, reward, done, info = self.env.step(proposed_action)
 
+
+            print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
             return obs, reward, done, info
