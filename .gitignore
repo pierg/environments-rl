@@ -235,3 +235,5 @@ ai-safety-gridworlds/.DS_Store
 A2C/experiments
 gridworld_agent/experiments
 experiments
+evaluations
+results
