@@ -28,7 +28,7 @@ range RoomStatus = 0..1 //Room 0, Room 1
 range Elements = 0..NumberOfElements //Nothing, Door, Water, Light Switch, Dirt, Vase, Wall
 
 set Observations = {observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[Elements].[Elements]}//Left, Front, Right
-set AgentActions = {left,right,forward,toggle,switch,clean, wait}
+set AgentActions = {left,right,forward,toggle,switch,clean}//, wait}
 
 set Alphabet = {Observations,AgentActions}
 
@@ -98,6 +98,6 @@ controller ||C =(ENVIRONMENT)~{Goal}.
 ||CC = (C).
 
 controllerSpec Goal = {
-	safety = {CleanAllowed, SafeForward, MustClean, MustToggle, MustSwitch, ToggleAllowed, SwitchAllowed, DontTurnRightToWall, DontTurnLeftToWall, WaitIfNeccesary}
+	safety = {CleanAllowed, SafeForward, MustClean, MustToggle, MustSwitch, ToggleAllowed, SwitchAllowed}//, DontTurnRightToWall, DontTurnLeftToWall, WaitIfNeccesary}
 	controllable = {AgentActions}
 } 
