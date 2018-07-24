@@ -52,7 +52,7 @@ class DirtWatLightEnv(ExMiniGridEnv):
         # add water
         self.grid.set(5, 3, Water())
         self.grid.set(1, 5, Water())
-        self.grid.set(7, 5, Water())
+        self.grid.set(7, 2, Water())
 
         #add dirt
         self.list_dirt = []
