@@ -113,7 +113,8 @@ while [ $iterations -ne $i ]; do
             replace=${name/v0\",/$replace}
             sed -i 's/"controller": true,/"controller": false,/g' configurations/main.json
             sed -i "s/$name/$replace/" configurations/main.json
-            echo "\n\n...launching the training..."
+            echo "   "
+            echo "..launching the training..."
             echo "------ Without Controller -----"
             python3 ./pytorch_rl/main.py --stop $stop --iterations $i
 
@@ -122,7 +123,3 @@ while [ $iterations -ne $i ]; do
 
     Rscript plot_result.R
 done
-
-
-# echo "...launch visdom server in the background..."
-# python3 -m visdom.server &
