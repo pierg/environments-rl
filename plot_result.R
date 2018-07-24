@@ -34,21 +34,21 @@ autoPlot <- function(array,fileName)
   # first graph with N_step_AVG and N_goal_reached
   max = max(max(N_step_AVG),max(N_goal_reached))
   min = min(min(N_step_AVG),min(N_goal_reached))
-  plot(N_step,N_step_AVG, type = 'l', col="red", ylim=c(min,max), ylab= "")
+  plot(N_step,N_step_AVG, type = 'l', col="red", ylim=c(min - 0.1,max + 0.1), ylab= "")
   lines(N_step,N_goal_reached,type ='l', col="blue")
   legend(1,80,legend = c("N_step_AVG","N_goal_reached"), col = c("red","blue"), lty=1:1, cex=0.8)
 
   # second graph with N_saved and N_death
   max = max(max(N_saved),max(N_death))
   min = min(min(N_saved),min(N_death))
-  plot(N_step,N_saved, type = 'l', col="red", ylim = c(min,max), ylab= "")
+  plot(N_step,N_saved, type = 'l', col="red", ylim = c(min -0.1,max +0.1), ylab= "")
   lines(N_step,N_death,type ='l', col="blue")
   legend(1,30,legend = c("N_saved","N_death"), col = c("red","blue"), lty=1:1, cex=0.8)
 
   #third graph with Reward_mean and Reward_std
   max = max(max(Reward_mean),max(Reward_std))
   min = min(min(Reward_mean),min(Reward_std))
-  plot(N_step,Reward_mean, type = 'l', col="red", ylim = c(min,max), ylab= "")
+  plot(N_step,Reward_mean, type = 'l', col="red", ylim = c(min - 0.1,max + 0.1), ylab= "")
   lines(N_step,Reward_std,type  ='l', col="blue")
   legend(1,0.7,legend = c("Reward_mean","Reward_std"), col = c("red","blue"), lty=1:1, cex=0.8)
 
