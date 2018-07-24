@@ -1,0 +1,60 @@
+/*
+@author: {pmallozzi, ecastellano}
+RLMonitors
+*/
+
+const NumberOfElements = 7
+const Nothing = 0 
+const Door = 1
+const LightSwitch = 2
+const Water = 3
+const Dirt = 4
+const Vase = 5
+const Wall = 6
+const Goal = 7
+
+const LightOff = 0
+const LightOn = 1
+const DoorClose = 0
+const DoorOpen = 1
+
+//Light status of the Room 1. 
+range LightStatus = 0..1 //Off, On 
+//Status of the door in front of the agent (no door in front implies unknown).
+range DoorStatus = 0..1 //Close, Open
+//Room in which the agent is. 
+range RoomStatus = 0..1 //Room 0, Room 1
+//Element that is in front/right/left of the Agent. 
+range Elements = 0..NumberOfElements //Nothing, Door, Water, Light Switch, Dirt, Vase, Wall
+
+set Observations = {observation}
+set AgentActions = {left,right,forward,toggle,switch,clean}
+
+set Alphabet = {Observations,AgentActions}
+
+property DONT_CIRCLE_RIGHT = (right -> W | AgentActions\{right} -> DONT_CIRCLE_RIGHT), 
+W = (right -> S | AgentActions\{right} -> DONT_CIRCLE_RIGHT),
+S = (right -> E | AgentActions\{right} -> DONT_CIRCLE_RIGHT), 
+E = (right -> ERROR | AgentActions\{right} -> DONT_CIRCLE_RIGHT).
+
+
+property DONT_CIRCLE_LEFT = (left -> W | AgentActions\{left} -> DONT_CIRCLE_LEFT), 
+W = (left -> S | AgentActions\{left} -> DONT_CIRCLE_LEFT),
+S = (left -> E | AgentActions\{left} -> DONT_CIRCLE_LEFT), 
+E = (left -> ERROR | AgentActions\{left} -> DONT_CIRCLE_LEFT).
+
+//Defines the alternation between actions and observations.
+AGENT = AGENT_OBS,
+AGENT_DO = (AgentActions -> AGENT_OBS),
+AGENT_OBS = (Observations -> AGENT_DO).
+
+||ENVIRONMENT = (AGENT).
+
+controller ||C =(ENVIRONMENT)~{Goal}.  
+
+||CC = (C).
+
+controllerSpec Goal = {
+	safety = {DONT_CIRCLE_RIGHT, DONT_CIRCLE_LEFT}
+	controllable = {AgentActions}
+} 
