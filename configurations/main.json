@@ -28,10 +28,12 @@
     },
     "controllers": {
         "reachability": [
-            "config_2/reachability_doorway", "config_2/reachability_goal"
+            "config_2/reachability_doorway",
+            "config_2/reachability_goal"
         ],
         "safety": [
-            "config_2/safety_main", "config_2/safety_loop"
+            "config_2/safety_main",
+            "config_2/safety_loop"
         ]
     },
     "stop_learning": 480,
