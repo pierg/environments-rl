@@ -59,8 +59,21 @@ autoPlot <- function(array,fileName)
 
 #create the plot for each csv file in evaluation
 for (csvFile in Sys.glob("evaluations/*.csv")){
+  # the file don't test to plot csv with less than line of datas or with NaN (Not a Number)
+  not_NaN_in_csv = TRUE
   array = read.csv(csvFile)
-  Name = substr(csvFile,1, nchar(csvFile)-4)      #delete the csv instance
-  Name = substr(Name,13, nchar(Name))
-  autoPlot(array,Name)                            # call the function which plot each graphical curve
+  if (dim(array)[1] > 1) {
+    for(i in seq(1,length(array))) {
+      for(j in seq(1,dim(array)[1])) {
+        if (NaN %in% array[j,i]) {
+          not_NaN_in_csv = FALSE
+        }
+      }
+    }
+    if (not_NaN_in_csv) {
+      Name = substr(csvFile,1, nchar(csvFile)-4)      #delete the csv instance
+      Name = substr(Name,13, nchar(Name))
+      autoPlot(array,Name)                            # call the function which plot each graphical curve
+    }
+  }
 }

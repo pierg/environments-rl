@@ -67,17 +67,116 @@ autoPlot <- function(array_mo,array_nomo,fileName)
 }
 
 
+N_whitout_mo = 0
+N_whit_mo = 0
+N_total_death_nomo = 0
+N_total_death_mo = 0
+N_death_by_end_nomo = 0
+N_death_by_end_mo = 0
+N_death_env_nomo = 0
+N_death_env_mo = 0
+
+N_saved_nomo = 0
+N_saved_mo = 0
+
+N_episode_nomo = 0
+N_episode_mo = 0
+N_steps_nomo = 0
+N_steps_mo = 0
+N_Updates_nomo = 0
+N_Updates_mo = 0
+
+not_choose_no_mo = TRUE
+not_choose_mo = TRUE
+
 #create the plot for each csv file in evaluation
-for (csvFile in Sys.glob("evaluations/*_2_0.csv")){
+for (csvFile in Sys.glob("evaluations/*_2.csv")){
   #charge the file with no monitor
-  array_nomo = read.csv(csvFile)
-  Name_nomo = substr(csvFile,1, nchar(csvFile)-4)      #delete the csv instance
-  Name_nomo = substr(Name_nomo,13,nchar(Name_nomo))
+  not_NaN_in_csv = TRUE
+  array = read.csv(csvFile)
+  if (dim(array)[1] > 1) {
+    for(i in seq(1,length(array))) {
+      for(j in seq(1,dim(array)[1])) {
+        if (NaN %in% array[j,i]) {
+          not_NaN_in_csv = FALSE
+        }
+      }
+    }
+    if (not_NaN_in_csv) {
+      N_whitout_mo = N_whitout_mo + 1
+      N_total_death_nomo = N_total_death_nomo + array[dim(array)[1], 20]
+      N_death_by_end_nomo = N_death_by_end_nomo + array[dim(array)[1], 19]
+      N_death_env_nomo = N_death_env_nomo + array[dim(array)[1], 17]
+      N_saved_nomo = N_saved_nomo + array[dim(array)[1], 18]
+      N_episode_nomo = N_episode_nomo + array[dim(array)[1], 21]
+      N_steps_nomo = N_steps_nomo + array[dim(array)[1], 2]
+      N_Updates_nomo = N_Updates_nomo + array[dim(array)[1], 1]
+
+      if (not_choose_no_mo) {
+        array_nomo = read.csv(csvFile)
+        Name_nomo = substr(csvFile,1, nchar(csvFile)-4)      #delete the csv instance
+        Name_nomo = substr(Name_nomo,13,nchar(Name_nomo))
+        not_chosse_no_mo = FALSE
+      }
+    }
+  }
   #charge the file with monitor
+  not_NaN_in_csv = TRUE
   csvFile=sub("_2","",csvFile)
-  array_mo = read.csv(csvFile)
-  Name_mo = substr(csvFile,1, nchar(csvFile)-4)      #delete the csv instance
-  Name_mo = substr(Name_mo,13,nchar(Name_mo))
-  
-  autoPlot(array_mo,array_nomo,Name_mo)                            # call the function which plot each graphical curve
+  array = read.csv(csvFile)
+  if (dim(array)[1] > 1) {
+    for(i in seq(1,length(array))) {
+      for(j in seq(1,dim(array)[1])) {
+        if (NaN %in% array[j,i]) {
+          not_NaN_in_csv = FALSE
+        }
+      }
+    }
+    if (not_NaN_in_csv) {
+      N_whit_mo = N_whit_mo + 1
+      N_total_death_mo = N_total_death_mo + array[dim(array)[1], 20]
+      N_death_by_end_mo = N_death_by_end_mo + array[dim(array)[1], 19]
+      N_death_env_mo = N_death_env_mo + array[dim(array)[1], 17]
+      N_saved_mo = N_saved_mo + array[dim(array)[1], 18]
+      N_episode_mo = N_episode_mo + array[dim(array)[1], 21]
+      N_steps_mo = N_steps_mo + array[dim(array)[1], 2]
+      N_Updates_mo = N_Updates_mo + array[dim(array)[1], 1]
+
+      if (not_choose_mo) {
+        array_mo = read.csv(csvFile)
+        Name_mo = substr(csvFile,1, nchar(csvFile)-4)      #delete the csv instance
+        Name_mo = substr(Name_mo,13,nchar(Name_mo))
+        not_choose_mo = FALSE
+      }
+    }
+  }
 }
+autoPlot(array_mo,array_nomo,Name_mo)                            # call the function which plot each graphical curve
+
+N_total_death_mo = N_total_death_mo / N_whit_mo
+N_death_by_end_mo = N_death_by_end_mo / N_whit_mo
+N_death_env_mo = N_death_env_mo / N_whit_mo
+N_saved_mo = N_saved_mo / N_whit_mo
+N_episode_mo = N_episode_mo / N_whit_mo
+N_steps_mo = N_steps_mo / N_whit_mo
+N_Updates_mo = N_Updates_mo / N_whit_mo
+
+N_total_death_nomo = N_total_death_nomo / N_whitout_mo
+N_death_by_end_nomo = N_death_by_end_nomo / N_whitout_mo
+N_death_env_nomo = N_death_env_nomo / N_whitout_mo
+N_saved_nomo = N_saved_nomo / N_whitout_mo
+N_episode_nomo = N_episode_nomo / N_whitout_mo
+N_steps_nomo = N_steps_nomo / N_whitout_mo
+N_Updates_nomo = N_Updates_nomo / N_whitout_mo
+
+# print all the mean info
+print("Monitor Data: ")
+print(c("N_total_death : ", N_total_death_mo, "  N_death_by_end : ", N_death_by_end_mo, "  N_death_by_Environment : ", N_death_env_mo))
+print(c("N_saved : ", N_saved_mo))
+print(c("N_Episodes", N_episode_mo, "  N_steps : ", N_steps_mo, "  N_Updates : ", N_Updates_mo))
+
+print("                            ")
+print("No Monitor Data: ")
+print(c("N_total_death : ", N_total_death_nomo, "  N_death_by_end : ", N_death_by_end_nomo, "  N_death_by_Environment : ", N_death_env_nomo))
+print(c("N_saved : ", N_saved_nomo))
+print(c("N_Episodes", N_episode_nomo, "  N_steps : ", N_steps_nomo, "  N_Updates : ", N_Updates_nomo))
