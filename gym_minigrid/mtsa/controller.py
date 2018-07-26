@@ -41,6 +41,7 @@ class Controller(Machine):
         with open(transitions_path, 'r') as inf:
             self.transitions = eval(inf.read())
 
+        # super().__init__("mtsa", self.states, self.transitions, 'S0M1', notify )
         Machine.__init__(self, states=self.states, transitions=self.transitions, initial='S0')
 
 
@@ -57,7 +58,7 @@ class Controller(Machine):
     def observe(self, observations):
         self.observations = observations
         self.fill_observations()
-        print(self.controller_name + self.controller_type + "   state: " + str(self.state) + "    obs: " + str([x for x in Controller.obs if Controller.obs[x] == True]))
+        print(self.controller_name + "-" + self.controller_type + "   state: " + str(self.state) + "    obs: " + str([x for x in Controller.obs if Controller.obs[x] == True]))
         self.trigger('observation')
 
         # Check if the controller is active
@@ -124,6 +125,9 @@ class Controller(Machine):
         Controller.obs["wall-left"] = p.at_left_is(self.observations, "wall")
         Controller.obs["wall-front"] = p.in_front_of(self.observations, "wall")
         Controller.obs["wall-right"] = p.at_right_is(self.observations, "wall")
+        Controller.obs["goal-left"] = p.at_left_is(self.observations, "goal")
+        Controller.obs["goal-front"] = p.in_front_of(self.observations, "goal")
+        Controller.obs["goal-right"] = p.at_right_is(self.observations, "goal")
 
 
 
@@ -151,7 +155,10 @@ class Controller(Machine):
         "vase-left": False,
         "wall-right": False,
         "wall-front": False,
-        "wall-left": False
+        "wall-left": False,
+        "goal-right": False,
+        "goal-front": False,
+        "goal-left": False
     }
 
 
@@ -230,4 +237,13 @@ class Controller(Machine):
 
     def wall_forward(self):
         return Controller.obs["wall-front"]
+
+    def goal_left(self):
+        return Controller.obs["goal-left"]
+
+    def goal_right(self):
+        return Controller.obs["goal-right"]
+
+    def goal_forward(self):
+        return Controller.obs["goal-front"]
 

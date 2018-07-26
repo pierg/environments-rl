@@ -1,0 +1,1 @@
+N_updates,N_timesteps,FPS,Reward_mean,Reward_median,Reward_min,Reward_max,Reward_std,Entropy,Value_loss,Action_loss,N_episodes,N_blocked_actions,N_violation,N_goal_reached,N_step_AVG,N_death,N_saved,N_death_by_end,Total_death,N_Total_episodes,N_break,Info_saved
