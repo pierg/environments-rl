@@ -26,8 +26,8 @@ range DoorStatus = 0..1 //Close, Open
 //Room in which the agent is. 
 range RoomStatus = 0..1 //Room 0, Room 1
 //Element that is in front/right/left of the Agent. 
-range Elements = -1..0 //Nothing, Door, Water, Light Switch, Dirt, Vase, Wall
-range ExtendedElements = -2..0
+range Elements = -1..Nothing //Goal, Nothing, Door, Light Switch, Water, Dirt, Vase, Wall
+range ExtendedElements = -2..Nothing
 
 
 set Observations = {observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[Elements].[Elements]}//Left, Front, Right

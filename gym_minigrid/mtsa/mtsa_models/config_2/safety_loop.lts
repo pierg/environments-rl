@@ -3,7 +3,8 @@
 RLMonitors
 */
 
-const NumberOfElements = 7
+const NumberOfElements = 6
+const Unknown = -2
 const Nothing = 0 
 const Door = 1
 const LightSwitch = 2
@@ -11,7 +12,7 @@ const Water = 3
 const Dirt = 4
 const Vase = 5
 const Wall = 6
-const Goal = 7
+const Goal = -1
 
 const LightOff = 0
 const LightOn = 1
@@ -25,7 +26,7 @@ range DoorStatus = 0..1 //Close, Open
 //Room in which the agent is. 
 range RoomStatus = 0..1 //Room 0, Room 1
 //Element that is in front/right/left of the Agent. 
-range Elements = 0..NumberOfElements //Nothing, Door, Water, Light Switch, Dirt, Vase, Wall
+range Elements = -1..NumberOfElements //Nothing, Door, Water, Light Switch, Dirt, Vase, Wall
 
 set Observations = {observation}
 set AgentActions = {left,right,forward,toggle,switch,clean}
