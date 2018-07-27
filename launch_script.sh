@@ -124,3 +124,4 @@ while [ $iterations -ne $i ]; do
 done
 
 Rscript plot_result.R
+Rscript plot_monitor.R
