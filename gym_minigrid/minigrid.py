@@ -10,7 +10,7 @@ from gym_minigrid.rendering import *
 CELL_PIXELS = 32
 
 # Number of cells (width and height) in the agent view
-AGENT_VIEW_SIZE = 5
+AGENT_VIEW_SIZE = 7
 
 # Size of the array given as an observation to the agent
 OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE, 3)
@@ -1080,7 +1080,6 @@ class MiniGridEnv(gym.Env):
             done = True
 
         obs = self.gen_obs()
-
         return obs, reward, done, {}
 
     def gen_obs_grid(self):

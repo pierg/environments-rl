@@ -8,8 +8,8 @@
     "goal": 1,
     "step": 0,
     "unsafe":-0.3,
-    "on_plan": 0.1,
-    "off_plan": -0.1
+    "on_plan": 0.01,
+    "off_plan": -0.15
   },
   "cleaningenv":{
     "clean":0.1

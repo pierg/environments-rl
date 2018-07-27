@@ -385,13 +385,6 @@ class ExMiniGridEnv(MiniGridEnv):
         # Default actions and cells
         obs, reward, done, info = super().step(action)
 
-
-
-        if self.step_count == self.max_steps:
-            info = "end"
-            self.step_count = 0
-            done = True
-
         # Setting up costums cells and rewards
 
         reward += self.config.rewards.standard.step
@@ -402,12 +395,6 @@ class ExMiniGridEnv(MiniGridEnv):
                 done = True
                 reward += self.config.rewards.standard.death
                 info = "died"
-            # Step into Goal
-            if fwd_cell is not None and fwd_cell.type == 'goal':
-                print("GOAL REACHED!")
-                done = True
-                reward += self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
-                info = "goal"
 
         if action == self.actions.toggle:
             # Cleaning Dirt

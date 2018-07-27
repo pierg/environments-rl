@@ -3,7 +3,6 @@ from configurations import config_grabber as cg
 from .action_planning_goap import *
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.minigrid import Goal
-from gym_minigrid.monitors.patterns.response import *
 
 import gym
 
@@ -70,25 +69,6 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
 
     def step(self, proposed_action):
-        self.goal_cell = None
-
-        self.secondary_goals = []
-
-        #  Every goal that is not going to the green square is a secondary goal
-        #  Here we parse them from the config
-        for goal in self.config.action_planning.secondary_goals:
-            if goal == 'goal_safe_zone':
-                self.secondary_goals.append(goal_safe_zone)
-            elif goal == 'goal_turn_around':
-                self.secondary_goals.append(goal_turn_around)
-            elif goal == 'goal_safe_east':
-                self.secondary_goals.append(goal_safe_east)
-            elif goal == 'goal_clear_west':
-                self.secondary_goals.append(goal_clear_west)
-
-        self.secondary_goals = tuple(self.secondary_goals)
-
-        end = False
         # To be returned to the agent
         obs, reward, done, info = None, None, None, None
 
@@ -172,10 +152,10 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             if current_cell.type == "goal":
                 done = True
                 if info == "plan_finished":
-                    reward += self.config.action_planning.reward.goal
+                    reward += self.config.rewards.standard.goal
                     info = "goal+plan_finished"
                 else:
-                    reward += self.config.action_planning.reward.goal
+                    reward += self.config.rewards.standard.goal
                     info = "goal"
             elif current_cell.type == "unsafe":
                 reward += self.config.action_planning.reward.unsafe
@@ -210,7 +190,6 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         if reward == self.config.action_planning.reward.step:
             bonus = -1 * self.config.action_planning.reward.step / math.sqrt(newCnt)
             reward += bonus
-
         return obs, reward, done, info
     # ---------------------- ACTION PLANNER END ----------------------#
 

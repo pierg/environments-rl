@@ -135,7 +135,7 @@ def main():
         rollouts.cuda()
     start = time.time()
     for j in range(num_updates):
-        if identical_rewards == stop_learning and last_reward_mean == config.rewards:
+        if identical_rewards == stop_learning and last_reward_mean >= config.rewards.standard.goal - 0.05:
             print("stop learning")
             break
         for step in range(args.num_steps):
@@ -165,10 +165,10 @@ def main():
                     current_reward_median = evaluator.get_reward_median()
 
                     # Rewards are close to the goal reward
-                    if current_reward_median > (config.rewards.standard.goal - abs(
+                    if current_reward_median >= (config.rewards.standard.goal - abs(
                             config.rewards.standard.step * config.optimal_num_steps)):
                         identical_rewards += 1
-                        print("--> rewards close to goal reward -> " + identical_rewards)
+                        print("--> rewards close to goal reward -> " + str(identical_rewards))
 
                     else:
                         identical_rewards = 0

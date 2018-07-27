@@ -288,11 +288,10 @@ register(
             goal = 1
             step = 0
             unsafe = -0.3
-            on_plan = 0.1
-            off_plan = -0.1
+            on_plan = 0.01
+            off_plan = -0.15
             for current_monitor in rewards:
                 if current_monitor == "action_planning":
-                    print("TEST")
                     goal = current_monitor.goal
                     step = current_monitor.step
                     unsafe = current_monitor.unsafe

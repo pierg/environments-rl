@@ -43,7 +43,7 @@ autoPlot <- function(array,fileName)
   min = min(min(N_saved),min(N_death))
   plot(N_step,N_saved, type = 'l', col="red", ylim = c(min,max), ylab= "")
   lines(N_step,N_death,type ='l', col="blue")
-  legend(1,30,legend = c("N_saved","N_death"), col = c("red","blue"), lty=1:1, cex=0.8)
+  legend(1,5,legend = c("N_saved","N_death"), col = c("red","blue"), lty=1:1, cex=0.8)
 
   #third graph with Reward_mean and Reward_std
   max = max(max(Reward_mean),max(Reward_std))
@@ -60,8 +60,20 @@ autoPlot <- function(array,fileName)
 
 #create the plot for each csv file in evaluation
 for (csvFile in Sys.glob("evaluations/*.csv")){
+  not_NaN_in_csv = TRUE
   array = read.csv(csvFile)
-  Name = substr(csvFile,1, nchar(csvFile)-4)      #delete the csv instance
-  Name = substr(Name,13, nchar(Name))
-  autoPlot(array,Name)                            # call the function which plot each graphical curve
+  if (dim(array)[1] > 1) {
+    for(i in seq(1,length(array))) {
+      for(j in seq(1,dim(array)[1])) {
+        if (NaN %in% array[j,i]) {
+          not_NaN_in_csv = FALSE
+        }
+      }
+    }
+    if (not_NaN_in_csv) {
+      Name = substr(csvFile,1, nchar(csvFile)-4)      #delete the csv instance
+      Name = substr(Name,13, nchar(Name))
+      autoPlot(array,Name)                            # call the function which plot each graphical curve
+    }
+  }
 }
