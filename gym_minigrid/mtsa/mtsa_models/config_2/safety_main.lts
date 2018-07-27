@@ -60,7 +60,7 @@ ltl_property DontTurnRightToWall = [](right -> !(OnLeft[Wall] && !Wait)) //|| In
 ltl_property DontTurnLeftToWall = [](left -> !(OnRight[Wall] && !Wait)) 
 
 //When to go forward
-ltl_property SafeForward = [](forward -> InFrontOf[Nothing] || (InFrontOf[Door] && DoorOpen))
+ltl_property SafeForward = [](forward -> InFrontOf[Nothing] || (InFrontOf[Door] && DoorOpen) || InFrontOf[Goal])
 ltl_property StepOnGoal = []!({AgentActions}\{forward} && InFrontOf[Goal])
 
 //When to clean
