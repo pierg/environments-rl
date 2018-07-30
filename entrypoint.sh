@@ -3,7 +3,7 @@
 # Pull latest changes in the repositories
 echo "...updating repositories..."
 pwd
-git git reset --hard HEAD
+git reset --hard HEAD
 git clean -f
 git pull
 pwd
