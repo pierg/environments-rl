@@ -83,7 +83,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             self.reset_planner()
 
         self.step_count += 1
-        reward = self.config.action_planning.reward.step
+        reward = self.config.rewards.standard.step
 
         # check if episode is finished
         if self.step_count == self.env.max_steps:
@@ -159,7 +159,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
                     info = "goal"
             elif current_cell.type == "unsafe":
                 reward += self.config.action_planning.reward.unsafe
-        info = "violation"
+                info = "violation"
 
         if done:
             self.step_count = 0
@@ -187,8 +187,8 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         newCnt = preCnt + 1
         self.counts[tup] = newCnt
 
-        if reward == self.config.action_planning.reward.step:
-            bonus = -1 * self.config.action_planning.reward.step / math.sqrt(newCnt)
+        if reward == self.config.rewards.standard.step:
+            bonus = -1 * self.config.rewards.standard.step / math.sqrt(newCnt)
             reward += bonus
         return obs, reward, done, info
     # ---------------------- ACTION PLANNER END ----------------------#
@@ -224,7 +224,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
                 else:
                     return self.config.action_planning.reward.on_plan * self.plan_tracker, info
         else:
-            return self.config.action_planning.reward.step, info
+            return self.config.rewards.standard.step, info
 
     def reset_planner(self):
         self.action_plan = []

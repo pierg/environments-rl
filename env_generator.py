@@ -285,15 +285,11 @@ register(
               'w') as config:
         action_planning = {}
         if hasattr(elements,"action_planning"):
-            goal = 1
-            step = 0
             unsafe = -0.3
             on_plan = 0.01
             off_plan = -0.15
             for current_monitor in rewards:
                 if current_monitor == "action_planning":
-                    goal = current_monitor.goal
-                    step = current_monitor.step
                     unsafe = current_monitor.unsafe
                     on_plan = current_monitor.on_plan
                     off_plan = current_monitor.off_plan
@@ -302,8 +298,6 @@ register(
                 "random_unsafe_obj":int("{0}".format(elements.action_planning.random_unsafe_obj)),
                 "secondary_goals":"{0}".format(elements.action_planning.secondary_goals),
                 "reward": {
-                    "goal": float( "{0:.2f}".format(goal)),
-                    "step": float("{0:.2f}".format(step)),
                     "unsafe": float("{0:.2f}".format(unsafe)),
                     "on_plan": float("{0:.2f}".format(on_plan)),
                     "off_plan": float("{0:.2f}".format(off_plan)),

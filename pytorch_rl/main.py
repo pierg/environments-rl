@@ -135,7 +135,7 @@ def main():
         rollouts.cuda()
     start = time.time()
     for j in range(num_updates):
-        if identical_rewards == stop_learning and last_reward_mean >= config.rewards.standard.goal - 0.05:
+        if identical_rewards == stop_learning and last_reward_mean >= config.rewards.standard.goal - 0.02:
             print("stop learning")
             break
         for step in range(args.num_steps):
