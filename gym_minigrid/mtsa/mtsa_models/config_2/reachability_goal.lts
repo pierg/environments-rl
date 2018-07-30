@@ -1,0 +1,78 @@
+/*
+@author: {pmallozzi, ecastellano}
+RLMonitors
+*/
+
+const NumberOfElements = 6
+const Unknown = -2
+const Nothing = 0 
+const Door = 1
+const LightSwitch = 2
+const Water = 3
+const Dirt = 4
+const Vase = 5
+const Wall = 6
+const Goal = -1
+
+const LightOff = 0
+const LightOn = 1
+const DoorClose = 0
+const DoorOpen = 1
+
+//Light status of the Room 1. 
+range LightStatus = 0..1 //Off, On 
+//Status of the door in front of the agent (no door in front implies unknown).
+range DoorStatus = 0..1 //Close, Open
+//Room in which the agent is. 
+range RoomStatus = 0..1 //Room 0, Room 1
+//Element that is in front/right/left of the Agent. 
+range Elements = -1..Nothing //Goal, Nothing, Door, Light Switch, Water, Dirt, Vase, Wall
+range ExtendedElements = -2..Nothing
+
+
+set Observations = {observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[Elements].[Elements]}//Left, Front, Right
+set AgentActions = {left,right,forward}
+set Alphabet = {Observations,AgentActions}
+
+fluent InFrontOf[e:Elements] = <observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[e].[Elements], Observations\{observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[e].[Elements]}> initially 0 
+fluent LightOn = <observation.[LightOn].[DoorStatus].[RoomStatus].[Elements].[Elements].[Elements], Observations\{observation.[LightOn].[DoorStatus].[RoomStatus].[Elements].[Elements].[Elements]}> initially 0 
+fluent DoorOpen = <observation.[LightStatus].[DoorOpen].[RoomStatus].[Elements].[Elements].[Elements], Observations\{observation.[LightStatus].[DoorOpen].[RoomStatus].[Elements].[Elements].[Elements]}> initially 0 
+fluent OnLeft[e:Elements] = <observation.[LightStatus].[DoorStatus].[RoomStatus].[e].[Elements].[Elements], Observations\{observation.[LightStatus].[DoorStatus].[RoomStatus].[e].[Elements].[Elements]}> initially 0 
+fluent OnRight[e:Elements] = <observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[Elements].[e], Observations\{observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[Elements].[e]}> initially 0 
+
+fluent Forward = <forward, Alphabet\{forward}> initially 0
+
+ltl_property WinIfReachGoal = [](forward -> (InFrontOf[Goal]))
+
+
+//Defines the alternation between actions and observations.
+AGENT = AGENT_OBS,
+AGENT_DO = (AgentActions -> AGENT_OBS),
+AGENT_OBS = (Observations -> AGENT_DO).
+
+
+ROTATE = (observation.[ls:LightStatus].[ds:DoorStatus].[rs:RoomStatus].[l:Elements].[f:Elements].[r:Elements] -> ROTATE[ls][ds][rs][l][f][r][Unknown]),
+ROTATE[ls:LightStatus].[ds:DoorStatus].[rs:RoomStatus][l:Elements].[f:Elements].[r:Elements][b:ExtendedElements] = (right -> ROTATE_RIGHT[ls][ds][rs][l][f][r][b] | left -> ROTATE_LEFT[ls][ds][rs][l][f][r][b]
+												| observation.[ls2:LightStatus].[ds2:DoorStatus].[rs2:RoomStatus].[l].[f].[r] -> ROTATE[ls2][ds2][rs2][l][f][r][b]), 
+ROTATE_LEFT[ls:LightStatus].[ds:DoorStatus].[rs:RoomStatus][l:Elements].[f:Elements][r:Elements][b:ExtendedElements] = ( when (b==Unknown) observation.[ls].[ds].[rs].[x:Elements].[l].[f] -> ROTATE[ls][ds][rs][x][l][f][r] | 
+																		 when (b!=Unknown) observation.[LightStatus].[DoorStatus].[RoomStatus].[b].[l].[f] -> ROTATE[ls][ds][rs][b][l][f][r]),
+ROTATE_RIGHT[ls:LightStatus].[ds:DoorStatus].[rs:RoomStatus][l:Elements].[f:Elements][r:Elements][b:ExtendedElements] = (when (b==Unknown) observation.[ls].[ds].[rs].[f].[r].[x:Elements] -> ROTATE[ls][ds][rs][f][r][x][l] | 
+																		when (b!=Unknown) observation.[ls].[ds].[rs].[f].[r].[b] -> ROTATE[ls][ds][rs][f][r][b][l] ).
+
+INIT = (observation.[LightStatus].[DoorStatus].[1].[Nothing].[Nothing].[Goal] -> CONTINUE | observation.[LightStatus].[DoorStatus].[1].[Nothing].[Goal].[Nothing] -> CONTINUE | observation.[LightStatus].[DoorStatus].[1].[Goal].[Nothing].[Nothing] -> CONTINUE), 
+CONTINUE = (observation.[ls:LightStatus].[ds:DoorStatus].[rs:RoomStatus].[l:Elements].[f:Elements].[r:Elements] ->  CONTINUE).
+
+
+||ENVIRONMENT = (AGENT || ROTATE || INIT).
+
+
+controller ||C =(ENVIRONMENT)~{Goal}.  
+
+||CC = (C).
+
+controllerSpec Goal = {
+	safety = {WinIfReachGoal}
+	liveness = {Forward}
+	reachability	
+	controllable = {AgentActions}
+} 

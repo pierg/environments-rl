@@ -1,8 +1,9 @@
+import random
+
 from configurations import config_grabber as cg
 
 from .action_planning_goap import *
 from gym_minigrid.extendedminigrid import *
-from gym_minigrid.minigrid import Goal
 
 import gym
 
@@ -230,4 +231,3 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         self.action_plan = []
         self.action_plan_size = 0
         self.plan_tracker = 0
-

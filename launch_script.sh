@@ -119,13 +119,8 @@ while [ $iterations -ne $i ]; do
 
     fi
     let "i+=1"
-    echo "ploting results"
+
 done
 
-# plot the result of the experience
 Rscript plot_result.R
 Rscript plot_monitor.R
-
-
-# echo "...launch visdom server in the background..."
-# python3 -m visdom.server &

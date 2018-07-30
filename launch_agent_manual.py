@@ -25,6 +25,7 @@ def main():
 
 
     cg.Configuration.set("training_mode", False)
+    cg.Configuration.set("debug_mode", True)
 
     parser = OptionParser()
     parser.add_option(
@@ -87,11 +88,20 @@ def main():
             action = env.actions.toggle
         elif keyName == 'PAGE_UP':
             action = env.actions.pickup
+            action = env.env.actions.forward
+            print("unknown key %s, going forward" % keyName)
+            return
         elif keyName == 'PAGE_DOWN':
             action = env.actions.drop
+            action = env.env.actions.forward
+            print("unknown key %s, going forward" % keyName)
+            return
 
         elif keyName == 'CTRL':
             action = env.actions.wait
+            action = env.env.actions.forward
+            print("unknown key %s, going forward" % keyName)
+            return
 
         else:
             print("unknown key %s" % keyName)

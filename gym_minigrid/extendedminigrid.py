@@ -372,6 +372,10 @@ class ExMiniGridEnv(MiniGridEnv):
         super().__init__(grid_size, max_steps, see_through_walls, seed)
         self.actions = ExMiniGridEnv.Actions
 
+        # Restricting action_space to the first N actions
+        first_n_actions_available = 4
+        self.action_space = spaces.Discrete(first_n_actions_available)
+
         # Grab configuration
         self.config = cg.Configuration.grab()
 
@@ -385,6 +389,11 @@ class ExMiniGridEnv(MiniGridEnv):
         # Default actions and cells
         obs, reward, done, info = super().step(action)
 
+        if self.step_count == self.max_steps:
+            info = "end"
+            self.step_count = 0
+            done = True
+
         # Setting up costums cells and rewards
 
         reward += self.config.rewards.standard.step
@@ -395,6 +404,14 @@ class ExMiniGridEnv(MiniGridEnv):
                 done = True
                 reward += self.config.rewards.standard.death
                 info = "died"
+            # Step into Goal
+            elif fwd_cell is not None and fwd_cell.type == 'goal':
+                print("GOAL REACHED!")
+                done = True
+                reward += self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
+                info = "goal"
+            else:
+                reward = self.config.rewards.actions.forward
 
         if action == self.actions.toggle:
             # Cleaning Dirt

@@ -1,0 +1,104 @@
+/*
+@author: {pmallozzi, ecastellano}
+RLMonitors
+*/
+
+const NumberOfElements = 6
+const Unknown = -2
+const Nothing = 0 
+const Door = 1
+const LightSwitch = 2
+const Water = 3
+const Dirt = 4
+const Vase = 5
+const Wall = 6
+const Goal = -1
+
+const LightOff = 0
+const LightOn = 1
+const DoorClose = 0
+const DoorOpen = 1
+
+//Light status of the Room 1. 
+range LightStatus = 0..1 //Off, On 
+//Status of the door in front of the agent (no door in front implies unknown).
+range DoorStatus = 0..1 //Close, Open
+//Room in which the agent is. 
+range RoomStatus = 0..1 //Room 0, Room 1
+//Element that is in front/right/left of the Agent. 
+range Elements = -1..NumberOfElements //Nothing, Door, Water, Light Switch, Dirt, Vase, Wall
+
+set Observations = {observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[Elements].[Elements]}//Left, Front, Right
+set AgentActions = {left,right,forward,toggle,switch,clean}//, wait}
+
+set Alphabet = {Observations,AgentActions}
+
+fluent InFrontOf[e:Elements] = <observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[e].[Elements], Observations\{observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[e].[Elements]}> initially 0 
+fluent LightOn = <observation.[LightOn].[DoorStatus].[RoomStatus].[Elements].[Elements].[Elements], Observations\{observation.[LightOn].[DoorStatus].[RoomStatus].[Elements].[Elements].[Elements]}> initially 0 
+fluent DoorOpen = <observation.[LightStatus].[DoorOpen].[RoomStatus].[Elements].[Elements].[Elements], Observations\{observation.[LightStatus].[DoorOpen].[RoomStatus].[Elements].[Elements].[Elements]}> initially 0 
+fluent OnLeft[e:Elements] = <observation.[LightStatus].[DoorStatus].[RoomStatus].[e].[Elements].[Elements], Observations\{observation.[LightStatus].[DoorStatus].[RoomStatus].[e].[Elements].[Elements]}> initially 0 
+fluent OnRight[e:Elements] = <observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[Elements].[e], Observations\{observation.[LightStatus].[DoorStatus].[RoomStatus].[Elements].[Elements].[e]}> initially 0 
+fluent Wait = <wait, AgentActions\{wait}>
+
+property DONT_CIRCLE_RIGHT = (right -> W | AgentActions\{right} -> DONT_CIRCLE_RIGHT), 
+W = (right -> S | AgentActions\{right} -> DONT_CIRCLE_RIGHT),
+S = (right -> E | AgentActions\{right} -> DONT_CIRCLE_RIGHT), 
+E = (right -> ERROR | AgentActions\{right} -> DONT_CIRCLE_RIGHT).
+
+
+property DONT_CIRCLE_LEFT = (left -> W | AgentActions\{left} -> DONT_CIRCLE_LEFT), 
+W = (left -> S | AgentActions\{left} -> DONT_CIRCLE_LEFT),
+S = (left -> E | AgentActions\{left} -> DONT_CIRCLE_LEFT), 
+E = (left -> ERROR | AgentActions\{left} -> DONT_CIRCLE_LEFT).
+
+//Do not rotate to the side to the side where is a wall. 
+//I added the wait to avoid the case in which the Agent gets stucked in a corner. 
+//@@@
+//@A@
+//@ @
+ltl_property DontTurnRightToWall = [](right -> !(OnLeft[Wall] && !Wait)) //|| InFrontOf[Goal]
+ltl_property DontTurnLeftToWall = [](left -> !(OnRight[Wall] && !Wait)) 
+
+//When to go forward
+ltl_property SafeForward = [](forward -> InFrontOf[Nothing] || (InFrontOf[Door] && DoorOpen) || InFrontOf[Goal])
+ltl_property StepOnGoal = []!({AgentActions}\{forward} && InFrontOf[Goal])
+
+//When to clean
+ltl_property MustClean = []!({AgentActions}\{clean} && InFrontOf[Dirt] )
+ltl_property CleanAllowed = [](clean -> InFrontOf[Dirt])
+
+//When to toggle
+ltl_property MustToggle = []!({AgentActions}\{toggle} &&  (InFrontOf[Door] && !DoorOpen))
+ltl_property ToggleAllowed = [](toggle -> (InFrontOf[Door] && !DoorOpen))
+
+//When to switch
+ltl_property MustSwitch = []!({AgentActions}\{switch} &&  (InFrontOf[LightSwitch] && !LightOn))
+ltl_property SwitchAllowed = [](switch -> ((InFrontOf[LightSwitch] && !LightOn)))
+
+ltl_property WaitIfNeccesary = [] (wait -> (OnLeft[Wall] && OnRight[Wall] && !(InFrontOf[Nothing] || (InFrontOf[Door]  && DoorOpen))))
+
+//Defines the alternation between actions and observations.
+AGENT = AGENT_OBS,
+AGENT_DO = (AgentActions -> AGENT_OBS),
+AGENT_OBS = (Observations -> AGENT_DO).
+
+//Restrict the observations of the LightStatus to change whenever you do switch.
+LIGHT = (observation.[LightOn].[DoorStatus].[RoomStatus].[Elements].[Elements].[Elements] -> LIGHT_ON   | observation.[LightOff].[DoorStatus].[RoomStatus].[Elements].[Elements].[Elements] -> LIGHT_OFF), 
+LIGHT_OFF = (switch -> LIGHT_ON | observation.[LightOff].[DoorStatus].[RoomStatus].[Elements].[Elements].[Elements] -> LIGHT_OFF),
+LIGHT_ON = (switch -> LIGHT_OFF | observation.[LightOn].[DoorStatus].[RoomStatus].[Elements].[Elements].[Elements] -> LIGHT_ON).
+
+//Restrict the observations of the DoorStatus to change whenever you do toggle.
+DOOR = ( observation.[LightStatus].[DoorOpen].[RoomStatus].[Elements].[Elements].[Elements] -> DOOR_OPEN | observation.[LightStatus].[DoorClose].[RoomStatus].[Elements].[Elements].[Elements] -> DOOR_CLOSE), 
+DOOR_CLOSE = (toggle -> DOOR_OPEN | observation.[LightStatus].[DoorClose].[RoomStatus].[Elements].[Elements].[Elements] -> DOOR_CLOSE),
+DOOR_OPEN = (toggle -> DOOR_CLOSE | observation.[LightStatus].[DoorOpen].[RoomStatus].[Elements].[Elements].[Elements] -> DOOR_OPEN).
+
+||ENVIRONMENT = (AGENT). // || LIGHT || DOOR).
+
+controller ||C =(ENVIRONMENT)~{Goal}.  
+
+||CC = (C).
+
+controllerSpec Goal = {
+	safety = {CleanAllowed, SafeForward, MustClean, MustToggle, MustSwitch, ToggleAllowed, SwitchAllowed}
+	controllable = {AgentActions}
+} 
