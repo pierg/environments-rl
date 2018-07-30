@@ -20,6 +20,9 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Grab configuration
         self.config = cg.Configuration.grab()
 
+        print("Controllers: " + str(self.config.controllers))
+        print("Rewards: " + str(self.config.rewards))
+
         # State Machine MTSA controllers
         self.controllers = []
 
@@ -32,8 +35,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         for controller in self.config.controllers.safety:
             new_controller = Controller(controller, "safe")
             self.controllers.append(new_controller)
-
-        print("active_controllers: " + str(self.controllers))
 
         # Set controller rewards
         self.respected_reward = 0.0
@@ -96,6 +97,6 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if self.config.debug_mode: print("##### Environment not modeled by the controllers -> free exploration! ######")
                 obs, reward, done, info = self.env.step(proposed_action)
 
+            if self.config.debug_mode: print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
 
-            print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
             return obs, reward, done, info

@@ -61,9 +61,8 @@ def main():
     args.algo = config.algorithm
     args.vis = config.visdom
     stop_learning = config.stop_learning
+    stop_after_update_number = config.stop_after_update_number
 
-    # Quick change @Todo find a better way to stop the learning
-    stop_learning = 240
     # Initializing evaluation
     evaluator = Evaluator()
 
@@ -155,7 +154,12 @@ def main():
                     stepOnLastGoal[x] = (j * args.num_steps + step + 1)
             evaluator.update(reward, done, info, numberOfStepBeforeDone)
 
-            if stop_learning:
+
+            if stop_after_update_number > 0:
+                if j > stop_after_update_number:
+                    break
+
+            elif stop_learning:
                 if first_time:
                     first_time = False
                     last_reward_mean = evaluator.get_reward_mean()
@@ -165,8 +169,7 @@ def main():
                     current_reward_median = evaluator.get_reward_median()
 
                     # Rewards are close to the goal reward
-                    if current_reward_median > (config.rewards.standard.goal - abs(
-                            config.rewards.standard.step * config.optimal_num_steps)):
+                    if current_reward_median > (config.rewards.standard.goal - (config.rewards.standard.goal/10)):
                         identical_rewards += 1
                         print("--> rewards close to goal reward -> " + str(identical_rewards))
 

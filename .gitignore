@@ -1,3 +1,9 @@
+.idea/
+evaluations/
+pytorch_rl/trained_models/
+.DS_Store
+results/
+
 *.pyc
 *__pycache__
 *egg-info
@@ -185,7 +191,6 @@ local.properties
 .settings/
 .loadpath
 .recommenders
-.DS_Store
 # External tool builders
 .externalToolBuilders/
 
@@ -226,14 +231,3 @@ local.properties
 .cache-main
 .scala_dependencies
 .worksheet
-
-.idea/
-ai-safety-gridworlds/.DS_Store
-
-
-# Experiments files
-A2C/experiments
-gridworld_agent/experiments
-experiments
-evaluations
-results

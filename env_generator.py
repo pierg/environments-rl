@@ -104,7 +104,7 @@ class RandomEnv(ExMiniGridEnv):
         #Place lightswitch
         lightswitch_is_posed = False
         test_goal = 0
-        if width > 6:
+        if width > 10:
             if {3}:
                 while not lightswitch_is_posed:
                     width_pos , height_pos = self._random_or_not_position(2, width - 3, 2, height - 1)
