@@ -61,9 +61,8 @@ def main():
     args.algo = config.algorithm
     args.vis = config.visdom
     stop_learning = config.stop_learning
+    stop_after_update_number = config.stop_after_update_number
 
-    # Quick change @Todo find a better way to stop the learning
-    stop_learning = 240
     # Initializing evaluation
     evaluator = Evaluator()
 
@@ -155,7 +154,12 @@ def main():
                     stepOnLastGoal[x] = (j * args.num_steps + step + 1)
             evaluator.update(reward, done, info, numberOfStepBeforeDone)
 
-            if stop_learning:
+
+            if stop_after_update_number > 0:
+                if j > stop_after_update_number:
+                    break
+
+            elif stop_learning:
                 if first_time:
                     first_time = False
                     last_reward_mean = evaluator.get_reward_mean()
