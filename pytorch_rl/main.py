@@ -165,8 +165,7 @@ def main():
                     current_reward_median = evaluator.get_reward_median()
 
                     # Rewards are close to the goal reward
-                    if current_reward_median > (config.rewards.standard.goal - abs(
-                            config.rewards.standard.step * config.optimal_num_steps)):
+                    if current_reward_median > (config.rewards.standard.goal - (config.rewards.standard.goal/10)):
                         identical_rewards += 1
                         print("--> rewards close to goal reward -> " + str(identical_rewards))
 
