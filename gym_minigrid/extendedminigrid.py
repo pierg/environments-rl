@@ -286,12 +286,15 @@ class ExMiniGridEnv(MiniGridEnv):
         # Used to observe the environment in the step() before the action
         observe = -1
 
+        # Action space
         left = 0
         right = 1
         forward = 2
-        pickup = 3
-        drop = 4
-        toggle = 5
+        toggle = 3
+
+        # Extra action (not used)
+        pickup = 4
+        drop = 5
         done = 6
         clean = 7
 
@@ -334,6 +337,10 @@ class ExMiniGridEnv(MiniGridEnv):
     def __init__(self, grid_size=16, max_steps=100, see_through_walls=False, seed=1337):
         super().__init__(grid_size, max_steps, see_through_walls, seed)
         self.actions = ExMiniGridEnv.Actions
+
+        # Restricting action_space to the first N actions
+        first_n_actions_available = 4
+        self.action_space = spaces.Discrete(first_n_actions_available)
 
         # Grab configuration
         self.config = cg.Configuration.grab()
