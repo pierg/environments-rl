@@ -2,6 +2,7 @@
 evaluations/
 pytorch_rl/trained_models/
 .DS_Store
+results/
 
 *.pyc
 *__pycache__
