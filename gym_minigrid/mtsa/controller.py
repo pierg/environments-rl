@@ -27,6 +27,7 @@ class Controller(Machine):
         self.observations = None
 
         self.tigger_action = None
+        self.available_actions = None
 
         # The agent uses toggle for doors and light switch but the mtsa models does not
         self.is_toggle_a_switch = False
@@ -63,16 +64,32 @@ class Controller(Machine):
             print(self.controller_name + "-" + self.controller_type + "   state: " + str(self.state) + "    obs: " + str([x for x in Controller.obs if Controller.obs[x] == True]))
         self.trigger('observation')
 
-        # Check if the controller is active
-        availabile_actions = self.get_triggers(self.state)
-        if "observation" in availabile_actions:
+        # Get available actions
+        available_actions = self.get_triggers(self.state)
+        for action in available_actions[:]:
+            if action.startswith('to_'):
+                available_actions.remove(action)
+            if action == ('switch'):
+                id = available_actions.index(action)
+                available_actions[id] = 'toggle'
+                self.is_toggle_a_switch = True
+            elif action == ('clean'):
+                id = available_actions.index(action)
+                available_actions[id] = 'toggle'
+                self.is_toggle_a_clean = True
+
+        # Set controller active or not
+        if "observation" in available_actions:
             self.set_state("S0")
             self.controller_state = "inactive"
-        elif len(availabile_actions) == 0:
+        elif len(available_actions) == 0:
             self.set_state("S0")
             self.controller_state = "end"
         else:
             self.controller_state = "active"
+
+        self.available_actions = available_actions
+
 
     def act(self, action):
         if self.is_active():
@@ -87,19 +104,7 @@ class Controller(Machine):
             self.trigger(self.tigger_action)
 
     def get_available_actions(self):
-        available_actions = self.get_triggers(self.state)
-        for action in available_actions[:]:
-            if action.startswith('to_'):
-                available_actions.remove(action)
-            if action == ('switch'):
-                id = available_actions.index(action)
-                available_actions[id] = 'toggle'
-                self.is_toggle_a_switch = True
-            elif action == ('clean'):
-                id = available_actions.index(action)
-                available_actions[id] = 'toggle'
-                self.is_toggle_a_clean = True
-        return available_actions
+        return self.available_actions
 
     
     def fill_observations(self):
