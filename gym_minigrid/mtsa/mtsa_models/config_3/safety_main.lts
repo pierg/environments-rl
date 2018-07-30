@@ -52,7 +52,6 @@ ltl_property ToggleAllowed = [](toggle -> (InFrontOf[Door] && !DoorOpen))
 ltl_property MustSwitch = []!({AgentActions}\{switch} &&  (InFrontOf[LightSwitch] && !LightOn))
 ltl_property SwitchAllowed = [](switch -> ((InFrontOf[LightSwitch] && !LightOn)))
 
-ltl_property WaitIfNeccesary = [] (wait -> (OnLeft[Wall] && OnRight[Wall] && !(InFrontOf[Nothing] || (InFrontOf[Door]  && DoorOpen))))
 
 //Defines the alternation between actions and observations.
 AGENT = AGENT_OBS,
@@ -84,6 +83,6 @@ controller ||C =(ENVIRONMENT)~{Goal}.
 ||CC = (C).
 
 controllerSpec Goal = {
-	safety = {CleanAllowed, SafeForward, MustClean, MustToggle, MustSwitch, ToggleAllowed, SwitchAllowed}
+	safety = {CleanAllowed, SafeForward, MustClean, MustToggle, MustSwitch, ToggleAllowed, SwitchAllowed, StepOnGoal}
 	controllable = {AgentActions}
 } 
