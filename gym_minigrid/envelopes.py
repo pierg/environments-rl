@@ -100,7 +100,3 @@ class SafetyEnvelope(gym.core.Wrapper):
             if self.config.debug_mode: print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
 
             return obs, reward, done, info
-
-
-    # def reset(self, **kwargs):
-    #     super(SafetyEnvelope, self).reset(**kwargs)
