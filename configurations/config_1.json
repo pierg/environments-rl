@@ -5,6 +5,7 @@
     "training_mode": true,
     "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
     "optimal_num_steps": 40,
+    "stop_after_update_number": 200,
     "evaluation_directory_name": "evaluations",
     "controller": true,
     "log_interval": 10,
@@ -15,12 +16,12 @@
     "rendering": true,
     "rewards": {
         "cleaningenv": {
-            "clean": 0.1
+            "clean": 0.0
         },
         "standard": {
-            "death": -10.0,
-            "goal": 100.0,
-            "step": -0.11
+            "death": -1.0,
+            "goal": 1.0,
+            "step": 0.00
         },
         "actions": {
             "forward": 0.0
@@ -28,12 +29,14 @@
     },
     "controllers": {
         "reachability": [
-            "config_1"
+            "config_2/reachability_doorway",
+            "config_2/reachability_goal"
         ],
         "safety": [
-            "config_2"
+            "config_2/safety_loop",
+            "config_3/safety_main"
         ]
     },
     "stop_learning": 480,
-    "visdom": false
+    "visdom": true
 }

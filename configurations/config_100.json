@@ -20,8 +20,8 @@
         },
         "standard": {
             "death": -1.0,
-            "goal": 1.0,
-            "step": 0.0
+            "goal": 100.0,
+            "step": 0.00
         },
         "actions": {
             "forward": 0.0
@@ -38,5 +38,5 @@
         ]
     },
     "stop_learning": 480,
-    "visdom": true
+    "visdom": false
 }
