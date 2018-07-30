@@ -20,7 +20,7 @@
         },
         "standard": {
             "death": -1.0,
-            "goal": 1.0,
+            "goal": 10.0,
             "step": -0.01
         },
         "actions": {
@@ -34,7 +34,7 @@
         ],
         "safety": [
             "config_2/safety_loop",
-            "config_2/safety_main"
+            "config_3/safety_main"
         ]
     },
     "stop_learning": 480,

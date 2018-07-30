@@ -88,12 +88,18 @@ def main():
         elif keyName == 'SPACE':
             action = env.env.actions.toggle
         elif keyName == 'PAGE_UP':
-            action = env.env.actions.pickup
+            action = env.env.actions.forward
+            print("unknown key %s, going forward" % keyName)
+            return
         elif keyName == 'PAGE_DOWN':
-            action = env.env.actions.drop
+            action = env.env.actions.forward
+            print("unknown key %s, going forward" % keyName)
+            return
 
         elif keyName == 'CTRL':
-            action = env.env.actions.wait
+            action = env.env.actions.forward
+            print("unknown key %s, going forward" % keyName)
+            return
 
         else:
             print("unknown key %s" % keyName)
@@ -115,7 +121,7 @@ def main():
         env.render('human')
         time.sleep(0.01)
         if observed:
-            env.step(env.env.actions.observe)
+            env.step(-1)
             observed = False
         # If the window was closed
         if renderer.window == None:
