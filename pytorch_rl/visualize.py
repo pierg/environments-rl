@@ -9,6 +9,28 @@ avg_reward = 0
 X = []
 Y = []
 
+
+def test_visdom():
+    # Lazily import visdom so that people don't need to install visdom
+    # if they're not actually using it
+    from visdom import Visdom
+
+    global vis
+    global win
+    global avg_reward
+
+    vis = Visdom()
+    assert vis.check_connection()
+
+    trace = dict(x=[1, 2, 3], y=[4, 5, 6], mode="markers+lines", type='custom',
+                 marker={'color': 'red', 'symbol': 104, 'size': "10"},
+                 text=["one", "two", "three"], name='1st Trace')
+    layout = dict(title="First Plot", xaxis={'title': 'x1'}, yaxis={'title': 'x2'})
+
+    vis._send({'data': [trace], 'layout': layout, 'win': 'mywin'})
+
+
+
 def visdom_plot(
     total_num_steps,
     mean_reward
@@ -52,3 +74,7 @@ def visdom_plot(
         ),
         win = win
     )
+
+
+if __name__ == "__main__":
+    test_visdom()
