@@ -9,7 +9,7 @@
     "evaluation_directory_name": "evaluations",
     "controller": true,
     "log_interval": 10,
-    "num_processes": 1,
+    "num_processes": 48,
     "num_steps": 4,
     "number_of_iteration": 100,
     "on_violation_reset": false,
@@ -20,7 +20,7 @@
         },
         "standard": {
             "death": -1.0,
-            "goal": 1.0,
+            "goal": 100.0,
             "step": -0.01
         },
         "actions": {
@@ -38,5 +38,5 @@
         ]
     },
     "stop_learning": 480,
-    "visdom": true
+    "visdom": false
 }
