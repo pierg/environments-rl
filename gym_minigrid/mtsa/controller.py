@@ -3,6 +3,7 @@ import logging
 from sys import stdout
 import os
 from transitions import Machine
+from configurations import config_grabber as cg
 
 class Controller(Machine):
     """
@@ -16,6 +17,9 @@ class Controller(Machine):
 
         self.controller_name = name
         self.controller_type = type
+
+        # Grab configuration
+        self.config = cg.Configuration.grab()
 
         # active, end, inactive
         self.controller_state = None
@@ -50,15 +54,13 @@ class Controller(Machine):
 
     def is_active(self):
         return self.controller_state is "active"
-
-    def logger(self, message):
-        print(message)
     
 
     def observe(self, observations):
         self.observations = observations
         self.fill_observations()
-        print(self.controller_name + "-" + self.controller_type + "   state: " + str(self.state) + "    obs: " + str([x for x in Controller.obs if Controller.obs[x] == True]))
+        if self.config.debug_mode:
+            print(self.controller_name + "-" + self.controller_type + "   state: " + str(self.state) + "    obs: " + str([x for x in Controller.obs if Controller.obs[x] == True]))
         self.trigger('observation')
 
         # Check if the controller is active
