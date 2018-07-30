@@ -20,8 +20,8 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Grab configuration
         self.config = cg.Configuration.grab()
 
-        print("Controllers: " + self.config.controllers)
-        print("Rewards: " + self.config.rewards)
+        print("Controllers: " + str(self.config.controllers))
+        print("Rewards: " + str(self.config.rewards))
 
         # State Machine MTSA controllers
         self.controllers = []
