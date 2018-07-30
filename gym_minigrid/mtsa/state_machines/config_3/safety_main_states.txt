@@ -4,5 +4,6 @@
 { 'name' : 'S2'},
 { 'name' : 'S3'},
 { 'name' : 'S4'},
-{ 'name' : 'S5'}
+{ 'name' : 'S5'},
+{ 'name' : 'S6'}
 ]
