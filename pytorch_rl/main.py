@@ -54,6 +54,9 @@ def main():
     # Getting configuration from file
     config = cg.Configuration.grab()
 
+    cg.Configuration.set("training_mode", True)
+    cg.Configuration.set("debug_mode", False)
+
     # Overriding arguments with configuration file
     args.num_processes = config.num_processes
     args.num_steps = config.num_steps

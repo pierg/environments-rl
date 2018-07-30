@@ -1,8 +1,8 @@
 {
     "algorithm": "a2c",
     "config_name": "config-DirtWatLightExp-9x9-v0",
-    "debug_mode": false,
-    "training_mode": true,
+    "debug_mode": true,
+    "training_mode": false,
     "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
     "optimal_num_steps": 40,
     "stop_after_update_number": 200,

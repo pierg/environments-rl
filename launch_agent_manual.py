@@ -26,6 +26,7 @@ def main():
     observed = True
 
     cg.Configuration.set("training_mode", False)
+    cg.Configuration.set("debug_mode", True)
 
     parser = OptionParser()
     parser.add_option(
