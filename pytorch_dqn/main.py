@@ -11,7 +11,8 @@ from IPython.display import clear_output
 import matplotlib.pyplot as plt
 
 from arguments import get_args
-from evaluator import Evaluator
+from tools.evaluator import Evaluator
+from tools.visualize import visdom_plot
 
 
 try:
@@ -154,13 +155,14 @@ def plot(frame_idx, rewards, losses):
 
 
 
-num_frames = 10000
+num_frames = 1000000
 batch_size = 32
 gamma = 0.99
 
 losses = []
 all_rewards = []
 episode_reward = 0
+n_episodes = 0
 
 state = env.reset()
 for frame_idx in range(1, num_frames + 1):
@@ -177,6 +179,7 @@ for frame_idx in range(1, num_frames + 1):
         state = env.reset()
         all_rewards.append(episode_reward)
         episode_reward = 0
+        n_episodes += 1
 
     if len(replay_buffer) > batch_size:
         loss = compute_td_loss(batch_size)
@@ -184,3 +187,9 @@ for frame_idx in range(1, num_frames + 1):
 
     if frame_idx % 200 == 0:
         plot(frame_idx, all_rewards, losses)
+
+        if config.visdom:
+            win = visdom_plot(
+                n_episodes,
+                episode_reward
+            )

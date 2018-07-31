@@ -4,7 +4,7 @@ import torch
 
 from configurations import config_grabber as cg
 
-import csv_logger
+from tools import csv_logger
 
 import os
 
