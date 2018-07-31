@@ -4,7 +4,7 @@
 autoPlot <- function(array_mo,array_nomo,fileName)
 {
   setwd("results/")                     #place the pdf in resuts file
-  Name <- c(fileName,"goap.pdf")            #add the pdf instance
+  Name <-paste(fileName, "goap.pdf",sep="-")           #add the pdf instance
   print(c("running",Name))              #beginning of the plot creation
   pdf(Name,width = 8, height = 6)
   

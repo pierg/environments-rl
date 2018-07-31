@@ -66,6 +66,16 @@ def main():
     stop_learning = config.stop_learning
     stop_after_update_number = config.stop_after_update_number
 
+
+    # bonus reward:
+    if hasattr(config,"optimal_num_steps"):
+        bonus_reward = config.rewards.standard.step * config.optimal_num_steps
+    else:
+        bonus_reward = 72 * config.rewards.standard.step
+
+    if config.action_planning.active:
+        bonus_reward += 15 * config.action_planning.reward.on_plan
+
     # Initializing evaluation
     evaluator = Evaluator()
 
@@ -137,7 +147,7 @@ def main():
         rollouts.cuda()
     start = time.time()
     for j in range(num_updates):
-        if identical_rewards == stop_learning and last_reward_mean == config.rewards:
+        if identical_rewards == stop_learning and last_reward_mean >= (config.rewards.standard.goal + bonus_reward):
             print("stop learning")
             break
         for step in range(args.num_steps):
@@ -172,7 +182,7 @@ def main():
                     current_reward_median = evaluator.get_reward_median()
 
                     # Rewards are close to the goal reward
-                    if current_reward_median >= (config.rewards.standard.goal - (config.rewards.standard.goal/30)):
+                    if current_reward_median >= (config.rewards.standard.goal + bonus_reward):
                         identical_rewards += 1
                         print("--> rewards close to goal reward -> " + str(identical_rewards))
 
@@ -339,6 +349,7 @@ def main():
                 total_num_steps,
                 final_rewards.mean()
             )
+
 
 
 if __name__ == "__main__":

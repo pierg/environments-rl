@@ -43,7 +43,7 @@ autoPlot <- function(array,fileName)
   min = min(min(N_saved),min(N_death))
   plot(N_step,N_saved, type = 'l', col="red", ylim = c(min,max), ylab= "")
   lines(N_step,N_death,type ='l', col="blue")
-  legend(1,5,legend = c("N_saved","N_death"), col = c("red","blue"), lty=1:1, cex=0.8)
+  legend(1,20,legend = c("N_saved","N_death"), col = c("red","blue"), lty=1:1, cex=0.8)
 
   #third graph with Reward_mean and Reward_std
   max = max(max(Reward_mean),max(Reward_std))
