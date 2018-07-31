@@ -408,7 +408,8 @@ class ExMiniGridEnv(MiniGridEnv):
             elif fwd_cell is not None and fwd_cell.type == 'goal':
                 print("GOAL REACHED!")
                 done = True
-                reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
+                reward = self.config.rewards.standard.goal
+                # reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
                 info = "goal"
 
         if action == self.actions.toggle:
@@ -433,25 +434,26 @@ class ExMiniGridEnv(MiniGridEnv):
             if self.roomList:
                 for x in self.roomList:
                     if x.objectInRoom(self.agent_pos):
+
+                        # The agent does not see the elements if the light in the room is off
                         if not x.getLight():
                             for i in range(0, len(grid.grid)):
                                 if grid.grid[i] is not None:
                                     grid.grid[i] = None
-                            # Encode the partially observable view into a numpy array
-                        image = grid.encode()
 
-                        assert hasattr(self, 'mission'), "environments must define a textual mission string"
 
-                        # Observations are dictionaries containing:
-                        # - an image (partially observable view of the environment)
-                        # - the agent's direction/orientation (acting as a compass)
-                        # - a textual mission string (instructions for the agent)
-                        obs = {
-                            'image': image,
-                            'direction': self.agent_dir,
-                            'mission': self.mission
-                        }
-                        return obs
+            # Encode the partially observable view into a numpy array
+            image = grid.encode()
+
+            # Observations are dictionaries containing:
+            # - an image (partially observable view of the environment)
+            # - the agent's direction/orientation (acting as a compass)
+            obs = {
+                'image': image,
+                'direction': self.agent_dir
+            }
+            return obs
+
         except AttributeError:
             return super().gen_obs()
 

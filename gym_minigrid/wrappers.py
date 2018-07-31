@@ -124,3 +124,28 @@ class FlatObsWrapper(gym.core.ObservationWrapper):
         obs = np.concatenate((image.flatten(), self.cachedArray.flatten()))
 
         return obs
+
+
+
+class FlatImageObs(gym.core.ObservationWrapper):
+    """
+    observed images into one flat array
+    """
+
+    def __init__(self, env, maxStrLen=64):
+        super().__init__(env)
+
+        imgSpace = env.observation_space.spaces['image']
+        imgSize = reduce(operator.mul, imgSpace.shape, 1)
+
+        self.observation_space = spaces.Box(
+            low=0,
+            high=255,
+            shape=(1, imgSize),
+            dtype='uint8'
+        )
+
+    def observation(self, obs):
+        image = obs['image']
+        obs = image.flatten()
+        return obs

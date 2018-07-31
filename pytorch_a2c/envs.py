@@ -24,7 +24,7 @@ def make_env(env_id, seed, rank, log_dir):
 
         # Maxime: until RL code supports dict observations, squash observations into a flat vector
         if isinstance(env.observation_space, spaces.Dict):
-            env = FlatObsWrapper(env)
+            env = FlatImageObs(env)
 
         return env
 

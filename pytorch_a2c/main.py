@@ -12,7 +12,7 @@ import torch.optim as optim
 from torch.autograd import Variable
 
 from arguments import get_args
-from evaluator import Evaluator
+from tools.evaluator import Evaluator
 from vec_env.dummy_vec_env import DummyVecEnv
 from vec_env.subproc_vec_env import SubprocVecEnv
 from kfac import KFACOptimizer
@@ -67,7 +67,7 @@ def main():
     stop_after_update_number = config.stop_after_update_number
 
     # Initializing evaluation
-    evaluator = Evaluator()
+    evaluator = Evaluator("a2c")
 
     os.environ['OMP_NUM_THREADS'] = '1'
 
