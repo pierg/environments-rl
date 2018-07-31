@@ -43,7 +43,7 @@ cg.Configuration.set("training_mode", True)
 cg.Configuration.set("debug_mode", False)
 
 # Initializing evaluation
-evaluator = Evaluator()
+evaluator = Evaluator("dqn")
 
 env = gym.make(config.env_name)
 # env.seed(seed + rank)
@@ -165,11 +165,15 @@ episode_reward = 0
 n_episodes = 0
 
 state = env.reset()
+
 for frame_idx in range(1, num_frames + 1):
     epsilon = epsilon_by_frame(frame_idx)
     action = model.act(state, epsilon)
 
-    next_state, reward, done, _ = env.step(action)
+    if config.rendering:
+        env.render('human')
+
+    next_state, reward, done, info = env.step(action)
     replay_buffer.push(state, action, reward, next_state, done)
 
     state = next_state
@@ -187,7 +191,6 @@ for frame_idx in range(1, num_frames + 1):
 
     if frame_idx % 200 == 0:
         plot(frame_idx, all_rewards, losses)
-
         if config.visdom:
             win = visdom_plot(
                 n_episodes,

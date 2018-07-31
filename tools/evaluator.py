@@ -11,7 +11,7 @@ import os
 
 class Evaluator:
 
-    def __init__(self, number=0):
+    def __init__(self, algorithm, number=0):
         # Getting configuration from file
         self.config = cg.Configuration.grab()
 

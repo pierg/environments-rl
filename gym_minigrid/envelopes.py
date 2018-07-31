@@ -64,9 +64,6 @@ class SafetyEnvelope(gym.core.Wrapper):
 
     def step(self, proposed_action):
 
-        if self.config.num_processes == 1 and self.config.rendering:
-            self.env.render('human')
-
         if proposed_action == self.env.actions.observe:
             self.observe()
         else:
