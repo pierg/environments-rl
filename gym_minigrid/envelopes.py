@@ -80,7 +80,6 @@ class SafetyEnvelope(gym.core.Wrapper):
                     if self.config.debug_mode: print("action_to_execution_1: " + controller_action)
                     obs, reward, done, info = self.env.step(proposed_action)
                     reward += self.respected_reward
-                    print("+++ " + str(reward))
                 else:
                     if self.config.debug_mode: print("the proposed action is not safe! Choosing a random safe action...")
                     safe_action = random.choice(self.safe_actions)
@@ -88,7 +87,6 @@ class SafetyEnvelope(gym.core.Wrapper):
                     if self.config.debug_mode: print("action_to_execution_2: " + controller_action)
                     obs, reward, done, info = self.env.step(safe_action)
                     reward += self.violated_reward
-                    print("--- " + str(reward))
                     info = "violation"
 
                 for controller in self.controllers:

@@ -18,7 +18,8 @@ from vec_env.subproc_vec_env import SubprocVecEnv
 from kfac import KFACOptimizer
 from model import Policy
 from storage import RolloutStorage
-from tools.visualize import visdom_plot
+from \
+    visualize import visdom_plot
 
 from configurations import config_grabber as cg
 

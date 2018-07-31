@@ -27,8 +27,8 @@
             "forward": 0.0
         },
         "controller": {
-            "respected": 0.00,
-            "violated": -0.00
+            "respected": 0.0,
+            "violated": -0.0
         }
     },
     "controllers": {
