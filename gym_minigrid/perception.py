@@ -185,6 +185,10 @@ class Perception():
             # Returns true if the agent is in the room after it crossed the door
             return Perception.agent_in_room_number(env, 1)
 
+        elif condition == "environment_with_lightswitch":
+            # Returns true if a lighswitch is in the environment
+            return Perception.environment_with_lightswitch(env)
+
     def light_on_next_room(env):
         try:
             if env.roomList:
@@ -273,4 +277,10 @@ class Perception():
             if agent_obs.grid[i] is not None:
                 if agent_obs.grid[i].type == "lightSwitch":
                     return Perception.light_on
+        return False
+
+    def environment_with_lightswitch(env):
+        for i in range(len(Perception.array_pos)):
+            if Perception.array_pos[i][0] == "lightSwitch":
+                return True
         return False

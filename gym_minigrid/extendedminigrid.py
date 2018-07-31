@@ -408,15 +408,17 @@ class ExMiniGridEnv(MiniGridEnv):
             elif fwd_cell is not None and fwd_cell.type == 'goal':
                 print("GOAL REACHED!")
                 done = True
-                reward += self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
+                reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
                 info = "goal"
-            else:
-                reward = self.config.rewards.actions.forward
 
         if action == self.actions.toggle:
             # Cleaning Dirt
             if fwd_cell is not None and fwd_cell.type == 'dirt':
                 reward += self.config.rewards.cleaningenv.clean
+
+        if done:
+            self.step_count = 0
+            return obs, reward, done, info
 
         if self.config.debug_mode: print("reward: " + str(reward) + "\tinfo: " + str(info))
         return obs, reward, done, info

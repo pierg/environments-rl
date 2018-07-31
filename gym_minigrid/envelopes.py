@@ -4,6 +4,7 @@ from configurations import config_grabber as cg
 
 from .action_planning_goap import *
 from gym_minigrid.extendedminigrid import *
+from perception import *
 
 import gym
 
@@ -79,21 +80,6 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
         # proceed with the step
         obs, reward, done, info = self.env.step(proposed_action)
-
-        if self.step_count == 0:
-            self.reset_planner()
-
-        self.step_count += 1
-        reward = self.config.rewards.standard.step
-
-        # check if episode is finished
-        if self.step_count == self.env.max_steps:
-            info = "end"
-            done = True
-            self.step_count = 0
-            reward += self.death_reward
-            return obs, reward, done, info
-
         # observations
         obs = self.env.gen_obs()
         current_obs = ExGrid.decode(obs['image'])
@@ -104,18 +90,28 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         if self.goap:
 
             # check if following the plan
-            reward, info = self.check_plan(proposed_action, info)
+            planning_reward, plan_info = self.check_plan(proposed_action, info)
+            if plan_info =="plan_finished" and info == "goal":
+                info = "goal+plan_finished"
+            reward += planning_reward
 
-            for obj in current_obs.grid:    # Look if the green square is in the observation
-                if isinstance(obj, Goal):
-                    #  If the agent does not have a plan or if the plan is not to go to the green cell ...
-                    if (self.goal_cell is not None and goal_green_square[0] not in self.goal_cell[0]) or\
-                            not self.action_plan:
-                        self.action_plan, self.goal_cell = run(current_obs, current_dir, (goal_green_square,))
-                        self.action_plan_size = len(self.action_plan)
-                        self.critical_actions = [ExMiniGridEnv.Actions.forward]
-                        info = "plan_created"
-                        break
+            lightswitch_in_env = Perception.is_condition_satisfied(self.env,"environment_with_lightswitch")
+            if lightswitch_in_env:
+                can_follow_plan = Perception.light_on
+            else:
+                can_follow_plan = True
+
+            if can_follow_plan:
+                for obj in current_obs.grid:    # Look if the green square is in the observation
+                    if isinstance(obj, Goal):
+                        #  If the agent does not have a plan or if the plan is not to go to the green cell ...
+                        if (self.goal_cell is not None and goal_green_square[0] not in self.goal_cell[0]) or\
+                                not self.action_plan:
+                            self.action_plan, self.goal_cell = run(current_obs, current_dir, (goal_green_square,))
+                            self.action_plan_size = len(self.action_plan)
+                            self.critical_actions = [ExMiniGridEnv.Actions.forward]
+                            info = "plan_created"
+                            break
 
             # If the agent does not have a plan try to give him a secondary goal
             if not self.action_plan and self.secondary_goals:
@@ -147,25 +143,6 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         current_cell = Grid.get(self.env.grid, a, b)
         self.last_cell[self.step_count % 3] = (a, b)
 
-        # Try
-
-        if current_cell is not None:
-            if current_cell.type == "goal":
-                done = True
-                if info == "plan_finished":
-                    reward += self.config.rewards.standard.goal
-                    info = "goal+plan_finished"
-                else:
-                    reward += self.config.rewards.standard.goal
-                    info = "goal"
-            elif current_cell.type == "unsafe":
-                reward += self.config.action_planning.reward.unsafe
-                info = "violation"
-
-        if done:
-            self.step_count = 0
-            return obs, reward, done, info
-
         """
         With every step we log the agent's position, direction and action.
         We do not punish the agent the first time it is in a new set of position, direction and action.
@@ -188,9 +165,6 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         newCnt = preCnt + 1
         self.counts[tup] = newCnt
 
-        if reward == self.config.rewards.standard.step:
-            bonus = -1 * self.config.rewards.standard.step / math.sqrt(newCnt)
-            reward += bonus
         return obs, reward, done, info
     # ---------------------- ACTION PLANNER END ----------------------#
 
@@ -225,7 +199,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
                 else:
                     return self.config.action_planning.reward.on_plan * self.plan_tracker, info
         else:
-            return self.config.rewards.standard.step, info
+            return 0, info
 
     def reset_planner(self):
         self.action_plan = []
