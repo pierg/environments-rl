@@ -101,7 +101,7 @@ def plot_dqn(
 
 def visdom_plot(
     total_num_steps,
-    mean_reward
+    cum_reward
 ):
     from visdom import Visdom
 
@@ -118,10 +118,11 @@ def visdom_plot(
         vis.close()
 
     # Running average for curve smoothing
-    avg_reward = avg_reward * 0.9 + 0.1 * mean_reward
+    # avg_reward = avg_reward * 0.9 + 0.1 * cum_reward
+    avg_reward = cum_reward / total_num_steps
 
     X.append(total_num_steps)
-    Y1.append(mean_reward)
+    Y1.append(cum_reward)
     Y2.append(avg_reward)
 
     # The plot with the handle 'win' is updated each time this is called
@@ -130,8 +131,8 @@ def visdom_plot(
         Y = np.array(Y1),
         opts = dict(
             #title = 'All Environments',
-            xlabel='Total number of episodes',
-            ylabel='Reward per episode',
+            xlabel='Total number of steps',
+            ylabel='Cumulative reward',
             ytickmin=0,
             #ytickmax=1,
             #ytickstep=0.1,
@@ -150,7 +151,7 @@ def visdom_plot(
         opts=dict(
             # title = 'All Environments',
             xlabel='Total number of episodes',
-            ylabel='Average Rewards',
+            ylabel='Average Reward',
             ytickmin=0,
             # ytickmax=1,
             # ytickstep=0.1,

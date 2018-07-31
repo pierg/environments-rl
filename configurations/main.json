@@ -13,6 +13,10 @@
     "num_steps": 4,
     "number_of_iteration": 100,
     "on_violation_reset": false,
+    "dqn": {
+        "max_num_frames": 1000000,
+        "results_log_interval": 200
+    },
     "rendering": true,
     "rewards": {
         "cleaningenv": {
@@ -27,8 +31,8 @@
             "forward": 0.0
         },
         "controller": {
-            "respected": 0.0,
-            "violated": -0.0
+            "respected": 0.01,
+            "violated": -0.01
         }
     },
     "controllers": {

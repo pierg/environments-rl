@@ -11,7 +11,7 @@ from IPython.display import clear_output
 import matplotlib.pyplot as plt
 
 from arguments import get_args
-from tools.evaluator import Evaluator
+from pytorch_dqn.evaluator import Evaluator
 from tools.visualize import visdom_plot
 
 
@@ -153,25 +153,34 @@ def plot(frame_idx, rewards, losses):
     plt.plot(losses)
     plt.show()
 
-
-
-num_frames = 1000000
+max_num_frames = config.dqn.max_num_frames
 batch_size = 32
 gamma = 0.99
 
 losses = []
-all_rewards = []
+all_episodes_rewards = []
 episode_reward = 0
+
+# Used for evaluations
+cum_reward = 0
+# All values below  refer to the logging interval 'results_log_interval'
+all_rewards = []
+all_losses = []
 n_episodes = 0
+n_deaths = 0
+n_goals = 0
+n_violations = 0
 
 state = env.reset()
 
-for frame_idx in range(1, num_frames + 1):
-    epsilon = epsilon_by_frame(frame_idx)
-    action = model.act(state, epsilon)
+for frame_idx in range(1, max_num_frames + 1):
 
+    # Render grid
     if config.rendering:
         env.render('human')
+
+    epsilon = epsilon_by_frame(frame_idx)
+    action = model.act(state, epsilon)
 
     next_state, reward, done, info = env.step(action)
     replay_buffer.push(state, action, reward, next_state, done)
@@ -179,20 +188,39 @@ for frame_idx in range(1, num_frames + 1):
     state = next_state
     episode_reward += reward
 
+    # Evaluation
+    cum_reward += reward
+    all_rewards.append(reward)
+    if info == "died": n_deaths += 1
+    if info == "goal": n_goals += 1
+    if info == "violation": n_violations += 1
+
     if done:
         state = env.reset()
-        all_rewards.append(episode_reward)
+        all_episodes_rewards.append(episode_reward)
         episode_reward = 0
         n_episodes += 1
 
     if len(replay_buffer) > batch_size:
         loss = compute_td_loss(batch_size)
         losses.append(loss.data[0])
+        all_losses.append(loss.data[0])
 
-    if frame_idx % 200 == 0:
-        plot(frame_idx, all_rewards, losses)
+    if frame_idx % config.dqn.results_log_interval == 0:
+        # plot(frame_idx, all_episodes_rewards, losses)
+        evaluator.update(frame_idx, all_rewards, cum_reward, all_losses, n_episodes, n_deaths, n_goals, n_violations)
+        # Resetting values
+        all_rewards = []
+        all_losses = []
+        n_episodes = 0
+        n_deaths = 0
+        n_goals = 0
+        n_violations = 0
+
+        evaluator.save()
+
         if config.visdom:
             win = visdom_plot(
-                n_episodes,
-                episode_reward
+                frame_idx,
+                cum_reward
             )

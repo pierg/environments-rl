@@ -16,13 +16,16 @@ class Evaluator:
         self.config = cg.Configuration.grab()
 
         while os.path.isfile(self.config.evaluation_directory_name + "/"
+                             + str(algorithm) + "_"
                              + self.config.config_name
                              + "_"
                              + str(number)
                              + ".csv"):
             number += 1
+
         config_file_path = os.path.abspath(__file__ + "/../../"
                                            + self.config.evaluation_directory_name + "/"
+                                           + str(algorithm) + "_"
                                            + self.config.config_name
                                            + "_"
                                            + str(number)
@@ -58,8 +61,6 @@ class Evaluator:
                                   'N_break',
                                   'Info_saved'])
 
-        # Evaluation variables
-        # self.shortest_path = config.shortest_path
 
         self.episode_rewards = torch.zeros([self.config.num_processes, 1])
         self.final_rewards = torch.zeros([self.config.num_processes, 1])
