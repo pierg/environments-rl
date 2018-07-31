@@ -1,6 +1,6 @@
 from scipy import stats
 import numpy as np
-import statistics as st
+from pytorch_dqn.visualize import visdom_plot
 
 from configurations import config_grabber as cg
 
@@ -65,8 +65,6 @@ class Evaluator:
 
         self.last_saved_element_idx = 0
 
-
-
     def update(self, frame_idx, all_rewards, cum_reward, all_losses, n_episodes, n_deaths, n_goals, n_violations):
         self.n_frames.append(frame_idx)
         self.reward_mean.append(np.mean(all_rewards))
@@ -75,10 +73,14 @@ class Evaluator:
         self.reward_max.append(np.max(all_rewards))
         self.reward_sem.append(stats.sem(all_rewards))
         self.reward_cum.append(cum_reward)
+        if self.config.visdom:
+            visdom_plot("cum_rwd", self.n_frames, "n_frames", self.reward_cum, "cum_reward")
         self.losses_mean.append(np.mean(all_losses))
         self.n_episodes.append(n_episodes)
         self.n_deaths.append(n_deaths)
         self.n_goals.append(n_goals)
+        if self.config.visdom:
+            visdom_plot("goal", self.n_frames, "n_frames", self.n_goals, "n_goals")
         self.n_violations.append(n_violations)
 
 

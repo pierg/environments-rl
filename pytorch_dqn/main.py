@@ -191,9 +191,12 @@ for frame_idx in range(1, max_num_frames + 1):
     # Evaluation
     cum_reward += reward
     all_rewards.append(reward)
-    if info == "died": n_deaths += 1
-    if info == "goal": n_goals += 1
-    if info == "violation": n_violations += 1
+    if "died" in info:
+        n_deaths += 1
+    if "goal" in info:
+        n_goals += 1
+    if "violation" in info:
+        n_violations += 1
 
     if done:
         state = env.reset()
@@ -218,9 +221,3 @@ for frame_idx in range(1, max_num_frames + 1):
         n_violations = 0
 
         evaluator.save()
-
-        if config.visdom:
-            win = visdom_plot(
-                frame_idx,
-                cum_reward
-            )
