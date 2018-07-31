@@ -310,6 +310,7 @@ register(
             "env_name": "MiniGrid-RandomEnv-{0}x{0}-{1}-v0".format(grid_size, random_token),
             "num_processes": 48,
             "optimal_num_steps":40,
+            "stop_after_update_number": 200,
             "num_steps": 4,
             "log_interval": 10,
             "on_violation_reset": False,

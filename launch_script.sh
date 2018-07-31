@@ -107,7 +107,7 @@ while [ $iterations -ne $i ]; do
     if [ $start_training -eq 1 ]; then
             echo "...launching the training..."
             echo "+++++ With Goap +++++"
-            python3 ./pytorch_rl/main.py --stop $stop --iterations $i
+            python3 ./pytorch_a2c/main.py --stop $stop --iterations $i
             name=`grep -e '"config_name"' configurations/main.json`
             replace="v0_2\","
             replace=${name/v0\",/$replace}
@@ -115,7 +115,7 @@ while [ $iterations -ne $i ]; do
             sed -i "s/$name/$replace/" configurations/main.json
             echo "\n\n...launching the training..."
             echo "------ Without Goap -----"
-            python3 ./pytorch_rl/main.py --stop $stop --iterations $i
+            python3 ./pytorch_a2c/main.py --stop $stop --iterations $i
 
     fi
     let "i+=1"

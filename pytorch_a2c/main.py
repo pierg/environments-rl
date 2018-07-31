@@ -18,7 +18,7 @@ from vec_env.subproc_vec_env import SubprocVecEnv
 from kfac import KFACOptimizer
 from model import Policy
 from storage import RolloutStorage
-from visualize import visdom_plot
+from tools.visualize import visdom_plot
 
 from configurations import config_grabber as cg
 
@@ -67,7 +67,7 @@ def main():
     stop_after_update_number = config.stop_after_update_number
 
     # Initializing evaluation
-    evaluator = Evaluator("a2c")
+    evaluator = Evaluator()
 
     os.environ['OMP_NUM_THREADS'] = '1'
 
