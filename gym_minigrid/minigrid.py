@@ -13,7 +13,9 @@ CELL_PIXELS = 32
 AGENT_VIEW_SIZE = 5
 
 # Size of the array given as an observation to the agent
+# TODO: Why 3?!?
 OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE, 3)
+# OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
 
 # Map of color names to RGB values
 COLORS = {

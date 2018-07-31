@@ -12,7 +12,7 @@ class DirtWatLightEnv(ExMiniGridEnv):
             grid_size=size,
             max_steps=4 * size * size,
             # Set this to True for maximum speed
-            see_through_walls=True
+            see_through_walls=False
         )
 
 
