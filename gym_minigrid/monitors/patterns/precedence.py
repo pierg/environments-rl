@@ -110,6 +110,10 @@ class Precedence(SafetyStateMachine):
     def precondition_cond(self):
         return Precedence.obs["precondition"]
 
+    def reset(self):
+        super().reset()
+        Precedence.obs["precondition"] = False
+
     def __init__(self, name, conditions, notify, rewards):
         self.respectd_rwd = rewards.respected
         self.violated_rwd = rewards.violated
@@ -133,10 +137,10 @@ class Precedence(SafetyStateMachine):
 
         postcondition = p.is_condition_satisfied(obs, self.postcondition, action_proposed)
         Precedence.obs["postcondition"] = postcondition
-
+        if not Precedence.obs["precondition"]:
+            Precedence.obs["precondition"] = p.is_condition_satisfied(obs, self.precondition, action_proposed)
         # If postcondition is true, check precondition and trigger as one atomic operation
         if postcondition:
-            Precedence.obs["precondition"] = p.is_condition_satisfied(obs, self.precondition, action_proposed)
             self.trigger("*")
 
 

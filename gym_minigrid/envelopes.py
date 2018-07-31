@@ -141,10 +141,10 @@ class SafetyEnvelope(gym.core.Wrapper):
                     logging.info("action_planner() -> safe action : %s", str(self.env.actions.toggle))
                     safe_action = self.env.actions.toggle
                 if unsafe_action[1] == "turn_left":
-                    logging.info("action_planner() -> safe action : %s", str(self.env.actions.toggle))
+                    logging.info("action_planner() -> safe action : %s", str(self.env.actions.left))
                     safe_action = self.env.actions.left
                 if unsafe_action[1] == "forward":
-                    logging.info("action_planner() -> safe action : %s", str(self.env.actions.toggle))
+                    logging.info("action_planner() -> safe action : %s", str(self.env.actions.forward))
                     safe_action = self.env.actions.forward
         return safe_action
 
@@ -192,6 +192,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         unsafe_actions = []
         shaped_rewards = []
         for name, monitor in self.monitor_states.items():
+            print("name",name)
             if monitor["state"] == "violation" or monitor["state"] == "precond_violated" or monitor["state"] == "postcond_violated" :
                 if self.config.on_violation_reset:
                     obs = self.env.reset()
@@ -200,6 +201,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if "unsafe_action" in monitor:
                     # Add them only if the monitor is in enforcing mode
                     if monitor["mode"] == "enforcing":
+                        print(name)
                         unsafe_actions.append((monitor["unsafe_action"], monitor["action_planner"]))
                 shaped_rewards.append(monitor["shaped_reward"])
 
