@@ -77,7 +77,7 @@ def main():
         bonus_reward += 15 * config.action_planning.reward.on_plan
 
     # Initializing evaluation
-    evaluator = Evaluator()
+    evaluator = Evaluator("a2c")
 
     os.environ['OMP_NUM_THREADS'] = '1'
 

@@ -10,5 +10,9 @@
     "active": true,
     "random_unsafe_obj": 0,
     "secondary_goals": []
+  },
+  "dqn": {
+    "max_num_frames": 1200000,
+    "results_log_interval": 200
   }
 }

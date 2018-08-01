@@ -6,7 +6,7 @@ configuration_file="main.json"
 start_training=1
 qlearning=0
 
-while getopts ":t:l:r:e:w:s:i:q" opt; do
+while getopts ":tlre:w:s:i:q" opt; do
     case ${opt} in
         q)
             qlearning=1
@@ -112,8 +112,6 @@ while [ $iterations -ne $i ]; do
     if [ $start_training -eq 1 ]; then
             echo "...launching the training..."
             echo "+++++ With Goap +++++"
-            python3 ./pytorch_a2c/main.py --stop $stop --iterations $i
-            echo "+++++ With Controller +++++"
             if [ $qlearning -eq 1 ]; then
                 python3 ./pytorch_dqn/main.py --stop $stop --iterations $i --norender
             else
@@ -126,11 +124,6 @@ while [ $iterations -ne $i ]; do
             sed -i "s/$name/$replace/" configurations/main.json
             echo "\n\n...launching the training..."
             echo "------ Without Goap -----"
-            python3 ./pytorch_a2c/main.py --stop $stop --iterations $i
-
-            echo "   "
-            echo "..launching the training..."
-            echo "------ Without Controller -----"
             if [ $qlearning -eq 1 ]; then
                 python3 ./pytorch_dqn/main.py --stop $stop --iterations $i --norender
             else

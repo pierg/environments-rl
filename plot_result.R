@@ -60,6 +60,9 @@ autoPlot <- function(array,fileName)
 
 #create the plot for each csv file in evaluation
 for (csvFile in Sys.glob("evaluations/*.csv")){
+  if (grepl("dqn",csvFile)) {
+    next
+  }
     # the file don't test to plot csv with less than line of datas or with NaN (Not a Number)
   not_NaN_in_csv = TRUE
   array = read.csv(csvFile)

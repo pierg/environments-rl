@@ -99,6 +99,9 @@ N_Updates_mo = 0
 
 #create the plot for each csv file in evaluation
 for (csvFile in Sys.glob("evaluations/*_2.csv")){
+  if (grepl("dqn",csvFile)) {
+    next
+  }
   #charge the file with no monitor
   not_NaN_in_csv_mo = TRUE
   not_NaN_in_csv_nomo = TRUE

@@ -32,6 +32,7 @@ def generate_environment(environment="default", rewards="default"):
     light_switch = elements.light_switch
     random_each_episode = elements.random_each_episode
     rewards = Configuration.grab("rewards/" + rewards)
+    dqn = elements.dqn
     with open(environment_path + "randoms/" + "randomenv{0}.py".format(random_token), 'w') as env:
         env.write("""
 from gym_minigrid.extendedminigrid import *
@@ -323,14 +324,6 @@ register(
             "action_planning": {
 
             },
-            "monitors": {
-                "properties": {
-
-                },
-                "patterns": {
-
-                }
-            },
             "rewards": {
                 "standard": {
                     "goal": float("{0:.2f}".format(rewards.standard.goal if hasattr(rewards.standard, 'goal') else 1)),
@@ -342,6 +335,10 @@ register(
                     "clean": float(
                         "{0:.2f}".format(rewards.cleaningenv.clean if hasattr(rewards.cleaningenv, 'clean') else 0.5))
                 }
+            },
+            "dqn": {
+                "max_num_frames": int("{0}".format(elements.dqn.max_num_frames if hasattr(elements.dqn, 'max_num_frames') else 100000)),
+                "results_log_interval": int("{0}".format(elements.dqn.results_log_interval if hasattr(elements.dqn, 'results_log_interval') else 200))
             }
         }, indent=2)
 

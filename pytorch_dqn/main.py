@@ -35,8 +35,8 @@ evaluator = Evaluator("dqn")
 
 env = gym.make(config.env_name)
 # env.seed(seed + rank)
-if config.controller:
-    env = SafetyEnvelope(env)
+if config.action_planning.active:
+    env = ActionPlannerEnvelope(env)
 
 # until RL code supports dict observations, squash observations into a flat vector
 if isinstance(env.observation_space, spaces.Dict):
