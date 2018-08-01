@@ -10,7 +10,7 @@ import torch.autograd as autograd
 # from IPython.display import clear_output
 # import matplotlib.pyplot as plt
 
-from arguments import get_args
+# from arguments import get_args
 from pytorch_dqn.evaluator import Evaluator
 
 try:
@@ -23,17 +23,17 @@ except Exception as e:
     print(e)
     pass
 
-args = get_args()
-
-if args.stop:
-    num_updates = int(args.stop)
-
-try:
-    os.makedirs(args.log_dir)
-except OSError:
-    files = glob.glob(os.path.join(args.log_dir, '*.monitor.csv'))
-    for f in files:
-        os.remove(f)
+# args = get_args()
+#
+# if args.stop:
+#     num_updates = int(args.stop)
+#
+# try:
+#     os.makedirs(args.log_dir)
+# except OSError:
+#     files = glob.glob(os.path.join(args.log_dir, '*.monitor.csv'))
+#     for f in files:
+#         os.remove(f)
 
 config = cg.Configuration.grab()
 
