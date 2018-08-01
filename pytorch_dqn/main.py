@@ -5,8 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.autograd as autograd
 
-# from IPython.display import clear_output
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 from tools.arguments import get_args
 from pytorch_dqn.evaluator import Evaluator
@@ -130,18 +129,6 @@ def compute_td_loss(batch_size):
 
     return loss
 
-
-# def plot(frame_idx, rewards, losses):
-#     clear_output(True)
-#     plt.figure(figsize=(20,5))
-#     plt.subplot(131)
-#     plt.title('frame %s. reward: %s' % (frame_idx, np.mean(rewards[-10:])))
-#     plt.plot(rewards)
-#     plt.subplot(132)
-#     plt.title('loss')
-#     plt.plot(losses)
-#     plt.show()
-
 max_num_frames = config.dqn.max_num_frames
 batch_size = 32
 gamma = 0.99
@@ -200,7 +187,6 @@ for frame_idx in range(1, max_num_frames + 1):
         all_losses.append(loss.data[0])
 
     if frame_idx % config.dqn.results_log_interval == 0:
-        # plot(frame_idx, all_episodes_rewards, losses)
         evaluator.update(frame_idx, all_rewards, cum_reward, all_losses, n_episodes, n_deaths, n_goals, n_violations)
 
         print("...n_frame | n_goals | epsilon:\t" + str(frame_idx) + "\t" + str(n_goals) + "\t" + str(epsilon))
