@@ -10,7 +10,7 @@ dill==0.2.7.1
 EasyProcess==0.2.3
 future==0.16.0
 gym==0.10.3
--e git+https://github.com/pierg/gym-minigrid.git@f5bce126656c0be0a406832faf6299b85f9e5cd1#egg=gym_minigrid
+-e git+https://github.com/pierg/gym-minigrid.git@ad600e09be2d105d60ceb4254bd449a7e2f34024#egg=gym_minigrid
 idna==2.6
 ipython==6.5.0
 ipython-genutils==0.2.0
@@ -54,4 +54,3 @@ visdom==0.1.8.4
 wcwidth==0.1.7
 websocket-client==0.48.0
 zmq==0.0.0
-ipython
