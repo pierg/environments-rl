@@ -374,7 +374,7 @@ class ExMiniGridEnv(MiniGridEnv):
                 info.append("died")
             # Step into Goal
             elif fwd_cell is not None and fwd_cell.type == 'goal':
-                print("GOAL REACHED!")
+                # print("GOAL REACHED!")
                 done = True
                 reward = self.config.rewards.standard.goal
                 # reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)

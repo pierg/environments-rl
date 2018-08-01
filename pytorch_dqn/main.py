@@ -162,6 +162,7 @@ n_violations = 0
 
 state = env.reset()
 
+print("\nTraining started...")
 for frame_idx in range(1, max_num_frames + 1):
 
     # Render grid
@@ -201,6 +202,9 @@ for frame_idx in range(1, max_num_frames + 1):
     if frame_idx % config.dqn.results_log_interval == 0:
         # plot(frame_idx, all_episodes_rewards, losses)
         evaluator.update(frame_idx, all_rewards, cum_reward, all_losses, n_episodes, n_deaths, n_goals, n_violations)
+
+        print("...n_frame: " + frame_idx + "\tgoals:" + n_goals + "...")
+
         # Resetting values
         all_rewards = []
         all_losses = []
@@ -208,5 +212,6 @@ for frame_idx in range(1, max_num_frames + 1):
         n_deaths = 0
         n_goals = 0
         n_violations = 0
-
         evaluator.save()
+
+print("...Trained finished!\n")
