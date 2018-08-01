@@ -203,7 +203,7 @@ for frame_idx in range(1, max_num_frames + 1):
         # plot(frame_idx, all_episodes_rewards, losses)
         evaluator.update(frame_idx, all_rewards, cum_reward, all_losses, n_episodes, n_deaths, n_goals, n_violations)
 
-        print("...n_frame: " + frame_idx + "\tgoals:" + n_goals + "...")
+        print("...n_frame: " + str(frame_idx) + "\tgoals:" + str(n_goals) + "...")
 
         # Resetting values
         all_rewards = []
