@@ -8,7 +8,11 @@ from tools import csv_logger
 
 import os
 
+"""
+All the values besides 'reward_cum' refer to the interval 
+between one n_frame and the next one
 
+"""
 class Evaluator:
 
     def __init__(self, algorithm, iteration=0):
@@ -35,7 +39,7 @@ class Evaluator:
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
-        # Setup CSV logging
+
         csv_logger.create_header(config_file_path,
                                  ['n_frames',
                                   'reward_mean',
