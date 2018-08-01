@@ -17,7 +17,7 @@
         "max_num_frames": 100000,
         "results_log_interval": 200
     },
-    "rendering": true,
+    "rendering": false,
     "rewards": {
         "cleaningenv": {
             "clean": 0.0

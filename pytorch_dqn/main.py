@@ -23,13 +23,13 @@ except Exception as e:
 
 args = get_args()
 
-config = cg.Configuration.grab()
-
 cg.Configuration.set("training_mode", True)
 cg.Configuration.set("debug_mode", False)
 
 if args.norender:
     cg.Configuration.set("rendering", False)
+
+config = cg.Configuration.grab()
 
 # Initializing evaluation
 evaluator = Evaluator("dqn")
