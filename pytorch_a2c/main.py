@@ -18,7 +18,7 @@ from vec_env.subproc_vec_env import SubprocVecEnv
 from kfac import KFACOptimizer
 from model import Policy
 from storage import RolloutStorage
-from visualize import visdom_plot
+from tools.visualize import visdom_plot
 
 from configurations import config_grabber as cg
 
@@ -65,6 +65,12 @@ def main():
     args.vis = config.visdom
     stop_learning = config.stop_learning
     stop_after_update_number = config.stop_after_update_number
+
+    # steps reward:
+    if hasattr(config, "optimal_num_steps"):
+        steps_reward = config.rewards.standard.step * config.optimal_num_steps
+    else:
+        steps_reward = 72 * config.rewards.standard.step
 
     # Initializing evaluation
     evaluator = Evaluator("a2c")
@@ -137,7 +143,7 @@ def main():
         rollouts.cuda()
     start = time.time()
     for j in range(num_updates):
-        if identical_rewards == stop_learning and last_reward_mean == config.rewards:
+        if identical_rewards == stop_learning and last_reward_mean >= (config.rewards.standard.goal + steps_reward):
             print("stop learning")
             break
         for step in range(args.num_steps):
@@ -172,7 +178,7 @@ def main():
                     current_reward_median = evaluator.get_reward_median()
 
                     # Rewards are close to the goal reward
-                    if current_reward_median > (config.rewards.standard.goal - (config.rewards.standard.goal/30)):
+                    if current_reward_median >= (config.rewards.standard.goal + steps_reward):
                         identical_rewards += 1
                         print("--> rewards close to goal reward -> " + str(identical_rewards))
 

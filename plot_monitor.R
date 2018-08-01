@@ -4,7 +4,7 @@
 autoPlot <- function(array_mo,array_nomo,fileName)
 {
   setwd("results/")                     #place the pdf in resuts file
-  Name <- c(fileName,"controller.pdf")            #add the pdf instance
+  Name <- paste(fileName, "controller.pdf",sep="-")            #add the pdf instance
   print(c("running",Name))              #beginning of the plot creation
   pdf(Name,width = 8, height = 6)
   
@@ -100,6 +100,10 @@ N_Updates_mo = 0
 
 #create the plot for each csv file in evaluation
 for (csvFile in Sys.glob("evaluations/*_2.csv")){
+  # check if the csv result to pytorch_dqn
+  if (grepl("dqn",csvFile)) {
+    next
+  }
   #charge the file with no controller
   not_NaN_in_csv_mo = TRUE
   not_NaN_in_csv_nomo = TRUE
