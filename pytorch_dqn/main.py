@@ -12,8 +12,6 @@ import matplotlib.pyplot as plt
 
 from arguments import get_args
 from pytorch_dqn.evaluator import Evaluator
-from tools.visualize import visdom_plot
-
 
 try:
     import gym_minigrid
