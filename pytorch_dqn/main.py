@@ -7,8 +7,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.autograd as autograd
 
-from IPython.display import clear_output
-import matplotlib.pyplot as plt
+# from IPython.display import clear_output
+# import matplotlib.pyplot as plt
 
 from arguments import get_args
 from pytorch_dqn.evaluator import Evaluator
@@ -81,7 +81,7 @@ epsilon_final = 0.01
 epsilon_decay = 500
 epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * frame_idx / epsilon_decay)
 
-plt.plot([epsilon_by_frame(i) for i in range(10000)])
+# plt.plot([epsilon_by_frame(i) for i in range(10000)])
 
 
 class DQN(nn.Module):
@@ -140,16 +140,16 @@ def compute_td_loss(batch_size):
     return loss
 
 
-def plot(frame_idx, rewards, losses):
-    clear_output(True)
-    plt.figure(figsize=(20,5))
-    plt.subplot(131)
-    plt.title('frame %s. reward: %s' % (frame_idx, np.mean(rewards[-10:])))
-    plt.plot(rewards)
-    plt.subplot(132)
-    plt.title('loss')
-    plt.plot(losses)
-    plt.show()
+# def plot(frame_idx, rewards, losses):
+#     clear_output(True)
+#     plt.figure(figsize=(20,5))
+#     plt.subplot(131)
+#     plt.title('frame %s. reward: %s' % (frame_idx, np.mean(rewards[-10:])))
+#     plt.plot(rewards)
+#     plt.subplot(132)
+#     plt.title('loss')
+#     plt.plot(losses)
+#     plt.show()
 
 max_num_frames = config.dqn.max_num_frames
 batch_size = 32
