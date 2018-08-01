@@ -129,6 +129,7 @@ class Response(SafetyStateMachine):
 
     # Convert observations to state and populate the obs_conditions
     def _map_conditions(self, obs, action_proposed):
+        self.action_proposed = action_proposed
         precondition = p.is_condition_satisfied(obs, self.precondition, action_proposed)
         Response.obs["precondition"] = precondition
 
@@ -155,5 +156,6 @@ class Response(SafetyStateMachine):
         super()._on_shaping(self.respectd_rwd)
 
     def _on_violated(self):
+        #print(self.name, self.action_proposed, Response.obs["precondition"],Response.obs["postcondition"])
         logging.info("entered state: " + self.state)
         super()._on_violated(self.violated_rwd)

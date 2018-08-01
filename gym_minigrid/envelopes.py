@@ -180,7 +180,6 @@ class SafetyEnvelope(gym.core.Wrapper):
             self.env.render('human')
 
         # logging.info("___check BEFORE action is applyed to the environmnent")
-
         # Check observation and proposed action in all running monitors
         for monitor in self.monitors:
             monitor.check(current_obs_env, proposed_action)
@@ -192,7 +191,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         unsafe_actions = []
         shaped_rewards = []
         for name, monitor in self.monitor_states.items():
-            print("name",name)
             if monitor["state"] == "violation" or monitor["state"] == "precond_violated" or monitor["state"] == "postcond_violated" :
                 if self.config.on_violation_reset:
                     obs = self.env.reset()
@@ -201,7 +199,6 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if "unsafe_action" in monitor:
                     # Add them only if the monitor is in enforcing mode
                     if monitor["mode"] == "enforcing":
-                        print(name)
                         unsafe_actions.append((monitor["unsafe_action"], monitor["action_planner"]))
                 shaped_rewards.append(monitor["shaped_reward"])
 
