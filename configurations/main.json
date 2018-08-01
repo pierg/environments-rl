@@ -14,7 +14,7 @@
     "number_of_iteration": 100,
     "on_violation_reset": false,
     "dqn": {
-        "max_num_frames": 1000000,
+        "max_num_frames": 100000,
         "results_log_interval": 200
     },
     "rendering": true,
@@ -31,7 +31,7 @@
             "forward": 0.0
         },
         "controller": {
-            "respected": 0.01,
+            "respected": 0.0,
             "violated": -0.01
         }
     },
