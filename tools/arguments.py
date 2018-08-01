@@ -67,6 +67,8 @@ def get_args():
                         help='number of updates before stopping the evaluation')
     parser.add_argument('--iterations', type=int, default=0,
                         help='number of iterations to do before stopping the evaluation')
+    parser.add_argument('--norender', action='store_true', default=False,
+                        help='turn rendendering off in the config file ')
     args = parser.parse_args()
 
     args.cuda = not args.no_cuda and torch.cuda.is_available()

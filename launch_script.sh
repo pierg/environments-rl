@@ -113,9 +113,9 @@ while [ $iterations -ne $i ]; do
             echo "...launching the training..."
             echo "+++++ With Controller +++++"
             if [ $qlearning -eq 1 ]; then
-                python3 ./pytorch_dqn/main.py --stop $stop --iterations $i
+                python3 ./pytorch_dqn/main.py --stop $stop --iterations $i --norender
             else
-                python3 ./pytorch_a2c/main.py --stop $stop --iterations $i
+                python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
             fi
             name=`grep -e '"config_name"' configurations/main.json`
             replace="v0_2\","
@@ -126,11 +126,10 @@ while [ $iterations -ne $i ]; do
             echo "..launching the training..."
             echo "------ Without Controller -----"
             if [ $qlearning -eq 1 ]; then
-                python3 ./pytorch_dqn/main.py --stop $stop --iterations $i
+                python3 ./pytorch_dqn/main.py --stop $stop --iterations $i --norender
             else
-                python3 ./pytorch_a2c/main.py --stop $stop --iterations $i
+                python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
             fi
-
     fi
     let "i+=1"
 
