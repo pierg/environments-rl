@@ -5,16 +5,24 @@ import torch
 from configurations import config_grabber as cg
 from tools.visualize import visdom_plot
 
-import tools.csv_logger
+from tools import csv_logger
 
 import os
 
 
 class Evaluator:
 
-    def __init__(self):
+    def __init__(self, algorithm, number=0):
         # Getting configuration from file
         self.config = cg.Configuration.grab()
+
+        while os.path.isfile(self.config.evaluation_directory_name + "/"
+                             + str(algorithm) + "_"
+                             + self.config.config_name
+                             + "_"
+                             + str(number)
+                             + ".csv"):
+            number += 1
 
         config_file_path = os.path.abspath(__file__ + "/../../"
                                            + self.config.evaluation_directory_name + "/"
@@ -26,7 +34,7 @@ class Evaluator:
             os.makedirs(dirname)
 
         # Setup CSV logging
-        tools.csv_logger.create_header(config_file_path,
+        csv_logger.create_header(config_file_path,
                                  ['N_updates',
                                   'N_timesteps',
                                   'FPS',
@@ -52,11 +60,10 @@ class Evaluator:
                                   'Plan_created',
                                   'Plan_finished',
                                   'Plan_followed %',
-                                  'N_violations_diff'
+                                  'N_violations_diff',
+                                  'Info_saved'
                                   ]),
 
-        # Evaluation variables
-        # self.shortest_path = config.shortest_path
 
         self.episode_rewards = torch.zeros([self.config.num_processes, 1])
         self.final_rewards = torch.zeros([self.config.num_processes, 1])
@@ -78,6 +85,8 @@ class Evaluator:
         self.N_saved = 0
         self.N_Total_episodes = 0
         self.N_break = 0
+        self.dic_saved = {}
+        self.Info_saved = ""
         self.N_violation_diff = 0
 
     def update(self, reward, done, info, numberOfStepPerEpisode):
@@ -107,30 +116,31 @@ class Evaluator:
         self.N_goal_reached = 0
         for i in range(0, len(info)):
             if len(info[i]) > 0:
-                if info[i] == "died":
+                if info[i][0] == "died":
                     self.n_proccess_reached_goal[i] = 0
                     self.N_death += 1
                     self.Total_death += 1
                     self.N_Total_episodes += 1
-                elif info[i] == "goal":
-                    self.n_proccess_reached_goal[i] = 1
-                    self.N_Total_episodes += 1
-                elif info[i] == "goal+plan_finished":
+                elif info[i][0] == "goal":
                     self.n_proccess_reached_goal[i] = 1
                     self.N_plan_finished += 1
                     self.N_Total_episodes += 1
-                    plan_followed.append(100)
-                elif info[i] == "violation":
-                    self.N_violation_diff += 1
+                elif info[i][0] == "violation":
                     self.N_violation += 1
-                elif info[i] == "end":
+                    self.n_proccess_reached_goal[i] = 0
+                elif info[i][0] == "end":
                     self.n_proccess_reached_goal[i] = 0
                     self.N_death_by_end += 1
                     self.Total_death += 1
                     self.N_Total_episodes += 1
-                elif info[i] == "saved":
+                elif info[i][0] == "saved":
                     self.N_saved += 1
-                elif info[i] == "break":
+                    for element in info[i][1].values():
+                        if element in self.dic_saved:
+                            self.dic_saved[element] = self.dic_saved[element] + 1
+                        else:
+                            self.dic_saved[element] = 1
+                elif info[i][0] == "break":
                     self.N_break += 1
                 elif info[i] == "plan_created":
                     self.N_plan_created += 1
@@ -145,11 +155,9 @@ class Evaluator:
         for i in range(0, len(self.n_proccess_reached_goal)):
             self.N_goal_reached += self.n_proccess_reached_goal[i]
         self.n_episodes = n_episodes_mask
-
-        if len(plan_followed) > 0:
-            self.avg_pcn_plan_followed = sum(plan_followed) / len(plan_followed)
-        else:
-            self.avg_pcn_plan_followed = 0
+        self.Info_saved = ""
+        for i in self.dic_saved:
+            self.Info_saved += "{}_{}_".format(i, self.dic_saved[i])
 
     def get_reward_mean(self):
         return self.final_rewards.mean()
@@ -159,7 +167,7 @@ class Evaluator:
 
     def save(self, n_updates, t_start, t_end, dist_entropy, value_loss, action_loss):
         total_num_steps = (n_updates + 1) * self.config.num_processes * self.config.num_steps
-        tools.csv_logger.write_to_log([n_updates,
+        csv_logger.write_to_log([n_updates,
                                  total_num_steps,
                                  int(total_num_steps / t_end - t_start),
                                  self.final_rewards.mean(),
@@ -181,18 +189,4 @@ class Evaluator:
                                  self.Total_death,
                                  self.N_Total_episodes,
                                  self.N_break,
-                                 self.N_plan_created,
-                                 self.N_plan_finished,
-                                 self.avg_pcn_plan_followed,
-                                 self.N_violation_diff
-                                 ]),
-        self.N_violation_diff = 0
-
-    def visdom(self, n_updates):
-        visdom_plot(
-            (n_updates + 1) * self.config.num_processes * self.config.num_steps,
-            self.final_rewards.mean(),
-            self.N_violation_diff,
-            self.N_goal_reached,
-            self.numberOfStepAverage
-        )
+                                 self.Info_saved])

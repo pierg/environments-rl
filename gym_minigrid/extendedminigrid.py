@@ -1,6 +1,7 @@
 from gym_minigrid.minigrid import *
 from configurations import config_grabber as cg
 
+
 def extended_dic(obj_names=[]):
     """
     Extend the OBJECT_TO_IDX dictionaries with additional objects
@@ -389,8 +390,10 @@ class ExMiniGridEnv(MiniGridEnv):
         # Default actions and cells
         obs, reward, done, info = super().step(action)
 
+        info = []
+
         if self.step_count == self.max_steps:
-            info = "end"
+            info.append("end")
             self.step_count = 0
             done = True
 
@@ -403,14 +406,14 @@ class ExMiniGridEnv(MiniGridEnv):
             if fwd_cell is not None and fwd_cell.type == 'water':
                 done = True
                 reward += self.config.rewards.standard.death
-                info = "died"
+                info.append("died")
             # Step into Goal
             elif fwd_cell is not None and fwd_cell.type == 'goal':
-                print("GOAL REACHED!")
+                # print("GOAL REACHED!")
                 done = True
                 reward = self.config.rewards.standard.goal
                 # reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
-                info = "goal"
+                info.append("goal")
 
         if action == self.actions.toggle:
             # Cleaning Dirt

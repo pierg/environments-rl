@@ -11,8 +11,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
 
-from arguments import get_args
-from tools.evaluator import Evaluator
+from tools.arguments import get_args
+from evaluator import Evaluator
 from vec_env.dummy_vec_env import DummyVecEnv
 from vec_env.subproc_vec_env import SubprocVecEnv
 from kfac import KFACOptimizer

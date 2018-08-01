@@ -4,9 +4,14 @@
 # it will use that as config file.
 configuration_file="main.json"
 start_training=1
+qlearning=0
 
-while getopts ":tlre:w:s:i:" opt; do
+while getopts ":t:l:r:e:w:s:i:q" opt; do
     case ${opt} in
+        q)
+            qlearning=1
+            ;;
+
         r)
             random=1
             start_training=1
@@ -108,6 +113,12 @@ while [ $iterations -ne $i ]; do
             echo "...launching the training..."
             echo "+++++ With Goap +++++"
             python3 ./pytorch_a2c/main.py --stop $stop --iterations $i
+            echo "+++++ With Controller +++++"
+            if [ $qlearning -eq 1 ]; then
+                python3 ./pytorch_dqn/main.py --stop $stop --iterations $i --norender
+            else
+                python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
+            fi
             name=`grep -e '"config_name"' configurations/main.json`
             replace="v0_2\","
             replace=${name/v0\",/$replace}
@@ -117,6 +128,14 @@ while [ $iterations -ne $i ]; do
             echo "------ Without Goap -----"
             python3 ./pytorch_a2c/main.py --stop $stop --iterations $i
 
+            echo "   "
+            echo "..launching the training..."
+            echo "------ Without Controller -----"
+            if [ $qlearning -eq 1 ]; then
+                python3 ./pytorch_dqn/main.py --stop $stop --iterations $i --norender
+            else
+                python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
+            fi
     fi
     let "i+=1"
 

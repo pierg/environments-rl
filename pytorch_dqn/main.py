@@ -1,5 +1,3 @@
-import glob
-import os
 import gym
 
 import torch
@@ -7,13 +5,10 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.autograd as autograd
 
-from IPython.display import clear_output
 import matplotlib.pyplot as plt
 
-from arguments import get_args
-from tools.evaluator import Evaluator
-from tools.visualize import visdom_plot
-
+from tools.arguments import get_args
+from pytorch_dqn.evaluator import Evaluator
 
 try:
     import gym_minigrid
@@ -27,20 +22,13 @@ except Exception as e:
 
 args = get_args()
 
-if args.stop:
-    num_updates = int(args.stop)
-
-try:
-    os.makedirs(args.log_dir)
-except OSError:
-    files = glob.glob(os.path.join(args.log_dir, '*.monitor.csv'))
-    for f in files:
-        os.remove(f)
-
-config = cg.Configuration.grab()
-
 cg.Configuration.set("training_mode", True)
 cg.Configuration.set("debug_mode", False)
+
+if args.norender:
+    cg.Configuration.set("rendering", False)
+
+config = cg.Configuration.grab()
 
 # Initializing evaluation
 evaluator = Evaluator("dqn")
@@ -83,7 +71,7 @@ epsilon_final = 0.01
 epsilon_decay = 500
 epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * frame_idx / epsilon_decay)
 
-plt.plot([epsilon_by_frame(i) for i in range(10000)])
+# plt.plot([epsilon_by_frame(i) for i in range(10000)])
 
 
 class DQN(nn.Module):
@@ -141,37 +129,35 @@ def compute_td_loss(batch_size):
 
     return loss
 
-
-def plot(frame_idx, rewards, losses):
-    clear_output(True)
-    plt.figure(figsize=(20,5))
-    plt.subplot(131)
-    plt.title('frame %s. reward: %s' % (frame_idx, np.mean(rewards[-10:])))
-    plt.plot(rewards)
-    plt.subplot(132)
-    plt.title('loss')
-    plt.plot(losses)
-    plt.show()
-
-
-
-num_frames = 1000000
+max_num_frames = config.dqn.max_num_frames
 batch_size = 32
 gamma = 0.99
 
 losses = []
-all_rewards = []
+all_episodes_rewards = []
 episode_reward = 0
+
+# Used for evaluations
+cum_reward = 0
+# All values below  refer to the logging interval 'results_log_interval'
+all_rewards = []
+all_losses = []
 n_episodes = 0
+n_deaths = 0
+n_goals = 0
+n_violations = 0
 
 state = env.reset()
 
-for frame_idx in range(1, num_frames + 1):
-    epsilon = epsilon_by_frame(frame_idx)
-    action = model.act(state, epsilon)
+print("\nTraining started...")
+for frame_idx in range(1, max_num_frames + 1):
 
+    # Render grid
     if config.rendering:
         env.render('human')
+
+    epsilon = epsilon_by_frame(frame_idx)
+    action = model.act(state, epsilon)
 
     next_state, reward, done, info = env.step(action)
     replay_buffer.push(state, action, reward, next_state, done)
@@ -179,20 +165,39 @@ for frame_idx in range(1, num_frames + 1):
     state = next_state
     episode_reward += reward
 
+    # Evaluation
+    cum_reward += reward
+    all_rewards.append(reward)
+    if "died" in info:
+        n_deaths += 1
+    if "goal" in info:
+        n_goals += 1
+    if "violation" in info:
+        n_violations += 1
+
     if done:
         state = env.reset()
-        all_rewards.append(episode_reward)
+        all_episodes_rewards.append(episode_reward)
         episode_reward = 0
         n_episodes += 1
 
     if len(replay_buffer) > batch_size:
         loss = compute_td_loss(batch_size)
         losses.append(loss.data[0])
+        all_losses.append(loss.data[0])
 
-    if frame_idx % 200 == 0:
-        plot(frame_idx, all_rewards, losses)
-        if config.visdom:
-            win = visdom_plot(
-                n_episodes,
-                episode_reward
-            )
+    if frame_idx % config.dqn.results_log_interval == 0:
+        evaluator.update(frame_idx, all_rewards, cum_reward, all_losses, n_episodes, n_deaths, n_goals, n_violations)
+
+        print("...n_frame | n_goals | epsilon:\t" + str(frame_idx) + "\t" + str(n_goals) + "\t" + str(epsilon))
+
+        # Resetting values
+        all_rewards = []
+        all_losses = []
+        n_episodes = 0
+        n_deaths = 0
+        n_goals = 0
+        n_violations = 0
+        evaluator.save()
+
+print("...Trained finished!\n")
