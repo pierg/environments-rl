@@ -15,7 +15,7 @@
     "number_of_iteration": 100,
     "on_violation_reset": false,
     "dqn": {
-        "max_num_frames": 10000000,
+        "max_num_frames": 300000,
         "results_log_interval": 200,
         "epsilon_decay_episodes": 10,
         "epsilon_decay_frame": 500
