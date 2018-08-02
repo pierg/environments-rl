@@ -5,8 +5,6 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.autograd as autograd
 
-import matplotlib.pyplot as plt
-
 from tools.arguments import get_args
 from pytorch_dqn.evaluator_frames import Evaluator as ev_frames
 from pytorch_dqn.evaluator_episodes import Evaluator as ev_epi
@@ -78,7 +76,7 @@ epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_fi
 epsilon_by_episodes = lambda episode_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * episode_idx / epsilon_decay_episodes)
 
 # plt.plot([epsilon_by_frame(i) for i in range(10000)])
-plt.plot([epsilon_by_episodes(i) for i in range(10000)])
+# plt.plot([epsilon_by_episodes(i) for i in range(10000)])
 # plt.savefig('epsilon_by_episodes.png')
 
 class DQN(nn.Module):
