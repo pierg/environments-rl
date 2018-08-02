@@ -70,7 +70,7 @@ class ReplayBuffer(object):
 epsilon_start = 1.0
 epsilon_final = 0.00
 epsilon_decay_frame = 500
-epsilon_decay_episodes = 10
+epsilon_decay_episodes = 100
 
 epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * frame_idx / epsilon_decay_frame)
 epsilon_by_episodes = lambda episode_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * episode_idx / epsilon_decay_episodes)
