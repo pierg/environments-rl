@@ -72,14 +72,16 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
     def step(self, proposed_action):
         # To be returned to the agent
-        obs, reward, done, info = None, None, None, None
+        obs, reward, done, info = None, None, None, []
 
         # ---------------------- ACTION PLANNER START ----------------------#
         if self.config.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
         # proceed with the step
-        obs, reward, done, info = self.env.step(proposed_action)
+        obs, reward, done, old_info = self.env.step(proposed_action)
+
+        info.append(old_info)
         # observations
         obs = self.env.gen_obs()
         current_obs = ExGrid.decode(obs['image'])
@@ -91,8 +93,8 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
             # check if following the plan
             planning_reward, plan_info = self.check_plan(proposed_action, info)
-            if plan_info =="plan_finished" and info == "goal":
-                info = "goal+plan_finished"
+            if plan_info =="plan_finished" and "goal" in info:
+                info.append("goal+plan_finished")
             reward += planning_reward
 
             lightswitch_in_env = Perception.is_condition_satisfied(self.env,"environment_with_lightswitch")
@@ -110,7 +112,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
                             self.action_plan, self.goal_cell = run(current_obs, current_dir, (goal_green_square,))
                             self.action_plan_size = len(self.action_plan)
                             self.critical_actions = [ExMiniGridEnv.Actions.forward]
-                            info = "plan_created"
+                            info.append("plan_created")
                             break
 
             # If the agent does not have a plan try to give him a secondary goal
