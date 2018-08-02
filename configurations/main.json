@@ -47,5 +47,5 @@
         ]
     },
     "stop_learning": 480,
-    "visdom": true
+    "visdom": false
 }
