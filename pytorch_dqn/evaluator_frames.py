@@ -20,7 +20,7 @@ class Evaluator:
         self.config = cg.Configuration.grab()
 
         file_name = self.config.evaluation_directory_name + "/" \
-                + str(algorithm) + "_" \
+                + str(algorithm) + "_frm_" \
                 + self.config.config_name \
                 + "_"
 
@@ -41,7 +41,7 @@ class Evaluator:
 
 
         csv_logger.create_header(config_file_path,
-                                 ['n_frames',
+                                 ['frame_idx',
                                   'reward_mean',
                                   'reward_median',
                                   'reward_min',
@@ -52,9 +52,10 @@ class Evaluator:
                                   'n_episodes',
                                   'n_deaths',
                                   'n_goals',
-                                  'n_violations'])
+                                  'n_violations',
+                                  'last_epsilon'])
 
-        self.n_frames = []
+        self.frame_idx = []
         self.reward_mean = []
         self.reward_median = []
         self.reward_min = []
@@ -66,33 +67,38 @@ class Evaluator:
         self.n_deaths = []
         self.n_goals = []
         self.n_violations = []
+        self.last_epsilon = []
 
         self.last_saved_element_idx = 0
 
-    def update(self, frame_idx, all_rewards, cum_reward, all_losses, n_episodes, n_deaths, n_goals, n_violations):
-        self.n_frames.append(frame_idx)
+    def update(self, frame_idx, all_rewards, cum_reward, all_losses, n_episodes, n_deaths, n_goals, n_violations, last_epsilon):
+        self.frame_idx.append(frame_idx)
         self.reward_mean.append(np.mean(all_rewards))
+        if self.config.visdom:
+            visdom_plot("avg_rwd", self.frame_idx, "frame_idx", self.reward_mean, "reward_mean")
         self.reward_median.append(np.median(all_rewards))
         self.reward_min.append(np.min(all_rewards))
         self.reward_max.append(np.max(all_rewards))
         self.reward_sem.append(stats.sem(all_rewards))
         self.reward_cum.append(cum_reward)
         if self.config.visdom:
-            visdom_plot("cum_rwd", self.n_frames, "n_frames", self.reward_cum, "cum_reward")
+            visdom_plot("cum_rwd", self.frame_idx, "frame_idx", self.reward_cum, "cum_reward")
         self.losses_mean.append(np.mean(all_losses))
         self.n_episodes.append(n_episodes)
         self.n_deaths.append(n_deaths)
         self.n_goals.append(n_goals)
         if self.config.visdom:
-            visdom_plot("goal", self.n_frames, "n_frames", self.n_goals, "n_goals")
+            visdom_plot("goal", self.frame_idx, "frame_idx", self.n_goals, "n_goals")
         self.n_violations.append(n_violations)
-
+        self.last_epsilon.append(last_epsilon)
+        if self.config.visdom:
+            visdom_plot("last_epsilon", self.frame_idx, "frame_idx", self.last_epsilon, "last_epsilon")
 
     def save(self):
 
         idx = self.last_saved_element_idx
-        while idx < len(self.n_frames):
-            csv_logger.write_to_log([self.n_frames[idx],
+        while idx < len(self.frame_idx):
+            csv_logger.write_to_log([self.frame_idx[idx],
                                      self.reward_mean[idx],
                                      self.reward_median[idx],
                                      self.reward_min[idx],
@@ -103,6 +109,7 @@ class Evaluator:
                                      self.n_episodes[idx],
                                      self.n_deaths[idx],
                                      self.n_goals[idx],
-                                     self.n_violations[idx]])
+                                     self.n_violations[idx],
+                                     self.last_epsilon[idx]])
             idx += 1
         self.last_saved_element_idx = idx

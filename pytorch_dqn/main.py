@@ -8,7 +8,8 @@ import torch.autograd as autograd
 import matplotlib.pyplot as plt
 
 from tools.arguments import get_args
-from pytorch_dqn.evaluator import Evaluator
+from pytorch_dqn.evaluator_frames import Evaluator as ev_frames
+from pytorch_dqn.evaluator_episodes import Evaluator as ev_epi
 
 try:
     import gym_minigrid
@@ -31,7 +32,9 @@ if args.norender:
 config = cg.Configuration.grab()
 
 # Initializing evaluation
-evaluator = Evaluator("dqn")
+evaluator_frames = ev_frames("dqn")
+evaluator_episodes = ev_epi("dqn")
+
 
 env = gym.make(config.env_name)
 # env.seed(seed + rank)
@@ -67,12 +70,16 @@ class ReplayBuffer(object):
 
 
 epsilon_start = 1.0
-epsilon_final = 0.01
-epsilon_decay = 500
-epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * frame_idx / epsilon_decay)
+epsilon_final = 0.00
+epsilon_decay_frame = 500
+epsilon_decay_episodes = 10
+
+epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * frame_idx / epsilon_decay_frame)
+epsilon_by_episodes = lambda episode_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * episode_idx / epsilon_decay_episodes)
 
 # plt.plot([epsilon_by_frame(i) for i in range(10000)])
-
+plt.plot([epsilon_by_episodes(i) for i in range(10000)])
+# plt.savefig('epsilon_by_episodes.png')
 
 class DQN(nn.Module):
     def __init__(self, num_inputs, num_actions):
@@ -139,15 +146,27 @@ episode_reward = 0
 
 # Used for evaluations
 cum_reward = 0
+
+# Frames evauators
 # All values below  refer to the logging interval 'results_log_interval'
-all_rewards = []
-all_losses = []
-n_episodes = 0
-n_deaths = 0
-n_goals = 0
-n_violations = 0
+all_rewards_f = []
+all_losses_f = []
+n_episodes_f = 0
+n_deaths_f = 0
+n_goals_f = 0
+n_violations_f = 0
+
+# Episodes evaluators
+all_rewards_e = []
+cum_reward_e = 0
+all_losses_e = []
+n_deaths_e = 0
+n_goals_e = 0
+n_violations_e = 0
 
 state = env.reset()
+
+episode_idx = 0
 
 print("\nTraining started...")
 for frame_idx in range(1, max_num_frames + 1):
@@ -156,7 +175,8 @@ for frame_idx in range(1, max_num_frames + 1):
     if config.rendering:
         env.render('human')
 
-    epsilon = epsilon_by_frame(frame_idx)
+    # epsilon = epsilon_by_frame(frame_idx)
+    epsilon = epsilon_by_episodes(episode_idx)
     action = model.act(state, epsilon)
 
     next_state, reward, done, info = env.step(action)
@@ -167,37 +187,57 @@ for frame_idx in range(1, max_num_frames + 1):
 
     # Evaluation
     cum_reward += reward
-    all_rewards.append(reward)
+    cum_reward_e += reward
+    all_rewards_f.append(reward)
+    all_rewards_e.append(reward)
     if "died" in info:
-        n_deaths += 1
+        n_deaths_f += 1
+        n_deaths_e += 1
     if "goal" in info:
-        n_goals += 1
+        n_goals_f += 1
+        n_goals_e += 1
     if "violation" in info:
-        n_violations += 1
+        n_violations_f += 1
+        n_violations_e += 1
 
     if done:
         state = env.reset()
         all_episodes_rewards.append(episode_reward)
         episode_reward = 0
-        n_episodes += 1
+        n_episodes_f += 1
+        episode_idx += 1
+
+        evaluator_episodes.update(episode_idx, all_rewards_e, cum_reward_e, all_losses_e, n_deaths_e, n_goals_e, n_violations_e, epsilon)
+        evaluator_episodes.save()
+
+        # Resetting episodes evaluators
+        all_rewards_e = []
+        cum_reward_e = 0
+        all_losses_e = []
+        n_deaths_e = 0
+        n_goals_e = 0
+        n_violations_e = 0
+
+
 
     if len(replay_buffer) > batch_size:
         loss = compute_td_loss(batch_size)
         losses.append(loss.data[0])
-        all_losses.append(loss.data[0])
+        all_losses_f.append(loss.data[0])
+        all_losses_e.append(loss.data[0])
 
     if frame_idx % config.dqn.results_log_interval == 0:
-        evaluator.update(frame_idx, all_rewards, cum_reward, all_losses, n_episodes, n_deaths, n_goals, n_violations)
+        evaluator_frames.update(frame_idx, all_rewards_f, cum_reward, all_losses_f, n_episodes_f, n_deaths_f, n_goals_f, n_violations_f, epsilon)
 
-        print("...n_frame | n_goals | epsilon:\t" + str(frame_idx) + "\t" + str(n_goals) + "\t" + str(epsilon))
+        print("...n_frame | n_episodes | n_goals | epsilon:\t" + str(frame_idx) + "\t" + str(episode_idx) + "\t" + str(n_goals_f) + "\t" + str(epsilon))
 
         # Resetting values
-        all_rewards = []
-        all_losses = []
-        n_episodes = 0
-        n_deaths = 0
-        n_goals = 0
-        n_violations = 0
-        evaluator.save()
+        all_rewards_f = []
+        all_losses_f = []
+        n_episodes_f = 0
+        n_deaths_f = 0
+        n_goals_f = 0
+        n_violations_f = 0
+        evaluator_frames.save()
 
 print("...Trained finished!\n")

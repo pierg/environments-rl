@@ -334,16 +334,20 @@ class ExMiniGridEnv(MiniGridEnv):
             return "observe"
         return None
 
-    def __init__(self, grid_size=16, max_steps=100, see_through_walls=False, seed=1337):
-        super().__init__(grid_size, max_steps, see_through_walls, seed)
+    def __init__(self, grid_size=16, max_steps=-1, see_through_walls=False, seed=1337):
+        # Grab configuration
+        self.config = cg.Configuration.grab()
+        # Overriding the max_num_steps
+        max_num_steps = max_steps
+        if hasattr(self.config, 'max_num_steps'):
+            max_num_steps = self.config.max_num_steps
+        super().__init__(grid_size, max_num_steps, see_through_walls, seed)
         self.actions = ExMiniGridEnv.Actions
 
         # Restricting action_space to the first N actions
         first_n_actions_available = 4
         self.action_space = spaces.Discrete(first_n_actions_available)
 
-        # Grab configuration
-        self.config = cg.Configuration.grab()
 
     def step(self, action):
 
