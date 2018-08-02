@@ -10,11 +10,12 @@ from gym_minigrid.rendering import *
 CELL_PIXELS = 32
 
 # Number of cells (width and height) in the agent view
-AGENT_VIEW_SIZE = 3
+AGENT_VIEW_SIZE = 5
 
 # Size of the array given as an observation to the agent
-# TODO: Why 3?!?
+# 3 = Type, Color, Is_open
 OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE, 3)
+
 # OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
 
 # Map of color names to RGB values
