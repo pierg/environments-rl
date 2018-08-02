@@ -42,7 +42,7 @@ class Evaluator:
 
         csv_logger.create_header(config_file_path,
                                  ['episode_idx',
-                                  'cum_reward_e'
+                                  'cum_reward_e',
                                   'reward_mean',
                                   'reward_median',
                                   'reward_min',
@@ -53,7 +53,11 @@ class Evaluator:
                                   'n_deaths',
                                   'n_goals',
                                   'n_violations',
-                                  'last_epsilon'])
+                                  'last_epsilon',
+                                  'n_steps_goal_mean',
+                                  'n_steps_goal_sem',
+                                  'n_steps_goal_min',
+                                  'n_steps_goal_max'])
 
         self.episode_idx = []
         self.reward_cum_e = []
@@ -67,10 +71,12 @@ class Evaluator:
         self.n_goals = []
         self.n_violations = []
         self.last_epsilon = []
+        self.n_steps_goal_min = []
 
         self.last_saved_element_idx = 0
 
-    def update(self, episode_idx, all_rewards, reward_cum_e, all_losses, n_deaths, n_goals, n_violations, last_epsilon):
+    def update(self, episode_idx, all_rewards, reward_cum_e, all_losses, n_deaths, n_goals, n_violations, 
+               last_epsilon, n_steps_goal_min):
 
         self.episode_idx.append(episode_idx)
         self.reward_mean.append(np.mean(all_rewards))
@@ -92,6 +98,9 @@ class Evaluator:
         self.last_epsilon.append(last_epsilon)
         # if self.config.visdom:
         #     visdom_plot("last_epsilon", self.episode_idx, "episode_idx", self.last_epsilon, "last_epsilon")
+        self.n_steps_goal_min.append(n_steps_goal_min)
+        if self.config.visdom:
+            visdom_plot("steps_goal", self.episode_idx, "episode_idx", self.n_steps_goal_min, "steps_goal")
 
     def save(self):
 
@@ -108,6 +117,7 @@ class Evaluator:
                                      self.n_deaths[idx],
                                      self.n_goals[idx],
                                      self.n_violations[idx],
-                                     self.last_epsilon[idx]])
+                                     self.last_epsilon[idx],
+                                     self.n_steps_goal_min[idx]])
             idx += 1
         self.last_saved_element_idx = idx

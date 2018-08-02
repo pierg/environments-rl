@@ -16,7 +16,9 @@
     "on_violation_reset": false,
     "dqn": {
         "max_num_frames": 10000000,
-        "results_log_interval": 200
+        "results_log_interval": 200,
+        "epsilon_decay_episodes": 100,
+        "epsilon_decay_frame": 500
     },
     "rendering": true,
     "rewards": {
@@ -26,7 +28,7 @@
         "standard": {
             "death": -0.1,
             "goal": 1.0,
-            "step": -0.00
+            "step": -0.0
         },
         "actions": {
             "forward": 0.0
@@ -47,5 +49,5 @@
         ]
     },
     "stop_learning": 480,
-    "visdom": false
+    "visdom": true
 }

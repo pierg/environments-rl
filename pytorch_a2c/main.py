@@ -42,6 +42,10 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
+if args.norender:
+    cg.Configuration.set("rendering", False)
+    cg.Configuration.set("visdom", False)
+
 try:
     os.makedirs(args.log_dir)
 except OSError:

@@ -26,6 +26,7 @@ cg.Configuration.set("debug_mode", False)
 
 if args.norender:
     cg.Configuration.set("rendering", False)
+    cg.Configuration.set("visdom", False)
 
 config = cg.Configuration.grab()
 
@@ -69,8 +70,8 @@ class ReplayBuffer(object):
 
 epsilon_start = 1.0
 epsilon_final = 0.00
-epsilon_decay_frame = 500
-epsilon_decay_episodes = 100
+epsilon_decay_frame = config.dqn.epsilon_decay_frame
+epsilon_decay_episodes = config.dqn.epsilon_decay_episodes
 
 epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * frame_idx / epsilon_decay_frame)
 epsilon_by_episodes = lambda episode_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * episode_idx / epsilon_decay_episodes)
@@ -78,6 +79,7 @@ epsilon_by_episodes = lambda episode_idx: epsilon_final + (epsilon_start - epsil
 # plt.plot([epsilon_by_frame(i) for i in range(10000)])
 # plt.plot([epsilon_by_episodes(i) for i in range(10000)])
 # plt.savefig('epsilon_by_episodes.png')
+
 
 class DQN(nn.Module):
     def __init__(self, num_inputs, num_actions):
@@ -166,7 +168,13 @@ state = env.reset()
 
 episode_idx = 0
 
+# For benchmarking and to stop the training
+n_step_idx = 0
+n_steps_reach_goal = -1
+min_n_steps_reach_goal = -1
+
 print("\nTraining started...")
+
 for frame_idx in range(1, max_num_frames + 1):
 
     # Render grid
@@ -176,6 +184,8 @@ for frame_idx in range(1, max_num_frames + 1):
     # epsilon = epsilon_by_frame(frame_idx)
     epsilon = epsilon_by_episodes(episode_idx)
     action = model.act(state, epsilon)
+
+    n_step_idx += 1
 
     next_state, reward, done, info = env.step(action)
     replay_buffer.push(state, action, reward, next_state, done)
@@ -191,9 +201,16 @@ for frame_idx in range(1, max_num_frames + 1):
     if "died" in info:
         n_deaths_f += 1
         n_deaths_e += 1
+
     if "goal" in info:
         n_goals_f += 1
         n_goals_e += 1
+        if min_n_steps_reach_goal == -1:
+            min_n_steps_reach_goal = n_step_idx
+        elif n_step_idx < min_n_steps_reach_goal:
+            min_n_steps_reach_goal = n_step_idx
+        n_step_idx = 0
+
     if "violation" in info:
         n_violations_f += 1
         n_violations_e += 1
@@ -205,7 +222,7 @@ for frame_idx in range(1, max_num_frames + 1):
         n_episodes_f += 1
         episode_idx += 1
 
-        evaluator_episodes.update(episode_idx, all_rewards_e, cum_reward_e, all_losses_e, n_deaths_e, n_goals_e, n_violations_e, epsilon)
+        evaluator_episodes.update(episode_idx, all_rewards_e, cum_reward_e, all_losses_e, n_deaths_e, n_goals_e, n_violations_e, epsilon, min_n_steps_reach_goal)
         evaluator_episodes.save()
 
         # Resetting episodes evaluators
@@ -217,7 +234,6 @@ for frame_idx in range(1, max_num_frames + 1):
         n_violations_e = 0
 
 
-
     if len(replay_buffer) > batch_size:
         loss = compute_td_loss(batch_size)
         losses.append(loss.data[0])
@@ -227,7 +243,9 @@ for frame_idx in range(1, max_num_frames + 1):
     if frame_idx % config.dqn.results_log_interval == 0:
         evaluator_frames.update(frame_idx, all_rewards_f, cum_reward, all_losses_f, n_episodes_f, n_deaths_f, n_goals_f, n_violations_f, epsilon)
 
-        print("...n_frame | n_episodes | n_goals | epsilon:\t" + str(frame_idx) + "\t" + str(episode_idx) + "\t" + str(n_goals_f) + "\t" + str(epsilon))
+        if frame_idx == config.dqn.results_log_interval:
+            print("\nn_frame \tn_episodes \tn_goals \tsteps_to_goal \tepsilon")
+        print(str(frame_idx) + "\t" + str(episode_idx) + "\t" + str(n_goals_f) + "\t" + str(min_n_steps_reach_goal) + "\t" + str(round(epsilon, 2)))
 
         # Resetting values
         all_rewards_f = []
@@ -237,5 +255,6 @@ for frame_idx in range(1, max_num_frames + 1):
         n_goals_f = 0
         n_violations_f = 0
         evaluator_frames.save()
+
 
 print("...Trained finished!\n")
