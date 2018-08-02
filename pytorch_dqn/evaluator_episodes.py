@@ -30,17 +30,17 @@ class Evaluator:
                              + ".csv"):
             iteration += 1
 
-        config_file_path = os.path.abspath(__file__ + "/../../"
+        self.config_file_path = os.path.abspath(__file__ + "/../../"
                                            + file_name
                                            + str(iteration)
                                            + ".csv")
 
-        dirname = os.path.dirname(config_file_path)
+        dirname = os.path.dirname(self.config_file_path)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
 
-        csv_logger.create_header(config_file_path,
+        csv_logger.create_header(self.config_file_path,
                                  ['episode_idx',
                                   'cum_reward_e',
                                   'reward_mean',
@@ -54,10 +54,7 @@ class Evaluator:
                                   'n_goals',
                                   'n_violations',
                                   'last_epsilon',
-                                  'n_steps_goal_mean',
-                                  'n_steps_goal_sem',
-                                  'n_steps_goal_min',
-                                  'n_steps_goal_max'])
+                                  'n_steps_goal'])
 
         self.episode_idx = []
         self.reward_cum_e = []
@@ -71,12 +68,12 @@ class Evaluator:
         self.n_goals = []
         self.n_violations = []
         self.last_epsilon = []
-        self.n_steps_goal_min = []
+        self.n_steps_goal = []
 
         self.last_saved_element_idx = 0
 
     def update(self, episode_idx, all_rewards, reward_cum_e, all_losses, n_deaths, n_goals, n_violations, 
-               last_epsilon, n_steps_goal_min):
+               last_epsilon, n_steps_goal):
 
         self.episode_idx.append(episode_idx)
         self.reward_mean.append(np.mean(all_rewards))
@@ -98,15 +95,15 @@ class Evaluator:
         self.last_epsilon.append(last_epsilon)
         # if self.config.visdom:
         #     visdom_plot("last_epsilon", self.episode_idx, "episode_idx", self.last_epsilon, "last_epsilon")
-        self.n_steps_goal_min.append(n_steps_goal_min)
+        self.n_steps_goal.append(n_steps_goal)
         if self.config.visdom:
-            visdom_plot("steps_goal", self.episode_idx, "episode_idx", self.n_steps_goal_min, "steps_goal")
+            visdom_plot("steps_goal", self.episode_idx, "episode_idx", self.n_steps_goal, "steps_goal")
 
     def save(self):
 
         idx = self.last_saved_element_idx
         while idx < len(self.episode_idx):
-            csv_logger.write_to_log([self.episode_idx[idx],
+            csv_logger.write_to_log(self.config_file_path, [self.episode_idx[idx],
                                      self.reward_mean[idx],
                                      self.reward_median[idx],
                                      self.reward_min[idx],
@@ -118,6 +115,6 @@ class Evaluator:
                                      self.n_goals[idx],
                                      self.n_violations[idx],
                                      self.last_epsilon[idx],
-                                     self.n_steps_goal_min[idx]])
+                                     self.n_steps_goal[idx]])
             idx += 1
         self.last_saved_element_idx = idx

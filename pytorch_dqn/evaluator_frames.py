@@ -30,17 +30,17 @@ class Evaluator:
                              + ".csv"):
             iteration += 1
 
-        config_file_path = os.path.abspath(__file__ + "/../../"
+        self.config_file_path = os.path.abspath(__file__ + "/../../"
                                            + file_name
                                            + str(iteration)
                                            + ".csv")
 
-        dirname = os.path.dirname(config_file_path)
+        dirname = os.path.dirname(self.config_file_path)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
 
-        csv_logger.create_header(config_file_path,
+        csv_logger.create_header(self.config_file_path,
                                  ['frame_idx',
                                   'reward_mean',
                                   'reward_median',
@@ -98,7 +98,7 @@ class Evaluator:
 
         idx = self.last_saved_element_idx
         while idx < len(self.frame_idx):
-            csv_logger.write_to_log([self.frame_idx[idx],
+            csv_logger.write_to_log(self.config_file_path, [self.frame_idx[idx],
                                      self.reward_mean[idx],
                                      self.reward_median[idx],
                                      self.reward_min[idx],

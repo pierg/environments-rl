@@ -5,6 +5,7 @@ cum_rwd_f = None
 goal_f = None
 avg_rwd_f = None
 last_epsilon_f = None
+steps_goal = None
 
 cum_rwd_e = None
 
@@ -17,6 +18,7 @@ def visdom_plot(what, x, x_label, y, y_label, where='main'):
     global goal_f
     global avg_rwd_f
     global last_epsilon_f
+    global steps_goal
 
     global cum_rwd_e
 
@@ -46,6 +48,20 @@ def visdom_plot(what, x, x_label, y, y_label, where='main'):
                 height=250
             ),
             win=cum_rwd_f
+        )
+
+    if what == "steps_goal":
+        steps_goal = vis.line(
+            X=np.array(x),
+            Y=np.array(y),
+            opts=dict(
+                xlabel=x_label,
+                ylabel=y_label,
+                ytickmin=0,
+                width=300,
+                height=250
+            ),
+            win=steps_goal
         )
 
 

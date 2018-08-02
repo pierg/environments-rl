@@ -17,7 +17,7 @@
     "dqn": {
         "max_num_frames": 10000000,
         "results_log_interval": 200,
-        "epsilon_decay_episodes": 100,
+        "epsilon_decay_episodes": 10,
         "epsilon_decay_frame": 500
     },
     "rendering": true,
@@ -49,5 +49,5 @@
         ]
     },
     "stop_learning": 480,
-    "visdom": true
+    "visdom": false
 }
