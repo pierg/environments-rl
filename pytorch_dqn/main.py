@@ -169,25 +169,29 @@ state = env.reset()
 episode_idx = 0
 
 # For benchmarking and to stop the training
-n_step_idx = 0
+n_step_epi_idx = 0
 min_n_steps_reach_goal = -1
 
 print("\nTraining started...")
 
 for frame_idx in range(1, max_num_frames + 1):
-
-    # Render grid
-    if config.rendering:
-        env.render('human')
+    #
+    # # Render grid
+    # if config.rendering:
+    #     env.render('human')
 
     # epsilon = epsilon_by_frame(frame_idx)
     epsilon = epsilon_by_episodes(episode_idx)
     action = model.act(state, epsilon)
 
-    n_step_idx += 1
+    n_step_epi_idx += 1
 
     next_state, reward, done, info = env.step(action)
     replay_buffer.push(state, action, reward, next_state, done)
+
+    # Render grid
+    if config.rendering:
+        env.render('human')
 
     state = next_state
     episode_reward += reward
@@ -217,17 +221,17 @@ for frame_idx in range(1, max_num_frames + 1):
             n_goals_e += 1
 
             evaluator_episodes.update(episode_idx, all_rewards_e, cum_reward_e, all_losses_e, n_deaths_e, n_goals_e,
-                                      n_violations_e, epsilon, n_step_idx)
+                                      n_violations_e, epsilon, n_step_epi_idx)
             evaluator_episodes.save()
 
             if min_n_steps_reach_goal == -1:
-                min_n_steps_reach_goal = n_step_idx
-            elif n_step_idx < min_n_steps_reach_goal:
-                min_n_steps_reach_goal = n_step_idx
+                min_n_steps_reach_goal = n_step_epi_idx
+            elif n_step_epi_idx < min_n_steps_reach_goal:
+                min_n_steps_reach_goal = n_step_epi_idx
 
-            print("     >>  GOAL" + "\t" + str(n_step_idx) + "\t            min: " + str(min_n_steps_reach_goal))
+            print("     >>  GOAL" + "\t" + str(n_step_epi_idx) + "\t            min: " + str(min_n_steps_reach_goal))
 
-            n_step_idx = 0
+            n_step_epi_idx = 0
 
         # Resetting episodes evaluators
         all_rewards_e = []
@@ -236,7 +240,6 @@ for frame_idx in range(1, max_num_frames + 1):
         n_deaths_e = 0
         n_goals_e = 0
         n_violations_e = 0
-
 
     if "violation" in info:
         n_violations_f += 1
@@ -248,6 +251,7 @@ for frame_idx in range(1, max_num_frames + 1):
         losses.append(loss.data[0])
         all_losses_f.append(loss.data[0])
         all_losses_e.append(loss.data[0])
+
 
     if frame_idx % config.dqn.results_log_interval == 0:
         evaluator_frames.update(frame_idx, all_rewards_f, cum_reward, all_losses_f, n_episodes_f, n_deaths_f, n_goals_f, n_violations_f, epsilon)

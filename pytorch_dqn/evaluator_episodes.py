@@ -42,7 +42,6 @@ class Evaluator:
 
         csv_logger.create_header(self.config_file_path,
                                  ['episode_idx',
-                                  'cum_reward_e',
                                   'reward_mean',
                                   'reward_median',
                                   'reward_min',
