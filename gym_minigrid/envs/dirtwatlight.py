@@ -50,7 +50,9 @@ class DirtWatLightEnv(ExMiniGridEnv):
         self.grid.set(4, 4, Door(self._rand_elem(sorted(set(COLOR_NAMES)))))
 
         # add water
+        self.grid.set(1, 2, Water())
         self.grid.set(5, 3, Water())
+        self.grid.set(6, 4, Water())
         self.grid.set(1, 5, Water())
         self.grid.set(7, 2, Water())
 
