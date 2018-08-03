@@ -138,12 +138,28 @@ class FlatImageObs(gym.core.ObservationWrapper):
         imgSpace = env.observation_space.spaces['image']
         imgSize = reduce(operator.mul, imgSpace.shape, 1)
 
+
         self.observation_space = spaces.Box(
             low=0,
             high=255,
             shape=(1, imgSize),
             dtype='uint8'
         )
+
+        # TODO: How to get a one dimention Box?
+        self.observation_space = spaces.Box(
+            low=0,
+            high=imgSize,
+            shape=(1, imgSize),
+            dtype='uint8'
+        )
+
+        # self.observation_space = spaces.Box(
+        #     low=0,
+        #     high=imgSize,
+        #     shape=imgSize,
+        #     dtype='uint8'
+        # )
 
     def observation(self, obs):
         image = obs['image']
