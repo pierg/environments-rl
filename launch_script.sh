@@ -6,7 +6,7 @@ configuration_file="main.json"
 start_training=1
 qlearning=0
 
-while getopts ":t:l:r:e:w:s:i:q" opt; do
+while getopts t:l:r:e:w:s:i:q opt; do
     case ${opt} in
         q)
             qlearning=1
@@ -77,8 +77,6 @@ while [ $iterations -ne $i ]; do
             configuration_file=`python3 env_generator.py --environment_file "default" --rewards_file "default"`
         fi
         configuration_file="randoms/$configuration_file"
-    else
-        configuration_file=${1:-"main.json"}
     fi
 
     echo "...environment name is..."
