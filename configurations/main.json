@@ -18,7 +18,7 @@
         "max_num_frames": 300000,
         "results_log_interval": 200,
         "epsilon_decay_episodes": 10,
-        "epsilon_decay_frame": 500
+        "epsilon_decay_frame": 5000
     },
     "rendering": true,
     "rewards": {

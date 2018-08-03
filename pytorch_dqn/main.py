@@ -19,6 +19,12 @@ except Exception as e:
     print(e)
     pass
 
+"""
+TODOs: 
+Better way to  tune down epsilon (when it's finding the minumum path?)
+
+"""
+
 args = get_args()
 
 cg.Configuration.set("training_mode", True)
