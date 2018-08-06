@@ -75,7 +75,7 @@ def extract_array(label, csv_file):
     return values
 
 
-def single_line_plot(x, y, x_label, y_label, ys_sem = 0, nrow = 1, nelm = 1):
+def single_line_plot(x, y, x_label, y_label, ys_sem = 0):
     """
     Plots y on x
     :param x: array of values rappresenting the x, scale
@@ -83,12 +83,10 @@ def single_line_plot(x, y, x_label, y_label, ys_sem = 0, nrow = 1, nelm = 1):
     :param x_label: label of x
     :param y_labels: label of y
     :param y_sem: (optional) standard error mean, it adds as translucent area around the y
-    :param nrom: number of graph in the pdf page
-    :param nelm: number of the ploting graph in the pdf page
     :return: matplot figure, it can then be added to a pdf
     """
-    figure = plt.subplot(nrow, 1, nelm)
-    figure.plot(x, y, linewidth=1)
+    figure = plt.figure()
+    plt.plot(x, y, linewidth=1)
 
     if ys_sem != 0:
         area_top = []
@@ -96,10 +94,9 @@ def single_line_plot(x, y, x_label, y_label, ys_sem = 0, nrow = 1, nelm = 1):
         for k in range(len(y)):
             area_bot.append(y[k] - ys_sem[k - 1])
             area_top.append(y[k] + ys_sem[k - 1])
-        figure.fill_between(x, area_bot, area_top, color="skyblue", alpha=0.4)
-    figure.set_xlabel(x_label)
-    figure.set_ylabel(y_label)
-    plt.show()
+        plt.fill_between(x, area_bot, area_top, color="skyblue", alpha=0.4)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     return figure
 
 # TODO
@@ -135,16 +132,20 @@ def multi_figures_plot(x, ys, x_label, y_labels, ys_sem=0):
     figure = plt.figure()
     ax_to_send = figure.subplots(nrows = len(ys), ncols=1)
     if len(ys) == 1:
-        if ys_sem != 0:
-            ax_to_send = single_line_plot(x, ys[0], x_label, y_labels[0], ys_sem[0], len(ys), 1)
-        else:
-            ax_to_send = single_line_plot(x, ys[0], x_label, y_labels[0], nrow = len(ys), nelm = 1)
+        return single_line_plot(x, ys[0], x_label, y_labels[0], ys_sem[0])
     else:
         for k in range(len(ys)):
+            ax_to_send[k].plot(x, ys[k], linewidth=1)
+            ax_to_send[k].set_xlabel(x_label)
+            ax_to_send[k].set_ylabel(y_labels[k])
             if ys_sem != 0:
-                ax_to_send[k] = single_line_plot(x, ys[k], x_label, y_labels[k], ys_sem[k], len(ys), k + 1)
-            else:
-                ax_to_send[k] = single_line_plot(x, ys[k], x_label, y_labels[k], nrow = len(ys), nelm = k + 1)
+                if ys_sem[k] != 0:
+                    area_top = [ys[k][0]]
+                    area_bot = [ys[k][0]]
+                    for j in range(1, len(ys[k])):
+                        area_bot.append(ys[k][j] - ys_sem[k][j - 1])
+                        area_top.append(ys[k][j] + ys_sem[k][j - 1])
+                    ax_to_send[k].fill_between(x, area_bot, area_top, color="skyblue", alpha=0.4)
             ax_to_send[k].axes.get_xaxis().set_visible(False)
         ax_to_send[k].axes.get_xaxis().set_visible(True)
     return figure
@@ -161,6 +162,7 @@ def plot():
                                              'last_epsilon',
                                              'n_violations',
                                              'reward_cum'])
+
     figure_frames = multi_figures_plot(frm_frame_idx[0],
                        [frm_reward_mean[0],
                         frm_reward_cum[0]], 'frm_frame_idx',['n_steps_goal',
