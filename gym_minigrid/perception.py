@@ -145,9 +145,10 @@ class Perception():
             # Returns true if the agent is in front of an opened door
             return Perception.door_closed(env)
 
-        elif condition == "door-opened-in-front":
+        elif condition == "ready-to-cross-door":
             # Returns true if the agent is in front of an opened door
-            return Perception.door_opened_in_front(env) and env.position != "verify"
+            return Perception.door_opened_in_front(env) and env.position != "verify"\
+                   and Perception.agent_in_room_number(env, 0) and Perception.light_on_next_room(env)
 
         elif condition == "door-closed-in-front":
             # Returns true if the agent is in front of an opened door
@@ -170,7 +171,7 @@ class Perception():
         elif condition == "entering-a-room":
             # Returns true if the agent is entering a room
             # Meaning there is a door in front and its action is to move forward
-            if Perception.door_opened_in_front(env) and action_proposed == ExMiniGridEnv.Actions.forward:
+            if Perception.door_opened_in_front(env) :#and action_proposed == ExMiniGridEnv.Actions.forward:
                 return True
             return False
 
@@ -184,7 +185,6 @@ class Perception():
             return False
 
         elif condition == "agent-on-door":
-            #print("agent on door ",Perception.agent_on_door(env) and env.position != "verify")
             return Perception.agent_on_door(env) and env.position != "verify"
 
         elif condition == "action-is-toggle":

@@ -5,7 +5,7 @@ from __future__ import division, print_function
 import sys
 import time
 from optparse import OptionParser
-
+from configurations import config_grabber as cg
 
 try:
     import gym_minigrid

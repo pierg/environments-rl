@@ -102,23 +102,31 @@ class Precedence(SafetyStateMachine):
 
     # Sate machine conditions
     def active_cond(self):
-        return Precedence.obs["active"]
+        #return Precedence.obs["active"]
+        return self.active
 
     def postcondition_cond(self):
-        return Precedence.obs["postcondition"]
+        #return Precedence.obs["postcondition"]
+        return self.obs_postcondition
 
     def precondition_cond(self):
-        return Precedence.obs["precondition"]
+        #return Precedence.obs["precondition"]
+        return self.obs_precondition
 
     def reset(self):
         super().reset()
-        Precedence.obs["precondition"] = False
+        #Precedence.obs["precondition"] = False
+        self.obs_precondition = False
 
     def __init__(self, name, conditions, notify, rewards):
         self.respectd_rwd = rewards.respected
         self.violated_rwd = rewards.violated
         self.precondition = conditions.pre
         self.postcondition = conditions.post
+
+        self.active = False
+        self.obs_precondition = False
+        self.obs_postcondition = False
 
         super().__init__(name, "precedence", self.states, self.transitions, 'idle', notify)
 
@@ -129,16 +137,21 @@ class Precedence(SafetyStateMachine):
     def _map_context(self, obs, action_proposed):
         # Activating condition
         context_active = self._context_active(obs, action_proposed)
-        Precedence.obs["active"] = context_active
+        #Precedence.obs["active"] = context_active
+        self.active = context_active
         return context_active
 
     # Convert observations to state and populate the obs_conditions
     def _map_conditions(self, obs, action_proposed):
 
         postcondition = p.is_condition_satisfied(obs, self.postcondition, action_proposed)
-        Precedence.obs["postcondition"] = postcondition
-        if not Precedence.obs["precondition"]:
-            Precedence.obs["precondition"] = p.is_condition_satisfied(obs, self.precondition, action_proposed)
+        #Precedence.obs["postcondition"] = postcondition
+        self.obs_postcondition = postcondition
+
+        #if not Precedence.obs["precondition"]:
+        if not self.obs_precondition:
+            #Precedence.obs["precondition"] = p.is_condition_satisfied(obs, self.precondition, action_proposed)
+            self.obs_precondition = p.is_condition_satisfied(obs, self.precondition, action_proposed)
         # If postcondition is true, check precondition and trigger as one atomic operation
         if postcondition:
             self.trigger("*")

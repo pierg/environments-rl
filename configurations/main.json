@@ -24,7 +24,7 @@
       "precedence": {
         "lightPrecedence": {
           "action_planner": "turn_right",
-          "active": false,
+          "active": true,
           "conditions": {
             "post": "entering-a-room",
             "pre": "light-switch-turned-on"
@@ -39,7 +39,7 @@
         },
         "roomPrecedence": {
           "action_planner": "turn_right",
-          "active": false,
+          "active": true,
           "conditions": {
             "post": "going-back",
             "pre": "light-switch-turned-off"
@@ -74,7 +74,7 @@
           "active": true,
           "conditions": {
             "post": "action-is-forward",
-            "pre": "door-opened-in-front"
+            "pre": "ready-to-cross-door"
           },
           "mode": "enforcing",
           "name": "doorResponse",

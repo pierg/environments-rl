@@ -3,7 +3,6 @@ import collections
 from configurations import config_grabber as cg
 
 from extendedminigrid import *
-from monitors.properties.avoid import *
 from monitors.patterns.precedence import *
 from monitors.patterns.absence import *
 from monitors.patterns.universality import *
@@ -45,8 +44,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.n_steps = 0
 
         # Dictionary that contains all the type of monitors you can use
-        dict_monitors = {'avoid': Avoid,
-                         'precedence': Precedence,
+        dict_monitors = {'precedence': Precedence,
                          'response': Response,
                          'universality': Universality,
                          'absence': Absence}
@@ -60,15 +58,6 @@ class SafetyEnvelope(gym.core.Wrapper):
                             new_monitor = dict_monitors[monitor.type](monitor.type + "_" + monitor.name,
                                                                       monitor.conditions, self._on_monitoring,
                                                                       monitor.rewards)
-                        # Monitors without condition (Avoid)
-                        else:
-                            for j in ExMiniGridEnv.Actions:
-                                if monitor.act_to_avoid == str(j):
-                                    action_to_avoid = j
-                            new_monitor = dict_monitors[monitor.type](monitor.type + "_" + monitor.obj_to_avoid,
-                                                                      monitor.obj_to_avoid,
-                                                                      action_to_avoid,
-                                                                      self._on_monitoring, monitor.rewards)
                         self.monitors.append(new_monitor)
                         self.monitor_states[new_monitor.name] = {}
                         self.monitor_states[new_monitor.name]["state"] = ""
@@ -186,7 +175,6 @@ class SafetyEnvelope(gym.core.Wrapper):
             if monitor.state == "violated" or monitor.state == "precond_violated" or monitor.state == "postcond_violated" :
                 saved = True
                 list_monitor[len(list_monitor)] = monitor.name
-
         # Check for unsafe actions before sending them to the environment:
         unsafe_actions = []
         shaped_rewards = []

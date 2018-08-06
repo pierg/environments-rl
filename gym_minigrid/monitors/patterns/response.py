@@ -102,19 +102,26 @@ class Response(SafetyStateMachine):
 
     # Sate machine conditions
     def active_cond(self):
-        return Response.obs["active"]
+        #return Response.obs["active"]
+        return self.active
 
     def precondition_cond(self):
-        return Response.obs["precondition"]
+        #return Response.obs["precondition"]
+        return self.obs_precondition
 
     def postcondition_cond(self):
-        return Response.obs["postcondition"]
+        #return Response.obs["postcondition"]
+        return self.obs_postcondition
 
     def __init__(self, name, conditions, notify, rewards):
         self.respectd_rwd = rewards.respected
         self.violated_rwd = rewards.violated
         self.postcondition = conditions.post
         self.precondition = conditions.pre
+
+        self.active = False
+        self.obs_precondition = False
+        self.obs_postcondition = False
 
         super().__init__(name, "response", self.states, self.transitions, 'idle', notify)
 
@@ -124,18 +131,21 @@ class Response(SafetyStateMachine):
     def _map_context(self, obs, action_proposed):
         # Activating condition
         context_active = self._context_active(obs, action_proposed)
-        Response.obs["active"] = context_active
+        #Response.obs["active"] = context_active
+        self.active = context_active
         return context_active
 
     # Convert observations to state and populate the obs_conditions
     def _map_conditions(self, obs, action_proposed):
         self.action_proposed = action_proposed
         precondition = p.is_condition_satisfied(obs, self.precondition, action_proposed)
-        Response.obs["precondition"] = precondition
+        #Response.obs["precondition"] = precondition
+        self.obs_precondition = precondition
 
         # If precondition is true, check postcondition and trigger as one atomic operation
         if precondition:
-            Response.obs["postcondition"] = p.is_condition_satisfied(obs, self.postcondition, action_proposed)
+            #Response.obs["postcondition"] = p.is_condition_satisfied(obs, self.postcondition, action_proposed)
+            self.obs_postcondition = p.is_condition_satisfied(obs, self.postcondition, action_proposed)
             self.trigger("*")
 
     def _on_idle(self):
@@ -156,6 +166,5 @@ class Response(SafetyStateMachine):
         super()._on_shaping(self.respectd_rwd)
 
     def _on_violated(self):
-        #print(self.name, self.action_proposed, Response.obs["precondition"],Response.obs["postcondition"])
         logging.info("entered state: " + self.state)
         super()._on_violated(self.violated_rwd)
