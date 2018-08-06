@@ -2,6 +2,10 @@ from gym_minigrid.minigrid import *
 from configurations import config_grabber as cg
 
 
+
+OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
+
+
 def extended_dic(obj_names=[]):
     """
     Extend the OBJECT_TO_IDX dictionaries with additional objects
@@ -369,16 +373,31 @@ class ExMiniGridEnv(MiniGridEnv):
             return "done"
         return None
 
-    def __init__(self, grid_size=16, max_steps=100, see_through_walls=False, seed=1337):
-        super().__init__(grid_size, max_steps, see_through_walls, seed)
+
+    def __init__(self, grid_size=16, max_steps=-1, see_through_walls=False, seed=1337):
+        # Grab configuration
+        self.config = cg.Configuration.grab()
+        # Overriding the max_num_steps
+        max_num_steps = max_steps
+        if hasattr(self.config, 'max_num_steps'):
+            max_num_steps = self.config.max_num_steps
+        super().__init__(grid_size, max_num_steps, see_through_walls, seed)
         self.actions = ExMiniGridEnv.Actions
+
+        self.observation_space = spaces.Box(
+            low=0,
+            high=255,
+            shape=OBS_ARRAY_SIZE,
+            dtype='uint8'
+        )
+        self.observation_space = spaces.Dict({
+            'image': self.observation_space
+        })
 
         # Restricting action_space to the first N actions
         first_n_actions_available = 4
         self.action_space = spaces.Discrete(first_n_actions_available)
 
-        # Grab configuration
-        self.config = cg.Configuration.grab()
 
     def step(self, action):
 
@@ -427,6 +446,7 @@ class ExMiniGridEnv(MiniGridEnv):
         if self.config.debug_mode: print("reward: " + str(reward) + "\tinfo: " + str(info))
         return obs, reward, done, info
 
+
     def gen_obs(self):
         """
         Generate the agent's view (partially observable, low-resolution encoding)
@@ -445,8 +465,29 @@ class ExMiniGridEnv(MiniGridEnv):
                                     grid.grid[i] = None
 
 
-            # Encode the partially observable view into a numpy array
-            image = grid.encode()
+            # # Encode the partially observable view into a numpy array
+            # image = grid.encode()
+
+            # Customized encoding
+
+            codeSize = grid.width * grid.height
+            array = np.zeros(shape=(grid.width, grid.height), dtype='uint8')
+
+            for j in range(0, grid.height):
+                for i in range(0, grid.width):
+
+                    v = grid.get(i, j)
+
+                    if v == None:
+                        continue
+
+                    array[i, j] = OBJECT_TO_IDX[v.type]
+                    # array[i, j, 1] = COLOR_TO_IDX[v.color]
+
+                    # if hasattr(v, 'is_open') and v.is_open:
+                    #     array[i, j, 2] = 1
+
+            image = array
 
             # Observations are dictionaries containing:
             # - an image (partially observable view of the environment)

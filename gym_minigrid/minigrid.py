@@ -13,8 +13,9 @@ CELL_PIXELS = 32
 AGENT_VIEW_SIZE = 7
 
 # Size of the array given as an observation to the agent
-# TODO: Why 3?!?
+# 3 = Type, Color, Is_open
 OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE, 3)
+
 # OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
 
 # Map of color names to RGB values
@@ -334,8 +335,8 @@ class Grid:
     """
 
     def __init__(self, width, height):
-        assert width >= 4
-        assert height >= 4
+        assert width >= 3
+        assert height >= 3
 
         self.width = width
         self.height = height
@@ -1089,14 +1090,43 @@ class MiniGridEnv(gym.Env):
         Generate the sub-grid observed by the agent.
         This method also outputs a visibility mask telling us which grid
         cells the agent can actually see.
+        Example observation for an agent (A) facing up in a view_size 3x3
+        The numbers indicate the obs_array index:
+
+            8   7   6
+            5   4   3
+            2   A   0
+
         """
 
         topX, topY, botX, botY = self.get_view_exts()
 
         grid = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
+        grid_rotate_left_1 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
+        grid_rotate_left_2 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
+        grid_rotate_left_3 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
 
-        for i in range(self.agent_dir + 1):
-            grid = grid.rotate_left()
+        # for i in range(self.agent_dir + 1):
+        #     grid = grid.rotate_left()
+
+        grid_rotate_left_1 = grid_rotate_left_1.rotate_left()
+
+        for i in range (2):
+            grid_rotate_left_2 = grid_rotate_left_2.rotate_left()
+
+        for i in range (3):
+            grid_rotate_left_3 = grid_rotate_left_3.rotate_left()
+
+        # agent facing right
+        if self.agent_dir == 0:
+            grid = grid_rotate_left_3
+        # agent facing left
+        elif self.agent_dir == 2:
+            grid = grid_rotate_left_1
+        # agent facing up
+        elif self.agent_dir == 3:
+            grid = grid_rotate_left_2
+
 
         # Process occluders and visibility
         # Note that this incurs some performance cost

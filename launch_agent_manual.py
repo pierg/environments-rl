@@ -23,6 +23,7 @@ def main():
 
     # logging.getLogger().setLevel(logging.INFO)
 
+    observed = True
 
     cg.Configuration.set("training_mode", False)
     cg.Configuration.set("debug_mode", True)
@@ -76,41 +77,77 @@ def main():
 
         action = 0
 
+        nonlocal observed
 
-        if keyName == 'LEFT':
-            action = env.actions.left
-        elif keyName == 'RIGHT':
-            action = env.actions.right
-        elif keyName == 'UP':
-            action = env.actions.forward
+        if hasattr(env, 'env'):
 
-        elif keyName == 'SPACE':
-            action = env.actions.toggle
-        elif keyName == 'PAGE_UP':
-            action = env.actions.pickup
-            action = env.env.actions.forward
-            print("unknown key %s, going forward" % keyName)
-            return
-        elif keyName == 'PAGE_DOWN':
-            action = env.actions.drop
-            action = env.env.actions.forward
-            print("unknown key %s, going forward" % keyName)
-            return
+            if keyName == 'LEFT':
+                action = env.env.actions.left
+            elif keyName == 'RIGHT':
+                action = env.env.actions.right
+            elif keyName == 'UP':
+                action = env.env.actions.forward
 
-        elif keyName == 'CTRL':
-            action = env.actions.wait
-            action = env.env.actions.forward
-            print("unknown key %s, going forward" % keyName)
-            return
+            elif keyName == 'SPACE':
+                action = env.env.actions.toggle
+            elif keyName == 'PAGE_UP':
+                action = env.env.actions.forward
+                print("unknown key %s, going forward" % keyName)
+                return
+            elif keyName == 'PAGE_DOWN':
+                action = env.env.actions.forward
+                print("unknown key %s, going forward" % keyName)
+                return
+
+            elif keyName == 'CTRL':
+                action = env.env.actions.forward
+                print("unknown key %s, going forward" % keyName)
+                return
+
+            else:
+                print("unknown key %s" % keyName)
+                return
+
+            obs, reward, done, info = env.step(action)
+            observed = True
+
+            print('step=%s, reward=%s' % (env.env.step_count, reward))
+            print("\n")
 
         else:
-            print("unknown key %s" % keyName)
-            return
 
-        obs, reward, done, info = env.step(action)
+            if keyName == 'LEFT':
+                action = env.actions.left
+            elif keyName == 'RIGHT':
+                action = env.actions.right
+            elif keyName == 'UP':
+                action = env.actions.forward
 
-        print('step=%s, reward=%s' % (env.step_count, reward))
-        print("\n")
+            elif keyName == 'SPACE':
+                action = env.actions.toggle
+            elif keyName == 'PAGE_UP':
+                action = env.actions.forward
+                print("unknown key %s, going forward" % keyName)
+                return
+            elif keyName == 'PAGE_DOWN':
+                action = env.actions.forward
+                print("unknown key %s, going forward" % keyName)
+                return
+
+            elif keyName == 'CTRL':
+                action = env.actions.forward
+                print("unknown key %s, going forward" % keyName)
+                return
+
+            else:
+                print("unknown key %s" % keyName)
+                return
+
+            obs, reward, done, info = env.step(action)
+            observed = True
+
+            print('step=%s, reward=%s' % (env.step_count, reward))
+            print("\n")
 
         if done:
             print('done!')

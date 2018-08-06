@@ -10,7 +10,7 @@ autoPlot <- function(array_mo,array_nomo,fileName)
   
   # Monitor Datas
   colonne <- dim(array_mo)[1]              # recover the number of lines in the csv
-  # add datas of the first line
+  # add datas of the first line 
   N_step_mo = c(array_mo[1,2])
   N_step_AVG_mo = c(array_mo[1,16])
   N_goal_reached_mo = c(array_mo[1,15])
