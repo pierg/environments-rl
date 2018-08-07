@@ -134,6 +134,9 @@ while [ $iterations -ne $i ]; do
             else
                 python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
             fi
+
+            echo "plotting..."
+            python3 ./pytorch_dqn/plot_evaluations.py
     fi
     let "i+=1"
 
