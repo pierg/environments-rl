@@ -22,3 +22,4 @@ from gym_minigrid.envs.unsafeRandomLevels import *
 from gym_minigrid.envs.unsafeEnv import *
 from gym_minigrid.envs.wa6_grid6 import *
 from gym_minigrid.envs.dirtwatlight import *
+from gym_minigrid.envs.randoms.randomenv7608 import *

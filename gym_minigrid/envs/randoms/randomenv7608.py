@@ -1,40 +1,4 @@
-import argparse
-import json
-from random import randint
-from configurations.config_grabber import Configuration
 
-parser = argparse.ArgumentParser(description='Arguments for creating the environments and its configuration')
-parser.add_argument('--environment_file', type=str, required=False, help="A json file containing the keys: "
-                                                                         "step, goal, near, immediate, violated. "
-                                                                         "The values should be the wanted rewards "
-                                                                         "of the actions")
-parser.add_argument('--rewards_file', type=str, required=False, help="A json file containing the keys: "
-                                                                     "step, goal, near, immediate, violated. "
-                                                                     "The values should be the wanted rewards "
-                                                                     "of the actions")
-
-environment_path = "../gym-minigrid/gym_minigrid/envs/"
-configuration_path = "configurations/"
-random_token = randint(0, 9999)
-
-""" This script creates a random environment in the gym_minigrid/envs folder. It uses a token_hex(4) 
-        as the ID and the random seed for placing tiles in the grid.
-    This to ensure that certain environments can be reproduced 
-        in case the agent behaves strange in certain environments, in order to investigate why.        
-"""
-
-
-def generate_environment(environment="default", rewards="default"):
-    elements = Configuration.grab("environments/" + environment)
-    grid_size = elements.grid_size
-    n_water = elements.n_water
-    n_deadend = elements.n_deadend
-    light_switch = elements.light_switch
-    random_each_episode = elements.random_each_episode
-    rewards = Configuration.grab("rewards/" + rewards)
-    dqn = elements.dqn
-    with open(environment_path + "randoms/" + "randomenv{0}.py".format(random_token), 'w') as env:
-        env.write("""
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
 import random
@@ -44,7 +8,7 @@ class RandomEnv(ExMiniGridEnv):
             grid_size=size,
             max_steps=4*size*size,
             # Set this to True for maximum speed
-            see_through_walls= not {3}
+            see_through_walls= not False
         )
 
     def getRooms(self):
@@ -64,7 +28,7 @@ class RandomEnv(ExMiniGridEnv):
         return tab
 
     def _random_or_not_position(self, xmin, xmax, ymin, ymax ):
-        if {5}:
+        if False:
             width_pos, height_pos = self._rand_pos( xmin, xmax + 1, ymin, ymax + 1)
         else:
             width_pos = random.randint( xmin, xmax)
@@ -72,13 +36,13 @@ class RandomEnv(ExMiniGridEnv):
         return width_pos, height_pos
 
     def _random_number(self, min, max):
-        if {5}:
+        if False:
             return self._rand_int(min,max+1)
         else:
             return random.randint(min,max)
 
     def _random_or_not_bool(self):
-        if {5}:
+        if False:
             return self._rand_bool()
         else:
             return random.choice([True, False])
@@ -94,24 +58,22 @@ class RandomEnv(ExMiniGridEnv):
         # Place a goal square in the bottom-right corner
         self.grid.set(width - 2, height - 2, Goal())
         # Set the random seed to the random token, so we can reproduce the environment
-        random.seed("{4}")
+        random.seed("7608")
 
         #Place lightswitch
         lightswitch_is_posed = False
         test_goal = 0
         if width > 10:
-            if {3}:
+            if False:
                 while not lightswitch_is_posed:
                     width_pos , height_pos = self._random_or_not_position(2, width - 3, 2, height - 1)
 
                     #lightswitch and room wall must not replace a fundamental element (goal, key, ...)
                     continue_while = True
-                    if isinstance(self.grid.get(width_pos, height_pos), Goal) or \
-                     isinstance(self.grid.get(width_pos, height_pos), Key):
+                    if isinstance(self.grid.get(width_pos, height_pos), Goal) or                      isinstance(self.grid.get(width_pos, height_pos), Key):
                         continue_while = False
                     for i in range(0,height):
-                        if isinstance(self.grid.get(width_pos + 1, i), Goal) or \
-                         isinstance(self.grid.get(width_pos + 1, i), Key):
+                        if isinstance(self.grid.get(width_pos + 1, i), Goal) or                          isinstance(self.grid.get(width_pos + 1, i), Key):
                             continue_while = False
                             break
                     if not continue_while:
@@ -157,14 +119,14 @@ class RandomEnv(ExMiniGridEnv):
         # Place dead ends
         placed_dead_ends = 0
         tmp = self._random_number(0,3)
-        while {2} > placed_dead_ends:
+        while 0 > placed_dead_ends:
             if self.grid_size < 10:
                 # Limit to one dead end if the grid is too small
                 if self._random_or_not_bool():
                     self.grid.vert_wall(width//2-1,height//2,height//2)
                 else:
                     self.grid.horz_wall(width//2,height//2-1,width//2)
-                placed_dead_ends = {2}
+                placed_dead_ends = 0
             else:
                 if tmp == 0:
                     self.grid.vert_wall(2,height-6,3)
@@ -182,12 +144,12 @@ class RandomEnv(ExMiniGridEnv):
         # Place water
         placed_water_tiles = 0
         anti_loop = 0
-        while {1} > placed_water_tiles:
+        while 6 > placed_water_tiles:
 
             # Added to avoid a number of water tiles that is impossible (infinite loop)
             anti_loop +=1
             if anti_loop > 1000:
-                placed_water_tiles = {1}
+                placed_water_tiles = 6
             # Minus 2 because grid is zero indexed, and the last one is just a wall
             width_pos , height_pos = self._random_or_not_position(1, width - 2, 1, height - 2)
             if width_pos == 1 and height_pos == 1:
@@ -247,13 +209,13 @@ class RandomEnv(ExMiniGridEnv):
                 continue
             self.grid.set(width_pos, height_pos, Water())
 
-            if self.grid_size < 10 and {2} > 0:
-                placed_water_tiles = {1}
+            if self.grid_size < 10 and 0 > 0:
+                placed_water_tiles = 6
             else:
                 placed_water_tiles += 1
 
         #if lightswitch_is_posed:
-            #if {3}:
+            #if False:
                 # transfert the position of the objects in the room in tha dark for visual  
                 #tab = self.saveElements(self.roomList[1])
                 #switchRoom.elements_in_room(tab)
@@ -262,114 +224,13 @@ class RandomEnv(ExMiniGridEnv):
     def step(self,action):
         # Reset if agent step on water without knowing it
         if action == self.actions.forward and self.worldobj_in_agent(1,0) == "water" :
-            return self.gen_obs(), {6}, True, "died"
+            return self.gen_obs(), -1, True, "died"
         else:
             return super().step(action)
-class RandomEnv{0}x{0}_{4}(RandomEnv):
+class RandomEnv12x12_7608(RandomEnv):
     def __init__(self):
-        super().__init__(size={0})
+        super().__init__(size=12)
 register(
-    id='MiniGrid-RandomEnv-{0}x{0}-{4}-v0',
-    entry_point='gym_minigrid.envs:RandomEnv{0}x{0}_{4}'
+    id='MiniGrid-RandomEnv-12x12-7608-v0',
+    entry_point='gym_minigrid.envs:RandomEnv12x12_7608'
 )
-""".format(grid_size, n_water, n_deadend, light_switch, random_token, random_each_episode, rewards.standard.death))
-        env.close()
-    # Adds the import statement to __init__.py in the envs folder in gym_minigrid,
-    # otherwise the environment is unavailable to use.
-    with open(environment_path + "__init__.py", 'a') as init_file:
-        init_file.write("\n")
-        init_file.write("from gym_minigrid.envs.randoms.randomenv{0} import *".format(random_token))
-        init_file.close()
-
-    # Creates a json config file for the random environment
-    with open(configuration_path + "randoms/" + "randomEnv-{0}x{0}-{1}-v0.json".format(grid_size, random_token),
-              'w') as config:
-        action_planning = {}
-        if hasattr(elements,"action_planning"):
-            unsafe = -0.3
-            on_plan = 0.01
-            off_plan = -0.15
-            for current_monitor in rewards:
-                if current_monitor == "action_planning":
-                    unsafe = current_monitor.unsafe
-                    on_plan = current_monitor.on_plan
-                    off_plan = current_monitor.off_plan
-            action_planning = {
-                "active": True if elements.action_planning.active else False,
-                "random_unsafe_obj":int("{0}".format(elements.action_planning.random_unsafe_obj)),
-                "secondary_goals":"{0}".format(elements.action_planning.secondary_goals),
-                "reward": {
-                    "unsafe": float("{0:.2f}".format(unsafe)),
-                    "on_plan": float("{0:.2f}".format(on_plan)),
-                    "off_plan": float("{0:.2f}".format(off_plan)),
-                }
-            }
-
-        json_object = json.dumps({
-            "config_name": "randomEnv-{0}x{0}-{1}-v0".format(grid_size, random_token),
-            "algorithm": "a2c",
-            "env_name": "MiniGrid-RandomEnv-{0}x{0}-{1}-v0".format(grid_size, random_token),
-            "num_processes": 48,
-            "optimal_num_steps": int("{0}".format(elements.optimal_num_steps if hasattr(elements, 'optimal_num_steps') else (int("{0}".format(elements.grid_size))*int("{0}".format(elements.grid_size))//2))),
-            "stop_after_update_number": 0,
-            "num_steps": 4,
-            "log_interval": 10,
-            "on_violation_reset": False,
-            "rendering": False,
-            "stop_learning": int("{0}".format(elements.stop_learning)),
-            "number_of_iteration": int("{0}".format(elements.number_of_iteration)),
-            "evaluation_directory_name": "evaluations",
-            "visdom": False,
-            "debug_mode": False,
-            "action_planning": {
-
-            },
-            "rewards": {
-                "standard": {
-                    "goal": float("{0:.2f}".format(rewards.standard.goal if hasattr(rewards.standard, 'goal') else 1)),
-                    "step": float("{0:.2f}".format(rewards.standard.step if hasattr(rewards.standard, 'step') else 0)),
-                    'death': float(
-                        "{0:.2f}".format(rewards.standard.death if hasattr(rewards.standard, 'death') else -1))
-                },
-                "cleaningenv": {
-                    "clean": float(
-                        "{0:.2f}".format(rewards.cleaningenv.clean if hasattr(rewards.cleaningenv, 'clean') else 0.5))
-                }
-            },
-            "dqn": {
-                "max_num_frames": int("{0}".format(elements.dqn.max_num_frames if hasattr(elements.dqn, 'max_num_frames') else 100000)),
-                "results_log_interval": int("{0}".format(elements.dqn.results_log_interval if hasattr(elements.dqn, 'results_log_interval') else 200)),
-                "epsilon_decay_episodes": int("{0}".format(
-                    elements.dqn.epsilon_decay_episodes if hasattr(elements.dqn, 'epsilon_decay_episodes') else 10)),
-                "epsilon_decay_frame": int("{0}".format(
-                    elements.dqn.epsilon_decay_frame if hasattr(elements.dqn, 'epsilon_decay_frame') else 5000))
-            }
-        }, indent=2)
-
-        d = {}
-        daction_planning ={}
-
-        for p in action_planning:
-                daction_planning[p] = action_planning[p]
-        d = json.loads(json_object)
-        d['action_planning'].update(daction_planning)
-        config.write(json.dumps(d, sort_keys=True, indent=2))
-        config.close()
-
-    return "randomEnv-{0}x{0}-{1}-v0.json".format(grid_size, random_token)
-
-
-def main():
-    args = parser.parse_args()
-    environment = "default"
-    rewards = "default"
-    if args.rewards_file is not None:
-        rewards = args.rewards_file
-    if args.environment_file is not None:
-        environment = args.environment_file
-    file_name = generate_environment(environment, rewards)
-    print(file_name)
-
-
-if __name__ == '__main__':
-    main()
