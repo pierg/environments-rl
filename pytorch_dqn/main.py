@@ -52,6 +52,7 @@ if config.controller:
     env = SafetyEnvelope(env)
 
 if args.record:
+    print("starting recording..")
     expt_dir = '../evaluations/videos'
     env = wrappers.Monitor(env, expt_dir, force=True)
 
