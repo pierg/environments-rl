@@ -153,30 +153,32 @@ def multi_figures_plot(x, ys, x_label, y_labels, ys_sem=0):
 def plot():
     extract_all_data_from_csv(os.path.abspath(os.path.dirname(__file__) + "/../evaluations/"))
 
-    figure_episodes = multi_figures_plot(epi_episode_idx[0],
-                       [epi_n_steps_goal[0],
-                        epi_last_epsilon[0],
-                        epi_n_violations[0],
-                        epi_reward_cum[0]], 'epi_episode_idx', ['n_steps_goal',
-                                             'last_epsilon',
-                                             'n_violations',
-                                             'reward_cum'])
+    for i in range(len(epi_episode_idx)):
 
-    figure_frames = multi_figures_plot(frm_frame_idx[0],
-                       [frm_reward_mean[0],
-                        frm_reward_cum[0]], 'frm_frame_idx',['n_steps_goal',
-                                             'reward_cum'],[frm_reward_sem[0], 0])
+        figure_episodes = multi_figures_plot(epi_episode_idx[i],
+                           [epi_n_steps_goal[i],
+                            epi_last_epsilon[i],
+                            epi_n_violations[i],
+                            epi_reward_cum[i]], 'epi_episode_idx', ['n_steps_goal',
+                                                 'last_epsilon',
+                                                 'n_violations',
+                                                 'reward_cum'])
 
-    # TODO: save the 2 figures as 2 pages in a single pdf and save the pdf in the evaluation folder
-    Name = "dqn_experience_"+ str(randint(0,999999))+ ".pdf"
-    print("PdfName : ", Name)
+        figure_frames = multi_figures_plot(frm_frame_idx[i],
+                           [frm_reward_mean[i],
+                            frm_reward_cum[i]], 'frm_frame_idx',['frm_reward_mean',
+                                                 'reward_cum'],[frm_reward_sem[i], 0])
 
-    os.chdir(os.path.dirname(__file__) + "/../evaluations/")
-    pdf = PdfPages(Name)
+        # TODO: save the 2 figures as 2 pages in a single pdf and save the pdf in the evaluation folder
+        Name = "dqn_experience_[" + str(i) + "]__"+ str(randint(0,999999))+ ".pdf"
+        print("PdfName : ", Name)
 
-    pdf.savefig(figure_episodes)
-    pdf.savefig(figure_frames)
-    pdf.close()
+        os.chdir(os.path.dirname(__file__) + "/../evaluations/")
+        pdf = PdfPages(Name)
+
+        pdf.savefig(figure_episodes)
+        pdf.savefig(figure_frames)
+        pdf.close()
 
 
 

@@ -84,11 +84,16 @@ while [ $iterations -ne $i ]; do
 
     if [ $configuration_file -eq "main.json" ]; then
         echo "using default configuration file: $configuration_file"
+        cd ./configurations
+        cp $configuration_file ../evaluations
+        echo "main config file copied in the evaluation folder"
     else
         echo "...updating selected configuration file..."
         cd ./configurations
         yes | cp -rf $configuration_file "main.json"
         echo "using configuration file: $configuration_file"
+        cp $configuration_file ../evaluations
+        echo "config file copied in the evaluation folder"
     fi
 
     cd ..
@@ -111,7 +116,7 @@ while [ $iterations -ne $i ]; do
             echo "...launching the training..."
             echo "+++++ With Controller +++++"
             if [ $qlearning -eq 1 ]; then
-                python3 ./pytorch_dqn/main.py --stop $stop --iterations $i --record
+                python3 ./pytorch_dqn/main.py --stop $stop --record
             else
                 python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
             fi
@@ -124,7 +129,7 @@ while [ $iterations -ne $i ]; do
             echo "..launching the training..."
             echo "------ Without Controller -----"
             if [ $qlearning -eq 1 ]; then
-                python3 ./pytorch_dqn/main.py --stop $stop --iterations $i --record
+                python3 ./pytorch_dqn/main.py --stop $stop --record
             else
                 python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
             fi
@@ -133,5 +138,4 @@ while [ $iterations -ne $i ]; do
 
 done
 
-Rscript plot_result.R
-Rscript plot_monitor.R
+
