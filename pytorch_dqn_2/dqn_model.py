@@ -11,19 +11,58 @@ class DQN(nn.Module):
                 i.e The number of most recent frames stacked together as describe in the paper
             num_actions: number of action-value to output, one-to-one correspondence to action in game.
         """
+    #     super(DQN, self).__init__()
+    #     self.conv1 = nn.Conv2d(in_channels, 32, kernel_size=8, stride=4)
+    #     self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
+    #     self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
+    #     self.fc4 = nn.Linear(7 * 7 * 64, 512)
+    #     self.fc5 = nn.Linear(512, num_actions)
+    #
+    # def forward(self, x):
+    #     x = F.relu(self.conv1(x))
+    #     x = F.relu(self.conv2(x))
+    #     x = F.relu(self.conv3(x))
+    #     x = F.relu(self.fc4(x.view(x.size(0), -1)))
+    #     return self.fc5(x)
+    def __init__(self, num_inputs, num_actions):
         super(DQN, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels, 32, kernel_size=8, stride=4)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
-        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
-        self.fc4 = nn.Linear(7 * 7 * 64, 512)
-        self.fc5 = nn.Linear(512, num_actions)
+
+        self.layers = nn.Sequential(
+            nn.Linear(num_inputs, 128),
+            nn.ReLU(),
+            nn.Linear(128, 128),
+            nn.ReLU(),
+            nn.Linear(128, num_actions)
+        )
 
     def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
-        x = F.relu(self.fc4(x.view(x.size(0), -1)))
-        return self.fc5(x)
+        return self.layers(x)
+
+
+class DQN_2(nn.Module):
+    def __init__(self, num_inputs, num_actions):
+        super(DQN, self).__init__()
+
+        self.layers = nn.Sequential(
+            nn.Linear(num_inputs, 128),
+            nn.ReLU(),
+            nn.Linear(128, 128),
+            nn.ReLU(),
+            nn.Linear(128, num_actions)
+        )
+
+    def forward(self, x):
+        return self.layers(x)
+
+    # def act(self, state, epsilon):
+    #     if random.random() > epsilon:
+    #         state = Variable(torch.FloatTensor(state).unsqueeze(0), volatile=True)
+    #         q_value = self.forward(state)
+    #         action = q_value.max(1)[1].data[0]
+    #     else:
+    #         action = random.randrange(env.action_space.n)
+    #     return action
+
 
 class DQN_RAM(nn.Module):
     def __init__(self, in_features=4, num_actions=18):

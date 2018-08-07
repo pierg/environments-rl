@@ -86,11 +86,16 @@ while [ $iterations -ne $i ]; do
 
     if [ $configuration_file -eq "main.json" ]; then
         echo "using default configuration file: $configuration_file"
+        cd ./configurations
+        cp $configuration_file ../evaluations
+        echo "main config file copied in the evaluation folder"
     else
         echo "...updating selected configuration file..."
         cd ./configurations
-        yes | cp -rf $configuration_file "main.json"
         echo "using configuration file: $configuration_file"
+        yes | cp -rf $configuration_file "main.json"
+        cp $configuration_file ../evaluations
+        echo "$configuration_file file copied in the evaluation folder"
     fi
 
     cd ..
@@ -113,7 +118,8 @@ while [ $iterations -ne $i ]; do
             echo "...launching the training..."
             echo "+++++ With Goap +++++"
             if [ $qlearning -eq 1 ]; then
-                python3 ./pytorch_dqn/main.py --stop $stop --iterations $i --norender
+                echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
+                python3 ./pytorch_dqn/main.py --stop $stop --record --norender
             else
                 python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
             fi
@@ -125,14 +131,16 @@ while [ $iterations -ne $i ]; do
             echo "\n\n...launching the training..."
             echo "------ Without Goap -----"
             if [ $qlearning -eq 1 ]; then
-                python3 ./pytorch_dqn/main.py --stop $stop --iterations $i --norender
+                python3 ./pytorch_dqn/main.py --stop $stop --record --norender
             else
                 python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
             fi
+
+            echo "plotting..."
+            python3 ./pytorch_dqn/plot_evaluations.py
     fi
     let "i+=1"
 
 done
 
-Rscript plot_result.R
-Rscript plot_monitor.R
+

@@ -47,11 +47,11 @@ evaluator_episodes = ev_epi("dqn")
 env = gym.make(config.env_name)
 
 # env.seed(seed + rank)
-if config.action_planning.active:
-    env = ActionPlannerEnvelope(env)
+
+if config.controller:
+    env = SafetyEnvelope(env)
 
 if args.record:
-    print("starting recording..")
     expt_dir = '../evaluations/videos'
     env = wrappers.Monitor(env, expt_dir, force=True)
 
@@ -150,7 +150,6 @@ def compute_td_loss(batch_size):
     optimizer.step()
 
     return loss
-
 
 if args.stop:
     max_num_frames = int(args.stop)

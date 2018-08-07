@@ -53,8 +53,7 @@ class Evaluator:
                                   'n_goals',
                                   'n_violations',
                                   'last_epsilon',
-                                  'n_steps_goal',
-                                  'expected_q_value'])
+                                  'n_steps_goal'])
 
         self.episode_idx = []
         self.reward_cum_e = []
@@ -69,12 +68,11 @@ class Evaluator:
         self.n_violations = []
         self.last_epsilon = []
         self.n_steps_goal = []
-        self.expected_q_value = []
 
         self.last_saved_element_idx = 0
 
     def update(self, episode_idx, all_rewards, reward_cum_e, all_losses, n_deaths, n_goals, n_violations, 
-               last_epsilon, n_steps_goal, expected_q_value):
+               last_epsilon, n_steps_goal):
 
         self.episode_idx.append(episode_idx)
         self.reward_mean.append(np.mean(all_rewards))
@@ -85,8 +83,8 @@ class Evaluator:
         self.reward_max.append(np.max(all_rewards))
         self.reward_sem.append(stats.sem(all_rewards))
         self.reward_cum_e.append(reward_cum_e)
-        # if self.config.visdom:
-        #     visdom_plot("cum_rwd_e", self.episode_idx, "episode_idx", self.reward_cum_e, "cum_reward")
+        if self.config.visdom:
+            visdom_plot("cum_rwd_e", self.episode_idx, "episode_idx", self.reward_cum_e, "cum_reward")
         self.losses_mean.append(np.mean(all_losses))
         self.n_deaths.append(n_deaths)
         self.n_goals.append(n_goals)
@@ -99,12 +97,6 @@ class Evaluator:
         self.n_steps_goal.append(n_steps_goal)
         if self.config.visdom:
             visdom_plot("steps_goal", self.episode_idx, "episode_idx", self.n_steps_goal, "steps_goal")
-
-        self.expected_q_value.append(np.mean(expected_q_value))
-        if self.config.visdom:
-            visdom_plot("expected_q_value", self.episode_idx, "episode_idx", self.expected_q_value, "expected_q_value")
-
-
 
     def save(self):
 
@@ -122,7 +114,6 @@ class Evaluator:
                                      self.n_goals[idx],
                                      self.n_violations[idx],
                                      self.last_epsilon[idx],
-                                     self.n_steps_goal[idx],
-                                     self.expected_q_value[idx]])
+                                     self.n_steps_goal[idx]])
             idx += 1
         self.last_saved_element_idx = idx

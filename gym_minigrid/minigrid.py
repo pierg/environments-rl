@@ -1156,7 +1156,7 @@ class MiniGridEnv(gym.Env):
         # Encode the partially observable view into a numpy array
         image = grid.encode()
 
-        assert hasattr(self, 'mission'), "environments must define a textual mission string"
+        # assert hasattr(self, 'mission'), "environments must define a textual mission string"
 
         # Observations are dictionaries containing:
         # - an image (partially observable view of the environment)

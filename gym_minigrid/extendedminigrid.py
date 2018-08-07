@@ -1,6 +1,11 @@
 from gym_minigrid.minigrid import *
 from configurations import config_grabber as cg
 
+import math
+import operator
+from functools import reduce
+
+import numpy as np
 
 
 OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
@@ -384,19 +389,26 @@ class ExMiniGridEnv(MiniGridEnv):
         super().__init__(grid_size, max_num_steps, see_through_walls, seed)
         self.actions = ExMiniGridEnv.Actions
 
+        """
+        Observation Space
+        low: lowest element value
+        high: highest element value
+        shape: imgSize tuple, each element can be of a value between 'low' and 'high'
+        """
+        imgSize = reduce(operator.mul, OBS_ARRAY_SIZE, 1)
+        elemSize = len(IDX_TO_OBJECT)
         self.observation_space = spaces.Box(
             low=0,
-            high=255,
-            shape=OBS_ARRAY_SIZE,
+            high=elemSize,
+            shape=(imgSize,),
             dtype='uint8'
         )
-        self.observation_space = spaces.Dict({
-            'image': self.observation_space
-        })
 
         # Restricting action_space to the first N actions
         first_n_actions_available = 4
         self.action_space = spaces.Discrete(first_n_actions_available)
+
+
 
 
     def step(self, action):
@@ -464,12 +476,7 @@ class ExMiniGridEnv(MiniGridEnv):
                                 if grid.grid[i] is not None:
                                     grid.grid[i] = None
 
-
-            # # Encode the partially observable view into a numpy array
-            # image = grid.encode()
-
-            # Customized encoding
-
+            """ Encoding into a numpy array """
             codeSize = grid.width * grid.height
             array = np.zeros(shape=(grid.width, grid.height), dtype='uint8')
 
@@ -482,20 +489,14 @@ class ExMiniGridEnv(MiniGridEnv):
                         continue
 
                     array[i, j] = OBJECT_TO_IDX[v.type]
-                    # array[i, j, 1] = COLOR_TO_IDX[v.color]
-
-                    # if hasattr(v, 'is_open') and v.is_open:
-                    #     array[i, j, 2] = 1
 
             image = array
 
-            # Observations are dictionaries containing:
-            # - an image (partially observable view of the environment)
-            # - the agent's direction/orientation (acting as a compass)
-            obs = {
-                'image': image,
-                'direction': self.agent_dir
-            }
+            # TODO: add direction and light status as part of the observations (self.agent_dir)
+            # obs = np.concatenate((image, self.agent_dir))
+
+            obs = image.flatten()
+
             return obs
 
         except AttributeError:

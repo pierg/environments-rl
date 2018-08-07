@@ -107,6 +107,7 @@ def dqn_learing(
     else:
         img_h, img_w = env.observation_space.shape
         input_arg = frame_history_len
+        input_arg = env.observation_space.shape[0]
     num_actions = env.action_space.n
 
     # Construct an epilson greedy policy with given exploration schedule
