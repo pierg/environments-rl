@@ -10,7 +10,7 @@ from utils.atari_wrapper import wrap_deepmind, wrap_deepmind_ram
 
 from tools.arguments import get_args
 
-from dqn_model import DQN
+from dqn_model import DQN, DQN_RAM
 from dqn_learn import OptimizerSpec, dqn_learing
 from utils.gym import get_env, get_wrapper_by_name
 from utils.schedule import LinearSchedule
@@ -64,9 +64,10 @@ Better way to  tune down epsilon (when it's finding the minumum path?)
 BATCH_SIZE = 32
 GAMMA = 0.99
 REPLAY_BUFFER_SIZE = 1000000
-LEARNING_STARTS = 50000
+LEARNING_STARTS = 500
+# LEARNING_STARTS = 50000
 LEARNING_FREQ = 4
-FRAME_HISTORY_LEN = 4
+FRAME_HISTORY_LEN = 2
 TARGER_UPDATE_FREQ = 10000
 LEARNING_RATE = 0.00025
 ALPHA = 0.95
@@ -88,7 +89,7 @@ def main(env, num_timesteps):
 
     dqn_learing(
         env=env,
-        q_func=DQN,
+        q_func=DQN_RAM,
         optimizer_spec=optimizer_spec,
         exploration=exploration_schedule,
         stopping_criterion=stopping_criterion,
@@ -118,9 +119,9 @@ if __name__ == '__main__':
     if config.controller:
         env = SafetyEnvelope(env)
 
-    # until RL code supports dict observations, squash observations into a flat vector
-    if isinstance(env.observation_space, spaces.Dict):
-        env = FlatImageObs(env)
+    # # until RL code supports dict observations, squash observations into a flat vector
+    # if isinstance(env.observation_space, spaces.Dict):
+    #     env = FlatImageObs(env)
 
     set_global_seeds(seed)
     env.seed(seed)

@@ -5,6 +5,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.autograd as autograd
 
+from gym import wrappers
+
 from tools.arguments import get_args
 from pytorch_dqn.evaluator_frames import Evaluator as ev_frames
 from pytorch_dqn.evaluator_episodes import Evaluator as ev_epi
@@ -42,13 +44,15 @@ evaluator_episodes = ev_epi("dqn")
 
 
 env = gym.make(config.env_name)
+
 # env.seed(seed + rank)
+
 if config.controller:
     env = SafetyEnvelope(env)
 
-# until RL code supports dict observations, squash observations into a flat vector
-if isinstance(env.observation_space, spaces.Dict):
-    env = FlatImageObs(env)
+if args.record:
+    expt_dir = '../evaluations/videos'
+    env = wrappers.Monitor(env, expt_dir, force=True)
 
 from collections import deque
 
@@ -92,7 +96,7 @@ class DQN(nn.Module):
         super(DQN, self).__init__()
 
         self.layers = nn.Sequential(
-            nn.Linear(env.observation_space.shape[1], 128),
+            nn.Linear(env.observation_space.shape[0], 128),
             nn.ReLU(),
             nn.Linear(128, 128),
             nn.ReLU(),
