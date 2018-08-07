@@ -117,7 +117,7 @@ while [ $iterations -ne $i ]; do
             echo "+++++ With Controller +++++"
             if [ $qlearning -eq 1 ]; then
                 echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
-                python3 ./pytorch_dqn/main.py --stop $stop --record
+                python3 ./pytorch_dqn/main.py --stop $stop --record --norender
             else
                 python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
             fi
@@ -130,7 +130,7 @@ while [ $iterations -ne $i ]; do
             echo "..launching the training..."
             echo "------ Without Controller -----"
             if [ $qlearning -eq 1 ]; then
-                python3 ./pytorch_dqn/main.py --stop $stop --record
+                python3 ./pytorch_dqn/main.py --stop $stop --record --norender
             else
                 python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
             fi
