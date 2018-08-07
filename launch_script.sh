@@ -90,10 +90,10 @@ while [ $iterations -ne $i ]; do
     else
         echo "...updating selected configuration file..."
         cd ./configurations
-        yes | cp -rf $configuration_file "main.json"
         echo "using configuration file: $configuration_file"
+        yes | cp -rf $configuration_file "main.json"
         cp $configuration_file ../evaluations
-        echo "config file copied in the evaluation folder"
+        echo "$configuration_file file copied in the evaluation folder"
     fi
 
     cd ..
@@ -116,6 +116,7 @@ while [ $iterations -ne $i ]; do
             echo "...launching the training..."
             echo "+++++ With Controller +++++"
             if [ $qlearning -eq 1 ]; then
+                echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
                 python3 ./pytorch_dqn/main.py --stop $stop --record
             else
                 python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender

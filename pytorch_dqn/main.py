@@ -151,6 +151,7 @@ def compute_td_loss(batch_size):
 
     return loss
 
+
 if args.stop:
     max_num_frames = int(args.stop)
     if max_num_frames != 0:
