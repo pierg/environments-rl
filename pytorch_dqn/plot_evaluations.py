@@ -152,7 +152,7 @@ def multi_figures_plot(x, ys, x_label, y_labels, ys_sem=0):
 
 def plot():
     extract_all_data_from_csv(os.path.abspath(os.path.dirname(__file__) + "/../evaluations/"))
-
+    os.chdir(os.path.dirname(__file__) + "/../evaluations/")
     for i in range(len(epi_episode_idx)):
 
         figure_episodes = multi_figures_plot(epi_episode_idx[i],
@@ -173,7 +173,7 @@ def plot():
         Name = "dqn_experience_[" + str(i) + "]__"+ str(randint(0,999999))+ ".pdf"
         print("PdfName : ", Name)
 
-        os.chdir(os.path.dirname(__file__) + "/../evaluations/")
+
         pdf = PdfPages(Name)
 
         pdf.savefig(figure_episodes)

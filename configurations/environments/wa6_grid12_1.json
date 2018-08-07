@@ -6,13 +6,13 @@
   "random_each_episode": false,
   "stop_learning": 432,
   "number_of_iteration": 100,
+  "max_num_frames": 1200000,
   "action_planning":{
     "active": true,
     "random_unsafe_obj": 0,
     "secondary_goals": []
   },
   "dqn": {
-    "max_num_frames": 1200000,
     "results_log_interval": 200,
     "epsilon_decay_episodes": 10,
     "epsilon_decay_frame": 5000

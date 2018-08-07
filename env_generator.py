@@ -318,6 +318,8 @@ register(
             "rendering": False,
             "stop_learning": int("{0}".format(elements.stop_learning)),
             "number_of_iteration": int("{0}".format(elements.number_of_iteration)),
+            "max_num_frames": int(
+                "{0}".format(elements.max_num_frames if hasattr(elements, 'max_num_frames') else 100000)),
             "evaluation_directory_name": "evaluations",
             "visdom": False,
             "debug_mode": False,
@@ -337,7 +339,6 @@ register(
                 }
             },
             "dqn": {
-                "max_num_frames": int("{0}".format(elements.dqn.max_num_frames if hasattr(elements.dqn, 'max_num_frames') else 100000)),
                 "results_log_interval": int("{0}".format(elements.dqn.results_log_interval if hasattr(elements.dqn, 'results_log_interval') else 200)),
                 "epsilon_decay_episodes": int("{0}".format(
                     elements.dqn.epsilon_decay_episodes if hasattr(elements.dqn, 'epsilon_decay_episodes') else 10)),
