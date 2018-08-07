@@ -88,10 +88,10 @@ def single_line_plot(x, y, x_label, y_label, ys_sem = 0):
     figure = plt.figure()
     plt.plot(x, y, linewidth=1)
 
-    if ys_sem != 0:
-        area_top = []
-        area_bot = []
-        for k in range(len(y)):
+    if ys_sem != 0 and len(y) !=0:
+        area_top = [y[0]]
+        area_bot = [y[0]]
+        for k in range(1, len(y)):
             area_bot.append(y[k] - ys_sem[k - 1])
             area_top.append(y[k] + ys_sem[k - 1])
         plt.fill_between(x, area_bot, area_top, color="skyblue", alpha=0.4)
@@ -133,21 +133,20 @@ def multi_figures_plot(x, ys, x_label, y_labels, ys_sem=0):
     ax_to_send = figure.subplots(nrows = len(ys), ncols=1)
     if len(ys) == 1:
         return single_line_plot(x, ys[0], x_label, y_labels[0], ys_sem[0])
-    else:
-        for k in range(len(ys)):
-            ax_to_send[k].plot(x, ys[k], linewidth=1)
-            ax_to_send[k].set_xlabel(x_label)
-            ax_to_send[k].set_ylabel(y_labels[k])
-            if ys_sem != 0:
-                if ys_sem[k] != 0:
-                    area_top = [ys[k][0]]
-                    area_bot = [ys[k][0]]
-                    for j in range(1, len(ys[k])):
-                        area_bot.append(ys[k][j] - ys_sem[k][j - 1])
-                        area_top.append(ys[k][j] + ys_sem[k][j - 1])
-                    ax_to_send[k].fill_between(x, area_bot, area_top, color="skyblue", alpha=0.4)
-            ax_to_send[k].axes.get_xaxis().set_visible(False)
-        ax_to_send[k].axes.get_xaxis().set_visible(True)
+    for k in range(len(ys)):
+        ax_to_send[k].plot(x, ys[k], linewidth=1)
+        ax_to_send[k].set_xlabel(x_label)
+        ax_to_send[k].set_ylabel(y_labels[k])
+        if ys_sem != 0:
+            if ys_sem[k] != 0 and len(ys[k]) != 0:
+                area_top = [ys[k][0]]
+                area_bot = [ys[k][0]]
+                for j in range(1, len(ys[k])):
+                    area_bot.append(ys[k][j] - ys_sem[k][j - 1])
+                    area_top.append(ys[k][j] + ys_sem[k][j - 1])
+                ax_to_send[k].fill_between(x, area_bot, area_top, color="skyblue", alpha=0.4)
+        ax_to_send[k].axes.get_xaxis().set_visible(False)
+    ax_to_send[k].axes.get_xaxis().set_visible(True)
     return figure
 
 
