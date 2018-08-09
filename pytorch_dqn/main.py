@@ -96,7 +96,7 @@ class ReplayBuffer(object):
 
 
 epsilon_start = 1.0
-epsilon_final = 0.01
+epsilon_final = 0.05
 epsilon_decay_frame = config.dqn.epsilon_decay_frame
 epsilon_decay_episodes = config.dqn.epsilon_decay_episodes
 
