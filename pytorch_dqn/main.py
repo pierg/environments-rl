@@ -39,6 +39,11 @@ if args.norender:
     cg.Configuration.set("rendering", False)
     cg.Configuration.set("visdom", False)
 
+if args.stop:
+    max_num_frames = int(args.stop)
+    if max_num_frames != 0:
+        cg.Configuration.set("max_num_frames", max_num_frames)
+
 config = cg.Configuration.grab()
 
 # Initializing evaluation
@@ -154,11 +159,6 @@ def compute_td_loss(batch_size):
 
     return loss
 
-
-if args.stop:
-    max_num_frames = int(args.stop)
-    if max_num_frames != 0:
-        cg.Configuration.set("max_num_frames", max_num_frames)
 
 
 max_num_frames = config.max_num_frames
