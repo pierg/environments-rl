@@ -5,6 +5,7 @@
 configuration_file="main.json"
 start_training=1
 qlearning=0
+double=0
 
 while getopts t:l:r:e:w:s:i:q opt; do
     case ${opt} in
