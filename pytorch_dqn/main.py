@@ -60,7 +60,6 @@ eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evalua
 # Cleaning the evaluation folder
 if os.path.exists(eval_folder) and os.path.isdir(eval_folder):
     shutil.rmtree(eval_folder)
-    shutil.rmtree(eval_folder)
     os.mkdir(eval_folder)
 
 # Initializing evaluation
