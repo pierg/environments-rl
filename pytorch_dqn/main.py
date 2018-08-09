@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.autograd as autograd
 
-from gym import wrappers
+from gym import wrappers, logger
 
 from tools.arguments import get_args
 from pytorch_dqn.evaluator_frames import Evaluator as ev_frames
@@ -29,6 +29,7 @@ Better way to  tune down epsilon (when it's finding the minumum path?)
 
 args = get_args()
 
+logger.setLevel(10)
 
 cg.Configuration.set("training_mode", True)
 cg.Configuration.set("debug_mode", False)

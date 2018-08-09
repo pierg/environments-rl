@@ -50,6 +50,6 @@
         ]
     },
     "stop_learning": 480,
-    "visdom": true,
+    "visdom": false,
     "max_num_frames": 500
 }
