@@ -6,17 +6,22 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 from gym_minigrid.rendering import *
 
+from configurations import config_grabber as cg
+
+config = cg.grab()
+
 # Size in pixels of a cell in the full-scale human view
 CELL_PIXELS = 32
 
 # Number of cells (width and height) in the agent view
-AGENT_VIEW_SIZE = 5
+# AGENT_VIEW_SIZE = 5
+AGENT_VIEW_SIZE = config.agent_view_size
+
 
 # Size of the array given as an observation to the agent
 # 3 = Type, Color, Is_open
-OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE, 3)
-
-# OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
+# OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE, 3)
+OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
 
 # Map of color names to RGB values
 COLORS = {
@@ -1107,9 +1112,6 @@ class MiniGridEnv(gym.Env):
         grid_rotate_left_1 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
         grid_rotate_left_2 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
         grid_rotate_left_3 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
-
-        # for i in range(self.agent_dir + 1):
-        #     grid = grid.rotate_left()
 
         grid_rotate_left_1 = grid_rotate_left_1.rotate_left()
 

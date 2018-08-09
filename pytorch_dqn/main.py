@@ -131,6 +131,8 @@ class DQN(nn.Module):
 
 
 model = DQN(env.observation_space.shape[0], env.action_space.n)
+print("ïnput_size  (obs_space) = " + str(env.observation_space.shape[0]))
+print("output_size (act_space) = " + str(env.action_space.n))
 optimizer = optim.Adam(model.parameters())
 replay_buffer = ReplayBuffer(1000)
 

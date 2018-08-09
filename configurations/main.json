@@ -51,5 +51,6 @@
     },
     "stop_learning": 480,
     "visdom": false,
-    "max_num_frames": 1000000
+    "max_num_frames": 100000
+    "agent_view_size": 9
 }
