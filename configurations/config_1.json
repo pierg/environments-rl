@@ -19,6 +19,8 @@
         "exploration_rate": 0.99,
         "epsilon_decay_episodes": 1000,
         "epsilon_decay_frame": 5000,
+        "epsilon_start": 1.0,
+        "epsilon_final": 0.1,
         "discount_factor": 0.99
     },
     "rendering": true,
@@ -28,7 +30,7 @@
         },
         "standard": {
             "death": -0.1,
-            "goal": 10.0,
+            "goal": 1.0,
             "step": -0.005
         },
         "actions": {
@@ -51,5 +53,6 @@
     },
     "stop_learning": 480,
     "visdom": false,
-    "max_num_frames": 1000000
+    "max_num_frames": 100000,
+    "agent_view_size": 9
 }
