@@ -90,7 +90,7 @@ def single_line_plot(x, y, x_label, y_label, ys_sem = 0):
     :return: matplot figure, it can then be added to a pdf
     """
     figure = plt.figure()
-    plt.plot(x, y, linewidth=1)
+    plt.plot(x, y, linewidth=0.5)
 
     if ys_sem != 0 and len(y) !=0:
         area_top = [y[0]]
@@ -133,7 +133,9 @@ def multi_figures_plot(x, ys, x_label, y_labels, ys_sem=0):
     :param ys_sem: (optional) standard error mean, it adds as translucent area around the ys
     :return: matplot figure, it can then be added to a pdf
     """
-    figure = plt.figure()
+    x_size = 10
+    y_size = len(y_labels)*2
+    figure = plt.figure(num=None, figsize=(x_size, y_size), dpi=80, facecolor='w', edgecolor='k')
     ax_to_send = figure.subplots(nrows = len(ys), ncols=1)
     if len(ys) == 1:
         return single_line_plot(x, ys[0], x_label, y_labels[0], ys_sem[0])
@@ -163,15 +165,16 @@ def plot():
                            [epi_n_steps_goal[i],
                             epi_last_epsilon[i],
                             epi_n_violations[i],
-                            epi_reward_cum[i]], 'epi_episode_idx', ['n_steps_goal',
+                            epi_reward_cum[i],
+                            epi_times_record[i],
+                            epi_cons_times_record[i]
+                             ], 'epi_episode_idx', ['n_steps_goal',
                                                  'last_epsilon',
                                                  'n_violations',
-                                                 'reward_cum'])
-
-        figure_episodes_goal = multi_figures_plot(epi_episode_idx[i],
-                                             [epi_times_record[i],
-                                              epi_cons_times_record[i]], 'epi_episode_idx', ['times_record',
-                                                                                      'cons_times_record'])
+                                                 'reward_cum',
+                                                    'times_record',
+                                                    'cons_times_record'
+                                                    ])
 
         figure_frames = multi_figures_plot(frm_frame_idx[i],
                            [frm_reward_mean[i],
@@ -179,14 +182,13 @@ def plot():
                                                  'reward_cum'],[frm_reward_sem[i], 0])
 
         # TODO: save the 2 figures as 2 pages in a single pdf and save the pdf in the evaluation folder
-        Name = "dqn_experience_[" + str(i) + "]__"+ str(randint(0,999999))+ ".pdf"
+        Name = "dqn_experience_[" + str(i) + "].pdf"
         print("PdfName : ", Name)
 
 
         pdf = PdfPages(Name)
 
         pdf.savefig(figure_episodes)
-        pdf.savefig(figure_episodes_goal)
         pdf.savefig(figure_frames)
         pdf.close()
 
