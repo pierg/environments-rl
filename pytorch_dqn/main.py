@@ -7,6 +7,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.autograd as autograd
 
+from configurations import config_grabber as cg
+
 from gym import wrappers, logger
 
 from tools.arguments import get_args
