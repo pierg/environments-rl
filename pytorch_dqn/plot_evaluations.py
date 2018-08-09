@@ -21,6 +21,8 @@ epi_last_epsilon = []
 epi_n_violations = []
 epi_n_deaths = []
 epi_reward_cum = []
+epi_times_record = []
+epi_cons_times_record = []
 
 # Frames
 frm_frame_idx = []
@@ -39,6 +41,8 @@ def extract_all_data_from_csv(csv_folder_abs_path):
             epi_n_violations.append(extract_array("n_violations", csv_folder_abs_path + "/" + csv_file_name))
             epi_n_deaths.append(extract_array("n_deaths", csv_folder_abs_path + "/" + csv_file_name))
             epi_reward_cum.append(extract_array("reward_cum", csv_folder_abs_path + "/" + csv_file_name))
+            epi_times_record.append(extract_array("times_record", csv_folder_abs_path + "/" + csv_file_name))
+            epi_cons_times_record.append(extract_array("cons_times_record", csv_folder_abs_path + "/" + csv_file_name))
 
         elif "frm" in csv_file_name:
             print("CsvName : ", csv_file_name)
@@ -164,6 +168,11 @@ def plot():
                                                  'n_violations',
                                                  'reward_cum'])
 
+        figure_episodes_goal = multi_figures_plot(epi_episode_idx[i],
+                                             [epi_times_record[i],
+                                              epi_cons_times_record[i]], 'epi_episode_idx', ['times_record',
+                                                                                      'cons_times_record'])
+
         figure_frames = multi_figures_plot(frm_frame_idx[i],
                            [frm_reward_mean[i],
                             frm_reward_cum[i]], 'frm_frame_idx',['frm_reward_mean',
@@ -177,6 +186,7 @@ def plot():
         pdf = PdfPages(Name)
 
         pdf.savefig(figure_episodes)
+        pdf.savefig(figure_episodes_goal)
         pdf.savefig(figure_frames)
         pdf.close()
 

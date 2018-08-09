@@ -17,14 +17,14 @@
     "dqn": {
         "results_log_interval": 200,
         "exploration_rate": 0.99,
-        "epsilon_decay_episodes": 10,
+        "epsilon_decay_episodes": 1000,
         "epsilon_decay_frame": 500,
         "discount_factor": 0.99
     },
     "rendering": true,
     "rewards": {
         "cleaningenv": {
-            "clean": 0.1
+            "clean": 0.0
         },
         "standard": {
             "death": -0.1,
@@ -35,7 +35,7 @@
             "forward": 0.0
         },
         "controller": {
-            "respected": 0.1,
+            "respected": 0.0,
             "violated": -0.001
         }
     },
@@ -51,5 +51,5 @@
     },
     "stop_learning": 480,
     "visdom": false,
-    "max_num_frames": 100000
+    "max_num_frames": 1000000
 }

@@ -40,6 +40,10 @@ while getopts t:l:r:e:w:s:i:q opt; do
             light=1
             start_training=1
             ;;
+
+        d)
+            double=1
+            ;;
     esac
 done
 shift $((OPTIND -1))
@@ -121,18 +125,20 @@ while [ $iterations -ne $i ]; do
             else
                 python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
             fi
-            name=`grep -e '"config_name"' configurations/main.json`
-            replace="v0_2\","
-            replace=${name/v0\",/$replace}
-            sed -i 's/"controller": true,/"controller": false,/g' configurations/main.json
-            sed -i "s/$name/$replace/" configurations/main.json
-            echo "   "
-            echo "..launching the training..."
-            echo "------ Without Controller -----"
-            if [ $qlearning -eq 1 ]; then
-                python3 ./pytorch_dqn/main.py --stop $stop --record --norender
-            else
-                python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
+            if [ $double -eq 1 ]; then
+                name=`grep -e '"config_name"' configurations/main.json`
+                replace="v0_2\","
+                replace=${name/v0\",/$replace}
+                sed -i 's/"controller": true,/"controller": false,/g' configurations/main.json
+                sed -i "s/$name/$replace/" configurations/main.json
+                echo "   "
+                echo "..launching the training..."
+                echo "------ Without Controller -----"
+                if [ $qlearning -eq 1 ]; then
+                    python3 ./pytorch_dqn/main.py --stop $stop --record --norender
+                else
+                    python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
+                fi
             fi
 
             echo "plotting..."
