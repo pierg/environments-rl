@@ -54,7 +54,9 @@ class Evaluator:
                                   'n_violations',
                                   'last_epsilon',
                                   'n_steps_goal',
-                                  'expected_q_value'])
+                                  'expected_q_value',
+                                  'times_record',
+                                  'cons_times_record'])
 
         self.episode_idx = []
         self.reward_cum_e = []
@@ -70,11 +72,13 @@ class Evaluator:
         self.last_epsilon = []
         self.n_steps_goal = []
         self.expected_q_value = []
+        self.times_record = []
+        self.cons_times_record = []
 
         self.last_saved_element_idx = 0
 
     def update(self, episode_idx, all_rewards, reward_cum_e, all_losses, n_deaths, n_goals, n_violations, 
-               last_epsilon, n_steps_goal, expected_q_value):
+               last_epsilon, n_steps_goal, expected_q_value, times_record, cons_times_record):
 
         self.episode_idx.append(episode_idx)
         self.reward_mean.append(np.mean(all_rewards))
@@ -104,6 +108,8 @@ class Evaluator:
         if self.config.visdom:
             visdom_plot("expected_q_value", self.episode_idx, "episode_idx", self.expected_q_value, "expected_q_value")
 
+        self.times_record.append(times_record)
+        self.cons_times_record.append(cons_times_record)
 
 
     def save(self):
@@ -123,6 +129,8 @@ class Evaluator:
                                      self.n_violations[idx],
                                      self.last_epsilon[idx],
                                      self.n_steps_goal[idx],
-                                     self.expected_q_value[idx]])
+                                     self.expected_q_value[idx],
+                                     self.times_record[idx],
+                                     self.cons_times_record[idx]])
             idx += 1
         self.last_saved_element_idx = idx

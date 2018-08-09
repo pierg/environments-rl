@@ -5,6 +5,7 @@
 configuration_file="main.json"
 start_training=1
 qlearning=0
+double=0
 
 while getopts ":tlre:w:s:i:q" opt; do
     case ${opt} in
@@ -39,6 +40,10 @@ while getopts ":tlre:w:s:i:q" opt; do
         l)
             light=1
             start_training=1
+            ;;
+
+        d)
+            double=1
             ;;
     esac
 done
@@ -128,6 +133,7 @@ while [ $iterations -ne $i ]; do
             replace=${name/v0\",/$replace}
             sed -i 's/"active": true,/"active": false,/g' configurations/main.json
             sed -i "s/$name/$replace/" configurations/main.json
+            echo "   "
             echo "\n\n...launching the training..."
             echo "------ Without Goap -----"
             if [ $qlearning -eq 1 ]; then

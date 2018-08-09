@@ -6,17 +6,22 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 from gym_minigrid.rendering import *
 
+from configurations import config_grabber as cg
+
+config = cg.grab()
+
 # Size in pixels of a cell in the full-scale human view
 CELL_PIXELS = 32
 
 # Number of cells (width and height) in the agent view
-AGENT_VIEW_SIZE = 7
+# AGENT_VIEW_SIZE = 5
+AGENT_VIEW_SIZE = config.agent_view_size
+
 
 # Size of the array given as an observation to the agent
 # 3 = Type, Color, Is_open
-OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE, 3)
-
-# OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
+# OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE, 3)
+OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
 
 # Map of color names to RGB values
 COLORS = {
@@ -868,6 +873,7 @@ class MiniGridEnv(gym.Env):
     def place_obj(self, obj, top=None, size=None, reject_fn=None):
         """
         Place an object at an empty position in the grid
+
         :param top: top-left position of the rectangle where to place
         :param size: size of the rectangle where to place
         :param reject_fn: function to filter out potential positions
@@ -1083,6 +1089,7 @@ class MiniGridEnv(gym.Env):
             done = True
 
         obs = self.gen_obs()
+
         return obs, reward, done, {}
 
     def gen_obs_grid(self):
