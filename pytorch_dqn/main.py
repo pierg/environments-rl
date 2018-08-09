@@ -54,7 +54,8 @@ if config.controller:
 
 if args.record:
     print("starting recording..")
-    expt_dir = '../evaluations/videos'
+    expt_dir = os.path.abspath(os.path.dirname(__file__) + "/../evaluations/videos/")
+    # expt_dir = '../evaluations/videos'
     env = wrappers.Monitor(env, expt_dir, force=True)
 
 from collections import deque
