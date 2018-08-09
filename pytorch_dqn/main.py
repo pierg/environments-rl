@@ -29,7 +29,8 @@ Better way to  tune down epsilon (when it's finding the minumum path?)
 
 args = get_args()
 
-logger.setLevel(10)
+# Debug mode = 10
+# logger.setLevel(10)
 
 cg.Configuration.set("training_mode", True)
 cg.Configuration.set("debug_mode", False)
@@ -55,7 +56,6 @@ if config.controller:
 if args.record:
     print("starting recording..")
     expt_dir = os.path.abspath(os.path.dirname(__file__) + "/../evaluations/videos/")
-    # expt_dir = '../evaluations/videos'
     env = wrappers.Monitor(env, expt_dir, force=True)
 
 from collections import deque
