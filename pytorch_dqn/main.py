@@ -265,6 +265,9 @@ for frame_idx in range(1, max_num_frames + 1):
             if n_step_epi_idx < record_curr:
                 record_curr = n_step_epi_idx
                 times_record += 1
+                print("     >>  GOAL" + "\t\t" + str(n_step_epi_idx) + "\t            NEW RECORD")
+            if n_step_epi_idx == record_curr:
+                print("     >>  GOAL" + "\t\t" + str(n_step_epi_idx) + "\t            RECORD")
 
             # Update consecutive number of
             if n_step_epi_idx == steps_prev:
@@ -278,7 +281,7 @@ for frame_idx in range(1, max_num_frames + 1):
                                       n_violations_e, epsilon, n_step_epi_idx, expected_q_value_e, times_record, cons_times_record)
             evaluator_episodes.save()
 
-            print("     >>  GOAL" + "\t" + str(n_step_epi_idx) + "\t            min: " + str(record_curr))
+            print("     >>  GOAL" + "\t\t" + str(n_step_epi_idx))
 
             n_step_epi_idx = 0
 
@@ -307,7 +310,7 @@ for frame_idx in range(1, max_num_frames + 1):
         evaluator_frames.update(frame_idx, all_rewards_f, cum_reward, all_losses_f, n_episodes_f, n_deaths_f, n_goals_f, n_violations_f, epsilon)
         evaluator_frames.save()
 
-        print(str(frame_idx) + "\t" + str(episode_idx) + "\t" + str(n_goals_f) + "\t" + str(record_curr) + "\t" + str(round(epsilon, 2)))
+        print(str(frame_idx) + "\t" + str(episode_idx) + "\t" + str(n_goals_f) + "\t\t\t" + str(round(epsilon, 2)))
 
         # Resetting values
         all_rewards_f = []
