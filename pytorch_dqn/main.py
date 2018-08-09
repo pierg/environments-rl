@@ -217,8 +217,8 @@ for frame_idx in range(1, max_num_frames + 1):
 
 
 
-    # epsilon = epsilon_by_frame(frame_idx)
-    epsilon = epsilon_by_episodes(episode_idx)
+    epsilon = epsilon_by_frame(frame_idx)
+    # epsilon = epsilon_by_episodes(episode_idx)
     action = model.act(state, epsilon)
 
     n_step_epi_idx += 1
