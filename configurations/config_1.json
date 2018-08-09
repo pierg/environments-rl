@@ -15,10 +15,11 @@
     "number_of_iteration": 100,
     "on_violation_reset": false,
     "dqn": {
-        "max_num_frames": 100000,
         "results_log_interval": 200,
-        "epsilon_decay_episodes": 10,
-        "epsilon_decay_frame": 500
+        "exploration_rate": 0.99,
+        "epsilon_decay_episodes": 1000,
+        "epsilon_decay_frame": 5000,
+        "discount_factor": 0.99
     },
     "rendering": true,
     "rewards": {
@@ -27,15 +28,15 @@
         },
         "standard": {
             "death": -0.1,
-            "goal": 1.0,
-            "step": -0.0
+            "goal": 10.0,
+            "step": -0.005
         },
         "actions": {
             "forward": 0.0
         },
         "controller": {
-            "respected": 0.1,
-            "violated": -0.1
+            "respected": 0.0,
+            "violated": -0.001
         }
     },
     "controllers": {
@@ -49,5 +50,6 @@
         ]
     },
     "stop_learning": 480,
-    "visdom": false
+    "visdom": false,
+    "max_num_frames": 1000000
 }
