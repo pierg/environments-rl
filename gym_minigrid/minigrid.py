@@ -8,7 +8,7 @@ from gym_minigrid.rendering import *
 
 from configurations import config_grabber as cg
 
-config = cg.grab()
+config = cg.Configuration.grab()
 
 # Size in pixels of a cell in the full-scale human view
 CELL_PIXELS = 32

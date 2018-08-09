@@ -7,6 +7,7 @@ from functools import reduce
 
 import numpy as np
 
+config = cg.Configuration.grab()
 
 AGENT_VIEW_SIZE = config.agent_view_size
 OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
