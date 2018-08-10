@@ -77,6 +77,10 @@ class Evaluator:
 
         self.last_saved_element_idx = 0
 
+
+
+
+
     def update(self, frame_idx, all_rewards, cum_reward, all_losses, n_episodes, n_deaths, n_goals, n_violations, last_epsilon):
         self.frame_idx.append(frame_idx)
         self.reward_mean.append(np.mean(all_rewards))

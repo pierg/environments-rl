@@ -38,6 +38,7 @@ args = get_args()
 
 cg.Configuration.set("training_mode", True)
 cg.Configuration.set("debug_mode", False)
+cg.Configuration.set("algorithm", "dqn")
 
 if args.norender:
     cg.Configuration.set("rendering", False)
@@ -68,12 +69,13 @@ eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evalua
 evaluator_frames = ev_frames("dqn", args.nomonitor)
 evaluator_episodes = ev_epi("dqn", args.nomonitor)
 
+
 if args.record:
     print("starting recording..")
     if args.nomonitor:
-        expt_dir = eval_folder + "/videos_no/"
+        expt_dir = eval_folder + "/dqn_videos_no/"
     else:
-        expt_dir = eval_folder + "/videos_yes/"
+        expt_dir = eval_folder + "/dqn_videos_yes/"
     env = wrappers.Monitor(env, expt_dir, force=True)
 
 from collections import deque

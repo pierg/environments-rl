@@ -3,17 +3,21 @@
     "config_name": "config-DirtWatLightExp-9x9-v0",
     "debug_mode": false,
     "training_mode": true,
+    "rendering": false,
     "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
-    "optimal_num_steps": 40,
-    "stop_after_update_number": 200,
+    "agent_view_size": 5,
+    "visdom": false,
     "evaluation_directory_name": "evaluations",
     "controller": true,
-    "max_num_steps": 1000000000,
+    "max_num_frames": 1000000,
     "log_interval": 10,
-    "num_processes": 1,
-    "num_steps": 4,
-    "number_of_iteration": 100,
-    "on_violation_reset": false,
+    "a2c": {
+        "algorithm": "a2c",
+        "num_processes": 1,
+        "num_steps": 4,
+        "stop_after_update_number": 200,
+        "stop_learning": 480
+    },
     "dqn": {
         "results_log_interval": 200,
         "exploration_rate": 0.99,
@@ -23,7 +27,6 @@
         "epsilon_final": 0.1,
         "discount_factor": 0.99
     },
-    "rendering": true,
     "rewards": {
         "cleaningenv": {
             "clean": 0.0
@@ -50,9 +53,5 @@
             "config_2/safety_loop",
             "config_3/safety_main"
         ]
-    },
-    "stop_learning": 480,
-    "visdom": false,
-    "max_num_frames": 1000000,
-    "agent_view_size": 5
+    }
 }
