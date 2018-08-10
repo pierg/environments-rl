@@ -6,6 +6,8 @@ configuration_file="main.json"
 start_training=1
 qlearning=0
 double=0
+launch_monitor=0
+launch_without=0
 
 while getopts t:l:r:e:w:s:i:q opt; do
     case ${opt} in
@@ -42,8 +44,12 @@ while getopts t:l:r:e:w:s:i:q opt; do
             start_training=1
             ;;
 
-        d)
-            double=1
+        a)
+            launch_monitor=1
+            ;;
+
+        b)
+            launch_without=1
             ;;
     esac
 done
@@ -119,14 +125,16 @@ while [ $iterations -ne $i ]; do
 
     if [ $start_training -eq 1 ]; then
             echo "...launching the training..."
-            echo "+++++ With Controller +++++"
-            if [ $qlearning -eq 1 ]; then
-                echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
-                python3 ./pytorch_dqn/main.py --stop $stop --record --norender
-            else
-                python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
+            if [ $launch_monitor -eq 1 ]; then
+                echo "+++++ With Controller +++++"
+                if [ $qlearning -eq 1 ]; then
+                    echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
+                    python3 ./pytorch_dqn/main.py --stop $stop --record --norender
+                else
+                    python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
+                fi
             fi
-            if [ $double -eq 1 ]; then
+            if [ $launch_without -eq 1 ]; then
                 name=`grep -e '"config_name"' configurations/main.json`
                 replace="v0_2\","
                 replace=${name/v0\",/$replace}
@@ -136,14 +144,14 @@ while [ $iterations -ne $i ]; do
                 echo "..launching the training..."
                 echo "------ Without Controller -----"
                 if [ $qlearning -eq 1 ]; then
-                    python3 ./pytorch_dqn/main.py --stop $stop --record --norender
+                    python3 ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor
                 else
                     python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
                 fi
             fi
 
             echo "plotting..."
-            python3 ./pytorch_dqn/plot_evaluations.py
+            python3 ./evaluations/plot.py
     fi
     let "i+=1"
 

@@ -65,12 +65,15 @@ eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evalua
 #     os.mkdir(eval_folder)
 
 # Initializing evaluation
-evaluator_frames = ev_frames("dqn")
-evaluator_episodes = ev_epi("dqn")
+evaluator_frames = ev_frames("dqn", args.nomonitor)
+evaluator_episodes = ev_epi("dqn", args.nomonitor)
 
 if args.record:
     print("starting recording..")
-    expt_dir = eval_folder + "/videos/"
+    if args.nomonitor:
+        expt_dir = eval_folder + "/videos_no/"
+    else:
+        expt_dir = eval_folder + "/videos_yes/"
     env = wrappers.Monitor(env, expt_dir, force=True)
 
 from collections import deque

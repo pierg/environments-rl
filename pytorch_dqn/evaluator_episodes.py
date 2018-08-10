@@ -15,14 +15,22 @@ between one n_frame and the next one
 """
 class Evaluator:
 
-    def __init__(self, algorithm, iteration=0):
+    def __init__(self, algorithm, nomonitor, iteration=0):
         # Getting configuration from file
         self.config = cg.Configuration.grab()
 
-        file_name = self.config.evaluation_directory_name + "/" \
-                + str(algorithm) + "_epi_" \
-                + self.config.config_name \
-                + "_"
+
+        if nomonitor:
+            file_name = self.config.evaluation_directory_name + "/" \
+                        + "NO_" + str(algorithm) + "_epi_" \
+                        + self.config.config_name \
+                        + "_"
+        else:
+            file_name = self.config.evaluation_directory_name + "/" \
+                        + "YES_" + str(algorithm) + "_epi_" \
+                        + self.config.config_name \
+                        + "_"
+
 
         while os.path.isfile(__file__ + "/../../"
                              + file_name
