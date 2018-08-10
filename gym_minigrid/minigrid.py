@@ -569,7 +569,7 @@ class Grid:
                 if not mask[i, j]:
                     continue
 
-                cell = grid.get(i, j)
+                cell = grid.get(grid.width - (i + 1), grid.height - (j + 1))
                 if cell and not cell.see_behind():
                     continue
 
@@ -581,7 +581,7 @@ class Grid:
                 if not mask[i, j]:
                     continue
 
-                cell = grid.get(i, j)
+                cell = grid.get(grid.width - (i + 1), grid.height - (j + 1))
                 if cell and not cell.see_behind():
                     continue
 

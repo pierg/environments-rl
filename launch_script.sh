@@ -152,6 +152,7 @@ while [ $iterations -ne $i ]; do
 
             echo "plotting..."
             python3 ./evaluations/plot.py
+            python3 ./pytorch_a2c/plot_evaluations.py
     fi
     let "i+=1"
 

@@ -31,6 +31,8 @@ class Evaluator:
                                            + str(number)
                                            + ".csv")
 
+        self.config_file_path = config_file_path
+
         dirname = os.path.dirname(config_file_path)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
@@ -62,13 +64,13 @@ class Evaluator:
                                   'Info_saved'])
 
 
-        self.episode_rewards = torch.zeros([self.config.num_processes, 1])
-        self.final_rewards = torch.zeros([self.config.num_processes, 1])
+        self.episode_rewards = torch.zeros([self.config.a2c.num_processes, 1])
+        self.final_rewards = torch.zeros([self.config.a2c.num_processes, 1])
 
-        self.n_catastrophes = torch.zeros([self.config.num_processes, 1])
-        self.n_episodes = torch.zeros([self.config.num_processes, 1])
-        self.n_proccess_reached_goal = [0] * self.config.num_processes
-        self.numberOfStepPerEpisode = [0] * self.config.num_processes
+        self.n_catastrophes = torch.zeros([self.config.a2c.num_processes, 1])
+        self.n_episodes = torch.zeros([self.config.a2c.num_processes, 1])
+        self.n_proccess_reached_goal = [0] * self.config.a2c.num_processes
+        self.numberOfStepPerEpisode = [0] * self.config.a2c.num_processes
         self.numberOfStepAverage = 0
         self.N_goal_reached = 0
         self.N_death = 0
@@ -145,8 +147,8 @@ class Evaluator:
         return self.final_rewards.median()
 
     def save(self, n_updates, t_start, t_end, dist_entropy, value_loss, action_loss):
-        total_num_steps = (n_updates + 1) * self.config.num_processes * self.config.num_steps
-        csv_logger.write_to_log([n_updates,
+        total_num_steps = (n_updates + 1) * self.config.a2c.num_processes * self.config.a2c.num_steps
+        csv_logger.write_to_log(self.config_file_path,[n_updates,
                                  total_num_steps,
                                  int(total_num_steps / t_end - t_start),
                                  self.final_rewards.mean(),

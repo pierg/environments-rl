@@ -62,17 +62,18 @@ def main():
     cg.Configuration.set("debug_mode", False)
 
     # Overriding arguments with configuration file
-    args.num_processes = config.num_processes
-    args.num_steps = config.num_steps
+    args.num_processes = config.a2c.num_processes
+    args.num_steps = config.a2c.num_steps
     args.env_name = config.env_name
     args.algo = config.algorithm
     args.vis = config.visdom
-    stop_learning = config.stop_learning
-    stop_after_update_number = config.stop_after_update_number
+    stop_learning = config.a2c.stop_learning
+    print(stop_learning)
+    stop_after_update_number = config.a2c.stop_after_update_number
 
     # steps reward:
-    if hasattr(config, "optimal_num_steps"):
-        steps_reward = config.rewards.standard.step * config.optimal_num_steps
+    if hasattr(config.a2c, "optimal_num_steps"):
+        steps_reward = config.rewards.standard.step * config.a2c.optimal_num_steps
     else:
         steps_reward = 72 * config.rewards.standard.step
 
@@ -132,7 +133,7 @@ def main():
     rollouts.observations[0].copy_(current_obs)
     numberOfStepBeforeDone = []
     stepOnLastGoal = []
-    for i in range(0, config.num_processes):
+    for i in range(0, config.a2c.num_processes):
         numberOfStepBeforeDone.append(0)
         stepOnLastGoal.append(0)
     # These variables are used to compute average rewards for all processes.
