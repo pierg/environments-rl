@@ -9,7 +9,7 @@ double=0
 launch_monitor=0
 launch_without=0
 
-while getopts t:l:r:e:w:s:i:q opt; do
+while getopts t:l:r:e:w:s:i:q:a:b opt; do
     case ${opt} in
         q)
             qlearning=1
