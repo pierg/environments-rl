@@ -11,13 +11,13 @@
     "controller": true,
     "rendering": false,
     "log_interval": 10,
-    "max_num_frames": 1000,
+    "max_num_frames": 100000,
     "a2c": {
         "stop_learning": 48000,
         "num_steps": 4,
         "stop_after_update_number": 0,
         "algorithm": "a2c",
-        "num_processes": 1,
+        "num_processes": 48,
         "optimal_num_step": 40
     },
     "visdom": false,

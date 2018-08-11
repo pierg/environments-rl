@@ -63,7 +63,10 @@ def main():
 
     num_updates = int(config.max_num_frames) // config.a2c.num_steps // config.a2c.num_processes
 
-    print(config.a2c.stop_learning)
+    print("num_updates:     " + str(num_updates))
+
+    print("stop_learning:   " + str(config.a2c.stop_learning))
+
     stop_after_update_number = config.a2c.stop_after_update_number
 
     # steps reward:
