@@ -1,4 +1,16 @@
 {
+    "controller": true,
+    "rendering": false,
+    "recording": true,
+    "log_interval": 10,
+    "max_num_frames": 100000,
+    "debug_mode": false,
+    "evaluation_directory_name": "evaluations",
+    "config_name": "config-DirtWatLightExp-9x9-v0",
+    "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
+    "training_mode": true,
+    "agent_view_size": 5,
+    "visdom": false,
     "dqn": {
         "exploration_rate": 0.99,
         "epsilon_decay_episodes": 1000,
@@ -8,10 +20,6 @@
         "epsilon_decay_frame": 5000,
         "epsilon_final": 0.1
     },
-    "controller": true,
-    "rendering": false,
-    "log_interval": 10,
-    "max_num_frames": 100000,
     "a2c": {
         "stop_learning": 48000,
         "num_steps": 4,
@@ -22,7 +30,6 @@
         "save_model_interval": 50,
         "save_evaluation_interval": 50
     },
-    "visdom": false,
     "rewards": {
         "controller": {
             "violated": -0.001,
@@ -40,10 +47,6 @@
             "forward": 0.0
         }
     },
-    "debug_mode": false,
-    "evaluation_directory_name": "evaluations",
-    "config_name": "config-DirtWatLightExp-9x9-v0",
-    "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
     "controllers": {
         "safety": [
             "config_2/safety_loop",
@@ -53,7 +56,5 @@
             "config_2/reachability_doorway",
             "config_2/reachability_goal"
         ]
-    },
-    "training_mode": true,
-    "agent_view_size": 5
+    }
 }

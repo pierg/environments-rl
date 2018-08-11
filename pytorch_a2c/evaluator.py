@@ -10,11 +10,11 @@ import os, re, os.path
 
 class Evaluator:
 
-    def __init__(self, algorithm, nomonitor, number=0):
+    def __init__(self, algorithm, number=0):
         # Getting configuration from file
         self.config = cg.Configuration.grab()
 
-        if nomonitor:
+        if self.config.controller:
             file_name = self.config.evaluation_directory_name + "/a2c/" \
                         + "NO_" + str(algorithm) + "_" \
                         + self.config.config_name \

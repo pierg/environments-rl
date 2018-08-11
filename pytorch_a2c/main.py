@@ -35,12 +35,17 @@ cg.Configuration.set("training_mode", True)
 cg.Configuration.set("debug_mode", False)
 
 if args.stop:
-    num_updates = int(args.stop)
     cg.Configuration.set("max_num_frames", args.stop)
 
 if args.norender:
     cg.Configuration.set("rendering", False)
     cg.Configuration.set("visdom", False)
+
+if args.record:
+    cg.Configuration.set("recording", True)
+
+if args.nomonitor:
+    cg.Configuration.set("controller", False)
 
 
 # Getting configuration from file
@@ -50,13 +55,6 @@ eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evalua
 
 # Copy config file to evaluation folder
 copyfile(cg.Configuration.file_path(), eval_folder + "/configuration_a2c.txt")
-
-#  # Clean up evaluation folder
-# pattern_exclude = "plot*"
-# for root, dirs, files in os.walk(eval_folder + "/a2c/"):
-#     for file in files:
-#         if not re.match(pattern_exclude, file):
-#             os.remove(os.path.join(root, file))
 
 
 def main():
@@ -76,11 +74,11 @@ def main():
         steps_reward = 72 * config.rewards.standard.step
 
     # Initializing evaluation
-    evaluator = Evaluator("a2c", args.nomonitor)
+    evaluator = Evaluator("a2c")
 
     os.environ['OMP_NUM_THREADS'] = '1'
 
-    envs = [make_env(config.env_name, args.seed, i, args.log_dir) for i in range(config.a2c.num_processes)]
+    envs = [make_env(config.env_name, args.seed, i) for i in range(config.a2c.num_processes)]
 
     if config.a2c.num_processes > 1:
         envs = SubprocVecEnv(envs)
@@ -183,7 +181,7 @@ def main():
                     # Rewards are close to the goal reward
                     if current_reward_median >= (config.rewards.standard.goal + steps_reward):
                         identical_rewards += 1
-                        print("--> rewards close to goal reward -> " + str(identical_rewards))
+                        # print("--> rewards close to goal reward -> " + str(identical_rewards))
 
                     else:
                         identical_rewards = 0
@@ -322,7 +320,6 @@ def main():
             save_model = [save_model,
                           hasattr(envs, 'ob_rms') and envs.ob_rms or None]
             torch.save(save_model, os.path.join(save_path, config.env_name + ".pt"))
-            print("model saved")
 
         if j % config.a2c.save_evaluation_interval == 0:
             end = time.time()

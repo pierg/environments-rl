@@ -38,22 +38,28 @@ Better way to  tune down epsilon (when it's finding the minumum path?)
 
 args = get_args()
 
-# Debug mode = 10
-# logger.setLevel(10)
-
 cg.Configuration.set("training_mode", True)
 cg.Configuration.set("debug_mode", False)
+
+if args.stop:
+    cg.Configuration.set("max_num_frames", args.stop)
 
 if args.norender:
     cg.Configuration.set("rendering", False)
     cg.Configuration.set("visdom", False)
 
-if args.stop:
-    max_num_frames = int(args.stop)
-    if max_num_frames != 0:
-        cg.Configuration.set("max_num_frames", max_num_frames)
+if args.record:
+    cg.Configuration.set("recording", True)
 
+if args.nomonitor:
+    cg.Configuration.set("controller", False)
+
+
+# Getting configuration from file
 config = cg.Configuration.grab()
+
+# Debug mode = 10
+# logger.setLevel(10)
 
 env = gym.make(config.env_name)
 
@@ -67,24 +73,17 @@ eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evalua
 # Copy config file to evaluation folder
 copyfile(cg.Configuration.file_path(), eval_folder + "/configuration_dqn.txt")
 
-# # Clean up evaluation folder
-# pattern_exclude = "plot*"
-# for root, dirs, files in os.walk(eval_folder + "/dqn"):
-#     for file in files:
-#         if not re.match(pattern_exclude, file):
-#             os.remove(os.path.join(root, file))
-
 # Initializing evaluation
-evaluator_frames = ev_frames("dqn", args.nomonitor)
-evaluator_episodes = ev_epi("dqn", args.nomonitor)
+evaluator_frames = ev_frames("dqn")
+evaluator_episodes = ev_epi("dqn")
 
 
-if args.record:
+if config.recording:
     print("starting recording..")
-    if args.nomonitor:
-        expt_dir = eval_folder + "/dqn_videos_no/"
-    else:
+    if config.controller:
         expt_dir = eval_folder + "/dqn_videos_yes/"
+    else:
+        expt_dir = eval_folder + "/dqn_videos_no/"
     env = wrappers.Monitor(env, expt_dir, force=True)
 
 from collections import deque
