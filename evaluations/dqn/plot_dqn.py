@@ -7,7 +7,6 @@ from matplotlib.backends.backend_pdf import PdfPages
 import csv
 import glob
 from random import randint
-import configurations.config_grabber as cg
 
 plt.rcParams["font.family"] = "Times New Roman"
 plt.rcParams.update({'font.size': 15})
@@ -158,7 +157,8 @@ def multi_figures_plot(x, ys, x_label, y_labels, ys_sem=0):
 
 
 def plot():
-    extract_all_data_from_csv(os.path.abspath(os.path.dirname(__file__)))
+    current_directory = os.path.abspath(os.path.dirname(__file__))
+    extract_all_data_from_csv(current_directory)
     for i in range(len(epi_episode_idx)):
 
         figure_episodes = multi_figures_plot(epi_episode_idx[i],
@@ -185,8 +185,7 @@ def plot():
         Name = "dqn_experience_[" + str(i) + "].pdf"
         print("PdfName : ", Name)
 
-
-        pdf = PdfPages(Name)
+        pdf = PdfPages(current_directory + "/" + Name)
 
         pdf.savefig(figure_episodes)
         pdf.savefig(figure_frames)
