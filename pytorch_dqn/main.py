@@ -15,6 +15,11 @@ from tools.arguments import get_args
 from pytorch_dqn.evaluator_frames import Evaluator as ev_frames
 from pytorch_dqn.evaluator_episodes import Evaluator as ev_epi
 
+from shutil import copyfile
+
+import os, re, os.path
+
+
 try:
     import gym_minigrid
     from gym_minigrid.wrappers import *
@@ -38,7 +43,6 @@ args = get_args()
 
 cg.Configuration.set("training_mode", True)
 cg.Configuration.set("debug_mode", False)
-cg.Configuration.set("algorithm", "dqn")
 
 if args.norender:
     cg.Configuration.set("rendering", False)
@@ -60,10 +64,15 @@ if config.controller:
 
 eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
 
-# Cleaning the evaluation folder
-# if os.path.exists(eval_folder) and os.path.isdir(eval_folder):
-#     shutil.rmtree(eval_folder)
-#     os.mkdir(eval_folder)
+# Copy config file to evaluation folder
+copyfile(cg.Configuration.file_path(), eval_folder + "/configuration_dqn.txt")
+
+# Clean up evaluation folder
+pattern_exclude = "plot*"
+for root, dirs, files in os.walk(eval_folder + "/dqn"):
+    for file in files:
+        if not re.match(pattern_exclude, file):
+            os.remove(os.path.join(root, file))
 
 # Initializing evaluation
 evaluator_frames = ev_frames("dqn", args.nomonitor)

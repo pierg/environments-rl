@@ -6,8 +6,7 @@ from configurations import config_grabber as cg
 
 from tools import csv_logger
 
-import os
-
+import os, re, os.path
 
 class Evaluator:
 
@@ -17,12 +16,12 @@ class Evaluator:
 
         if nomonitor:
             file_name = self.config.evaluation_directory_name + "/a2c/" \
-                        + "NO_" + str(algorithm) \
+                        + "NO_" + str(algorithm) + "_" \
                         + self.config.config_name \
                         + "_"
         else:
             file_name = self.config.evaluation_directory_name + "/a2c/" \
-                        + "YES_" + str(algorithm) \
+                        + "YES_" + str(algorithm) + "_" \
                         + self.config.config_name \
                         + "_"
 

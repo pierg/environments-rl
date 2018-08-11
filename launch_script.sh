@@ -9,12 +9,11 @@ double=0
 launch_monitor=0
 launch_without=0
 
-while getopts t:l:r:e:w:s:i:q:a:b opt; do
+while getopts qrt:e:w:s:i:lab opt; do
     case ${opt} in
         q)
             qlearning=1
             ;;
-
         r)
             random=1
             start_training=1
@@ -43,11 +42,9 @@ while getopts t:l:r:e:w:s:i:q:a:b opt; do
             light=1
             start_training=1
             ;;
-
         a)
             launch_monitor=1
             ;;
-
         b)
             launch_without=1
             ;;
@@ -96,15 +93,11 @@ while [ $iterations -ne $i ]; do
     if [ $configuration_file -eq "main.json" ]; then
         echo "using default configuration file: $configuration_file"
         cd ./configurations
-        cp $configuration_file ../evaluations
-        echo "main config file copied in the evaluation folder"
     else
         echo "...updating selected configuration file..."
         cd ./configurations
         echo "using configuration file: $configuration_file"
         yes | cp -rf $configuration_file "main.json"
-        cp $configuration_file ../evaluations
-        echo "$configuration_file file copied in the evaluation folder"
     fi
 
     cd ..
@@ -122,6 +115,7 @@ while [ $iterations -ne $i ]; do
     if ! [ $stop ]; then
         stop=0
     fi
+    echo $launch_monitor
 
     if [ $start_training -eq 1 ]; then
             echo "...launching the training..."

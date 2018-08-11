@@ -1,5 +1,4 @@
 {
-    "algorithm": "a2c",
     "dqn": {
         "exploration_rate": 0.99,
         "epsilon_decay_episodes": 1000,
@@ -10,9 +9,9 @@
         "epsilon_final": 0.1
     },
     "controller": true,
-    "rendering": true,
+    "rendering": false,
     "log_interval": 10,
-    "max_num_frames": 100000,
+    "max_num_frames": 1000,
     "a2c": {
         "stop_learning": 48000,
         "num_steps": 4,
