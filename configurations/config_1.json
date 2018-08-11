@@ -25,7 +25,7 @@
     "visdom": false,
     "rewards": {
         "controller": {
-            "violated": -0.001,
+            "violated": -0.01,
             "respected": 0.0
         },
         "cleaningenv": {
@@ -34,7 +34,7 @@
         "standard": {
             "death": -0.1,
             "goal": 1.0,
-            "step": -0.005
+            "step": 0.0
         },
         "actions": {
             "forward": 0.0

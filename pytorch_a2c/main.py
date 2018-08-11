@@ -306,8 +306,9 @@ def main():
         rollouts.after_update()
 
         save_dir = "../" + config.evaluation_directory_name + "/a2c/trained_model/"
-        if j % args.save_interval == 0 and save_dir != "":
-            save_path = os.path.join(save_dir, config.a2c.algorithm)
+        if j % config.a2c.save_model_interval == 0:
+            # save_path = os.path.join(save_dir, config.a2c.algorithm)
+            save_path = save_dir
             try:
                 os.makedirs(save_path)
             except OSError:
@@ -321,8 +322,9 @@ def main():
             save_model = [save_model,
                           hasattr(envs, 'ob_rms') and envs.ob_rms or None]
             torch.save(save_model, os.path.join(save_path, config.env_name + ".pt"))
+            print("model saved")
 
-        if j % args.log_interval == 0:
+        if j % config.a2c.save_evaluation_interval == 0:
             end = time.time()
             total_num_steps = (j + 1) * config.a2c.num_processes * config.a2c.num_steps
 
