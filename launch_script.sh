@@ -130,8 +130,12 @@ while [ $iterations -ne $i ]; do
                 if [ $qlearning -eq 1 ]; then
                     echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
                     python3 ./pytorch_dqn/main.py --stop $stop --record --norender
+                    echo "plotting..."
+                    python3 ./evaluations/a2c/plot_dqn.py
                 else
                     python3 ./pytorch_a2c/main.py --stop $stop --norender
+                    echo "plotting..."
+                    python3 ./evaluations/a2c/plot_a2c.py
                 fi
             fi
             if [ $launch_without -eq 1 ]; then
@@ -145,14 +149,14 @@ while [ $iterations -ne $i ]; do
                 echo "------ Without Controller -----"
                 if [ $qlearning -eq 1 ]; then
                     python3 ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor
+                    echo "plotting..."
+                    python3 ./evaluations/a2c/plot_dqn.py
                 else
                     python3 ./pytorch_a2c/main.py --stop $stop --norender --nomonitor
+                    echo "plotting..."
+                    python3 ./evaluations/a2c/plot_a2c.py
                 fi
             fi
-
-            echo "plotting..."
-            python3 ./evaluations/plot.py
-            python3 ./pytorch_a2c/plot_evaluations.py
     fi
     let "i+=1"
 
