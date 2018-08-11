@@ -51,12 +51,12 @@ eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evalua
 # Copy config file to evaluation folder
 copyfile(cg.Configuration.file_path(), eval_folder + "/configuration_a2c.txt")
 
- # Clean up evaluation folder
-pattern_exclude = "plot*"
-for root, dirs, files in os.walk(eval_folder + "/a2c/"):
-    for file in files:
-        if not re.match(pattern_exclude, file):
-            os.remove(os.path.join(root, file))
+#  # Clean up evaluation folder
+# pattern_exclude = "plot*"
+# for root, dirs, files in os.walk(eval_folder + "/a2c/"):
+#     for file in files:
+#         if not re.match(pattern_exclude, file):
+#             os.remove(os.path.join(root, file))
 
 
 def main():
