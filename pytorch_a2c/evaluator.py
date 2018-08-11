@@ -11,22 +11,31 @@ import os
 
 class Evaluator:
 
-    def __init__(self, algorithm, number=0):
+    def __init__(self, algorithm, nomonitor, number=0):
         # Getting configuration from file
         self.config = cg.Configuration.grab()
 
-        while os.path.isfile(self.config.evaluation_directory_name + "/"
-                             + str(algorithm) + "_"
-                             + self.config.config_name
-                             + "_"
+        if nomonitor:
+            file_name = self.config.evaluation_directory_name + "/a2c/" \
+                        + "NO_" + str(algorithm) \
+                        + self.config.config_name \
+                        + "_"
+        else:
+            file_name = self.config.evaluation_directory_name + "/a2c/" \
+                        + "YES_" + str(algorithm) \
+                        + self.config.config_name \
+                        + "_"
+
+
+        while os.path.isfile(__file__ + "/../../"
+                             + file_name
                              + str(number)
                              + ".csv"):
             number += 1
 
+
         config_file_path = os.path.abspath(__file__ + "/../../"
-                                           + self.config.evaluation_directory_name + "/"
-                                           + str(algorithm) + "_"
-                                           + self.config.config_name
+                                           + file_name
                                            + "_"
                                            + str(number)
                                            + ".csv")

@@ -1106,6 +1106,7 @@ class MiniGridEnv(gym.Env):
 
         """
 
+
         topX, topY, botX, botY = self.get_view_exts()
 
         grid = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)

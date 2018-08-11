@@ -20,12 +20,12 @@ class Evaluator:
         self.config = cg.Configuration.grab()
 
         if nomonitor:
-            file_name = self.config.evaluation_directory_name + "/" \
+            file_name = self.config.evaluation_directory_name + "/dqn/" \
                         + "NO_" + str(algorithm) + "_frm_" \
                         + self.config.config_name \
                         + "_"
         else:
-            file_name = self.config.evaluation_directory_name + "/" \
+            file_name = self.config.evaluation_directory_name + "/dqn/" \
                         + "YES_" + str(algorithm) + "_frm_" \
                         + self.config.config_name \
                         + "_"

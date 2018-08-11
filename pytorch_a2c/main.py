@@ -62,6 +62,8 @@ def main():
     cg.Configuration.set("debug_mode", False)
 
     # Overriding arguments with configuration file
+
+    args.save_dir = "../" + config.evaluation_directory_name + "/a2c/trained_model/"
     args.num_processes = config.a2c.num_processes
     args.num_steps = config.a2c.num_steps
     args.env_name = config.env_name
@@ -78,7 +80,7 @@ def main():
         steps_reward = 72 * config.rewards.standard.step
 
     # Initializing evaluation
-    evaluator = Evaluator("a2c")
+    evaluator = Evaluator("a2c", args.nomonitor)
 
     os.environ['OMP_NUM_THREADS'] = '1'
 

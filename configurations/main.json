@@ -10,15 +10,15 @@
         "epsilon_final": 0.1
     },
     "controller": true,
-    "rendering": false,
+    "rendering": true,
     "log_interval": 10,
-    "max_num_frames": 1000000,
+    "max_num_frames": 100000,
     "a2c": {
-        "stop_learning": 480,
+        "stop_learning": 48000,
         "num_steps": 4,
         "stop_after_update_number": 0,
         "algorithm": "a2c",
-        "num_processes": 48,
+        "num_processes": 1,
         "optimal_num_step": 40
     },
     "visdom": false,
@@ -39,7 +39,7 @@
             "forward": 0.0
         }
     },
-    "debug_mode": true,
+    "debug_mode": false,
     "evaluation_directory_name": "evaluations",
     "config_name": "config-DirtWatLightExp-9x9-v0",
     "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
@@ -53,6 +53,6 @@
             "config_2/reachability_goal"
         ]
     },
-    "training_mode": false,
+    "training_mode": true,
     "agent_view_size": 5
 }
