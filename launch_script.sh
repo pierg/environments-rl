@@ -125,22 +125,22 @@ while [ $iterations -ne $i ]; do
                     echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
                     python3 ./pytorch_dqn/main.py --stop $stop --record --norender
                 else
-                    python3 ./pytorch_a2c/main.py --stop $stop --norender
+                    python3 ./pytorch_a2c/main.py --stop $stop --record --norender
                 fi
             fi
             if [ $launch_without -eq 1 ]; then
-                name=`grep -e '"config_name"' configurations/main.json`
-                replace="v0_2\","
-                replace=${name/v0\",/$replace}
-                sed -i 's/"controller": true,/"controller": false,/g' configurations/main.json
-                sed -i "s/$name/$replace/" configurations/main.json
-                echo "   "
+#                name=`grep -e '"config_name"' configurations/main.json`
+#                replace="v0_2\","
+#                replace=${name/v0\",/$replace}
+#                sed -i 's/"controller": true,/"controller": false,/g' configurations/main.json
+#                sed -i "s/$name/$replace/" configurations/main.json
+#                echo "   "
                 echo "..launching the training..."
                 echo "------ Without Controller -----"
                 if [ $qlearning -eq 1 ]; then
                     python3 ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor
                 else
-                    python3 ./pytorch_a2c/main.py --stop $stop --norender --nomonitor
+                    python3 ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor
                 fi
             fi
             echo "plotting..."
