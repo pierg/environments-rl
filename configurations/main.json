@@ -9,7 +9,7 @@
     "config_name": "config-DirtWatLightExp-9x9-v0",
     "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
     "training_mode": false,
-    "agent_view_size": 3,
+    "agent_view_size": 5,
     "visdom": false,
     "dqn": {
         "exploration_rate": 0.99,

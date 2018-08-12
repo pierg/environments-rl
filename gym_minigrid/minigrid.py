@@ -5,23 +5,18 @@ import numpy as np
 from gym import error, spaces, utils
 from gym.utils import seeding
 from gym_minigrid.rendering import *
-
 from configurations import config_grabber as cg
-
-config = cg.Configuration.grab()
 
 # Size in pixels of a cell in the full-scale human view
 CELL_PIXELS = 32
 
+config = cg.Configuration.grab()
+
 # Number of cells (width and height) in the agent view
-# AGENT_VIEW_SIZE = 5
 AGENT_VIEW_SIZE = config.agent_view_size
 
-
 # Size of the array given as an observation to the agent
-# 3 = Type, Color, Is_open
-# OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE, 3)
-OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
+OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE, 3)
 
 # Map of color names to RGB values
 COLORS = {
@@ -364,8 +359,8 @@ class Grid:
     """
 
     def __init__(self, width, height):
-        assert width >= 3
-        assert height >= 3
+        assert width >= 4
+        assert height >= 4
 
         self.width = width
         self.height = height
@@ -595,7 +590,7 @@ class Grid:
                 if not mask[i, j]:
                     continue
 
-                cell = grid.get(grid.width - (i + 1), grid.height - (j + 1))
+                cell = grid.get(i, j)
                 if cell and not cell.see_behind():
                     continue
 
@@ -607,7 +602,7 @@ class Grid:
                 if not mask[i, j]:
                     continue
 
-                cell = grid.get(grid.width - (i + 1), grid.height - (j + 1))
+                cell = grid.get(i, j)
                 if cell and not cell.see_behind():
                     continue
 
@@ -1140,49 +1135,12 @@ class MiniGridEnv(gym.Env):
 
         return obs, reward, done, {}
 
-
-
-
     def gen_obs_grid(self):
         """
         Generate the sub-grid observed by the agent.
         This method also outputs a visibility mask telling us which grid
         cells the agent can actually see.
-        Example observation for an agent (A) facing up in a view_size 3x3
-        The numbers indicate the obs_array index:
-
-            8   7   6
-            5   4   3
-            2   A   0
-
         """
-
-
-        # topX, topY, botX, botY = self.get_view_exts()
-        #
-        # grid = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
-        # grid_rotate_left_1 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
-        # grid_rotate_left_2 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
-        # grid_rotate_left_3 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
-        #
-        # grid_rotate_left_1 = grid_rotate_left_1.rotate_left()
-        #
-        # for i in range (2):
-        #     grid_rotate_left_2 = grid_rotate_left_2.rotate_left()
-        #
-        # for i in range (3):
-        #     grid_rotate_left_3 = grid_rotate_left_3.rotate_left()
-        #
-        # # agent facing right
-        # if self.agent_dir == 0:
-        #     grid = grid_rotate_left_3
-        # # agent facing left
-        # elif self.agent_dir == 2:
-        #     grid = grid_rotate_left_1
-        # # agent facing up
-        # elif self.agent_dir == 3:
-        #     grid = grid_rotate_left_2
-
 
         topX, topY, botX, botY = self.get_view_exts()
 
@@ -1190,8 +1148,6 @@ class MiniGridEnv(gym.Env):
 
         for i in range(self.agent_dir + 1):
             grid = grid.rotate_left()
-
-
 
         # Process occluders and visibility
         # Note that this incurs some performance cost
@@ -1221,7 +1177,7 @@ class MiniGridEnv(gym.Env):
         # Encode the partially observable view into a numpy array
         image = grid.encode()
 
-        # assert hasattr(self, 'mission'), "environments must define a textual mission string"
+        assert hasattr(self, 'mission'), "environments must define a textual mission string"
 
         # Observations are dictionaries containing:
         # - an image (partially observable view of the environment)

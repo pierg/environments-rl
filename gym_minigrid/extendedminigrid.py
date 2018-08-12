@@ -30,7 +30,7 @@ def extended_dic(obj_names=[]):
             new_obj_idx = new_obj_idx + 1
 
 
-extended_dic(["water", "lightSwitch", "dirt", "vase"])
+extended_dic(["water", "lightsw", "dirt", "vase"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 
@@ -86,7 +86,7 @@ class Water(WorldObj):
 class LightSwitch(WorldObj):
     def __init__(self):
         self.state = False
-        super(LightSwitch, self).__init__('lightSwitch', 'yellow')
+        super(LightSwitch, self).__init__('lightsw', 'yellow')
 
     def affectRoom(self, room):
         self.room = room
@@ -219,7 +219,7 @@ def worldobj_name_to_object(worldobj_name):
         return Water()
     elif worldobj_name == 'wall':
         return Wall()
-    elif worldobj_name == "lightSwitch":
+    elif worldobj_name == "lightsw":
         return LightSwitch()
     elif worldobj_name == "dirt":
         return Dirt()
@@ -276,7 +276,7 @@ class ExGrid(Grid):
                     v = Goal()
                 elif objType == 'water':
                     v = Water()
-                elif objType == 'lightSwitch':
+                elif objType == 'lightsw':
                     v = LightSwitch()
                 elif objType == 'dirt':
                     v = Dirt()
