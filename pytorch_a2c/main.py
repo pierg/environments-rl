@@ -78,6 +78,23 @@ def main():
 
     os.environ['OMP_NUM_THREADS'] = '1'
 
+    # cleaning up recording folder...
+    eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
+
+    if config.controller:
+        expt_dir = eval_folder + "/a2c/a2c_videos_yes/"
+    else:
+        expt_dir = eval_folder + "/a2c/a2c_videos_no/"
+
+    # Cleaning up the directory..
+    for the_file in os.listdir(expt_dir):
+        file_path = os.path.join(expt_dir, the_file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(e)
+
     envs = [make_env(config.env_name, args.seed, i) for i in range(config.a2c.num_processes)]
 
     if config.a2c.num_processes > 1:

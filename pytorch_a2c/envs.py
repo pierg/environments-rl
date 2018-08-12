@@ -30,7 +30,9 @@ def make_env(env_id, seed, rank):
                 expt_dir = eval_folder + "/a2c/a2c_videos_yes/"
             else:
                 expt_dir = eval_folder + "/a2c/a2c_videos_no/"
-            env = wrappers.Monitor(env, expt_dir, force=True)
+
+            uid = "___proc_n_" + str(rank) + " ___"
+            env = wrappers.Monitor(env, expt_dir, uid=uid)
 
         return env
 

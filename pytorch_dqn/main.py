@@ -81,10 +81,20 @@ evaluator_episodes = ev_epi("dqn")
 if config.recording:
     print("starting recording..")
     if config.controller:
-        expt_dir = eval_folder + "/dqn_videos_yes/"
+        expt_dir = eval_folder + "/dqn/dqn_videos_yes/"
     else:
-        expt_dir = eval_folder + "/dqn_videos_no/"
-    env = wrappers.Monitor(env, expt_dir, force=True)
+        expt_dir = eval_folder + "/dqn/dqn_videos_no/"
+
+    # Cleaning up the directory..
+    for the_file in os.listdir(expt_dir):
+        file_path = os.path.join(expt_dir, the_file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(e)
+
+    env = wrappers.Monitor(env, expt_dir)
 
 from collections import deque
 
