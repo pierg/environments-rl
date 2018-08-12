@@ -15,12 +15,11 @@ between one n_frame and the next one
 """
 class Evaluator:
 
-    def __init__(self, algorithm, nomonitor, iteration=0):
+    def __init__(self, algorithm, iteration=0):
         # Getting configuration from file
         self.config = cg.Configuration.grab()
 
-
-        if nomonitor:
+        if self.config.controller:
             file_name = self.config.evaluation_directory_name + "/dqn/" \
                         + "NO_" + str(algorithm) + "_epi_" \
                         + self.config.config_name \
