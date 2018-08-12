@@ -21,12 +21,12 @@ class Evaluator:
 
         if self.config.controller:
             file_name = self.config.evaluation_directory_name + "/dqn/" \
-                        + "NO_" + str(algorithm) + "_frm_" \
+                        + "YES_" + str(algorithm) + "_frm_" \
                         + self.config.config_name \
                         + "_"
         else:
             file_name = self.config.evaluation_directory_name + "/dqn/" \
-                        + "YES_" + str(algorithm) + "_frm_" \
+                        + "NO_" + str(algorithm) + "_frm_" \
                         + self.config.config_name \
                         + "_"
 

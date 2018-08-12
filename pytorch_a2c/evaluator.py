@@ -16,12 +16,12 @@ class Evaluator:
 
         if self.config.controller:
             file_name = self.config.evaluation_directory_name + "/a2c/" \
-                        + "NO_" + str(algorithm) + "_" \
+                        + "YES_" + str(algorithm) + "_" \
                         + self.config.config_name \
                         + "_"
         else:
             file_name = self.config.evaluation_directory_name + "/a2c/" \
-                        + "YES_" + str(algorithm) + "_" \
+                        + "NO_" + str(algorithm) + "_" \
                         + self.config.config_name \
                         + "_"
 
