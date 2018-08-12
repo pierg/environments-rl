@@ -66,6 +66,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         if proposed_action == self.env.actions.observe:
             self.observe()
+            self.env.print_grid()
         else:
             if self.config.training_mode:
                 self.observe()

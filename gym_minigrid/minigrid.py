@@ -1092,6 +1092,9 @@ class MiniGridEnv(gym.Env):
 
         return obs, reward, done, {}
 
+
+
+
     def gen_obs_grid(self):
         """
         Generate the sub-grid observed by the agent.
@@ -1107,30 +1110,39 @@ class MiniGridEnv(gym.Env):
         """
 
 
+        # topX, topY, botX, botY = self.get_view_exts()
+        #
+        # grid = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
+        # grid_rotate_left_1 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
+        # grid_rotate_left_2 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
+        # grid_rotate_left_3 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
+        #
+        # grid_rotate_left_1 = grid_rotate_left_1.rotate_left()
+        #
+        # for i in range (2):
+        #     grid_rotate_left_2 = grid_rotate_left_2.rotate_left()
+        #
+        # for i in range (3):
+        #     grid_rotate_left_3 = grid_rotate_left_3.rotate_left()
+        #
+        # # agent facing right
+        # if self.agent_dir == 0:
+        #     grid = grid_rotate_left_3
+        # # agent facing left
+        # elif self.agent_dir == 2:
+        #     grid = grid_rotate_left_1
+        # # agent facing up
+        # elif self.agent_dir == 3:
+        #     grid = grid_rotate_left_2
+
+
         topX, topY, botX, botY = self.get_view_exts()
 
         grid = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
-        grid_rotate_left_1 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
-        grid_rotate_left_2 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
-        grid_rotate_left_3 = self.grid.slice(topX, topY, AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
 
-        grid_rotate_left_1 = grid_rotate_left_1.rotate_left()
+        for i in range(self.agent_dir + 1):
+            grid = grid.rotate_left()
 
-        for i in range (2):
-            grid_rotate_left_2 = grid_rotate_left_2.rotate_left()
-
-        for i in range (3):
-            grid_rotate_left_3 = grid_rotate_left_3.rotate_left()
-
-        # agent facing right
-        if self.agent_dir == 0:
-            grid = grid_rotate_left_3
-        # agent facing left
-        elif self.agent_dir == 2:
-            grid = grid_rotate_left_1
-        # agent facing up
-        elif self.agent_dir == 3:
-            grid = grid_rotate_left_2
 
 
         # Process occluders and visibility

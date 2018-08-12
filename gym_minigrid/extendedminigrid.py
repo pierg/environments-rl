@@ -309,6 +309,19 @@ class ExMiniGridEnv(MiniGridEnv):
         done = 6
         clean = 7
 
+
+    def print_grid(self):
+
+        grid = self.gen_obs_grid()
+        for i, e in enumerate(grid[0].grid):
+            if i % grid[0].height == 0:
+                print("")
+            if e is not None:
+                print(str(e.type), end="\t")
+            else:
+                print("none",  end="\t")
+        print("")
+
     def strings_to_actions(self, actions):
         for i, action_name in enumerate(actions):
             if action_name == "left":
