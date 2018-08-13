@@ -1,55 +1,102 @@
 {
-  "grid_size": 10,
+  "grid_size": 7,
   "n_water": 5,
   "n_deadend": 4,
   "light_switch": true,
   "random_each_episode": false,
   "stop_learning":480,
-  "monitors": {
+  "number_of_iteration":1,
+   "monitors": {
     "patterns": {
+      "absence": {
+        "waterAbsence": {
+          "action_planner": "wait",
+          "active": true,
+          "conditions": "stepping-on-water",
+          "mode": "enforcing",
+          "name": "waterAbsence",
+          "type": "absence"
+        }
+      },
       "precedence": {
         "lightPrecedence": {
-          "type": "precedence",
-          "mode": "enforcing",
           "action_planner": "turn_right",
-          "active": false,
-          "name": "lightPrecedence",
+          "active": true,
           "conditions": {
-            "pre": "light-switch-turned-on",
-            "post": "entering-a-room"
-          }
+            "post": "entering-a-room",
+            "pre": "light-switch-turned-on"
+          },
+          "mode": "enforcing",
+          "name": "lightPrecedence",
+          "type": "precedence"
+        },
+        "roomPrecedence": {
+          "action_planner": "turn_right",
+          "active": true,
+          "conditions": {
+            "post": "going-back",
+            "pre": "light-switch-turned-off"
+          },
+          "mode": "enforcing",
+          "name": "roomPrecedence",
+          "type": "precedence"
         }
       },
       "response": {
-        "lightResponse": {
-          "type": "response",
-          "mode": "enforcing",
+        "openDoorResponse": {
           "action_planner": "toggle_light",
-          "active": false,
-          "name": "lightResponse",
+          "active": true,
           "conditions": {
-            "post": "light-switch-turned-on",
-            "pre": "light-switch-in-front-off"
-          }
-        }
-      },
-      "universality": {
-        "universality_1": {
-          "type": "universality",
-          "mode": "shaping",
-          "active": false,
-          "name": "lightUniversality",
-          "conditions": "light-on-current-room"
-        }
-      },
-      "absence": {
-        "waterAbsence": {
-          "active": false,
-          "conditions": "stepping-on-water",
+            "post": "action-is-toggle",
+            "pre": "door-closed-in-front"
+          },
           "mode": "enforcing",
-          "action_planner": "wait",
-          "name": "waterAbsence",
-          "type": "absence"
+          "name": "openDoorResponse",
+          "type": "response"
+        },
+        "doorResponse": {
+          "action_planner": "forward",
+          "active": true,
+          "conditions": {
+            "post": "action-is-forward",
+            "pre": "ready-to-cross-door"
+          },
+          "mode": "enforcing",
+          "name": "doorResponse",
+          "type": "response"
+        },
+        "onDoorResponse": {
+          "action_planner": "forward",
+          "active": true,
+          "conditions": {
+            "post": "action-is-forward",
+            "pre": "agent-on-door"
+          },
+          "mode": "enforcing",
+          "name": "onDoorResponse",
+          "type": "response"
+        },
+        "switchOffResponse": {
+          "action_planner": "toggle_light",
+          "active": true,
+          "conditions": {
+            "post": "action-is-toggle",
+            "pre": "light-switch-in-front-off"
+          },
+          "mode": "enforcing",
+          "name": "switchOffResponse",
+          "type": "response"
+        },
+        "switchOnResponse": {
+          "action_planner": "turn_left",
+          "active": true,
+          "conditions": {
+            "post": "action-is-left",
+            "pre": "light-switch-in-front-on"
+          },
+          "mode": "enforcing",
+          "name": "switchOnResponse",
+          "type": "response"
         }
       }
     }

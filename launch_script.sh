@@ -3,10 +3,17 @@
 # Sets the main.json as default, if the -t is specifed
 # it will use that as config file.
 configuration_file="main.json"
-start_training=0
+start_training=1
+qlearning=0
+double=0
+launch_monitor=0
+launch_without=0
 
-while getopts ":tlre:w:s:i:" opt; do
+while getopts qrt:e:w:s:i:lab opt; do
     case ${opt} in
+        q)
+            qlearning=1
+            ;;
         r)
             random=1
             start_training=1
@@ -34,6 +41,12 @@ while getopts ":tlre:w:s:i:" opt; do
         l)
             light=1
             start_training=1
+            ;;
+        a)
+            launch_monitor=1
+            ;;
+        b)
+            launch_without=1
             ;;
     esac
 done
@@ -72,8 +85,6 @@ while [ $iterations -ne $i ]; do
             configuration_file=`python3 env_generator.py --environment_file "default" --rewards_file "default"`
         fi
         configuration_file="randoms/$configuration_file"
-    else
-        configuration_file=${1:-"main.json"}
     fi
 
     echo "...environment name is..."
@@ -81,11 +92,12 @@ while [ $iterations -ne $i ]; do
 
     if [ $configuration_file -eq "main.json" ]; then
         echo "using default configuration file: $configuration_file"
+        cd ./configurations
     else
         echo "...updating selected configuration file..."
         cd ./configurations
-        yes | cp -rf $configuration_file "main.json"
         echo "using configuration file: $configuration_file"
+        yes | cp -rf $configuration_file "main.json"
     fi
 
     cd ..
@@ -103,21 +115,40 @@ while [ $iterations -ne $i ]; do
     if ! [ $stop ]; then
         stop=0
     fi
+    echo $launch_monitor
 
     if [ $start_training -eq 1 ]; then
-        echo "...launching the training..."
-            python3 ./pytorch_rl/main.py --stop $stop --iterations $i
-            name=`grep -e '"config_name"' configurations/main.json`
-            replace="v0_2\","
-            replace=${name/v0\",/$replace}
-            sed -i 's/"active": true,/"active": false,/g' configurations/main.json
-            sed -i "s/$name/$replace/" configurations/main.json
-            python3 ./pytorch_rl/main.py --stop $stop --iterations $i
-
+            echo "...launching the training..."
+            if [ $launch_monitor -eq 1 ]; then
+                echo "+++++ With Controller +++++"
+                if [ $qlearning -eq 1 ]; then
+                    echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
+                    python3 ./pytorch_dqn/main.py --stop $stop --record --norender
+                else
+                    python3 ./pytorch_a2c/main.py --stop $stop --record --norender
+                fi
+            fi
+            if [ $launch_without -eq 1 ]; then
+#                name=`grep -e '"config_name"' configurations/main.json`
+#                replace="v0_2\","
+#                replace=${name/v0\",/$replace}
+#                sed -i 's/"controller": true,/"controller": false,/g' configurations/main.json
+#                sed -i "s/$name/$replace/" configurations/main.json
+#                echo "   "
+                echo "..launching the training..."
+                echo "------ Without Controller -----"
+                if [ $qlearning -eq 1 ]; then
+                    python3 ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor
+                else
+                    python3 ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor
+                fi
+            fi
+            echo "plotting..."
+            python3 ./evaluations/a2c/plot_dqn.py
+            python3 ./evaluations/a2c/plot_a2c.py
     fi
     let "i+=1"
+
 done
 
 
-# echo "...launch visdom server in the background..."
-# python3 -m visdom.server &

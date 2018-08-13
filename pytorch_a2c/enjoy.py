@@ -9,6 +9,8 @@ import torch
 from torch.autograd import Variable
 from vec_env.dummy_vec_env import DummyVecEnv
 
+from configurations import config_grabber as cg
+
 from envs import make_env
 
 parser = argparse.ArgumentParser(description='RL')
@@ -18,16 +20,20 @@ parser.add_argument('--num-stack', type=int, default=1,
                     help='number of frames to stack (default: 1)')
 parser.add_argument('--log-interval', type=int, default=10,
                     help='log interval, one log per n updates (default: 10)')
-parser.add_argument('--env-name', default='PongNoFrameskip-v4',
+parser.add_argument('--env-name', default='MiniGrid-DirtWatLightExp-9x9-v0',
                     help='environment to train on (default: PongNoFrameskip-v4)')
-parser.add_argument('--load-dir', default='./trained_models/',
+parser.add_argument('--load-dir', default='./trained_models/a2c/',
                     help='directory to save agent logs (default: ./trained_models/)')
 args = parser.parse_args()
 
 env = make_env(args.env_name, args.seed, 0, None)
 env = DummyVecEnv([env])
 
-actor_critic, ob_rms = torch.load(os.path.join(args.load_dir, args.env_name + ".pt"))
+config = cg.Configuration.grab()
+path = "../" + config.evaluation_directory_name + "/a2c/trained_model/"
+save_path = os.path.join(path, "a2c")
+
+actor_critic, ob_rms = torch.load(os.path.join(save_path, args.env_name + ".pt"))
 
 render_func = env.envs[0].render
 

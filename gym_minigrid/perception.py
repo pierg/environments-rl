@@ -10,7 +10,7 @@ AGENT_GRID_LOCATION = 2
 class Perception():
 
     scanning_is_done = False
-    array_pos = []
+    array_pos =[]
     door_open = False
     light_on = False
     door_room = 0
@@ -28,10 +28,11 @@ class Perception():
                         try:
                             if env.roomList:
                                 for x in env.roomList:
-                                    if x.objectInRoom((i, j)):
+                                    if x.objectInRoom((i,j)):
                                         door_room = x.number
                         except AttributeError:
                             pass
+
         print(Perception.array_pos)
         Perception.scanning_is_done = True
 
@@ -40,8 +41,9 @@ class Perception():
             object = env.grid.get(Perception.array_pos[k][1], Perception.array_pos[k][2])
             if object.type == 'door':
                 Perception.door_open = object.is_open
-            elif object.type == 'lightSwitch':
+            elif object.type == 'lightsw':
                 Perception.light_on = object.state
+
 
     @staticmethod
     def in_front_of(obs, object_name):
@@ -267,10 +269,10 @@ class Perception():
         return False
 
     def list_switch_in_front_off(env):
-        return (env.worldobj_in_agent(1, 0) == "lightSwitch" and not Perception.light_on)
+        return (env.worldobj_in_agent(1, 0) == "lightsw" and not Perception.light_on)
 
     def list_switch_in_front_on(env):
-        return (env.worldobj_in_agent(1, 0) == "lightSwitch" and Perception.light_on)
+        return (env.worldobj_in_agent(1, 0) == "lightsw" and Perception.light_on)
 
     def door_closed_in_front(env):
         return (env.worldobj_in_agent(1, 0) == "door" and not Perception.door_open)
@@ -313,9 +315,12 @@ class Perception():
             return True
 
     def light_switch_turned_on(env):
-        agent_obs = ExGrid.decode(env.gen_obs()['image'])
+        if Perception.light_on:
+            return True
+        return False
+        """agent_obs = ExGrid.decode(env.gen_obs()['image'])
         for i in range(0, len(agent_obs.grid)):
             if agent_obs.grid[i] is not None:
-                if agent_obs.grid[i].type == "lightSwitch":
-                    return Perception.light_on
+                if agent_obs.grid[i].type == "lightsw":
+                    return Perception.light_on"""
         return False

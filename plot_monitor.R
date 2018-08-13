@@ -4,13 +4,13 @@
 autoPlot <- function(array_mo,array_nomo,fileName)
 {
   setwd("results/")                     #place the pdf in resuts file
-  Name <- c(fileName,"controller.pdf")            #add the pdf instance
+  Name <- paste(fileName, "controller.pdf",sep="-")            #add the pdf instance
   print(c("running",Name))              #beginning of the plot creation
   pdf(Name,width = 8, height = 6)
-  
+
   # Monitor Datas
   colonne <- dim(array_mo)[1]              # recover the number of lines in the csv
-  # add datas of the first line 
+  # add datas of the first line
   N_step_mo = c(array_mo[1,2])
   N_step_AVG_mo = c(array_mo[1,16])
   N_goal_reached_mo = c(array_mo[1,15])
@@ -24,10 +24,10 @@ autoPlot <- function(array_mo,array_nomo,fileName)
     N_death_mo = c(N_death_mo, array_mo[k,17])
     Reward_mean_mo = c(Reward_mean_mo, array_mo[k,4])
   }
-  
+
   #No Monitor Data
   colonne <- dim(array_nomo)[1]              # recover the number of lines in the csv
-  # add datas of the first line 
+  # add datas of the first line
   N_step_nomo = c(array_nomo[1,2])
   N_step_AVG_nomo = c(array_nomo[1,16])
   N_goal_reached_nomo = c(array_nomo[1,15])
@@ -41,7 +41,7 @@ autoPlot <- function(array_mo,array_nomo,fileName)
     N_death_nomo = c(N_death_nomo, array_nomo[k,17])
     Reward_mean_nomo = c(Reward_mean_nomo, array_nomo[k,4])
   }
-  
+
   #plot the graph with datas: in red data with monitor and in blue data without monitor
   long=max(max(N_step_mo),max(N_step_nomo))
   # first graph with N_step_AVG:
@@ -50,14 +50,14 @@ autoPlot <- function(array_mo,array_nomo,fileName)
   plot(N_step_mo,N_step_AVG_mo, type = 'l', col="red", ylim=c(min,max),xlim=c(0,long), ylab= "")
   lines(N_step_nomo,N_step_AVG_nomo,type ='l', col="blue")
   legend(1,80,legend = c("N_step_AVG_controller","N_step_AVG_no_controller"), col = c("red","blue"), lty=1:1, cex=0.8)
-  
+
   # second graph with N_goal_reached
   max = max(max(N_goal_reached_mo),max(N_goal_reached_nomo))
   min = min(min(N_goal_reached_mo),min(N_goal_reached_nomo))
   plot(N_step_mo,N_goal_reached_mo, type = 'l', col="red", ylim = c(min,max),xlim=c(0,long), ylab= "")
   lines(N_step_nomo,N_goal_reached_nomo,type ='l', col="blue")
   legend(1,30,legend = c("N_goal_reached_controller","N_goal_reached_no_controller"), col = c("red","blue"), lty=1:1, cex=0.8)
-  
+
   #third graph with Reward_mean
   max = max(max(N_death_mo),max(N_death_nomo))
   min = min(min(N_death_mo),min(N_death_nomo))
@@ -71,7 +71,7 @@ autoPlot <- function(array_mo,array_nomo,fileName)
   plot(N_step_mo,Reward_mean_mo, type = 'l', col="red", ylim = c(min,max), xlim=c(0,long),ylab= "")
   lines(N_step_nomo,Reward_mean_nomo,type  ='l', col="blue")
   legend(1,0.7,legend = c("Reward_mean_controller","Reward_mean_no_controller"), col = c("red","blue"), lty=1:1, cex=0.8)
-  
+
   dev.off()                   #Close the pdf
   setwd("..")                 #return in the current directory
   print("It's over")
@@ -100,6 +100,10 @@ N_Updates_mo = 0
 
 #create the plot for each csv file in evaluation
 for (csvFile in Sys.glob("evaluations/*_2.csv")){
+  # check if the csv result to pytorch_dqn
+  if (grepl("dqn",csvFile)) {
+    next
+  }
   #charge the file with no controller
   not_NaN_in_csv_mo = TRUE
   not_NaN_in_csv_nomo = TRUE

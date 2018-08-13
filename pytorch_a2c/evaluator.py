@@ -4,29 +4,42 @@ import torch
 
 from configurations import config_grabber as cg
 
-import csv_logger
+from tools import csv_logger
 
-import os
-
+import os, re, os.path
 
 class Evaluator:
 
-    def __init__(self, number=0):
+    def __init__(self, algorithm, number=0):
         # Getting configuration from file
         self.config = cg.Configuration.grab()
 
-        while os.path.isfile(self.config.evaluation_directory_name + "/"
-                             + self.config.config_name
-                             + "_"
+        if self.config.controller:
+            file_name = self.config.evaluation_directory_name + "/a2c/" \
+                        + "YES_" + str(algorithm) + "_" \
+                        + self.config.config_name \
+                        + "_"
+        else:
+            file_name = self.config.evaluation_directory_name + "/a2c/" \
+                        + "NO_" + str(algorithm) + "_" \
+                        + self.config.config_name \
+                        + "_"
+
+
+        while os.path.isfile(__file__ + "/../../"
+                             + file_name
                              + str(number)
                              + ".csv"):
             number += 1
+
+
         config_file_path = os.path.abspath(__file__ + "/../../"
-                                           + self.config.evaluation_directory_name + "/"
-                                           + self.config.config_name
+                                           + file_name
                                            + "_"
                                            + str(number)
                                            + ".csv")
+
+        self.config_file_path = config_file_path
 
         dirname = os.path.dirname(config_file_path)
         if not os.path.exists(dirname):
@@ -58,16 +71,14 @@ class Evaluator:
                                   'N_break',
                                   'Info_saved'])
 
-        # Evaluation variables
-        # self.shortest_path = config.shortest_path
 
-        self.episode_rewards = torch.zeros([self.config.num_processes, 1])
-        self.final_rewards = torch.zeros([self.config.num_processes, 1])
+        self.episode_rewards = torch.zeros([self.config.a2c.num_processes, 1])
+        self.final_rewards = torch.zeros([self.config.a2c.num_processes, 1])
 
-        self.n_catastrophes = torch.zeros([self.config.num_processes, 1])
-        self.n_episodes = torch.zeros([self.config.num_processes, 1])
-        self.n_proccess_reached_goal = [0] * self.config.num_processes
-        self.numberOfStepPerEpisode = [0] * self.config.num_processes
+        self.n_catastrophes = torch.zeros([self.config.a2c.num_processes, 1])
+        self.n_episodes = torch.zeros([self.config.a2c.num_processes, 1])
+        self.n_proccess_reached_goal = [0] * self.config.a2c.num_processes
+        self.numberOfStepPerEpisode = [0] * self.config.a2c.num_processes
         self.numberOfStepAverage = 0
         self.N_goal_reached = 0
         self.N_death = 0
@@ -140,9 +151,12 @@ class Evaluator:
     def get_reward_mean(self):
         return self.final_rewards.mean()
 
+    def get_reward_median(self):
+        return self.final_rewards.median()
+
     def save(self, n_updates, t_start, t_end, dist_entropy, value_loss, action_loss):
-        total_num_steps = (n_updates + 1) * self.config.num_processes * self.config.num_steps
-        csv_logger.write_to_log([n_updates,
+        total_num_steps = (n_updates + 1) * self.config.a2c.num_processes * self.config.a2c.num_steps
+        csv_logger.write_to_log(self.config_file_path,[n_updates,
                                  total_num_steps,
                                  int(total_num_steps / t_end - t_start),
                                  self.final_rewards.mean(),

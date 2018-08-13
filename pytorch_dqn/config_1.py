@@ -1,25 +1,15 @@
-import shutil
-
 import gym
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.autograd as autograd
-import random
 
-from configurations import config_grabber as cg
-
-from gym import wrappers, logger
+from gym import wrappers
 
 from tools.arguments import get_args
 from pytorch_dqn.evaluator_frames import Evaluator as ev_frames
 from pytorch_dqn.evaluator_episodes import Evaluator as ev_epi
-
-from shutil import copyfile
-
-import os, re, os.path
-
 
 try:
     import gym_minigrid
@@ -39,28 +29,20 @@ Better way to  tune down epsilon (when it's finding the minumum path?)
 
 args = get_args()
 
+
 cg.Configuration.set("training_mode", True)
 cg.Configuration.set("debug_mode", False)
-
-if args.stop:
-    cg.Configuration.set("max_num_frames", args.stop)
 
 if args.norender:
     cg.Configuration.set("rendering", False)
     cg.Configuration.set("visdom", False)
 
-if args.record:
-    cg.Configuration.set("recording", True)
-
-if args.nomonitor:
-    cg.Configuration.set("controller", False)
-
-
-# Getting configuration from file
 config = cg.Configuration.grab()
 
-# Debug mode = 10
-# logger.setLevel(10)
+# Initializing evaluation
+evaluator_frames = ev_frames("dqn")
+evaluator_episodes = ev_epi("dqn")
+
 
 env = gym.make(config.env_name)
 
@@ -69,33 +51,9 @@ env = gym.make(config.env_name)
 if config.controller:
     env = SafetyEnvelope(env)
 
-eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
-
-# Copy config file to evaluation folder
-copyfile(cg.Configuration.file_path(), eval_folder + "/configuration_dqn.txt")
-
-# Initializing evaluation
-evaluator_frames = ev_frames("dqn")
-evaluator_episodes = ev_epi("dqn")
-
-
-if config.recording:
-    print("starting recording..")
-    if config.controller:
-        expt_dir = eval_folder + "/dqn/dqn_videos_yes/"
-    else:
-        expt_dir = eval_folder + "/dqn/dqn_videos_no/"
-
-    # Cleaning up the directory..
-    for the_file in os.listdir(expt_dir):
-        file_path = os.path.join(expt_dir, the_file)
-        try:
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
-        except Exception as e:
-            print(e)
-
-    env = wrappers.Monitor(env, expt_dir)
+if args.record:
+    expt_dir = '../evaluations/videos'
+    env = wrappers.Monitor(env, expt_dir, force=True)
 
 from collections import deque
 
@@ -121,13 +79,17 @@ class ReplayBuffer(object):
         return len(self.buffer)
 
 
-epsilon_start = config.dqn.epsilon_start
-epsilon_final = config.dqn.epsilon_final
+epsilon_start = 1.0
+epsilon_final = 0.00
 epsilon_decay_frame = config.dqn.epsilon_decay_frame
 epsilon_decay_episodes = config.dqn.epsilon_decay_episodes
 
 epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * frame_idx / epsilon_decay_frame)
 epsilon_by_episodes = lambda episode_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * episode_idx / epsilon_decay_episodes)
+
+# plt.plot([epsilon_by_frame(i) for i in range(10000)])
+# plt.plot([epsilon_by_episodes(i) for i in range(10000)])
+# plt.savefig('epsilon_by_episodes.png')
 
 
 class DQN(nn.Module):
@@ -157,8 +119,6 @@ class DQN(nn.Module):
 
 
 model = DQN(env.observation_space.shape[0], env.action_space.n)
-print("ïnput_size  (obs_space) = " + str(env.observation_space.shape[0]))
-print("output_size (act_space) = " + str(env.action_space.n))
 optimizer = optim.Adam(model.parameters())
 replay_buffer = ReplayBuffer(1000)
 
@@ -190,6 +150,12 @@ def compute_td_loss(batch_size):
     optimizer.step()
 
     return loss
+
+if args.stop:
+    max_num_frames = int(args.stop)
+    if max_num_frames != 0:
+        cg.Configuration.set("max_num_frames", max_num_frames)
+
 
 max_num_frames = config.max_num_frames
 
@@ -225,28 +191,16 @@ state = env.reset()
 
 episode_idx = 0
 
-"""
-For benchmarking and to stop the training
-"""
-# Number of steps from the beginning of the episode
+# For benchmarking and to stop the training
 n_step_epi_idx = 0
-# Minimum number of steps achieved to reach the goal = record
-steps_prev = -1
-record_curr = -1
-# Number of times it achieved the record
-times_record = 0
-# Number of consecutive times it achieved the record
-cons_times_record = 0
-
+min_n_steps_reach_goal = -1
 
 print("\nTraining started...")
 
 for frame_idx in range(1, max_num_frames + 1):
 
-
-
-    epsilon = epsilon_by_frame(frame_idx)
-    # epsilon = epsilon_by_episodes(episode_idx)
+    # epsilon = epsilon_by_frame(frame_idx)
+    epsilon = epsilon_by_episodes(episode_idx)
     action = model.act(state, epsilon)
 
     n_step_epi_idx += 1
@@ -285,31 +239,16 @@ for frame_idx in range(1, max_num_frames + 1):
             n_goals_f += 1
             n_goals_e += 1
 
-            # First time
-            if record_curr == -1:
-                record_curr = n_step_epi_idx
-
-            # New record
-            if n_step_epi_idx < record_curr:
-                record_curr = n_step_epi_idx
-                times_record += 1
-                print("     >>  GOAL" + "\t\t" + str(n_step_epi_idx) + "\t            NEW RECORD")
-            if n_step_epi_idx == record_curr:
-                print("     >>  GOAL" + "\t\t" + str(n_step_epi_idx) + "\t            RECORD")
-
-            # Update consecutive number of
-            if n_step_epi_idx == steps_prev:
-                cons_times_record += 1
-            else:
-                cons_times_record = 0
-            steps_prev = n_step_epi_idx
-
-
             evaluator_episodes.update(episode_idx, all_rewards_e, cum_reward_e, all_losses_e, n_deaths_e, n_goals_e,
-                                      n_violations_e, epsilon, n_step_epi_idx, expected_q_value_e, times_record, cons_times_record)
+                                      n_violations_e, epsilon, n_step_epi_idx, expected_q_value_e)
             evaluator_episodes.save()
 
-            print("     >>  GOAL" + "\t\t" + str(n_step_epi_idx))
+            if min_n_steps_reach_goal == -1:
+                min_n_steps_reach_goal = n_step_epi_idx
+            elif n_step_epi_idx < min_n_steps_reach_goal:
+                min_n_steps_reach_goal = n_step_epi_idx
+
+            print("     >>  GOAL" + "\t" + str(n_step_epi_idx) + "\t            min: " + str(min_n_steps_reach_goal))
 
             n_step_epi_idx = 0
 
@@ -338,7 +277,7 @@ for frame_idx in range(1, max_num_frames + 1):
         evaluator_frames.update(frame_idx, all_rewards_f, cum_reward, all_losses_f, n_episodes_f, n_deaths_f, n_goals_f, n_violations_f, epsilon)
         evaluator_frames.save()
 
-        print(str(frame_idx) + "\t" + str(episode_idx) + "\t" + str(n_goals_f) + "\t\t\t" + str(round(epsilon, 2)))
+        print(str(frame_idx) + "\t" + str(episode_idx) + "\t" + str(n_goals_f) + "\t" + str(min_n_steps_reach_goal) + "\t" + str(round(epsilon, 2)))
 
         # Resetting values
         all_rewards_f = []
