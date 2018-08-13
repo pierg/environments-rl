@@ -126,6 +126,9 @@ class Evaluator:
                 elif info[i][0] == "goal":
                     self.n_proccess_reached_goal[i] = 1
                     self.N_Total_episodes += 1
+                elif info[i][0] == "goal+plan_finished":
+                    self.n_proccess_reached_goal[i] = 1
+                    self.N_Total_episodes += 1
                 elif info[i][0] == "violation":
                     self.N_violation += 1
                     self.n_proccess_reached_goal[i] = 0

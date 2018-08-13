@@ -162,7 +162,7 @@ def plot():
                                        reward_std[i]
                                        ], 'N_timesteps', ['Reward_mean',
                                                           'Reward_std'
-                                                          ],[0,reward_std[i]])
+                                                          ],[reward_std[i],0])
 
         Name = "a2c_experience_[" + str(i) + "].pdf"
         print("PdfName : ", Name)

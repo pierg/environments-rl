@@ -46,6 +46,8 @@ if args.record:
 
 if args.nomonitor:
     cg.Configuration.set("action_plan", False)
+else:
+    cg.Configuration.set("action_plan", True)
 
 
 # Getting configuration from file
@@ -237,6 +239,7 @@ def main():
                     last_reward_median = current_reward_median
             if identical_rewards == config.a2c.stop_learning:
                 break
+
             reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
             episode_rewards += reward
 

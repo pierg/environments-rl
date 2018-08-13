@@ -53,6 +53,8 @@ if args.record:
 
 if args.nomonitor:
     cg.Configuration.set("action_plan", False)
+else:
+    cg.Configuration.set("action_plan", True)
 
 
 # Getting configuration from file
