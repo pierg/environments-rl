@@ -14,7 +14,7 @@ class Evaluator:
         # Getting configuration from file
         self.config = cg.Configuration.grab()
 
-        if self.config.action_planning.active:
+        if self.config.action_plan:
             file_name = self.config.evaluation_directory_name + "/a2c/" \
                         + "YES_" + str(algorithm) + "_" \
                         + self.config.config_name \

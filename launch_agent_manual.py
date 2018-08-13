@@ -49,7 +49,7 @@ def main():
     # Load the gym environment
     env = gym.make(options.env_name)
 
-    if config.action_planning.active:
+    if config.action_plan:
         env = ActionPlannerEnvelope(env)
 
 

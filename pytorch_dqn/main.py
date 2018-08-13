@@ -52,7 +52,7 @@ if args.record:
     cg.Configuration.set("recording", True)
 
 if args.nomonitor:
-    cg.Configuration.set("action_planning.active", False)
+    cg.Configuration.set("action_plan", False)
 
 
 # Getting configuration from file
@@ -64,7 +64,7 @@ config = cg.Configuration.grab()
 env = gym.make(config.env_name)
 
 # env.seed(seed + rank)
-if config.action_planning.active:
+if config.action_plan:
     env = ActionPlannerEnvelope(env)
 
 eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
@@ -79,7 +79,7 @@ evaluator_episodes = ev_epi("dqn")
 
 if config.recording:
     print("starting recording..")
-    if config.action_planning.active:
+    if config.action_plan:
         expt_dir = eval_folder + "/dqn/dqn_videos_yes/"
     else:
         expt_dir = eval_folder + "/dqn/dqn_videos_no/"

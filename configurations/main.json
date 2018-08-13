@@ -1,54 +1,54 @@
 {
-    "config_name": "randomEnv-12x12-7608-v0_2",
-    "env_name": "MiniGrid-RandomEnv-12x12-7608-v0",
-    "agent_view_size": 7,
-    "debug_mode": false,
-    "recording": true,
-    "rewards": {
-        "standard": {
-            "step": -0.01,
-            "goal": 1.0,
-            "death": -1.0
-        },
-        "cleaningenv": {
-            "clean": 0.1
-        }
-    },
-    "visdom": false,
     "log_interval": 10,
+    "evaluation_directory_name": "evaluations",
+    "number_of_iteration": 100,
+    "debug_mode": true,
+    "agent_view_size": 7,
+    "recording": true,
+    "action_plan": false,
     "dqn": {
         "results_log_interval": 200,
-        "exploration_rate": 0.99,
-        "epsilon_decay_frame": 5000,
-        "epsilon_decay_episodes": 1000,
+        "epsilon_final": 0.1,
         "epsilon_start": 1.0,
         "discount_factor": 0.99,
-        "epsilon_final": 0.1
+        "epsilon_decay_frame": 5000,
+        "exploration_rate": 0.99,
+        "epsilon_decay_episodes": 1000
     },
-    "on_violation_reset": false,
-    "number_of_iteration": 100,
+    "training_mode": false,
+    "visdom": false,
+    "rewards": {
+        "cleaningenv": {
+            "clean": 0.1
+        },
+        "standard": {
+            "step": -0.01,
+            "death": -1.0,
+            "goal": 1.0
+        }
+    },
+    "a2c": {
+        "save_evaluation_interval": 50,
+        "num_steps": 4,
+        "optimal_num_step": 40,
+        "save_model_interval": 50,
+        "stop_learning": 480,
+        "num_processes": 48,
+        "stop_after_update_number": 50,
+        "algorithm": "a2c"
+    },
     "rendering": false,
-    "max_num_frames": 1000000,
-    "training_mode": true,
     "action_planning": {
+        "random_unsafe_obj": 0,
         "secondary_goals": "[]",
         "reward": {
             "on_plan": 0.01,
-            "unsafe": -0.3,
-            "off_plan": -0.15
-        },
-        "random_unsafe_obj": 0,
-        "active": true
+            "off_plan": -0.15,
+            "unsafe": -0.3
+        }
     },
-    "evaluation_directory_name": "evaluations",
-    "a2c": {
-        "num_steps": 4,
-        "save_model_interval": 50,
-        "algorithm": "a2c",
-        "save_evaluation_interval": 50,
-        "stop_learning": 48000,
-        "optimal_num_step": 40,
-        "num_processes": 48,
-        "stop_after_update_number": 0
-    }
+    "config_name": "randomEnv-12x12-7608-v0_2",
+    "on_violation_reset": false,
+    "env_name": "MiniGrid-RandomEnv-12x12-7608-v0",
+    "max_num_frames": 1000000
 }

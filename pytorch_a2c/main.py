@@ -45,7 +45,7 @@ if args.record:
     cg.Configuration.set("recording", True)
 
 if args.nomonitor:
-    cg.Configuration.set("action_planning.active", False)
+    cg.Configuration.set("action_plan", False)
 
 
 # Getting configuration from file
@@ -73,7 +73,7 @@ def main():
     else:
         bonus_reward = 72 * config.rewards.standard.step
 
-    if config.action_planning.active:
+    if config.action_plan:
         bonus_reward += 15 * config.action_planning.reward.on_plan
 
     # Initializing evaluation
@@ -84,7 +84,7 @@ def main():
     # cleaning up recording folder...
     eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
 
-    if config.action_planning.active:
+    if config.action_plan:
         expt_dir = eval_folder + "/a2c/a2c_videos_yes/"
     else:
         expt_dir = eval_folder + "/a2c/a2c_videos_no/"

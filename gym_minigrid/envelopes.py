@@ -20,7 +20,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         # Grab configuration
         self.config = cg.Configuration.grab()
 
-        self.goap = self.config.action_planning.active
+        self.goap = self.config.action_plan
 
         # Set rewards
         self.step_reward = self.config.rewards.standard.step
