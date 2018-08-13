@@ -1,5 +1,4 @@
 {
-    "num_processes": 48,
     "env_name": "MiniGrid-RandomEnv-12x12-7608-v0",
     "log_interval": 10,
     "rewards": {
@@ -12,10 +11,7 @@
             "clean": 0.1
         }
     },
-    "stop_after_update_number": 0,
-    "stop_learning": 432,
-    "algorithm": "a2c",
-    "num_steps": 4,
+    "agent_view_size": 7,
     "config_name": "randomEnv-12x12-7608-v0_2",
     "evaluation_directory_name": "evaluations",
     "dqn": {
@@ -26,6 +22,16 @@
         "epsilon_start": 1.0,
         "epsilon_final": 0.1,
         "discount_factor": 0.99
+    },
+  "a2c": {
+        "stop_learning": 48000,
+        "num_steps": 4,
+        "stop_after_update_number": 0,
+        "algorithm": "a2c",
+        "num_processes": 48,
+        "optimal_num_step": 40,
+        "save_model_interval": 50,
+        "save_evaluation_interval": 50
     },
     "on_violation_reset": false,
     "number_of_iteration": 100,
@@ -42,6 +48,5 @@
     "visdom": false,
     "rendering": false,
     "debug_mode": false,
-    "training_mode": true,
-    "optimal_num_steps": 72
+    "training_mode": true
 }

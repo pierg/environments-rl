@@ -71,6 +71,10 @@ def get_args():
                         help='turn rendendering off in the config file ')
     parser.add_argument('--record', action='store_true', default=False,
                         help='turn recording on, rendering will be automatically disabled')
+    parser.add_argument('--nomonitor', action='store_true', default=False,
+                        help='set no monitor')
+
+
     args = parser.parse_args()
 
     args.cuda = not args.no_cuda and torch.cuda.is_available()

@@ -19,10 +19,16 @@ class Evaluator:
         # Getting configuration from file
         self.config = cg.Configuration.grab()
 
-        file_name = self.config.evaluation_directory_name + "/" \
-                + str(algorithm) + "_frm_" \
-                + self.config.config_name \
-                + "_"
+        if self.config.controller:
+            file_name = self.config.evaluation_directory_name + "/dqn/" \
+                        + "YES_" + str(algorithm) + "_frm_" \
+                        + self.config.config_name \
+                        + "_"
+        else:
+            file_name = self.config.evaluation_directory_name + "/dqn/" \
+                        + "NO_" + str(algorithm) + "_frm_" \
+                        + self.config.config_name \
+                        + "_"
 
         while os.path.isfile(__file__ + "/../../"
                              + file_name
@@ -70,6 +76,10 @@ class Evaluator:
         self.last_epsilon = []
 
         self.last_saved_element_idx = 0
+
+
+
+
 
     def update(self, frame_idx, all_rewards, cum_reward, all_losses, n_episodes, n_deaths, n_goals, n_violations, last_epsilon):
         self.frame_idx.append(frame_idx)

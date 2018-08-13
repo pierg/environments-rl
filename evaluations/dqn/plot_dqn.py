@@ -7,7 +7,6 @@ from matplotlib.backends.backend_pdf import PdfPages
 import csv
 import glob
 from random import randint
-import configurations.config_grabber as cg
 
 plt.rcParams["font.family"] = "Times New Roman"
 plt.rcParams.update({'font.size': 15})
@@ -29,6 +28,7 @@ frm_frame_idx = []
 frm_reward_mean = []
 frm_reward_sem = []
 frm_reward_cum = []
+
 
 
 def extract_all_data_from_csv(csv_folder_abs_path):
@@ -133,7 +133,7 @@ def multi_figures_plot(x, ys, x_label, y_labels, ys_sem=0):
     :param ys_sem: (optional) standard error mean, it adds as translucent area around the ys
     :return: matplot figure, it can then be added to a pdf
     """
-    x_size = 10
+    x_size = len(x)/100
     y_size = len(y_labels)*2
     figure = plt.figure(num=None, figsize=(x_size, y_size), dpi=80, facecolor='w', edgecolor='k')
     ax_to_send = figure.subplots(nrows = len(ys), ncols=1)
@@ -157,8 +157,8 @@ def multi_figures_plot(x, ys, x_label, y_labels, ys_sem=0):
 
 
 def plot():
-    extract_all_data_from_csv(os.path.abspath(os.path.dirname(__file__) + "/../evaluations/"))
-    os.chdir(os.path.dirname(__file__) + "/../evaluations/")
+    current_directory = os.path.abspath(os.path.dirname(__file__))
+    extract_all_data_from_csv(current_directory)
     for i in range(len(epi_episode_idx)):
 
         figure_episodes = multi_figures_plot(epi_episode_idx[i],
@@ -185,8 +185,7 @@ def plot():
         Name = "dqn_experience_[" + str(i) + "].pdf"
         print("PdfName : ", Name)
 
-
-        pdf = PdfPages(Name)
+        pdf = PdfPages(current_directory + "/" + Name)
 
         pdf.savefig(figure_episodes)
         pdf.savefig(figure_frames)

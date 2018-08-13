@@ -15,7 +15,6 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
     """
 
     def __init__(self, env):
-
         super(ActionPlannerEnvelope, self).__init__(env)
 
         # Grab configuration

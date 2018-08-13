@@ -19,10 +19,17 @@ class Evaluator:
         # Getting configuration from file
         self.config = cg.Configuration.grab()
 
-        file_name = self.config.evaluation_directory_name + "/" \
-                + str(algorithm) + "_epi_" \
-                + self.config.config_name \
-                + "_"
+        if self.config.controller:
+            file_name = self.config.evaluation_directory_name + "/dqn/" \
+                        + "YES_" + str(algorithm) + "_epi_" \
+                        + self.config.config_name \
+                        + "_"
+        else:
+            file_name = self.config.evaluation_directory_name + "/dqn/" \
+                        + "NO_" + str(algorithm) + "_epi_" \
+                        + self.config.config_name \
+                        + "_"
+
 
         while os.path.isfile(__file__ + "/../../"
                              + file_name

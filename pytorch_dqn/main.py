@@ -7,11 +7,18 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.autograd as autograd
 
+from configurations import config_grabber as cg
+
 from gym import wrappers, logger
 
 from tools.arguments import get_args
 from pytorch_dqn.evaluator_frames import Evaluator as ev_frames
 from pytorch_dqn.evaluator_episodes import Evaluator as ev_epi
+
+from shutil import copyfile
+
+import os, re, os.path
+
 
 try:
     import gym_minigrid
@@ -31,22 +38,28 @@ Better way to  tune down epsilon (when it's finding the minumum path?)
 
 args = get_args()
 
-# Debug mode = 10
-# logger.setLevel(10)
-
 cg.Configuration.set("training_mode", True)
 cg.Configuration.set("debug_mode", False)
+
+if args.stop:
+    cg.Configuration.set("max_num_frames", args.stop)
 
 if args.norender:
     cg.Configuration.set("rendering", False)
     cg.Configuration.set("visdom", False)
 
-if args.stop:
-    max_num_frames = int(args.stop)
-    if max_num_frames != 0:
-        cg.Configuration.set("max_num_frames", max_num_frames)
+if args.record:
+    cg.Configuration.set("recording", True)
 
+if args.nomonitor:
+    cg.Configuration.set("controller", False)
+
+
+# Getting configuration from file
 config = cg.Configuration.grab()
+
+# Debug mode = 10
+# logger.setLevel(10)
 
 env = gym.make(config.env_name)
 
@@ -56,19 +69,31 @@ if config.action_planning.active:
 
 eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
 
-# Cleaning the evaluation folder
-# if os.path.exists(eval_folder) and os.path.isdir(eval_folder):
-#     shutil.rmtree(eval_folder)
-#     os.mkdir(eval_folder)
+# Copy config file to evaluation folder
+copyfile(cg.Configuration.file_path(), eval_folder + "/configuration_dqn.txt")
 
 # Initializing evaluation
 evaluator_frames = ev_frames("dqn")
 evaluator_episodes = ev_epi("dqn")
 
-if args.record:
+
+if config.recording:
     print("starting recording..")
-    expt_dir = eval_folder + "/videos/"
-    env = wrappers.Monitor(env, expt_dir, force=True)
+    if config.controller:
+        expt_dir = eval_folder + "/dqn/dqn_videos_yes/"
+    else:
+        expt_dir = eval_folder + "/dqn/dqn_videos_no/"
+
+    # Cleaning up the directory..
+    for the_file in os.listdir(expt_dir):
+        file_path = os.path.join(expt_dir, the_file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(e)
+
+    env = wrappers.Monitor(env, expt_dir)
 
 from collections import deque
 
@@ -94,8 +119,8 @@ class ReplayBuffer(object):
         return len(self.buffer)
 
 
-epsilon_start = config.epsilon_start
-epsilon_final = config.epsilon_final
+epsilon_start = config.dqn.epsilon_start
+epsilon_final = config.dqn.epsilon_final
 epsilon_decay_frame = config.dqn.epsilon_decay_frame
 epsilon_decay_episodes = config.dqn.epsilon_decay_episodes
 

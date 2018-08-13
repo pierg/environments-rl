@@ -7,6 +7,7 @@ from functools import reduce
 
 import numpy as np
 
+config = cg.Configuration.grab()
 
 AGENT_VIEW_SIZE = config.agent_view_size
 OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
@@ -29,7 +30,7 @@ def extended_dic(obj_names=[]):
             new_obj_idx = new_obj_idx + 1
 
 
-extended_dic(["water","unsafe","lightSwitch","dirt","vase"])
+extended_dic(["water","unsafe","lightsw","dirt","vase"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 
@@ -131,7 +132,7 @@ class Water(WorldObj):
 class LightSwitch(WorldObj):
     def __init__(self):
         self.state = False
-        super(LightSwitch, self).__init__('lightSwitch', 'yellow')
+        super(LightSwitch, self).__init__('lightsw', 'yellow')
 
     def affectRoom(self, room):
         self.room = room
@@ -266,7 +267,7 @@ def worldobj_name_to_object(worldobj_name):
         return Water()
     elif worldobj_name == 'wall':
         return Wall()
-    elif worldobj_name == "lightSwitch":
+    elif worldobj_name == "lightsw":
         return LightSwitch()
     elif worldobj_name == "dirt":
         return Dirt()
@@ -325,7 +326,7 @@ class ExGrid(Grid):
                     v = Unsafe()
                 elif objType == 'water':
                     v = Water()
-                elif objType == 'lightSwitch':
+                elif objType == 'lightsw':
                     v = LightSwitch()
                 elif objType == 'dirt':
                     v = Dirt()
@@ -346,10 +347,26 @@ class ExMiniGridEnv(MiniGridEnv):
         left = 0
         right = 1
         forward = 2
-        pickup = 3
-        drop = 4
-        toggle = 5
+        toggle = 3
+
+        # Extra action (not used)
+        pickup = 4
+        drop = 5
         done = 6
+        clean = 7
+
+
+    def print_grid(self):
+
+        grid = self.gen_obs_grid()
+        for i, e in enumerate(grid[0].grid):
+            if i % grid[0].height == 0:
+                print("")
+            if e is not None:
+                print(str(e.type), end="\t")
+            else:
+                print("none",  end="\t")
+        print("")
 
     def strings_to_actions(self, actions):
         for i, action_name in enumerate(actions):
@@ -363,6 +380,8 @@ class ExMiniGridEnv(MiniGridEnv):
                 actions[i] = self.actions.toggle
             elif action_name == "done":
                 actions[i] = self.actions.done
+            elif action_name == "clean":
+                actions[i] = self.actions.clean
 
         return actions
 
@@ -377,6 +396,8 @@ class ExMiniGridEnv(MiniGridEnv):
             return "toggle"
         elif action == self.actions.done:
             return "done"
+        elif action == self.actions.clean:
+            return "clean"
         return None
 
 

@@ -152,8 +152,11 @@ def main():
         if done:
             print('done!')
             resetEnv()
+        # env.render('human')
 
     renderer.window.setKeyDownCb(keyDownCb)
+
+    # env.render('human')
 
     while True:
         env.render('human')

@@ -6,13 +6,14 @@ configuration_file="main.json"
 start_training=1
 qlearning=0
 double=0
+launch_monitor=0
+launch_without=0
 
-while getopts ":tlre:w:s:i:q" opt; do
+while getopts qrt:e:w:s:i:lab opt; do
     case ${opt} in
         q)
             qlearning=1
             ;;
-
         r)
             random=1
             start_training=1
@@ -41,9 +42,11 @@ while getopts ":tlre:w:s:i:q" opt; do
             light=1
             start_training=1
             ;;
-
-        d)
-            double=1
+        a)
+            launch_monitor=1
+            ;;
+        b)
+            launch_without=1
             ;;
     esac
 done
@@ -92,15 +95,11 @@ while [ $iterations -ne $i ]; do
     if [ $configuration_file -eq "main.json" ]; then
         echo "using default configuration file: $configuration_file"
         cd ./configurations
-        cp $configuration_file ../evaluations
-        echo "main config file copied in the evaluation folder"
     else
         echo "...updating selected configuration file..."
         cd ./configurations
         echo "using configuration file: $configuration_file"
         yes | cp -rf $configuration_file "main.json"
-        cp $configuration_file ../evaluations
-        echo "$configuration_file file copied in the evaluation folder"
     fi
 
     cd ..
@@ -118,32 +117,43 @@ while [ $iterations -ne $i ]; do
     if ! [ $stop ]; then
         stop=0
     fi
+    echo $launch_monitor
 
     if [ $start_training -eq 1 ]; then
             echo "...launching the training..."
             echo "+++++ With Goap +++++"
-            if [ $qlearning -eq 1 ]; then
+            if [ $launch_monitor -eq 1 ]; then
                 echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
                 python3 ./pytorch_dqn/main.py --stop $stop --record --norender
             else
                 python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
+            if [ $launch_monitor -eq 1 ]; then
+                echo "+++++ With Controller +++++"
+                if [ $qlearning -eq 1 ]; then
+                    echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
+                    python3 ./pytorch_dqn/main.py --stop $stop --record --norender
+                else
+                    python3 ./pytorch_a2c/main.py --stop $stop --record --norender
+                fi
             fi
-            name=`grep -e '"config_name"' configurations/main.json`
-            replace="v0_2\","
-            replace=${name/v0\",/$replace}
-            sed -i 's/"active": true,/"active": false,/g' configurations/main.json
-            sed -i "s/$name/$replace/" configurations/main.json
-            echo "   "
-            echo "\n\n...launching the training..."
-            echo "------ Without Goap -----"
-            if [ $qlearning -eq 1 ]; then
-                python3 ./pytorch_dqn/main.py --stop $stop --record --norender
-            else
-                python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
+            if [ $launch_without -eq 1 ]; then
+#                name=`grep -e '"config_name"' configurations/main.json`
+#                replace="v0_2\","
+#                replace=${name/v0\",/$replace}
+#                sed -i 's/"controller": true,/"controller": false,/g' configurations/main.json
+#                sed -i "s/$name/$replace/" configurations/main.json
+#                echo "   "
+                echo "..launching the training..."
+                echo "------ Without Controller -----"
+                if [ $qlearning -eq 1 ]; then
+                    python3 ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor
+                else
+                    python3 ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor
+                fi
             fi
-
             echo "plotting..."
-            python3 ./pytorch_dqn/plot_evaluations.py
+            python3 ./evaluations/a2c/plot_dqn.py
+            python3 ./evaluations/a2c/plot_a2c.py
     fi
     let "i+=1"
 

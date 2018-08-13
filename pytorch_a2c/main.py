@@ -20,56 +20,56 @@ from model import Policy
 from storage import RolloutStorage
 from tools.visualize import visdom_plot
 
+from shutil import copyfile
+
 from configurations import config_grabber as cg
 
 from envs import make_env
 
+import os, re, os.path
+
+
 args = get_args()
 
-assert args.algo in ['a2c', 'ppo', 'acktr']
-if args.recurrent_policy:
-    assert args.algo in ['a2c', 'ppo'], 'Recurrent policy is not implemented for ACKTR'
-
-num_updates = int(args.num_frames) // args.num_steps // args.num_processes
+cg.Configuration.set("training_mode", True)
+cg.Configuration.set("debug_mode", False)
 
 if args.stop:
-    num_updates = int(args.stop)
-
-if args.iterations:
-    iterations = int(args.iterations)
-
-torch.manual_seed(args.seed)
-if args.cuda:
-    torch.cuda.manual_seed(args.seed)
+    cg.Configuration.set("max_num_frames", args.stop)
 
 if args.norender:
     cg.Configuration.set("rendering", False)
     cg.Configuration.set("visdom", False)
 
-try:
-    os.makedirs(args.log_dir)
-except OSError:
-    files = glob.glob(os.path.join(args.log_dir, '*.monitor.csv'))
-    for f in files:
-        os.remove(f)
+if args.record:
+    cg.Configuration.set("recording", True)
+
+if args.nomonitor:
+    cg.Configuration.set("controller", False)
+
+
+# Getting configuration from file
+config = cg.Configuration.grab()
+
+eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
+
+# Copy config file to evaluation folder
+copyfile(cg.Configuration.file_path(), eval_folder + "/configuration_a2c.txt")
 
 
 def main():
-    # Getting configuration from file
-    config = cg.Configuration.grab()
 
-    cg.Configuration.set("training_mode", True)
-    cg.Configuration.set("debug_mode", False)
+    num_updates = int(config.max_num_frames) // config.a2c.num_steps // config.a2c.num_processes
 
-    # Overriding arguments with configuration file
-    args.num_processes = config.num_processes
-    args.num_steps = config.num_steps
-    args.env_name = config.env_name
-    args.algo = config.algorithm
-    args.vis = config.visdom
-    stop_learning = config.stop_learning
-    stop_after_update_number = config.stop_after_update_number
+    print("num_updates:     " + str(num_updates))
 
+    print("stop_learning:   " + str(config.a2c.stop_learning))
+
+    stop_after_update_number = config.a2c.stop_after_update_number
+
+    # steps reward:
+    if hasattr(config.a2c, "optimal_num_steps"):
+        steps_reward = config.rewards.standard.step * config.a2c.optimal_num_steps
 
     # bonus reward:
     if hasattr(config,"optimal_num_steps"):
@@ -85,9 +85,26 @@ def main():
 
     os.environ['OMP_NUM_THREADS'] = '1'
 
-    envs = [make_env(args.env_name, args.seed, i, args.log_dir) for i in range(args.num_processes)]
+    # cleaning up recording folder...
+    eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
 
-    if args.num_processes > 1:
+    if config.controller:
+        expt_dir = eval_folder + "/a2c/a2c_videos_yes/"
+    else:
+        expt_dir = eval_folder + "/a2c/a2c_videos_no/"
+
+    # Cleaning up the directory..
+    for the_file in os.listdir(expt_dir):
+        file_path = os.path.join(expt_dir, the_file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(e)
+
+    envs = [make_env(config.env_name, args.seed, i) for i in range(config.a2c.num_processes)]
+
+    if config.a2c.num_processes > 1:
         envs = SubprocVecEnv(envs)
     else:
         envs = DummyVecEnv(envs)
@@ -114,15 +131,15 @@ def main():
     if args.cuda:
         actor_critic.cuda()
 
-    if args.algo == 'a2c':
+    if config.a2c.algorithm == 'a2c':
         optimizer = optim.RMSprop(actor_critic.parameters(), args.lr, eps=args.eps, alpha=args.alpha)
-    elif args.algo == 'ppo':
+    elif config.a2c.algorithm == 'ppo':
         optimizer = optim.Adam(actor_critic.parameters(), args.lr, eps=args.eps)
-    elif args.algo == 'acktr':
+    elif config.a2c.algorithm == 'acktr':
         optimizer = KFACOptimizer(actor_critic)
 
-    rollouts = RolloutStorage(args.num_steps, args.num_processes, obs_shape, envs.action_space, actor_critic.state_size)
-    current_obs = torch.zeros(args.num_processes, *obs_shape)
+    rollouts = RolloutStorage(config.a2c.num_steps, config.a2c.num_processes, obs_shape, envs.action_space, actor_critic.state_size)
+    current_obs = torch.zeros(config.a2c.num_processes, *obs_shape)
 
     def update_current_obs(obs):
         shape_dim0 = envs.observation_space.shape[0]
@@ -136,12 +153,12 @@ def main():
     rollouts.observations[0].copy_(current_obs)
     numberOfStepBeforeDone = []
     stepOnLastGoal = []
-    for i in range(0, config.num_processes):
+    for i in range(0, config.a2c.num_processes):
         numberOfStepBeforeDone.append(0)
         stepOnLastGoal.append(0)
     # These variables are used to compute average rewards for all processes.
-    episode_rewards = torch.zeros([args.num_processes, 1])
-    final_rewards = torch.zeros([args.num_processes, 1])
+    episode_rewards = torch.zeros([config.a2c.num_processes, 1])
+    final_rewards = torch.zeros([config.a2c.num_processes, 1])
     last_reward_mean = 0
     current_reward_mean = 0
     identical_rewards = 0
@@ -151,10 +168,10 @@ def main():
         rollouts.cuda()
     start = time.time()
     for j in range(num_updates):
-        if identical_rewards == stop_learning and last_reward_mean >= (config.rewards.standard.goal + bonus_reward):
+        if identical_rewards == config.a2c.stop_learning and last_reward_mean >= (config.rewards.standard.goal + steps_reward):
             print("stop learning")
             break
-        for step in range(args.num_steps):
+        for step in range(config.a2c.num_steps):
             # Sample actions
             value, action, action_log_prob, states = actor_critic.act(
                 Variable(rollouts.observations[step], volatile=True),
@@ -167,8 +184,8 @@ def main():
             obs, reward, done, info = envs.step(cpu_actions)
             for x in range(0, len(done)):
                 if done[x]:
-                    numberOfStepBeforeDone[x] = (j * args.num_steps + step + 1) - stepOnLastGoal[x]
-                    stepOnLastGoal[x] = (j * args.num_steps + step + 1)
+                    numberOfStepBeforeDone[x] = (j * config.a2c.num_steps + step + 1) - stepOnLastGoal[x]
+                    stepOnLastGoal[x] = (j * config.a2c.num_steps + step + 1)
             evaluator.update(reward, done, info, numberOfStepBeforeDone)
 
 
@@ -176,7 +193,7 @@ def main():
                 if j > stop_after_update_number:
                     break
 
-            elif stop_learning:
+            elif config.a2c.stop_learning:
                 if first_time:
                     first_time = False
                     last_reward_mean = evaluator.get_reward_mean()
@@ -186,9 +203,9 @@ def main():
                     current_reward_median = evaluator.get_reward_median()
 
                     # Rewards are close to the goal reward
-                    if current_reward_median >= (config.rewards.standard.goal + bonus_reward):
+                    if current_reward_median >= (config.rewards.standard.goal + steps_reward):
                         identical_rewards += 1
-                        print("--> rewards close to goal reward -> " + str(identical_rewards))
+                        # print("--> rewards close to goal reward -> " + str(identical_rewards))
 
                     else:
                         identical_rewards = 0
@@ -199,7 +216,7 @@ def main():
                     #      identical_rewards = 0
                     last_reward_mean = current_reward_mean
                     last_reward_median = current_reward_median
-            if identical_rewards == stop_learning:
+            if identical_rewards == config.a2c.stop_learning:
                 break
             reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
             episode_rewards += reward
@@ -232,7 +249,7 @@ def main():
 
         rollouts.compute_returns(next_value, args.use_gae, args.gamma, args.tau)
 
-        if args.algo in ['a2c', 'acktr']:
+        if config.a2c.algorithm in ['a2c', 'acktr']:
             values, action_log_probs, dist_entropy, states = actor_critic.evaluate_actions(
                 Variable(rollouts.observations[:-1].view(-1, *obs_shape)),
                 Variable(rollouts.states[:-1].view(-1, actor_critic.state_size)),
@@ -240,15 +257,15 @@ def main():
                 Variable(rollouts.actions.view(-1, action_shape))
             )
 
-            values = values.view(args.num_steps, args.num_processes, 1)
-            action_log_probs = action_log_probs.view(args.num_steps, args.num_processes, 1)
+            values = values.view(config.a2c.num_steps, config.a2c.num_processes, 1)
+            action_log_probs = action_log_probs.view(config.a2c.num_steps, config.a2c.num_processes, 1)
 
             advantages = Variable(rollouts.returns[:-1]) - values
             value_loss = advantages.pow(2).mean()
 
             action_loss = -(Variable(advantages.data) * action_log_probs).mean()
 
-            if args.algo == 'acktr' and optimizer.steps % optimizer.Ts == 0:
+            if config.a2c.algorithm == 'acktr' and optimizer.steps % optimizer.Ts == 0:
                 # Sampled fisher, see Martens 2014
                 actor_critic.zero_grad()
                 pg_fisher_loss = -action_log_probs.mean()
@@ -268,11 +285,11 @@ def main():
             optimizer.zero_grad()
             (value_loss * args.value_loss_coef + action_loss - dist_entropy * args.entropy_coef).backward()
 
-            if args.algo == 'a2c':
+            if config.a2c.algorithm == 'a2c':
                 nn.utils.clip_grad_norm(actor_critic.parameters(), args.max_grad_norm)
 
             optimizer.step()
-        elif args.algo == 'ppo':
+        elif config.a2c.algorithm == 'ppo':
             advantages = rollouts.returns[:-1] - rollouts.value_preds[:-1]
             advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-5)
 
@@ -310,8 +327,10 @@ def main():
 
         rollouts.after_update()
 
-        if j % args.save_interval == 0 and args.save_dir != "":
-            save_path = os.path.join(args.save_dir, args.algo)
+        save_dir = "../" + config.evaluation_directory_name + "/a2c/trained_model/"
+        if j % config.a2c.save_model_interval == 0:
+            # save_path = os.path.join(save_dir, config.a2c.algorithm)
+            save_path = save_dir
             try:
                 os.makedirs(save_path)
             except OSError:
@@ -324,11 +343,11 @@ def main():
 
             save_model = [save_model,
                           hasattr(envs, 'ob_rms') and envs.ob_rms or None]
-            torch.save(save_model, os.path.join(save_path, args.env_name + ".pt"))
+            torch.save(save_model, os.path.join(save_path, config.env_name + ".pt"))
 
-        if j % args.log_interval == 0:
+        if j % config.a2c.save_evaluation_interval == 0:
             end = time.time()
-            total_num_steps = (j + 1) * args.num_processes * args.num_steps
+            total_num_steps = (j + 1) * config.a2c.num_processes * config.a2c.num_steps
 
             # Save in the evaluator
             evaluator.save(j, start, end, dist_entropy, value_loss, action_loss)
@@ -348,7 +367,7 @@ def main():
                 )
             )
 
-        if args.vis and j % args.vis_interval == 0:
+        if config.visdom and j % config.visdom_interval == 0:
             win = visdom_plot(
                 total_num_steps,
                 final_rewards.mean()

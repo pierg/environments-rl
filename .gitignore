@@ -1,5 +1,4 @@
 .idea/
-evaluations/
 pytorch_a2c/trained_models/
 .DS_Store
 results/

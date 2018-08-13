@@ -9,6 +9,8 @@ import torch
 from torch.autograd import Variable
 from vec_env.dummy_vec_env import DummyVecEnv
 
+from configurations import config_grabber as cg
+
 from envs import make_env
 
 parser = argparse.ArgumentParser(description='RL')
@@ -27,7 +29,11 @@ args = parser.parse_args()
 env = make_env(args.env_name, args.seed, 0, None)
 env = DummyVecEnv([env])
 
-actor_critic, ob_rms = torch.load(os.path.join(args.load_dir, args.env_name + ".pt"))
+config = cg.Configuration.grab()
+path = "../" + config.evaluation_directory_name + "/a2c/trained_model/"
+save_path = os.path.join(path, "a2c")
+
+actor_critic, ob_rms = torch.load(os.path.join(save_path, args.env_name + ".pt"))
 
 render_func = env.envs[0].render
 
