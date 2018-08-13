@@ -281,6 +281,6 @@ class Perception():
 
     def environment_with_lightswitch(env):
         for i in range(len(Perception.array_pos)):
-            if Perception.array_pos[i][0] == "lightSwitch":
+            if Perception.array_pos[i][0] == "lightsw":
                 return True
         return False

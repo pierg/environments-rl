@@ -121,14 +121,8 @@ while [ $iterations -ne $i ]; do
 
     if [ $start_training -eq 1 ]; then
             echo "...launching the training..."
-            echo "+++++ With Goap +++++"
             if [ $launch_monitor -eq 1 ]; then
-                echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
-                python3 ./pytorch_dqn/main.py --stop $stop --record --norender
-            else
-                python3 ./pytorch_a2c/main.py --stop $stop --iterations $i --norender
-            if [ $launch_monitor -eq 1 ]; then
-                echo "+++++ With Controller +++++"
+                echo "+++++ With Goap +++++"
                 if [ $qlearning -eq 1 ]; then
                     echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
                     python3 ./pytorch_dqn/main.py --stop $stop --record --norender
@@ -144,7 +138,7 @@ while [ $iterations -ne $i ]; do
 #                sed -i "s/$name/$replace/" configurations/main.json
 #                echo "   "
                 echo "..launching the training..."
-                echo "------ Without Controller -----"
+                echo "------ Without Goap -----"
                 if [ $qlearning -eq 1 ]; then
                     python3 ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor
                 else
@@ -152,7 +146,7 @@ while [ $iterations -ne $i ]; do
                 fi
             fi
             echo "plotting..."
-            python3 ./evaluations/a2c/plot_dqn.py
+            python3 ./evaluations/dqn/plot_dqn.py
             python3 ./evaluations/a2c/plot_a2c.py
     fi
     let "i+=1"

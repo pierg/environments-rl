@@ -45,7 +45,7 @@ if args.record:
     cg.Configuration.set("recording", True)
 
 if args.nomonitor:
-    cg.Configuration.set("controller", False)
+    cg.Configuration.set("action_planning.active", False)
 
 
 # Getting configuration from file
@@ -67,10 +67,6 @@ def main():
 
     stop_after_update_number = config.a2c.stop_after_update_number
 
-    # steps reward:
-    if hasattr(config.a2c, "optimal_num_steps"):
-        steps_reward = config.rewards.standard.step * config.a2c.optimal_num_steps
-
     # bonus reward:
     if hasattr(config,"optimal_num_steps"):
         bonus_reward = config.rewards.standard.step * config.optimal_num_steps
@@ -88,7 +84,7 @@ def main():
     # cleaning up recording folder...
     eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
 
-    if config.controller:
+    if config.action_planning.active:
         expt_dir = eval_folder + "/a2c/a2c_videos_yes/"
     else:
         expt_dir = eval_folder + "/a2c/a2c_videos_no/"
@@ -141,6 +137,28 @@ def main():
     rollouts = RolloutStorage(config.a2c.num_steps, config.a2c.num_processes, obs_shape, envs.action_space, actor_critic.state_size)
     current_obs = torch.zeros(config.a2c.num_processes, *obs_shape)
 
+    def decode_obs(obs):
+        """ Encoding into a numpy array """
+        num_process = len(obs)
+        width = len(obs[0]['image'])
+        height = len(obs[0]['image'][0])
+
+        new_obs = np.zeros(shape=(num_process, width*height), dtype='uint8')
+        first = True
+
+        for k in range(num_process):
+            array = np.zeros(shape=(width, height), dtype='uint8')
+
+            for i in range(width):
+                for j in range(height):
+                    array[i, j] = obs[k]['image'][i][j][0]
+
+            image = array
+
+            new_obs[k] = image.flatten()
+
+        return new_obs
+
     def update_current_obs(obs):
         shape_dim0 = envs.observation_space.shape[0]
         obs = torch.from_numpy(obs).float()
@@ -148,7 +166,7 @@ def main():
             current_obs[:, :-shape_dim0] = current_obs[:, shape_dim0:]
         current_obs[:, -shape_dim0:] = obs
 
-    obs = envs.reset()
+    obs =decode_obs(envs.reset())
     update_current_obs(obs)
     rollouts.observations[0].copy_(current_obs)
     numberOfStepBeforeDone = []
@@ -168,7 +186,7 @@ def main():
         rollouts.cuda()
     start = time.time()
     for j in range(num_updates):
-        if identical_rewards == config.a2c.stop_learning and last_reward_mean >= (config.rewards.standard.goal + steps_reward):
+        if identical_rewards == config.a2c.stop_learning and last_reward_mean >= (config.rewards.standard.goal + bonus_reward):
             print("stop learning")
             break
         for step in range(config.a2c.num_steps):
@@ -182,6 +200,7 @@ def main():
 
             # Obser reward and next obs
             obs, reward, done, info = envs.step(cpu_actions)
+            obs = obs =decode_obs(obs)
             for x in range(0, len(done)):
                 if done[x]:
                     numberOfStepBeforeDone[x] = (j * config.a2c.num_steps + step + 1) - stepOnLastGoal[x]
@@ -203,7 +222,7 @@ def main():
                     current_reward_median = evaluator.get_reward_median()
 
                     # Rewards are close to the goal reward
-                    if current_reward_median >= (config.rewards.standard.goal + steps_reward):
+                    if current_reward_median >= (config.rewards.standard.goal + bonus_reward):
                         identical_rewards += 1
                         # print("--> rewards close to goal reward -> " + str(identical_rewards))
 

@@ -8,6 +8,8 @@ except Exception as e:
     print(e)
     pass
 
+import os
+
 from configurations import config_grabber as cg
 
 
@@ -26,7 +28,7 @@ def make_env(env_id, seed, rank):
         if config.recording:
             print("starting recording..")
             eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
-            if config.controller:
+            if config.action_planning.active:
                 expt_dir = eval_folder + "/a2c/a2c_videos_yes/"
             else:
                 expt_dir = eval_folder + "/a2c/a2c_videos_no/"

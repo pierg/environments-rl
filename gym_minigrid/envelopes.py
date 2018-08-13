@@ -74,7 +74,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         obs, reward, done, info = None, None, None, []
 
         # ---------------------- ACTION PLANNER START ----------------------#
-        if self.config.num_processes == 1 and self.config.rendering:
+        if self.config.a2c.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
         # proceed with the step
@@ -96,28 +96,22 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
                 info.append("goal+plan_finished")
             reward += planning_reward
 
-            lightswitch_in_env = Perception.is_condition_satisfied(self.env,"environment_with_lightswitch")
-            if lightswitch_in_env:
-                can_follow_plan = Perception.light_on
-            else:
-                can_follow_plan = True
 
-            if can_follow_plan:
-                for obj in current_obs.grid:    # Look if the green square is in the observation
-                    if isinstance(obj, Goal):
-                        #  If the agent does not have a plan or if the plan is not to go to the green cell ...
-                        if (self.goal_cell is not None and goal_green_square[0] not in self.goal_cell[0]) or\
-                                not self.action_plan:
-                            self.action_plan, self.goal_cell = run(current_obs, current_dir, (goal_green_square,))
-                            self.action_plan_size = len(self.action_plan)
-                            self.critical_actions = [ExMiniGridEnv.Actions.forward]
-                            info.append("plan_created")
-                            break
+            for obj in current_obs.grid:    # Look if the green square is in the observation
+                if isinstance(obj, Goal):
+                    #  If the agent does not have a plan or if the plan is not to go to the green cell ...
+                    if (self.goal_cell is not None and goal_green_square[0] not in self.goal_cell[0]) or\
+                            not self.action_plan:
+                        self.action_plan, self.goal_cell = run(current_obs, current_dir, (goal_green_square,))
+                        self.action_plan_size = len(self.action_plan)
+                        self.critical_actions = [ExMiniGridEnv.Actions.forward]
+                        info.append("plan_created")
+                        break
 
             # If the agent does not have a plan try to give him a secondary goal
             if not self.action_plan and self.secondary_goals:
-                    self.action_plan, self.goal_cell = run(current_obs, current_dir, self.secondary_goals)
-                    self.action_plan_size = len(self.action_plan)
+                self.action_plan, self.goal_cell = run(current_obs, current_dir, self.secondary_goals)
+                self.action_plan_size = len(self.action_plan)
 
             """    
             Currently an agent that has a plan for a secondary goal won't change the plan for a higher

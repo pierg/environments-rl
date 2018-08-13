@@ -353,7 +353,6 @@ class ExMiniGridEnv(MiniGridEnv):
         pickup = 4
         drop = 5
         done = 6
-        clean = 7
 
 
     def print_grid(self):
@@ -380,8 +379,6 @@ class ExMiniGridEnv(MiniGridEnv):
                 actions[i] = self.actions.toggle
             elif action_name == "done":
                 actions[i] = self.actions.done
-            elif action_name == "clean":
-                actions[i] = self.actions.clean
 
         return actions
 
@@ -396,8 +393,6 @@ class ExMiniGridEnv(MiniGridEnv):
             return "toggle"
         elif action == self.actions.done:
             return "done"
-        elif action == self.actions.clean:
-            return "clean"
         return None
 
 
@@ -485,44 +480,23 @@ class ExMiniGridEnv(MiniGridEnv):
         """
         Generate the agent's view (partially observable, low-resolution encoding)
         """
-        grid, vis_mask = self.gen_obs_grid()
-        """if Perception.light_on_current_room(self):"""
-        try:
+        obs =  super().gen_obs()
+
+        if hasattr(self, "roomList"):
             if self.roomList:
                 for x in self.roomList:
                     if x.objectInRoom(self.agent_pos):
 
                         # The agent does not see the elements if the light in the room is off
                         if not x.getLight():
-                            for i in range(0, len(grid.grid)):
-                                if grid.grid[i] is not None:
-                                    grid.grid[i] = None
+                            for i in range(0, len(obs['image'])):
+                                for j in range(0, len(obs['image'][i])):
+                                    if obs['image'][i][j][0] != 0:
+                                        obs['image'][i][j][0] = 0
+                                        obs['image'][i][j][1] = 0
+                                        obs['image'][i][j][2] = 0
 
-            """ Encoding into a numpy array """
-            codeSize = grid.width * grid.height
-            array = np.zeros(shape=(grid.width, grid.height), dtype='uint8')
-
-            for j in range(0, grid.height):
-                for i in range(0, grid.width):
-
-                    v = grid.get(i, j)
-
-                    if v == None:
-                        continue
-
-                    array[i, j] = OBJECT_TO_IDX[v.type]
-
-            image = array
-
-            # TODO: add direction and light status as part of the observations (self.agent_dir)
-            # obs = np.concatenate((image, self.agent_dir))
-
-            obs = image.flatten()
-
-            return obs
-
-        except AttributeError:
-            return super().gen_obs()
+        return obs
 
     def get_grid_coords_from_view(self, coordinates):
         """
