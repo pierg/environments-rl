@@ -144,11 +144,11 @@ def main():
         height = len(obs[0]['image'][0])
 
         new_obs = np.zeros(shape=(num_process, width*height), dtype='uint8')
-        first = True
 
         for k in range(num_process):
             array = np.zeros(shape=(width, height), dtype='uint8')
 
+            # keep just the object type
             for i in range(width):
                 for j in range(height):
                     array[i, j] = obs[k]['image'][i][j][0]
@@ -156,7 +156,7 @@ def main():
             image = array
 
             new_obs[k] = image.flatten()
-
+        #return the obs with just the object type
         return new_obs
 
     def update_current_obs(obs):
