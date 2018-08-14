@@ -4,7 +4,7 @@
     "recording": true,
     "log_interval": 10,
     "max_num_frames": 2000000,
-    "debug_mode": false,
+    "debug_mode": true,
     "evaluation_directory_name": "evaluations",
     "config_name": "config-DirtWatLightExp-9x9-v0",
     "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",

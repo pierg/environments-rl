@@ -92,6 +92,9 @@ def record():
 
 
 def enjoy():
+    env = make_env(args.env_name, args.seed, 0, True)
+    env = DummyVecEnv([env])
+
     actor_critic, ob_rms = torch.load(os.path.join(save_path, args.env_name + ".pt"))
 
     render_func = env.envs[0].render
