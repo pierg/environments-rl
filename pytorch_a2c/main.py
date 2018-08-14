@@ -86,15 +86,6 @@ def main():
     else:
         expt_dir = eval_folder + "/a2c/a2c_videos_no/"
 
-    # Cleaning up the directory..
-    for the_file in os.listdir(expt_dir):
-        file_path = os.path.join(expt_dir, the_file)
-        try:
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
-        except Exception as e:
-            print(e)
-
     envs = [make_env(config.env_name, args.seed, i) for i in range(config.a2c.num_processes)]
 
     if config.a2c.num_processes > 1:
