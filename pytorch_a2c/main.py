@@ -26,7 +26,7 @@ from configurations import config_grabber as cg
 
 from envs import make_env
 
-from enjoy import record
+# from enjoy import record
 
 import os, re, os.path
 
