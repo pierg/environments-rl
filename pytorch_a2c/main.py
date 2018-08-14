@@ -26,9 +26,15 @@ from configurations import config_grabber as cg
 
 from envs import make_env
 
+import os, re, os.path
+
+from enjoy import enjoy
 # from enjoy import record
 
-import os, re, os.path
+import sys
+sys.stdout = open("../evaluations/a2c/LOG.txt", "w")
+print ("test sys.stdout")
+
 
 import sys
 sys.stdout = open("../evaluations/a2c/LOG.txt", "w")
@@ -37,7 +43,6 @@ print ("test sys.stdout")
 args = get_args()
 
 cg.Configuration.set("training_mode", True)
-cg.Configuration.set("debug_mode", False)
 
 if args.stop:
     cg.Configuration.set("max_num_frames", args.stop)
@@ -173,6 +178,9 @@ def main():
                     numberOfStepBeforeDone[x] = (j * config.a2c.num_steps + step + 1) - stepOnLastGoal[x]
                     stepOnLastGoal[x] = (j * config.a2c.num_steps + step + 1)
                     anydone = True
+                    if "dead"in info:
+                        print("+++++++++ DIED!!!!! >>>>>>>>")
+
             evaluator.update(reward, done, info, numberOfStepBeforeDone)
 
             # if anydone:
@@ -335,9 +343,6 @@ def main():
             save_model = [save_model,
                           hasattr(envs, 'ob_rms') and envs.ob_rms or None]
             torch.save(save_model, os.path.join(save_path, config.env_name + ".pt"))
-
-
-
 
         if j % config.a2c.save_evaluation_interval == 0:
             end = time.time()

@@ -11,7 +11,7 @@ except Exception as e:
 from configurations import config_grabber as cg
 
 
-def make_env(env_id, seed, rank, record=False, force=False, resume=False, custom_message=None):
+def make_env(env_id, seed, rank, force=False, resume=False, custom_message="_"):
 
     config = cg.Configuration.grab()
 
@@ -23,7 +23,7 @@ def make_env(env_id, seed, rank, record=False, force=False, resume=False, custom
             env = SafetyEnvelope(env)
 
         # record only the first agent
-        if record and rank==0:
+        if config.recording and rank==0:
             print("starting recording..")
             eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
             if config.controller:
