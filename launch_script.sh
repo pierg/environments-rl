@@ -143,7 +143,7 @@ while [ $iterations -ne $i ]; do
                 fi
             fi
             echo "plotting..."
-            python3 ./evaluations/a2c/plot_dqn.py
+            python3 ./evaluations/dqn/plot_dqn.py
             python3 ./evaluations/a2c/plot_a2c.py
     fi
     let "i+=1"
