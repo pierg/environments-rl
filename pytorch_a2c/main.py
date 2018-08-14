@@ -48,6 +48,8 @@ if args.record:
 
 if args.nomonitor:
     cg.Configuration.set("controller", False)
+else:
+    cg.Configuration.set("controller", True)
 
 
 # Getting configuration from file
