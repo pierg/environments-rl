@@ -48,9 +48,8 @@
         }
     },
     "controllers": {
-        "reachability": [
-            "config_2/reachability_doorway",
-            "config_2/reachability_goal"
+        "safety": [
+            "config_3/safety_main"
         ]
     }
 }
