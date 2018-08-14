@@ -129,12 +129,11 @@ while [ $iterations -ne $i ]; do
                 fi
             fi
             if [ $launch_without -eq 1 ]; then
-#                name=`grep -e '"config_name"' configurations/main.json`
-#                replace="v0_2\","
-#                replace=${name/v0\",/$replace}
-#                sed -i 's/"controller": true,/"controller": false,/g' configurations/main.json
-#                sed -i "s/$name/$replace/" configurations/main.json
-#                echo "   "
+                name=`grep -e '"config_name"' configurations/main.json`
+                replace="v0_2\","
+                replace=${name/v0\",/$replace}
+                sed -i 's/"active": true,/"active": false,/g' configurations/main.json
+                sed -i "s/$name/$replace/" configurations/main.json
                 echo "..launching the training..."
                 echo "------ Without Controller -----"
                 if [ $qlearning -eq 1 ]; then
