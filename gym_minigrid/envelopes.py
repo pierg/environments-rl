@@ -26,15 +26,16 @@ class SafetyEnvelope(gym.core.Wrapper):
         # State Machine MTSA controllers
         self.controllers = []
 
-        # Reachability controllers
-        for controller in self.config.controllers.reachability:
-            new_controller = Controller(controller, "reach")
-            self.controllers.append(new_controller)
-
         # Safety controllers
         for controller in self.config.controllers.safety:
             new_controller = Controller(controller, "safe")
             self.controllers.append(new_controller)
+
+        # Reachability controllers
+        if hasattr(self.config.controllers, 'reachability'):
+            for controller in self.config.controllers.reachability:
+                new_controller = Controller(controller, "reach")
+                self.controllers.append(new_controller)
 
         # Set controller rewards
         self.respected_reward = self.config.rewards.controller.respected
