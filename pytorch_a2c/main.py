@@ -56,7 +56,7 @@ eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evalua
 
 if args.logstdfile:
     import sys
-    sys.stdout = open(eval_folder + "/LOG.txt", "w")
+    sys.stdout = open(eval_folder + "/a2c/LOG.txt", "w")
     print ("test sys.stdout")
 
 
@@ -173,7 +173,7 @@ def main():
                     numberOfStepBeforeDone[x] = (j * config.a2c.num_steps + step + 1) - stepOnLastGoal[x]
                     stepOnLastGoal[x] = (j * config.a2c.num_steps + step + 1)
                     anydone = True
-                    if "dead"in info:
+                    if "dead"in info[x]:
                         print("+++++++++ DIED!!!!! >>>>>>>>")
 
             evaluator.update(reward, done, info, numberOfStepBeforeDone)
