@@ -48,15 +48,17 @@ if args.nomonitor:
 else:
     cg.Configuration.set("controller", True)
 
-if args.logstdfile:
-    import sys
-    sys.stdout = open("../evaluations/a2c/LOG.txt", "w")
-    print ("test sys.stdout")
 
 # Getting configuration from file
 config = cg.Configuration.grab()
-
 eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
+
+
+if args.logstdfile:
+    import sys
+    sys.stdout = open(eval_folder + "/LOG.txt", "w")
+    print ("test sys.stdout")
+
 
 # Copy config file to evaluation folder
 copyfile(cg.Configuration.file_path(), eval_folder + "/configuration_a2c.txt")
