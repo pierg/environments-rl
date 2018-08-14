@@ -121,6 +121,9 @@ while [ $iterations -ne $i ]; do
     fi
     echo $launch_monitor
 
+    chmod 744 ./pytorch_dqn/main.py
+    chmod 744 ./pytorch_a2c/main.py
+
     if [ $start_training -eq 1 ] && [ $logstdfile -eq 0 ]; then
             echo "...launching the training..."
             if [ $launch_monitor -eq 1 ]; then
