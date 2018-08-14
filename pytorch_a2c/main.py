@@ -26,6 +26,8 @@ from configurations import config_grabber as cg
 
 from envs import make_env
 
+from enjoy import record
+
 import os, re, os.path
 
 
@@ -77,14 +79,6 @@ def main():
     evaluator = Evaluator("a2c")
 
     os.environ['OMP_NUM_THREADS'] = '1'
-
-    # cleaning up recording folder...
-    eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
-
-    if config.controller:
-        expt_dir = eval_folder + "/a2c/a2c_videos_yes/"
-    else:
-        expt_dir = eval_folder + "/a2c/a2c_videos_no/"
 
     envs = [make_env(config.env_name, args.seed, i) for i in range(config.a2c.num_processes)]
 
@@ -166,11 +160,19 @@ def main():
 
             # Obser reward and next obs
             obs, reward, done, info = envs.step(cpu_actions)
+
+            # anydone = False
+
             for x in range(0, len(done)):
                 if done[x]:
                     numberOfStepBeforeDone[x] = (j * config.a2c.num_steps + step + 1) - stepOnLastGoal[x]
                     stepOnLastGoal[x] = (j * config.a2c.num_steps + step + 1)
+                    anydone = True
             evaluator.update(reward, done, info, numberOfStepBeforeDone)
+
+            # if anydone:
+            #     if config.recording:
+            #         record()
 
 
             if stop_after_update_number > 0:
@@ -328,6 +330,9 @@ def main():
             save_model = [save_model,
                           hasattr(envs, 'ob_rms') and envs.ob_rms or None]
             torch.save(save_model, os.path.join(save_path, config.env_name + ".pt"))
+
+
+
 
         if j % config.a2c.save_evaluation_interval == 0:
             end = time.time()

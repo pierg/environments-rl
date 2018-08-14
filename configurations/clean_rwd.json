@@ -3,7 +3,7 @@
     "rendering": false,
     "recording": true,
     "log_interval": 10,
-    "max_num_frames": 1000000,
+    "max_num_frames": 2000000,
     "debug_mode": false,
     "evaluation_directory_name": "evaluations",
     "config_name": "config-DirtWatLightExp-9x9-v0",
@@ -39,7 +39,7 @@
             "clean": 1.0
         },
         "standard": {
-            "death": -0.1,
+            "death": -10.0,
             "goal": 10.0,
             "step": -0.005
         },
