@@ -86,7 +86,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                     if self.config.debug_mode: print("action_to_execution_2: " + controller_action)
                     obs, reward, done, info = self.env.step(safe_action)
                     reward += self.violated_reward
-                    info.append("violation")
+                    info["event"].append("violation")
 
                 for controller in self.controllers:
                     controller.act(controller_action)

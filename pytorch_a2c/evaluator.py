@@ -4,6 +4,8 @@ import torch
 
 from configurations import config_grabber as cg
 
+from torch.autograd import Variable
+
 from tools import csv_logger
 
 import os, re, os.path
@@ -39,6 +41,12 @@ class Evaluator:
                                            + str(number)
                                            + ".csv")
 
+        config_file_path_episodes = os.path.abspath(__file__ + "/../../"
+                                           + file_name
+                                           + "_epi_"
+                                           + str(number)
+                                           + ".csv")
+
         self.config_file_path = config_file_path
 
         dirname = os.path.dirname(config_file_path)
@@ -61,37 +69,83 @@ class Evaluator:
                                   'N_episodes',
                                   'N_blocked_actions',
                                   'N_violation',
-                                  'N_goal_reached',
+                                  'N_goals',
                                   'N_step_AVG',
-                                  'N_death',
-                                  'N_saved',
-                                  'N_death_by_end',
+                                  'N_died',
+                                  'N_died_by_end',
                                   'Total_death',
                                   'N_Total_episodes',
-                                  'N_break',
-                                  'Info_saved'])
+                                  'N_break'])
+
+        # For each episode of each processor, store the mean values of...
+        csv_logger.create_header(config_file_path_episodes,
+                                 ['Episode_N',
+                                  'Reward_mean',
+                                  'Reward_median',
+                                  'Reward_min',
+                                  'Reward_max',
+                                  'Reward_std',
+                                  'N_violation_mean',
+                                  'N_steps_goal_mean',
+                                  'N_goal_mean',
+                                  'N_died_mean',
+                                  'N_end_mean',
+                                  'N_violation_mean'])
 
 
         self.episode_rewards = torch.zeros([self.config.a2c.num_processes, 1])
         self.final_rewards = torch.zeros([self.config.a2c.num_processes, 1])
+
+
+        # Array of num_processes element, each element is a list. Each position is the episode index
+        self.episodes_rewards = np.zeros([self.config.a2c.num_processes, 1]).tolist()
+
 
         self.n_catastrophes = torch.zeros([self.config.a2c.num_processes, 1])
         self.n_episodes = torch.zeros([self.config.a2c.num_processes, 1])
         self.n_proccess_reached_goal = [0] * self.config.a2c.num_processes
         self.numberOfStepPerEpisode = [0] * self.config.a2c.num_processes
         self.numberOfStepAverage = 0
-        self.N_goal_reached = 0
-        self.N_death = 0
+        self.N_goals = 0
+        self.N_died = 0
         self.N_violation = 0
-        self.N_death_by_end = 0
+        self.N_died_by_end = 0
         self.Total_death = 0
-        self.N_saved = 0
         self.N_Total_episodes = 0
         self.N_break = 0
         self.dic_saved = {}
-        self.Info_saved = ""
 
-    def update(self, reward, done, info, numberOfStepPerEpisode):
+    def update(self, reward, done, info):
+
+        reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
+        self.episode_rewards += reward
+
+        # If done then clean the history of observations.
+        masks = torch.FloatTensor([[0.0] if done_ else [1.0] for done_ in done])
+        self.final_rewards *= masks
+        self.final_rewards += (1 - masks) * self.episode_rewards
+        for i, done_ in enumerate(done):
+            if done_:
+                # Append to
+                self.episodes_rewards[i].append(self.episode_rewards.data[i])
+
+        self.episode_rewards *= masks
+
+        # Pseudocode...
+        # for i in range(0, len(info)):
+        #     if len(info[i]) > 0:
+        #         if "died" in info[i]["event"]:
+        #             ........
+        #         if "goal" in info[i]["event"]:
+        #             ........
+        #         if "violation" in info[i]["event"]:
+        #             ........
+        #             N_steps_goal = info[i]["steps_count"]
+        #         if "end" in info[i]["event"]:
+        #             ........
+        #
+
+    def update_old(self, reward, done, info):
         reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
         self.episode_rewards += reward
 
@@ -113,12 +167,12 @@ class Evaluator:
                 self.numberOfStepAverage /= len(self.numberOfStepPerEpisode)
 
         self.n_catastrophes += n_catastrophes_mask
-        self.N_goal_reached = 0
+        self.N_goals = 0
         for i in range(0, len(info)):
             if len(info[i]) > 0:
                 if info[i][0] == "died":
                     self.n_proccess_reached_goal[i] = 0
-                    self.N_death += 1
+                    self.N_died += 1
                     self.Total_death += 1
                     self.N_Total_episodes += 1
                 elif info[i][0] == "goal":
@@ -129,24 +183,13 @@ class Evaluator:
                     self.n_proccess_reached_goal[i] = 0
                 elif info[i][0] == "end":
                     self.n_proccess_reached_goal[i] = 0
-                    self.N_death_by_end += 1
+                    self.N_died_by_end += 1
                     self.Total_death += 1
                     self.N_Total_episodes += 1
-                elif info[i][0] == "saved":
-                    self.N_saved += 1
-                    for element in info[i][1].values():
-                        if element in self.dic_saved:
-                            self.dic_saved[element] = self.dic_saved[element] + 1
-                        else:
-                            self.dic_saved[element] = 1
-                elif info[i][0] == "break":
-                    self.N_break += 1
         for i in range(0, len(self.n_proccess_reached_goal)):
-            self.N_goal_reached += self.n_proccess_reached_goal[i]
+            self.N_goals += self.n_proccess_reached_goal[i]
         self.n_episodes = n_episodes_mask
-        self.Info_saved = ""
-        for i in self.dic_saved:
-            self.Info_saved += "{}_{}_".format(i, self.dic_saved[i])
+
 
     def get_reward_mean(self):
         return self.final_rewards.mean()
@@ -170,12 +213,10 @@ class Evaluator:
                                  self.n_episodes.sum(),
                                  self.n_catastrophes.sum(),
                                  self.N_violation,
-                                 self.N_goal_reached,
+                                 self.N_goals,
                                  self.numberOfStepAverage,
-                                 self.N_death,
-                                 self.N_saved,
-                                 self.N_death_by_end,
+                                 self.N_died,
+                                 self.N_died_by_end,
                                  self.Total_death,
                                  self.N_Total_episodes,
-                                 self.N_break,
-                                 self.Info_saved])
+                                 self.N_break])
