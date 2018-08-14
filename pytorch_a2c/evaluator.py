@@ -49,6 +49,8 @@ class Evaluator:
 
         self.config_file_path = config_file_path
 
+        self.config_file_path_episodes = config_file_path_episodes
+
         dirname = os.path.dirname(config_file_path)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
@@ -89,8 +91,7 @@ class Evaluator:
                                   'N_steps_goal_mean',
                                   'N_goal_mean',
                                   'N_died_mean',
-                                  'N_end_mean',
-                                  'N_violation_mean'])
+                                  'N_end_mean'])
 
 
         self.episode_rewards = torch.zeros([self.config.a2c.num_processes, 1])
@@ -115,6 +116,11 @@ class Evaluator:
         self.N_break = 0
         self.dic_saved = {}
 
+        self.N_violation_mean = 0.0
+        self.N_died_mean = 0.0
+        self.N_end_mean = 0.0
+        self.N_goals_mean = 0.0
+
     def update(self, reward, done, info):
 
         reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
@@ -124,26 +130,48 @@ class Evaluator:
         masks = torch.FloatTensor([[0.0] if done_ else [1.0] for done_ in done])
         self.final_rewards *= masks
         self.final_rewards += (1 - masks) * self.episode_rewards
+        """
         for i, done_ in enumerate(done):
             if done_:
                 # Append to
                 self.episodes_rewards[i].append(self.episode_rewards.data[i])
+        """
 
         self.episode_rewards *= masks
 
-        # Pseudocode...
-        # for i in range(0, len(info)):
-        #     if len(info[i]) > 0:
-        #         if "died" in info[i]["event"]:
-        #             ........
-        #         if "goal" in info[i]["event"]:
-        #             ........
-        #         if "violation" in info[i]["event"]:
-        #             ........
-        #             N_steps_goal = info[i]["steps_count"]
-        #         if "end" in info[i]["event"]:
-        #             ........
-        #
+        N_violation = 0
+        N_died = 0
+        N_died_by_end = 0
+        N_goal_reached = 0
+
+        for i in range(0, len(info)):
+            if len(info[i]) > 0:
+                if "died" in info[i]["event"]:
+                    self.n_proccess_reached_goal[i] = 0
+                    N_died += 1
+                    self.N_Total_episodes += 1
+                elif "goal" in info[i]["event"]:
+                    N_goal_reached +=1
+                    self.N_Total_episodes += 1
+                elif "violation" in info[i]["event"]:
+                    N_violation += 1
+                    self.n_proccess_reached_goal[i] = 0
+                elif "end" in info[i]["event"]:
+                    self.n_proccess_reached_goal[i] = 0
+                    N_died_by_end += 1
+                    self.N_Total_episodes += 1
+
+        if done[i]:
+            self.numberOfStepPerEpisode[i] = info[i]["steps_count"]
+            self.numberOfStepAverage = 0
+            for j in range(0, len(self.numberOfStepPerEpisode)):
+                self.numberOfStepAverage += self.numberOfStepPerEpisode[j]
+            self.numberOfStepAverage /= len(self.numberOfStepPerEpisode)
+
+        self.N_violation_mean += N_violation / len(info)
+        self.N_died_mean += N_died / len(info)
+        self.N_end_mean += N_died_by_end / len(info)
+        self.N_goals_mean += N_goal_reached / len(info)
 
     def update_old(self, reward, done, info):
         reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
@@ -197,26 +225,40 @@ class Evaluator:
     def get_reward_median(self):
         return self.final_rewards.median()
 
-    def save(self, n_updates, t_start, t_end, dist_entropy, value_loss, action_loss):
+    def save(self, n_updates, t_start, t_end):
         total_num_steps = (n_updates + 1) * self.config.a2c.num_processes * self.config.a2c.num_steps
-        csv_logger.write_to_log(self.config_file_path,[n_updates,
-                                 total_num_steps,
-                                 int(total_num_steps / t_end - t_start),
+        csv_logger.write_to_log(self.config_file_path_episodes,[self.N_Total_episodes,
                                  self.final_rewards.mean(),
                                  self.final_rewards.median(),
                                  self.final_rewards.min(),
                                  self.final_rewards.max(),
                                  self.final_rewards.std(),
-                                 dist_entropy.data[0],
-                                 value_loss.data[0],
-                                 action_loss.data[0],
-                                 self.n_episodes.sum(),
-                                 self.n_catastrophes.sum(),
-                                 self.N_violation,
-                                 self.N_goals,
+                                 self.N_violation_mean,
                                  self.numberOfStepAverage,
-                                 self.N_died,
-                                 self.N_died_by_end,
-                                 self.Total_death,
-                                 self.N_Total_episodes,
-                                 self.N_break])
+                                 self.N_goals_mean,
+                                 self.N_died_mean,
+                                 self.N_end_mean])
+
+    def save_old(self, n_updates, t_start, t_end, dist_entropy, value_loss, action_loss):
+        total_num_steps = (n_updates + 1) * self.config.a2c.num_processes * self.config.a2c.num_steps
+        csv_logger.write_to_log(self.config_file_path, [n_updates,
+                                                        total_num_steps,
+                                                        int(total_num_steps / t_end - t_start),
+                                                        self.final_rewards.mean(),
+                                                        self.final_rewards.median(),
+                                                        self.final_rewards.min(),
+                                                        self.final_rewards.max(),
+                                                        self.final_rewards.std(),
+                                                        dist_entropy.data[0],
+                                                        value_loss.data[0],
+                                                        action_loss.data[0],
+                                                        self.n_episodes.sum(),
+                                                        self.n_catastrophes.sum(),
+                                                        self.N_violation,
+                                                        self.N_goals,
+                                                        self.numberOfStepAverage,
+                                                        self.N_died,
+                                                        self.N_died_by_end,
+                                                        self.Total_death,
+                                                        self.N_Total_episodes,
+                                                        self.N_break])

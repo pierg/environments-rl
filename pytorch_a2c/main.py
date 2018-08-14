@@ -278,7 +278,7 @@ def main():
             end = time.time()
             total_num_steps = (j + 1) * args.num_processes * args.num_steps
 
-            evaluator.save(j, start, end, dist_entropy, value_loss, action_loss)
+            evaluator.save(j, start, end)
             print(
                 "Updates {}, num timesteps {}, FPS {}, mean/median reward {:.2f}/{:.2f}, min/max reward {:.2f}/{:.2f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
                     format(

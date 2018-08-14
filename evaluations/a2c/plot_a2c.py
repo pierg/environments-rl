@@ -22,17 +22,38 @@ reward_mean = []
 reward_std = []
 
 
+# epi Data
+episode_n = []
+reward_mean_epi = []
+reward_std_epi = []
+n_violation_mean = []
+n_steps_goal_mean = []
+n_goal_mean = []
+n_died_mean = []
+n_end_mean = []
+
+
 def extract_all_data_from_csv(csv_folder_abs_path):
     for csv_file_name in os.listdir(csv_folder_abs_path):
         if "a2c" in csv_file_name and ".csv" in csv_file_name:
             print("CsvName : ", csv_file_name)
-            n_timesteps.append(extract_array("N_timesteps", csv_folder_abs_path + "/" + csv_file_name))
-            n_step_AVG.append(extract_array("N_step_AVG", csv_folder_abs_path + "/" + csv_file_name))
-            n_goal_reached.append(extract_array("N_goal_reached", csv_folder_abs_path + "/" + csv_file_name))
-            n_violation.append(extract_array("N_violation", csv_folder_abs_path + "/" + csv_file_name))
-            n_death.append(extract_array("N_death", csv_folder_abs_path + "/" + csv_file_name))
-            reward_mean.append(extract_array("Reward_mean", csv_folder_abs_path + "/" + csv_file_name))
-            reward_std.append(extract_array("Reward_std", csv_folder_abs_path + "/" + csv_file_name))
+            if "epi" in csv_file_name:
+                episode_n.append(extract_array("Episode_N", csv_folder_abs_path + "/" + csv_file_name))
+                reward_mean_epi.append(extract_array("Reward_mean", csv_folder_abs_path + "/" + csv_file_name))
+                reward_std_epi.append(extract_array("Reward_std", csv_folder_abs_path + "/" + csv_file_name))
+                n_violation_mean.append(extract_array("N_violation_mean", csv_folder_abs_path + "/" + csv_file_name))
+                n_steps_goal_mean.append(extract_array("N_steps_goal_mean", csv_folder_abs_path + "/" + csv_file_name))
+                n_goal_mean.append(extract_array("N_goal_mean", csv_folder_abs_path + "/" + csv_file_name))
+                n_died_mean.append(extract_array("N_died_mean", csv_folder_abs_path + "/" + csv_file_name))
+                n_end_mean.append(extract_array("N_end_mean", csv_folder_abs_path + "/" + csv_file_name))
+            else:
+                n_timesteps.append(extract_array("N_timesteps", csv_folder_abs_path + "/" + csv_file_name))
+                n_step_AVG.append(extract_array("N_step_AVG", csv_folder_abs_path + "/" + csv_file_name))
+                n_goal_reached.append(extract_array("N_goal_reached", csv_folder_abs_path + "/" + csv_file_name))
+                n_violation.append(extract_array("N_violation", csv_folder_abs_path + "/" + csv_file_name))
+                n_death.append(extract_array("N_death", csv_folder_abs_path + "/" + csv_file_name))
+                reward_mean.append(extract_array("Reward_mean", csv_folder_abs_path + "/" + csv_file_name))
+                reward_std.append(extract_array("Reward_std", csv_folder_abs_path + "/" + csv_file_name))
 
 
 def extract_array(label, csv_file):
@@ -175,6 +196,41 @@ def plot():
         pdf.savefig(figure_3)
 
         pdf.close()
+
+        for i in range(len(episode_n)):
+            figure_1 = multi_figures_plot(episode_n[i],
+                                          [n_steps_goal_mean[i],
+                                           n_goal_mean[i]
+                                           ], 'Episode_N', ['N_steps_goal_mean',
+                                                              'N_goal_mean'
+                                                              ])
+
+            figure_2 = multi_figures_plot(episode_n[i],
+                                          [n_violation_mean[i],
+                                           n_died_mean[i],
+                                           n_end_mean[i]
+                                           ], 'Episode_N', ['N_violation_mean',
+                                                              'N_died_mean',
+                                                              'N_end_mean'
+                                                              ])
+
+            figure_3 = multi_figures_plot(episode_n[i],
+                                          [reward_mean_epi[i],
+                                           reward_std_epi[i]
+                                           ], 'N_timesteps', ['Reward_mean',
+                                                              'Reward_std'
+                                                              ], [reward_std_epi[i], 0])
+
+            Name = "a2c_epi_experience_[" + str(i) + "].pdf"
+            print("PdfName : ", Name)
+
+            pdf = PdfPages(current_directory + "/" + Name)
+
+            pdf.savefig(figure_1)
+            pdf.savefig(figure_2)
+            pdf.savefig(figure_3)
+
+            pdf.close()
 
 
 
