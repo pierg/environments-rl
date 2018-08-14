@@ -30,6 +30,9 @@ from envs import make_env
 
 import os, re, os.path
 
+import sys
+sys.stdout = open("../evaluations/a2c/LOG.txt", "w")
+print ("test sys.stdout")
 
 args = get_args()
 
