@@ -4,6 +4,9 @@
     "step": -0.1,
     "death": -1
   },
+  "actions": {
+    "forward": 0.0
+  },
   "absence":{
     "name":"absence",
     "respected": 0,

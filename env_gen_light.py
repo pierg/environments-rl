@@ -186,48 +186,8 @@ register(
 
     # Creates a json config file for the random environment
     with open(configuration_path + "randoms/" + "randomEnv-{0}x{0}-{1}-v0.json".format(grid_size, random_token), 'w') as config:
-        list_of_json_properties = {}
         list_of_json_patterns = {}
-        properties_map = {}
         patterns_map = {}
-        if hasattr(elements,"monitors"):
-            if hasattr(elements.monitors,"properties"):
-                for type in elements.monitors.properties:
-                    for monitor in type:
-                        type_of_monitor = monitor.type
-                        near = 0
-                        immediate = 0
-                        violated = -1
-                        for current_monitor in rewards:
-                            if hasattr(current_monitor, "name"):
-                                if current_monitor.name == type_of_monitor:
-                                    near = current_monitor.near
-                                    immediate = current_monitor.immediate
-                                    violated = current_monitor.violated
-                        list_of_json_properties[monitor.name] = {
-                                "{0}".format(monitor.name): {
-                                    "type": "{0}".format(monitor.type),
-                                    "mode": "{0}".format(monitor.mode),
-                                    "action_planner": "{0}".format(monitor.action_planner),
-                                    "active": True if monitor.active else False,
-                                    "name": "{0}".format(monitor.name),
-                                    "obj_to_avoid": "{0}".format(monitor.obj_to_avoid),
-                                    "act_to_avoid": "{0}".format(monitor.act_to_avoid),
-                                    "rewards": {
-                                        "near": float(
-                                            "{0:.2f}".format(near)),
-                                        "immediate": float(
-                                            "{0:.2f}".format(immediate)),
-                                        "violated": float(
-                                            "{0:.2f}".format(violated)),
-                                    }
-                                }
-                            }
-                        if monitor.type in properties_map:
-                            properties_map[monitor.type].append(monitor.name)
-                        else:
-                            properties_map[monitor.type] = [monitor.name]
-
         if hasattr(elements,"monitors"):
             if hasattr(elements.monitors,"patterns"):
                 for type in elements.monitors.patterns:
@@ -271,6 +231,7 @@ register(
             "num_processes": 48,
             "num_steps": 4,
             "log_interval": 10,
+            "agent_view_size":  int("{0}".format(elements.agent_view_size)),
             "on_violation_reset": False,
             "rendering": False,
             "stop_learning": int("{0}".format(elements.stop_learning)),
@@ -278,15 +239,39 @@ register(
             "evaluation_directory_name": "evaluations",
             "visdom": False,
             "debug_mode": False,
+            "recording" : False,
+            "training_mode": True,
+            "max_num_steps": int("{0}".format(elements.max_num_steps)),
+            "max_num_frames": int("{0}".format(elements.max_num_frames)),
+            "controller": False,
+            "a2c": {
+                "algorithm": "a2c",
+                "save_model_interval": int("{0}".format(elements.a2c.save_model_interval)),
+                "num_processes": int("{0}".format(elements.a2c.num_processes)),
+                "stop_learning": int("{0}".format(elements.a2c.stop_learning)),
+                "optimal_num_step": int("{0}".format(elements.a2c.optimal_num_step)),
+                "stop_after_update_number": int("{0}".format(elements.a2c.stop_after_update_number)),
+                "num_steps": int("{0}".format(elements.a2c.num_steps)),
+                "save_evaluation_interval": int("{0}".format(elements.a2c.save_evaluation_interval))
+            },
+            "dqn": {
+                "exploration_rate": float("{0:.2f}".format(elements.dqn.exploration_rate)),
+                "results_log_interval": int("{0}".format(elements.dqn.results_log_interval)),
+                "epsilon_decay_episodes": int("{0}".format(elements.dqn.epsilon_decay_episodes)),
+                "epsilon_final":  float("{0:.2f}".format(elements.dqn.epsilon_final)),
+                "epsilon_decay_frame": int("{0}".format(elements.dqn.epsilon_decay_frame)),
+                "epsilon_start": float("{0:.2f}".format(elements.dqn.epsilon_start)),
+                "discount_factor": float("{0:.2f}".format(elements.dqn.discount_factor))
+            },
             "monitors": {
-                "properties": {
-
-                },
                 "patterns":{
 
                 }
             },
             "rewards": {
+                "actions": {
+                    "forward": float("{0:.2f}".format(rewards.actions.forward if hasattr(rewards.actions,'forward') else 0))
+                },
                 "standard":{
                     "goal": float("{0:.2f}".format(rewards.standard.goal if hasattr(rewards.standard,'goal') else 1)),
                     "step": float("{0:.2f}".format(rewards.standard.step if hasattr(rewards.standard,'step')else 0)),
@@ -299,20 +284,8 @@ register(
         }, indent=2)
 
         d = {}
-        dProperties = {}
         dPatterns = {}
 
-        for p in properties_map:
-            if isinstance(properties_map[p],str):
-                if p in dProperties:
-                    dProperties[p].update(list_of_json_properties[properties_map[p]])
-                else:
-                    dProperties[p] = list_of_json_properties[properties_map[p]]
-            for value in properties_map[p]:
-                if p in dProperties:
-                    dProperties[p].update(list_of_json_properties[value])
-                else:
-                    dProperties[p] = list_of_json_properties[value]
         for p in patterns_map:
             if isinstance(patterns_map[p],str):
                 if p in dPatterns:
@@ -327,7 +300,6 @@ register(
                         dPatterns[p] = list_of_json_patterns[value]
 
         d = json.loads(json_object)
-        d['monitors']['properties'].update(dProperties)
         d['monitors']['patterns'].update(dPatterns)
         config.write(json.dumps(d,sort_keys=True,indent=2))
         config.close()

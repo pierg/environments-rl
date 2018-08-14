@@ -3,10 +3,32 @@
   "n_water": 5,
   "n_deadend": 4,
   "light_switch": true,
+  "agent_view_size":5,
   "random_each_episode": false,
   "stop_learning":480,
   "number_of_iteration":1,
-   "monitors": {
+  "max_num_steps": 65000,
+  "max_num_frames": 10000000,
+   "dqn": {
+        "exploration_rate": 0.99,
+        "results_log_interval": 200,
+        "epsilon_decay_episodes": 1000,
+        "epsilon_final": 0.1,
+        "epsilon_decay_frame": 5000,
+        "epsilon_start": 1.0,
+        "discount_factor": 0.99
+    },
+   "a2c": {
+        "algorithm": "a2c",
+        "save_model_interval": 50,
+        "num_processes": 48,
+        "stop_learning": 48000,
+        "optimal_num_step": 40,
+        "stop_after_update_number": 0,
+        "num_steps": 4,
+        "save_evaluation_interval": 50
+    },
+  "monitors": {
     "patterns": {
       "absence": {
         "waterAbsence": {
