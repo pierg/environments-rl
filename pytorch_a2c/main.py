@@ -28,17 +28,6 @@ from envs import make_env
 
 import os, re, os.path
 
-from enjoy import enjoy
-# from enjoy import record
-
-import sys
-sys.stdout = open("../evaluations/a2c/LOG.txt", "w")
-print ("test sys.stdout")
-
-
-import sys
-sys.stdout = open("../evaluations/a2c/LOG.txt", "w")
-print ("test sys.stdout")
 
 args = get_args()
 
@@ -59,6 +48,10 @@ if args.nomonitor:
 else:
     cg.Configuration.set("controller", True)
 
+if args.logstdfile:
+    import sys
+    sys.stdout = open("../evaluations/a2c/LOG.txt", "w")
+    print ("test sys.stdout")
 
 # Getting configuration from file
 config = cg.Configuration.grab()
