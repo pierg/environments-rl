@@ -480,7 +480,53 @@ class ExMiniGridEnv(MiniGridEnv):
         """
         Generate the agent's view (partially observable, low-resolution encoding)
         """
-        obs =  super().gen_obs()
+        grid, vis_mask = self.gen_obs_grid()
+
+        """ Encoding into a numpy array """
+        codeSize = grid.width * grid.height
+        array = np.zeros(shape=(grid.width, grid.height), dtype='uint8')
+
+        """if Perception.light_on_current_room(self):"""
+        try:
+            if self.roomList:
+                for x in self.roomList:
+                    if x.objectInRoom(self.agent_pos):
+
+                        # The agent does not see the elements if the light in the room is off
+                        if not x.getLight():
+                            for i in range(0, len(grid.grid)):
+                                if grid.grid[i] is not None:
+                                    grid.grid[i] = None
+
+        except AttributeError:
+            pass
+
+        for j in range(0, grid.height):
+            for i in range(0, grid.width):
+
+                v = grid.get(i, j)
+
+                if v == None:
+                    continue
+
+                array[i, j] = OBJECT_TO_IDX[v.type]
+
+        image = array
+
+        # TODO: add direction and light status as part of the observations (self.agent_dir)
+        # obs = np.concatenate((image, self.agent_dir))
+
+        obs = image.flatten()
+
+        return obs
+
+
+
+    def gen_obs_old_form(self):
+        """
+            Generate the agent's view (partially observable, low-resolution encoding)
+        """
+        obs = super().gen_obs()
 
         if hasattr(self, "roomList"):
             if self.roomList:
@@ -497,6 +543,26 @@ class ExMiniGridEnv(MiniGridEnv):
                                         obs['image'][i][j][2] = 0
 
         return obs
+
+    def decode_obs(self, obs):
+        """ Encoding into a numpy array """
+
+        width = len(obs['image'])
+        height = len(obs['image'][0])
+
+        array = np.zeros(shape=(width, height), dtype='uint8')
+
+        # keep just the object type
+        for i in range(width):
+            for j in range(height):
+                array[i, j] = obs['image'][i][j][0]
+
+        image = array
+
+        new_obs = image.flatten()
+
+        #return the obs with just the object type
+        return new_obs
 
     def get_grid_coords_from_view(self, coordinates):
         """

@@ -130,41 +130,6 @@ epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_fi
 epsilon_by_episodes = lambda episode_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * episode_idx / epsilon_decay_episodes)
 
 
-def decode_obs(obs):
-    """ Encoding into a numpy array """
-    num_process = len(obs)
-
-    try:
-        width = len(obs[0]['image'])
-        height = len(obs[0]['image'][0])
-    except :
-        try:
-            width = len(obs[0][0]['image'])
-            height = len(obs[0][0]['image'][0])
-        except:
-            width = len(obs['image'])
-            height = len(obs['image'][0])
-
-    new_obs = np.zeros(shape=(num_process, width * height), dtype='uint8')
-    first = True
-
-    for k in range(num_process):
-        array = np.zeros(shape=(width, height), dtype='uint8')
-
-        for i in range(width):
-            for j in range(height):
-                try:
-                    array[i, j] = obs[k]['image'][i][j][0]
-                except:
-                    array[i, j] = obs['image'][i][j][0]
-
-        image = array
-
-        new_obs[k] = image.flatten()
-
-    return new_obs
-
-
 class DQN(nn.Module):
     def __init__(self, num_inputs, num_actions):
         super(DQN, self).__init__()
@@ -202,8 +167,6 @@ expected_q_value_e = []
 
 def compute_td_loss(batch_size):
     state, action, reward, next_state, done = replay_buffer.sample(batch_size)
-    state = decode_obs(state)
-    next_state = decode_obs(next_state)
 
     state = Variable(torch.FloatTensor(np.float32(state)))
     next_state = Variable(torch.FloatTensor(np.float32(next_state)), volatile=True)
@@ -258,7 +221,7 @@ n_deaths_e = 0
 n_goals_e = 0
 n_violations_e = 0
 
-state = decode_obs(env.reset())
+state = env.reset()
 
 episode_idx = 0
 
@@ -287,9 +250,9 @@ for frame_idx in range(1, max_num_frames + 1):
     action = model.act(state, epsilon)
 
     n_step_epi_idx += 1
+
     next_state, reward, done, info = env.step(action)
 
-    next_state = decode_obs(next_state)
     replay_buffer.push(state, action, reward, next_state, done)
 
     # Render grid

@@ -139,28 +139,6 @@ def main():
     rollouts = RolloutStorage(config.a2c.num_steps, config.a2c.num_processes, obs_shape, envs.action_space, actor_critic.state_size)
     current_obs = torch.zeros(config.a2c.num_processes, *obs_shape)
 
-    def decode_obs(obs):
-        """ Encoding into a numpy array """
-        num_process = len(obs)
-        width = len(obs[0]['image'])
-        height = len(obs[0]['image'][0])
-
-        new_obs = np.zeros(shape=(num_process, width*height), dtype='uint8')
-
-        for k in range(num_process):
-            array = np.zeros(shape=(width, height), dtype='uint8')
-
-            # keep just the object type
-            for i in range(width):
-                for j in range(height):
-                    array[i, j] = obs[k]['image'][i][j][0]
-
-            image = array
-
-            new_obs[k] = image.flatten()
-        #return the obs with just the object type
-        return new_obs
-
     def update_current_obs(obs):
         shape_dim0 = envs.observation_space.shape[0]
         obs = torch.from_numpy(obs).float()
@@ -168,7 +146,7 @@ def main():
             current_obs[:, :-shape_dim0] = current_obs[:, shape_dim0:]
         current_obs[:, -shape_dim0:] = obs
 
-    obs =decode_obs(envs.reset())
+    obs = envs.reset()
     update_current_obs(obs)
     rollouts.observations[0].copy_(current_obs)
     numberOfStepBeforeDone = []
@@ -202,7 +180,7 @@ def main():
 
             # Obser reward and next obs
             obs, reward, done, info = envs.step(cpu_actions)
-            obs = obs =decode_obs(obs)
+
             for x in range(0, len(done)):
                 if done[x]:
                     numberOfStepBeforeDone[x] = (j * config.a2c.num_steps + step + 1) - stepOnLastGoal[x]

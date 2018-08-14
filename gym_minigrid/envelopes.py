@@ -78,11 +78,10 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             self.env.render('human')
 
         # proceed with the step
-        obs, reward, done, old_info = self.env.step(proposed_action)
+        obs, reward, done, info = self.env.step(proposed_action)
 
-        info.append(old_info)
         # observations
-        obs = self.env.gen_obs()
+        obs = self.env.gen_obs_old_form()
         current_obs = ExGrid.decode(obs['image'])
         current_dir = obs['direction']
 
@@ -92,8 +91,12 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
             # check if following the plan
             planning_reward, plan_info = self.check_plan(proposed_action, info)
-            if plan_info =="plan_finished" and "goal" in info:
-                info.append("goal+plan_finished")
+            try:
+                if plan_info =="plan_finished" and info[-1] == "goal":
+                    info[-1]= "goal+plan_finished"
+            except IndexError:
+                if plan_info =="plan_finished" and info == "goal":
+                    info[-1]= "goal+plan_finished"
             reward += planning_reward
 
 
@@ -160,6 +163,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
         newCnt = preCnt + 1
         self.counts[tup] = newCnt
 
+        obs = self.env.decode_obs(obs)
         return obs, reward, done, info
     # ---------------------- ACTION PLANNER END ----------------------#
 
