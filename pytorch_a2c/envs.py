@@ -1,4 +1,5 @@
 try:
+    import os
     import gym_minigrid
     from gym_minigrid.wrappers import *
     from gym_minigrid.envelopes import *
