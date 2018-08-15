@@ -88,8 +88,7 @@ class Evaluator:
                                   'N_steps_goal_mean',
                                   'N_goal_mean',
                                   'N_died_mean',
-                                  'N_end_mean',
-                                  'N_episode'])
+                                  'N_end_mean'])
 
 
         self.episode_rewards = torch.zeros([self.config.a2c.num_processes, 1])
@@ -146,7 +145,7 @@ class Evaluator:
 
         for i in range(0, len(info)):
             if len(info[i]) > 0:
-                if "died" in info[i]["eventfinal"]:
+                if "died" in info[i]["event"]:
                     self.n_proccess_reached_goal[i] = 0
                     N_died += 1
                     self.N_Total_episodes += 1
