@@ -131,6 +131,7 @@ def main():
     episode_rewards = torch.zeros([config.a2c.num_processes, 1])
     final_rewards = torch.zeros([config.a2c.num_processes, 1])
 
+
     if args.cuda:
         current_obs = current_obs.cuda()
         rollouts.cuda()

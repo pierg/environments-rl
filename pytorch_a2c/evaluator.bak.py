@@ -70,9 +70,9 @@ class Evaluator:
                                   'Action_loss',
                                   'N_violation_avg',
                                   'N_goals_avg',
+                                  'N_step_goal_avg',
                                   'N_died_avg',
-                                  'N_end_avg',
-                                  'N_step_goal_avg'])
+                                  'N_end_avg'])
 
         # For each episode of each processor, store the mean values of...
         csv_logger.create_header(config_file_path_episodes,
@@ -180,9 +180,40 @@ class Evaluator:
         self.final_rewards += (1 - masks) * self.episode_rewards
         self.episode_rewards *= masks
 
+        n_catastrophes_mask = torch.FloatTensor([[1.0] if "violation" in info_ else [0.0] for info_ in info])
+        n_episodes_mask = torch.FloatTensor([[1.0] if done_ else [0.0] for done_ in done])
+        for i in range(0, len(done)):
+            if done[i]:
+                self.n_episodes = self.n_episodes + 1
+                self.numberOfStepPerEpisode[i] = numberOfStepPerEpisode[i]
+                self.numberOfStepAverage = 0
+                for j in range(0, len(self.numberOfStepPerEpisode)):
+                    self.numberOfStepAverage += self.numberOfStepPerEpisode[j]
+                self.numberOfStepAverage /= len(self.numberOfStepPerEpisode)
 
-
-
+        self.n_catastrophes += n_catastrophes_mask
+        self.N_goals = 0
+        for i in range(0, len(info)):
+            if len(info[i]) > 0:
+                if info[i][0] == "died":
+                    self.n_proccess_reached_goal[i] = 0
+                    self.N_died += 1
+                    self.Total_death += 1
+                    self.N_Total_episodes += 1
+                elif info[i][0] == "goal":
+                    self.n_proccess_reached_goal[i] = 1
+                    self.N_Total_episodes += 1
+                elif info[i][0] == "violation":
+                    self.N_violation += 1
+                    self.n_proccess_reached_goal[i] = 0
+                elif info[i][0] == "end":
+                    self.n_proccess_reached_goal[i] = 0
+                    self.N_died_by_end += 1
+                    self.Total_death += 1
+                    self.N_Total_episodes += 1
+        for i in range(0, len(self.n_proccess_reached_goal)):
+            self.N_goals += self.n_proccess_reached_goal[i]
+        self.n_episodes = n_episodes_mask
 
 
     def get_reward_mean(self):
@@ -191,8 +222,21 @@ class Evaluator:
     def get_reward_median(self):
         return self.final_rewards.median()
 
+    def save(self, n_updates, t_start, t_end):
+        total_num_steps = (n_updates + 1) * self.config.a2c.num_processes * self.config.a2c.num_steps
+        csv_logger.write_to_log(self.config_file_path_episodes,[self.N_Total_episodes,
+                                 self.final_rewards.mean(),
+                                 self.final_rewards.median(),
+                                 self.final_rewards.min(),
+                                 self.final_rewards.max(),
+                                 self.final_rewards.std(),
+                                 self.N_violation_mean,
+                                 self.numberOfStepAverage,
+                                 self.N_goals_mean,
+                                 self.N_died_mean,
+                                 self.N_end_mean])
 
-    def save(self, n_updates, t_start, t_end, dist_entropy, value_loss, action_loss):
+    def save_old(self, n_updates, t_start, t_end, dist_entropy, value_loss, action_loss):
         total_num_steps = (n_updates + 1) * self.config.a2c.num_processes * self.config.a2c.num_steps
         csv_logger.write_to_log(self.config_file_path, [n_updates,
                                                         total_num_steps,
