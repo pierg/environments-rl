@@ -136,6 +136,8 @@ def main():
         current_obs = current_obs.cuda()
         rollouts.cuda()
     start = time.time()
+
+    send_env_name = False
     for j in range(num_updates):
         for step in range(args.num_steps):
             # Sample actions
@@ -279,7 +281,12 @@ def main():
             end = time.time()
             total_num_steps = (j + 1) * args.num_processes * args.num_steps
 
-            evaluator.save(j, start, end)
+            # if the environment name and the controller state was not send
+            if not send_env_name:
+                evaluator.save(j, start, end, dist_entropy, value_loss, action_loss, config.env_name, config.controller)
+                send_env_name = True
+            else:
+                evaluator.save(j, start, end, dist_entropy, value_loss, action_loss)
             print(
                 "Updates {}, num timesteps {}, FPS {}, mean/median reward {:.2f}/{:.2f}, min/max reward {:.2f}/{:.2f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
                     format(
