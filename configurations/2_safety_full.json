@@ -37,7 +37,7 @@
             "respected": 0.0
         },
         "cleaningenv": {
-            "clean": 1.0
+            "clean": 10.0
         },
         "standard": {
             "death": -10.0,
