@@ -49,7 +49,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         list_actions = []
         for controller in self.controllers:
             controller.observe(self.env)
-            safe_actions_strings = controller.get_available_actions()
+            safe_actions_strings = controller.get_available_actions_for_agent()
             if self.config.debug_mode: print("  ---> available_actions: " + str(safe_actions_strings))
             if controller.is_active():
                 list_actions.append(safe_actions_strings)
