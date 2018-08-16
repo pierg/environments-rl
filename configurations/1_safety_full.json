@@ -4,8 +4,8 @@
     "recording": true,
     "log_interval": 10,
     "max_num_frames": 2000000,
-    "max_num_steps_episode": -1,
     "debug_mode": false,
+    "max_num_steps_episode": -1,
     "evaluation_directory_name": "evaluations",
     "config_name": "config-DirtWatLightExp-9x9-v0",
     "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
@@ -37,11 +37,11 @@
             "respected": 0.0
         },
         "cleaningenv": {
-            "clean": 10.0
+            "clean": 1.0
         },
         "standard": {
             "death": -10.0,
-            "goal": 1.0,
+            "goal": 10.0,
             "step": -0.005
         },
         "actions": {
@@ -50,7 +50,7 @@
     },
     "controllers": {
         "safety": [
-            "config_4/safety_toggle_allowed"
+            "config_4/safety_main"
         ]
     }
 }
