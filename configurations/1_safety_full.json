@@ -4,8 +4,8 @@
     "recording": true,
     "log_interval": 10,
     "max_num_frames": 2000000,
-    "max_num_steps_episode": -1,
     "debug_mode": false,
+    "max_num_steps_episode": -1,
     "evaluation_directory_name": "evaluations",
     "config_name": "config-DirtWatLightExp-9x9-v0",
     "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
@@ -51,10 +51,6 @@
     "controllers": {
         "safety": [
             "config_4/safety_main"
-        ],
-        "reachability": [
-            "config_2/reachability_doorway",
-            "config_2/reachability_goal"
         ]
     }
 }
