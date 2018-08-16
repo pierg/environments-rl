@@ -63,22 +63,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.safe_actions = self.env.strings_to_actions(list(safe_actions))
 
 
-        print("\n\nOBS BEFORE")
-        obj_front = self.env.worldobj_in_agent(1, 0)
-        if (obj_front is not None):
-            print("obj_front_bf_1: " + obj_front)
-        else:
-            print("obj_front_bf_1: " + "none")
-
-        # Get the position in front of the agent
-        fwd_pos = self.env.front_pos
-        # Get the contents of the cell in front of the agent
-        fwd_cell = self.env.grid.get(*fwd_pos)
-        if (fwd_cell is not None):
-            print("obj_front_bf_1: " + fwd_cell.type)
-        else:
-            print("obj_front_bf_1: " + "none")
-
 
     def step(self, proposed_action):
 
@@ -118,22 +102,6 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if self.config.debug_mode: print("##### Environment not modeled by the controllers -> free exploration! ######")
                 obs, reward, done, info = self.env.step(proposed_action)
 
-
-            print("OBS AFTER")
-            obj_front = self.env.worldobj_in_agent(1, 0)
-            if (obj_front is not None):
-                print("obj_front_af_1: " + obj_front)
-            else:
-                print("obj_front_af_1: " + "none")
-
-            # Get the position in front of the agent
-            fwd_pos = self.env.front_pos
-            # Get the contents of the cell in front of the agent
-            fwd_cell = self.env.grid.get(*fwd_pos)
-            if (fwd_cell is not None):
-                print("obj_front_bf_2: " + fwd_cell.type)
-            else:
-                print("obj_front_bf_1: " + "none")
 
             if self.config.debug_mode: print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
             return obs, reward, done, info
