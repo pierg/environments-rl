@@ -490,15 +490,23 @@ class ExMiniGridEnv(MiniGridEnv):
 
         """if Perception.light_on_current_room(self):"""
         try:
+            agent_pos = (AGENT_VIEW_SIZE // 2, AGENT_VIEW_SIZE - 1)
+
             if self.roomList:
                 for x in self.roomList:
-                    if x.objectInRoom(self.agent_pos):
+                    #check if room is on the dark
+                    if not x.getLight():
+                        for j in range(0, grid.height):
+                            for i in range(0, grid.width):
+                                # pass the obs coordinates (i, j) into the absolute grid coordinates (xpos, ypos).
+                                xpos = agent_pos[1] - j
+                                ypos = i - agent_pos[0]
+                                (xpos, ypos) = self.get_grid_coords_from_view((xpos, ypos))
 
-                        # The agent does not see the elements if the light in the room is off
-                        if not x.getLight():
-                            for i in range(0, len(grid.grid)):
-                                if grid.grid[i] is not None:
-                                    grid.grid[i] = None
+                                # check if the object position is on the room
+                                if x.objectInRoom((xpos, ypos)):
+                                    if grid.grid[(j * AGENT_VIEW_SIZE) + i] is not None:
+                                        grid.grid[i + (j * AGENT_VIEW_SIZE)] = None
 
             """ Encoding into a numpy array """
             codeSize = grid.width * grid.height
