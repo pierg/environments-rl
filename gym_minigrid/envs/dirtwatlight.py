@@ -11,7 +11,7 @@ class DirtWatLightEnv(ExMiniGridEnv):
         super().__init__(
             grid_size=size,
             max_steps=4 * size * size,
-            see_through_walls=True
+            see_through_walls=False
         )
 
 

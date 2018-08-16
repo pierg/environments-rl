@@ -10,9 +10,6 @@ class Controller(Machine):
     MTSA Controller synthetised from safety properties
     """
 
-    states = []
-    transitions = []
-
     def __init__(self, name, type):
 
         self.controller_name = name

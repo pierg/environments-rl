@@ -63,14 +63,20 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.safe_actions = self.env.strings_to_actions(list(safe_actions))
 
 
+
     def step(self, proposed_action):
+
+        if self.config.a2c.num_processes == 1 and self.config.rendering:
+            self.env.render('human')
 
         if proposed_action == self.env.actions.observe:
             self.observe()
-            self.env.print_grid()
         else:
             if self.config.training_mode:
                 self.observe()
+
+            if self.config.debug_mode: print("proposed_action: " + self.env.action_to_string(proposed_action))
+            if self.config.debug_mode: print("safe_actions: " + str(self.safe_actions))
 
             # The environment model is supported by the controllers
             if self.safe_actions is not None and len(self.safe_actions) > 0:
@@ -96,6 +102,6 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if self.config.debug_mode: print("##### Environment not modeled by the controllers -> free exploration! ######")
                 obs, reward, done, info = self.env.step(proposed_action)
 
-            if self.config.debug_mode: print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
 
+            if self.config.debug_mode: print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
             return obs, reward, done, info
