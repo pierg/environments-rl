@@ -89,8 +89,9 @@ class DirtWatLightEnv(ExMiniGridEnv):
         # Add the light switch next to the door
         switchRoom2 = LightSwitch()
         switchRoom2.affectRoom(self.roomList[1])
-        switchRoom2.setSwitchPos((3, 5))
+        # to send for visual ( it's not necessary for the operation )
         switchRoom2.elements_in_room(tab)
+        switchRoom2.cur_pos = (3, 5)
         self.grid.set(3, 5, switchRoom2)
         self.switchPosition = []
         self.switchPosition.append((3, 5))
