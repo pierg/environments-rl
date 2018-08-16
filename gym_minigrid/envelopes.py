@@ -92,11 +92,11 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             # check if following the plan
             planning_reward, plan_info = self.check_plan(proposed_action, info)
             try:
-                if plan_info =="plan_finished" and info[-1] == "goal":
-                    info[-1]= "goal+plan_finished"
+                if plan_info =="plan_finished" and info["event"][-1] == "goal":
+                    info["event"][-1] = "goal+plan_finished"
             except IndexError:
-                if plan_info =="plan_finished" and info == "goal":
-                    info[-1]= "goal+plan_finished"
+                if plan_info =="plan_finished" and info["event"] == "goal":
+                    info["event"] = "goal+plan_finished"
             reward += planning_reward
 
 
@@ -108,7 +108,7 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
                         self.action_plan, self.goal_cell = run(current_obs, current_dir, (goal_green_square,))
                         self.action_plan_size = len(self.action_plan)
                         self.critical_actions = [ExMiniGridEnv.Actions.forward]
-                        info.append("plan_created")
+                        info["event"].append("plan_created")
                         break
 
             # If the agent does not have a plan try to give him a secondary goal

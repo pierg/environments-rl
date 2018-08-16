@@ -6,8 +6,8 @@
   },
   "action_planning":{
     "unsafe":-0.3,
-    "on_plan": 0.05,
-    "off_plan": -0.05
+    "on_plan": 0.01,
+    "off_plan": -0.01
   },
   "cleaningenv":{
     "clean":0.1

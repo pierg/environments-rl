@@ -25,7 +25,7 @@ random_token = randint(0, 9999)
 
 
 def generate_environment(environment="default", rewards="default"):
-    elements = Configuration.grab("environments/" + environment)
+    elements = Configuration.grab("environments/" + str(environment))
     grid_size = elements.grid_size
     n_water = elements.n_water
     n_deadend = elements.n_deadend
@@ -259,12 +259,7 @@ class RandomEnv(ExMiniGridEnv):
                 #switchRoom.elements_in_room(tab)
 
         self.mission = ""
-    def step(self,action):
-        # Reset if agent step on water without knowing it
-        if action == self.actions.forward and self.worldobj_in_agent(1,0) == "water" :
-            return self.gen_obs(), {6}, True, "died"
-        else:
-            return super().step(action)
+        
 class RandomEnv{0}x{0}_{4}(RandomEnv):
     def __init__(self):
         super().__init__(size={0})
@@ -316,10 +311,13 @@ register(
             "log_interval": 10,
             "on_violation_reset": False,
             "rendering": False,
+            "action_plan": True,
             "stop_learning": int("{0}".format(elements.stop_learning)),
             "number_of_iteration": int("{0}".format(elements.number_of_iteration)),
             "max_num_frames": int(
                 "{0}".format(elements.max_num_frames if hasattr(elements, 'max_num_frames') else 100000)),
+            "agent_view_size": int(
+                "{0}".format(elements.agent_view_size if hasattr(elements, 'agent_view_size') else 5)),
             "evaluation_directory_name": "evaluations",
             "visdom": False,
             "debug_mode": False,
@@ -343,8 +341,33 @@ register(
                 "epsilon_decay_episodes": int("{0}".format(
                     elements.dqn.epsilon_decay_episodes if hasattr(elements.dqn, 'epsilon_decay_episodes') else 10)),
                 "epsilon_decay_frame": int("{0}".format(
-                    elements.dqn.epsilon_decay_frame if hasattr(elements.dqn, 'epsilon_decay_frame') else 5000))
-            }
+                    elements.dqn.epsilon_decay_frame if hasattr(elements.dqn, 'epsilon_decay_frame') else 5000)),
+                "epsilon_start":float("{0:.2f}".format(
+                    elements.dqn.epsilon_start if hasattr(elements.dqn, 'epsilon_start') else 1.0)),
+                "epsilon_final": float("{0:.2f}".format(
+                    elements.dqn.epsilon_final if hasattr(elements.dqn, 'epsilon_final') else 0.1)),
+                "exploration_rate": float("{0:.2f}".format(
+                    elements.dqn.exploration_rate if hasattr(elements.dqn, 'exploration_rate') else 0.99)),
+                "discount_factor": float("{0:.2f}".format(
+                    elements.dqn.discount_factor if hasattr(elements.dqn, 'discount_factor') else 0.99))
+            },
+            "a2c": {
+                "save_evaluation_interval": int("{0}".format(
+                    elements.a2c.save_evaluation_interval if hasattr(elements.a2c, 'save_evaluation_interval') else 10)),
+                "num_steps": int("{0}".format(
+                    elements.a2c.num_steps if hasattr(elements.a2c, 'num_steps') else 4)),
+                "stop_learning": int("{0}".format(
+                    elements.a2c.stop_learning if hasattr(elements.a2c, 'stop_learning') else 1000)),
+                "algorithm": "a2c",
+                "optimal_num_step": int("{0}".format(
+                    elements.a2c.optimal_num_step if hasattr(elements.a2c, 'optimal_num_step') else 40)),
+                "stop_after_update_number": int("{0}".format(
+                    elements.a2c.stop_after_update_number if hasattr(elements.a2c, 'stop_after_update_number') else 0)),
+                "save_model_interval": int("{0}".format(
+                    elements.a2c.save_model_interval if hasattr(elements.a2c, 'save_model_interval') else 50)),
+                "num_processes": int("{0}".format(
+                    elements.a2c.num_processes if hasattr(elements.a2c, 'num_processes') else 48)),
+            },
         }, indent=2)
 
         d = {}

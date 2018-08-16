@@ -185,7 +185,7 @@ def main():
                 if done[x]:
                     numberOfStepBeforeDone[x] = (j * config.a2c.num_steps + step + 1) - stepOnLastGoal[x]
                     stepOnLastGoal[x] = (j * config.a2c.num_steps + step + 1)
-            evaluator.update(reward, done, info, numberOfStepBeforeDone)
+            evaluator.update(reward, done, info)
 
 
             if stop_after_update_number > 0:
