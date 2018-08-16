@@ -95,7 +95,7 @@ class Controller(Machine):
     def get_available_actions_for_agent(self):
         av_actions = self.available_actions[:]
         toggle_is_in = False
-        for action in av_actions:
+        for action in av_actions[:]:
             if action in ["clean", "toggle", "switch"]:
                 id = av_actions.index(action)
                 if toggle_is_in:
@@ -103,7 +103,6 @@ class Controller(Machine):
                 else:
                     av_actions[id] = 'toggle'
                     toggle_is_in = True
-
         return av_actions
 
 
