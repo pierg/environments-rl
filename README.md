@@ -42,14 +42,14 @@ pip3 install -e .
 ```
 
 Optionally, if you wish use the reinforcement learning code included
-under [/pytorch_rl](/pytorch_rl), you should install PyTorch as follows:
+under [/pytorch_a2c](/pytorch_a2c), you should install PyTorch as follows:
 
 ```
 # PyTorch
 conda install pytorch torchvision -c pytorch
 ```
 
-Note: the pytorch_rl code is a custom fork of [this repository](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr),
+Note: the pytorch_a2c code is a custom fork of [this repository](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr),
 which was modified to work with this environment.
 
 ## Basic Usage
@@ -66,17 +66,17 @@ The environment being run can be selected with the `--env-name` option, eg:
 ./standalone.py --env-name MiniGrid-Empty-8x8-v0
 ```
 
-Basic reinforcement learning code is provided in the `pytorch_rl` subdirectory.
+Basic reinforcement learning code is provided in the `pytorch_a2c` subdirectory.
 You can perform training using the A2C algorithm with:
 
 ```
-python3 pytorch_rl/main.py --env-name MiniGrid-Empty-6x6-v0 --no-vis --num-processes 48 --algo a2c
+python3 pytorch_a2c/main.py --env-name MiniGrid-Empty-6x6-v0 --no-vis --num-processes 48 --algo a2c
 ```
 
 You can view the result of training using the `enjoy.py` script:
 
 ```
-python3 pytorch_rl/enjoy.py --env-name MiniGrid-Empty-6x6-v0 --load-dir ./trained_models/a2c
+python3 pytorch_a2c/enjoy.py --env-name MiniGrid-Empty-6x6-v0 --load-dir ./trained_models/a2c
 ```
 
 ## Design
@@ -103,7 +103,7 @@ Structure of the world:
   - Cells that do not contain an object have the value `None`
 - Each object has an associated discrete color (string)
 - Each object has an associated type (string)
-  - Provided object types are: wall, door, locked_doors, key, ball, box and goal
+  - Provided object types are: wall, floor, door, locked_doors, key, ball, box and goal
 - The agent can pick up and carry exactly one object (eg: ball or key)
 
 Actions in the basic environment:

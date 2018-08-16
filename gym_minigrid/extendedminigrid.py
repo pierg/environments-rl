@@ -1,6 +1,17 @@
 from gym_minigrid.minigrid import *
 from configurations import config_grabber as cg
 
+import math
+import operator
+from functools import reduce
+
+import numpy as np
+
+config = cg.Configuration.grab()
+
+AGENT_VIEW_SIZE = config.agent_view_size
+OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
+
 
 def extended_dic(obj_names=[]):
     """
@@ -19,7 +30,7 @@ def extended_dic(obj_names=[]):
             new_obj_idx = new_obj_idx + 1
 
 
-extended_dic(["water", "lightSwitch", "dirt", "vase"])
+extended_dic(["water", "lightsw", "dirt", "vase"])
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
 
 
@@ -75,7 +86,7 @@ class Water(WorldObj):
 class LightSwitch(WorldObj):
     def __init__(self):
         self.state = False
-        super(LightSwitch, self).__init__('lightSwitch', 'yellow')
+        super(LightSwitch, self).__init__('lightsw', 'yellow')
 
     def affectRoom(self, room):
         self.room = room
@@ -208,7 +219,7 @@ def worldobj_name_to_object(worldobj_name):
         return Water()
     elif worldobj_name == 'wall':
         return Wall()
-    elif worldobj_name == "lightSwitch":
+    elif worldobj_name == "lightsw":
         return LightSwitch()
     elif worldobj_name == "dirt":
         return Dirt()
@@ -265,7 +276,7 @@ class ExGrid(Grid):
                     v = Goal()
                 elif objType == 'water':
                     v = Water()
-                elif objType == 'lightSwitch':
+                elif objType == 'lightsw':
                     v = LightSwitch()
                 elif objType == 'dirt':
                     v = Dirt()
@@ -286,14 +297,30 @@ class ExMiniGridEnv(MiniGridEnv):
         # Used to observe the environment in the step() before the action
         observe = -1
 
+        # Action space
         left = 0
         right = 1
         forward = 2
-        pickup = 3
-        drop = 4
-        toggle = 5
+        toggle = 3
+
+        # Extra action (not used)
+        pickup = 4
+        drop = 5
         done = 6
         clean = 7
+
+
+    def print_grid(self):
+
+        grid = self.gen_obs_grid()
+        for i, e in enumerate(grid[0].grid):
+            if i % grid[0].height == 0:
+                print("")
+            if e is not None:
+                print(str(e.type), end="\t")
+            else:
+                print("none",  end="\t")
+        print("")
 
     def strings_to_actions(self, actions):
         for i, action_name in enumerate(actions):
@@ -331,12 +358,38 @@ class ExMiniGridEnv(MiniGridEnv):
             return "observe"
         return None
 
-    def __init__(self, grid_size=16, max_steps=100, see_through_walls=False, seed=1337):
-        super().__init__(grid_size, max_steps, see_through_walls, seed)
-        self.actions = ExMiniGridEnv.Actions
 
+    def __init__(self, grid_size=16, max_steps=-1, see_through_walls=False, seed=1337):
         # Grab configuration
         self.config = cg.Configuration.grab()
+        # Overriding the max_num_steps
+        max_num_steps = max_steps
+        if hasattr(self.config, 'max_num_steps'):
+            max_num_steps = self.config.max_num_steps
+        super().__init__(grid_size, max_num_steps, see_through_walls, seed)
+        self.actions = ExMiniGridEnv.Actions
+
+        """
+        Observation Space
+        low: lowest element value
+        high: highest element value
+        shape: imgSize tuple, each element can be of a value between 'low' and 'high'
+        """
+        imgSize = reduce(operator.mul, OBS_ARRAY_SIZE, 1)
+        elemSize = len(IDX_TO_OBJECT)
+        self.observation_space = spaces.Box(
+            low=0,
+            high=elemSize,
+            shape=(imgSize,),
+            dtype='uint8'
+        )
+
+        # Restricting action_space to the first N actions
+        first_n_actions_available = 4
+        self.action_space = spaces.Discrete(first_n_actions_available)
+
+
+
 
     def step(self, action):
 
@@ -348,9 +401,11 @@ class ExMiniGridEnv(MiniGridEnv):
         # Default actions and cells
         obs, reward, done, info = super().step(action)
 
+        info = {"event": [], "steps_count": self.step_count}
+
+
         if self.step_count == self.max_steps:
-            info = "end"
-            self.step_count = 0
+            info["event"].append("end")
             done = True
 
         # Setting up costums cells and rewards
@@ -362,13 +417,14 @@ class ExMiniGridEnv(MiniGridEnv):
             if fwd_cell is not None and fwd_cell.type == 'water':
                 done = True
                 reward = self.config.rewards.standard.death
-                info = "died"
+                info["event"].append("died")
             # Step into Goal
             elif fwd_cell is not None and fwd_cell.type == 'goal':
-                print("GOAL REACHED!")
+                # print("GOAL REACHED!")
                 done = True
-                reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
-                info = "goal"
+                reward = self.config.rewards.standard.goal
+                # reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
+                info["event"].append("goal")
             else:
                 reward = self.config.rewards.actions.forward
 
@@ -380,6 +436,7 @@ class ExMiniGridEnv(MiniGridEnv):
         if self.config.debug_mode: print("reward: " + str(reward) + "\tinfo: " + str(info))
         return obs, reward, done, info
 
+
     def gen_obs(self):
         """
         Generate the agent's view (partially observable, low-resolution encoding)
@@ -390,25 +447,36 @@ class ExMiniGridEnv(MiniGridEnv):
             if self.roomList:
                 for x in self.roomList:
                     if x.objectInRoom(self.agent_pos):
+
+                        # The agent does not see the elements if the light in the room is off
                         if not x.getLight():
                             for i in range(0, len(grid.grid)):
                                 if grid.grid[i] is not None:
                                     grid.grid[i] = None
-                            # Encode the partially observable view into a numpy array
-                        image = grid.encode()
 
-                        assert hasattr(self, 'mission'), "environments must define a textual mission string"
+            """ Encoding into a numpy array """
+            codeSize = grid.width * grid.height
+            array = np.zeros(shape=(grid.width, grid.height), dtype='uint8')
 
-                        # Observations are dictionaries containing:
-                        # - an image (partially observable view of the environment)
-                        # - the agent's direction/orientation (acting as a compass)
-                        # - a textual mission string (instructions for the agent)
-                        obs = {
-                            'image': image,
-                            'direction': self.agent_dir,
-                            'mission': self.mission
-                        }
-                        return obs
+            for j in range(0, grid.height):
+                for i in range(0, grid.width):
+
+                    v = grid.get(i, j)
+
+                    if v == None:
+                        continue
+
+                    array[i, j] = OBJECT_TO_IDX[v.type]
+
+            image = array
+
+            # TODO: add direction and light status as part of the observations (self.agent_dir)
+            # obs = np.concatenate((image, self.agent_dir))
+
+            obs = image.flatten()
+
+            return obs
+
         except AttributeError:
             return super().gen_obs()
 

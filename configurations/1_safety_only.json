@@ -49,6 +49,7 @@
     },
     "controllers": {
         "safety": [
+            "config_2/safety_loop",
             "config_3/safety_main"
         ]
     }

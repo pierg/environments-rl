@@ -6,6 +6,11 @@ from collections import namedtuple
 class Configuration():
 
     @staticmethod
+    def file_path(filename="main"):
+        config_file_path = os.path.abspath(__file__ + "/../../../" + "/gym-minigrid/configurations/" + filename + ".json")
+        return config_file_path
+
+    @staticmethod
     def grab(filename="main"):
         """
 

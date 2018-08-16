@@ -1,6 +1,5 @@
 .idea/
-evaluations/
-pytorch_rl/trained_models/
+pytorch_a2c/trained_models/
 .DS_Store
 results/
 

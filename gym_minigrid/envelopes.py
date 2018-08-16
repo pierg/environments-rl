@@ -26,19 +26,20 @@ class SafetyEnvelope(gym.core.Wrapper):
         # State Machine MTSA controllers
         self.controllers = []
 
-        # Reachability controllers
-        for controller in self.config.controllers.reachability:
-            new_controller = Controller(controller, "reach")
-            self.controllers.append(new_controller)
-
         # Safety controllers
         for controller in self.config.controllers.safety:
             new_controller = Controller(controller, "safe")
             self.controllers.append(new_controller)
 
+        # Reachability controllers
+        if hasattr(self.config.controllers, 'reachability'):
+            for controller in self.config.controllers.reachability:
+                new_controller = Controller(controller, "reach")
+                self.controllers.append(new_controller)
+
         # Set controller rewards
-        self.respected_reward = 0.0
-        self.violated_reward = -0.1
+        self.respected_reward = self.config.rewards.controller.respected
+        self.violated_reward = self.config.rewards.controller.violated
 
         self.safe_actions = None
 
@@ -64,11 +65,9 @@ class SafetyEnvelope(gym.core.Wrapper):
 
     def step(self, proposed_action):
 
-        if self.config.num_processes == 1 and self.config.rendering:
-            self.env.render('human')
-
         if proposed_action == self.env.actions.observe:
             self.observe()
+            self.env.print_grid()
         else:
             if self.config.training_mode:
                 self.observe()
@@ -87,7 +86,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                     if self.config.debug_mode: print("action_to_execution_2: " + controller_action)
                     obs, reward, done, info = self.env.step(safe_action)
                     reward += self.violated_reward
-                    info = "violation"
+                    info["event"].append("violation")
 
                 for controller in self.controllers:
                     controller.act(controller_action)

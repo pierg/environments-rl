@@ -49,7 +49,12 @@
     },
     "controllers": {
         "safety": [
+            "config_2/safety_loop",
             "config_3/safety_main"
+        ],
+        "reachability": [
+            "config_2/reachability_doorway",
+            "config_2/reachability_goal"
         ]
     }
 }

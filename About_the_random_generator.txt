@@ -14,9 +14,9 @@ About the random generator :
 			to the agent to reach the goal
 			
 		LightSwitch :
-			Boolean, true if you want a lightSwitch, which means two rooms, with light off in the last one.
-			The lightSwitch position is random (above or under the door).
-			If the grid size is under 11 you can't create a lightSwitch. We set this limitation in order
+			Boolean, true if you want a lightsw, which means two rooms, with light off in the last one.
+			The lightsw position is random (above or under the door).
+			If the grid size is under 11 you can't create a lightsw. We set this limitation in order
 			to let a possibility to create other elements at the same time.
 			
 	Random at each episode :

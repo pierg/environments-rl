@@ -26,6 +26,7 @@ def main():
     observed = True
 
     cg.Configuration.set("training_mode", False)
+    cg.Configuration.set("debug_mode", True)
 
     parser = OptionParser()
     parser.add_option(
@@ -78,44 +79,90 @@ def main():
 
         nonlocal observed
 
-        if keyName == 'LEFT':
-            action = env.env.actions.left
-        elif keyName == 'RIGHT':
-            action = env.env.actions.right
-        elif keyName == 'UP':
-            action = env.env.actions.forward
+        if hasattr(env, 'env'):
 
-        elif keyName == 'SPACE':
-            action = env.env.actions.toggle
-        elif keyName == 'PAGE_UP':
-            action = env.env.actions.pickup
-        elif keyName == 'PAGE_DOWN':
-            action = env.env.actions.drop
+            if keyName == 'LEFT':
+                action = env.env.actions.left
+            elif keyName == 'RIGHT':
+                action = env.env.actions.right
+            elif keyName == 'UP':
+                action = env.env.actions.forward
 
-        elif keyName == 'CTRL':
-            action = env.env.actions.wait
+            elif keyName == 'SPACE':
+                action = env.env.actions.toggle
+            elif keyName == 'PAGE_UP':
+                action = env.env.actions.forward
+                print("unknown key %s, going forward" % keyName)
+                return
+            elif keyName == 'PAGE_DOWN':
+                action = env.env.actions.forward
+                print("unknown key %s, going forward" % keyName)
+                return
+
+            elif keyName == 'CTRL':
+                action = env.env.actions.forward
+                print("unknown key %s, going forward" % keyName)
+                return
+
+            else:
+                print("unknown key %s" % keyName)
+                return
+
+            obs, reward, done, info = env.step(action)
+            observed = True
+
+            print('step=%s, reward=%s' % (env.env.step_count, reward))
+            print("\n")
 
         else:
-            print("unknown key %s" % keyName)
-            return
 
-        obs, reward, done, info = env.step(action)
-        observed = True
+            if keyName == 'LEFT':
+                action = env.actions.left
+            elif keyName == 'RIGHT':
+                action = env.actions.right
+            elif keyName == 'UP':
+                action = env.actions.forward
 
-        print('step=%s, reward=%s' % (env.env.step_count, reward))
-        print("\n")
+            elif keyName == 'SPACE':
+                action = env.actions.toggle
+            elif keyName == 'PAGE_UP':
+                action = env.actions.forward
+                print("unknown key %s, going forward" % keyName)
+                return
+            elif keyName == 'PAGE_DOWN':
+                action = env.actions.forward
+                print("unknown key %s, going forward" % keyName)
+                return
+
+            elif keyName == 'CTRL':
+                action = env.actions.forward
+                print("unknown key %s, going forward" % keyName)
+                return
+
+            else:
+                print("unknown key %s" % keyName)
+                return
+
+            obs, reward, done, info = env.step(action)
+            observed = True
+
+            print('step=%s, reward=%s' % (env.step_count, reward))
+            print("\n")
 
         if done:
             print('done!')
             resetEnv()
+        # env.render('human')
 
     renderer.window.setKeyDownCb(keyDownCb)
+
+    # env.render('human')
 
     while True:
         env.render('human')
         time.sleep(0.01)
-        if observed:
-            env.step(env.env.actions.observe)
+        if observed and config.controller:
+            env.step(-1)
             observed = False
         # If the window was closed
         if renderer.window == None:
