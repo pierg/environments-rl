@@ -1,14 +1,15 @@
 {
     "controller": true,
-    "rendering": false,
-    "recording": true,
+    "rendering": true,
+    "recording": false,
     "log_interval": 10,
     "max_num_frames": 2000000,
-    "debug_mode": true,
+    "max_num_steps_episode": -1,
+    "debug_mode": false,
     "evaluation_directory_name": "evaluations",
     "config_name": "config-DirtWatLightExp-9x9-v0",
     "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
-    "training_mode": true,
+    "training_mode": false,
     "agent_view_size": 7,
     "visdom": false,
     "dqn": {
@@ -25,7 +26,7 @@
         "num_steps": 4,
         "stop_after_update_number": 0,
         "algorithm": "a2c",
-        "num_processes": 48,
+        "num_processes": 1,
         "optimal_num_step": 40,
         "save_model_interval": 50,
         "save_evaluation_interval": 50

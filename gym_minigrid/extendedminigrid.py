@@ -310,9 +310,8 @@ class ExMiniGridEnv(MiniGridEnv):
         clean = 7
 
 
-    def print_grid(self):
+    def print_grid(self, grid):
 
-        grid = self.gen_obs_grid()
         for i, e in enumerate(grid[0].grid):
             if i % grid[0].height == 0:
                 print("")
@@ -393,26 +392,34 @@ class ExMiniGridEnv(MiniGridEnv):
 
     def step(self, action):
 
-        # Get the position in front of the agent
-        fwd_pos = self.front_pos
-        # Get the contents of the cell in front of the agent
-        fwd_cell = self.grid.get(*fwd_pos)
+        self.step_count += 1
 
-        # Default actions and cells
-        obs, reward, done, info = super().step(action)
+        reward = 0
+        done = False
 
         info = {"event": [], "steps_count": self.step_count}
 
+        # Get the position in front of the agent
+        fwd_pos = self.front_pos
 
-        if self.step_count == self.max_steps:
-            info["event"].append("end")
-            done = True
+        # Get the contents of the cell in front of the agent
+        fwd_cell = self.grid.get(*fwd_pos)
 
-        # Setting up costums cells and rewards
 
-        reward = self.config.rewards.standard.step
+        # Rotate left
+        if action == self.actions.left:
+            self.agent_dir -= 1
+            if self.agent_dir < 0:
+                self.agent_dir += 4
 
-        if action == self.actions.forward:
+        # Rotate right
+        elif action == self.actions.right:
+            self.agent_dir = (self.agent_dir + 1) % 4
+
+        # Move forward
+        elif action == self.actions.forward:
+            if fwd_cell == None or fwd_cell.can_overlap():
+                self.agent_pos = fwd_pos
             # Step into Water
             if fwd_cell is not None and fwd_cell.type == 'water':
                 done = True
@@ -420,7 +427,6 @@ class ExMiniGridEnv(MiniGridEnv):
                 info["event"].append("died")
             # Step into Goal
             elif fwd_cell is not None and fwd_cell.type == 'goal':
-                # print("GOAL REACHED!")
                 done = True
                 reward = self.config.rewards.standard.goal
                 # reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
@@ -428,13 +434,48 @@ class ExMiniGridEnv(MiniGridEnv):
             else:
                 reward = self.config.rewards.actions.forward
 
-        if action == self.actions.toggle:
-            # Cleaning Dirt
+        # Pick up an object
+        elif action == self.actions.pickup:
+            if fwd_cell and fwd_cell.can_pickup():
+                if self.carrying is None:
+                    self.carrying = fwd_cell
+                    self.carrying.cur_pos = np.array([-1, -1])
+                    self.grid.set(*fwd_pos, None)
+
+        # Drop an object
+        elif action == self.actions.drop:
+            if not fwd_cell and self.carrying:
+                self.grid.set(*fwd_pos, self.carrying)
+                self.carrying.cur_pos = fwd_pos
+                self.carrying = None
+
+        # Toggle/activate an object
+        elif action == self.actions.toggle:
             if fwd_cell is not None and fwd_cell.type == 'dirt':
                 reward = self.config.rewards.cleaningenv.clean
+            if fwd_cell:
+                fwd_cell.toggle(self, fwd_pos)
+
+        # Done action (not used by default)
+        elif action == self.actions.done:
+            pass
+
+        else:
+            assert False, "unknown action"
+
+        # Adding reward for the step
+        reward += self.config.rewards.standard.step
+
+        if self.step_count == self.config.max_num_steps_episode:
+            done = True
+
+        obs = self.gen_obs()
 
         if self.config.debug_mode: print("reward: " + str(reward) + "\tinfo: " + str(info))
+
         return obs, reward, done, info
+
+
 
 
     def gen_obs(self):
@@ -442,6 +483,11 @@ class ExMiniGridEnv(MiniGridEnv):
         Generate the agent's view (partially observable, low-resolution encoding)
         """
         grid, vis_mask = self.gen_obs_grid()
+
+        if self.config.debug_mode:
+            print("\nAgent View Original")
+            self.print_grid((grid, vis_mask))
+
         """if Perception.light_on_current_room(self):"""
         try:
             if self.roomList:
@@ -469,6 +515,12 @@ class ExMiniGridEnv(MiniGridEnv):
                     array[i, j] = OBJECT_TO_IDX[v.type]
 
             image = array
+
+            if self.config.debug_mode:
+                print("_______________________________________\n")
+                print("Agent View Modified with Light Info")
+                self.print_grid((grid, vis_mask))
+                print("\n\n")
 
             # TODO: add direction and light status as part of the observations (self.agent_dir)
             # obs = np.concatenate((image, self.agent_dir))

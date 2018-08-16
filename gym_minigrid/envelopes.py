@@ -63,14 +63,36 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.safe_actions = self.env.strings_to_actions(list(safe_actions))
 
 
+        print("\n\nOBS BEFORE")
+        obj_front = self.env.worldobj_in_agent(1, 0)
+        if (obj_front is not None):
+            print("obj_front_bf_1: " + obj_front)
+        else:
+            print("obj_front_bf_1: " + "none")
+
+        # Get the position in front of the agent
+        fwd_pos = self.env.front_pos
+        # Get the contents of the cell in front of the agent
+        fwd_cell = self.env.grid.get(*fwd_pos)
+        if (fwd_cell is not None):
+            print("obj_front_bf_1: " + fwd_cell.type)
+        else:
+            print("obj_front_bf_1: " + "none")
+
+
     def step(self, proposed_action):
+
+        if self.config.a2c.num_processes == 1 and self.config.rendering:
+            self.env.render('human')
 
         if proposed_action == self.env.actions.observe:
             self.observe()
-            self.env.print_grid()
         else:
             if self.config.training_mode:
                 self.observe()
+
+            if self.config.debug_mode: print("proposed_action: " + self.env.action_to_string(proposed_action))
+            if self.config.debug_mode: print("safe_actions: " + str(self.safe_actions))
 
             # The environment model is supported by the controllers
             if self.safe_actions is not None and len(self.safe_actions) > 0:
@@ -96,6 +118,22 @@ class SafetyEnvelope(gym.core.Wrapper):
                 if self.config.debug_mode: print("##### Environment not modeled by the controllers -> free exploration! ######")
                 obs, reward, done, info = self.env.step(proposed_action)
 
-            if self.config.debug_mode: print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
 
+            print("OBS AFTER")
+            obj_front = self.env.worldobj_in_agent(1, 0)
+            if (obj_front is not None):
+                print("obj_front_af_1: " + obj_front)
+            else:
+                print("obj_front_af_1: " + "none")
+
+            # Get the position in front of the agent
+            fwd_pos = self.env.front_pos
+            # Get the contents of the cell in front of the agent
+            fwd_cell = self.env.grid.get(*fwd_pos)
+            if (fwd_cell is not None):
+                print("obj_front_bf_2: " + fwd_cell.type)
+            else:
+                print("obj_front_bf_1: " + "none")
+
+            if self.config.debug_mode: print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
             return obs, reward, done, info
