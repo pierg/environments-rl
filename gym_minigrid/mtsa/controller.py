@@ -70,9 +70,12 @@ class Controller(Machine):
                 id = available_actions.index(action)
                 available_actions[id] = 'toggle'
                 self.is_toggle_a_switch = True
+                self.is_toggle_a_clean = False
+
             elif action == ('clean'):
                 id = available_actions.index(action)
                 available_actions[id] = 'toggle'
+                self.is_toggle_a_switch = False
                 self.is_toggle_a_clean = True
 
         # Set controller active or not
