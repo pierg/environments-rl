@@ -151,7 +151,7 @@ def main():
             # Obser reward and next obs
             obs, reward, done, info = envs.step(cpu_actions)
 
-            evaluator.update(reward, done, info)
+            evaluator.update(done, info)
 
             reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
             episode_rewards += reward
@@ -283,10 +283,10 @@ def main():
 
             # if the environment name and the controller state was not send
             if not send_env_name:
-                evaluator.save(j, start, end, dist_entropy, value_loss, action_loss, config.env_name, config.controller)
+                evaluator.save(j, start, final_rewards, dist_entropy, value_loss, action_loss, config.env_name, config.controller)
                 send_env_name = True
             else:
-                evaluator.save(j, start, end, dist_entropy, value_loss, action_loss)
+                evaluator.save(j, start, final_rewards, dist_entropy, value_loss, action_loss)
             print(
                 "Updates {}, num timesteps {}, FPS {}, mean/median reward {:.2f}/{:.2f}, min/max reward {:.2f}/{:.2f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
                     format(

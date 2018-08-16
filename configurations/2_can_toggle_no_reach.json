@@ -51,10 +51,6 @@
     "controllers": {
         "safety": [
             "config_4/safety_toggle_allowed"
-        ],
-        "reachability": [
-            "config_2/reachability_doorway",
-            "config_2/reachability_goal"
         ]
     }
 }
