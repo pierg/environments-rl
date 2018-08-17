@@ -50,7 +50,7 @@
     },
     "controllers": {
         "safety": [
-            "config_4/safety_main"
+            "config_4/safety_minimal_shield"
         ]
     }
 }
