@@ -26,7 +26,7 @@ parser.add_argument('--load-dir', default='./trained_models/a2c/',
                     help='directory to save agent logs (default: ./trained_models/)')
 args = parser.parse_args()
 
-env = make_env(args.env_name, args.seed, 0, None)
+env = make_env(args.env_name, args.seed, 0)
 env = DummyVecEnv([env])
 
 config = cg.Configuration.grab()

@@ -1,180 +1,180 @@
 {
-  "a2c": {
+    "a2c": {
+        "algorithm": "a2c",
+        "num_processes": 48,
+        "num_steps": 4,
+        "optimal_num_step": 40,
+        "save_evaluation_interval": 50,
+        "save_model_interval": 50,
+        "stop_after_update_number": 0,
+        "stop_learning": 48000
+    },
+    "agent_view_size": 5,
     "algorithm": "a2c",
+    "config_name": "randomEnv-7x7-6810-v0",
+    "controller": false,
+    "debug_mode": false,
+    "dqn": {
+        "discount_factor": 0.99,
+        "epsilon_decay_episodes": 1000,
+        "epsilon_decay_frame": 5000,
+        "epsilon_final": 0.1,
+        "epsilon_start": 1.0,
+        "exploration_rate": 0.99,
+        "results_log_interval": 200
+    },
+    "env_name": "MiniGrid-RandomEnv-7x7-6810-v0",
+    "evaluation_directory_name": "evaluations",
+    "log_interval": 10,
+    "max_num_frames": 10000000,
+    "max_num_steps": 65000,
+    "monitors": {
+        "patterns": {
+            "absence": {
+                "waterAbsence": {
+                    "action_planner": "wait",
+                    "active": true,
+                    "conditions": "stepping-on-water",
+                    "mode": "enforcing",
+                    "name": "waterAbsence",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "absence"
+                }
+            },
+            "precedence": {
+                "lightPrecedence": {
+                    "action_planner": "turn_right",
+                    "active": true,
+                    "conditions": {
+                        "post": "entering-a-room",
+                        "pre": "light-switch-turned-on"
+                    },
+                    "mode": "enforcing",
+                    "name": "lightPrecedence",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "precedence"
+                },
+                "roomPrecedence": {
+                    "action_planner": "turn_right",
+                    "active": true,
+                    "conditions": {
+                        "post": "going-back",
+                        "pre": "light-switch-turned-off"
+                    },
+                    "mode": "enforcing",
+                    "name": "roomPrecedence",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "precedence"
+                }
+            },
+            "response": {
+                "doorResponse": {
+                    "action_planner": "forward",
+                    "active": true,
+                    "conditions": {
+                        "post": "action-is-forward",
+                        "pre": "ready-to-cross-door"
+                    },
+                    "mode": "enforcing",
+                    "name": "doorResponse",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "response"
+                },
+                "onDoorResponse": {
+                    "action_planner": "forward",
+                    "active": true,
+                    "conditions": {
+                        "post": "action-is-forward",
+                        "pre": "agent-on-door"
+                    },
+                    "mode": "enforcing",
+                    "name": "onDoorResponse",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "response"
+                },
+                "openDoorResponse": {
+                    "action_planner": "toggle_light",
+                    "active": true,
+                    "conditions": {
+                        "post": "action-is-toggle",
+                        "pre": "door-closed-in-front"
+                    },
+                    "mode": "enforcing",
+                    "name": "openDoorResponse",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "response"
+                },
+                "switchOffResponse": {
+                    "action_planner": "toggle_light",
+                    "active": true,
+                    "conditions": {
+                        "post": "action-is-toggle",
+                        "pre": "light-switch-in-front-off"
+                    },
+                    "mode": "enforcing",
+                    "name": "switchOffResponse",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "response"
+                },
+                "switchOnResponse": {
+                    "action_planner": "turn_left",
+                    "active": true,
+                    "conditions": {
+                        "post": "action-is-left",
+                        "pre": "light-switch-in-front-on"
+                    },
+                    "mode": "enforcing",
+                    "name": "switchOnResponse",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "response"
+                }
+            }
+        }
+    },
     "num_processes": 48,
     "num_steps": 4,
-    "optimal_num_step": 40,
-    "save_evaluation_interval": 50,
-    "save_model_interval": 50,
-    "stop_after_update_number": 0,
-    "stop_learning": 48000
-  },
-  "agent_view_size": 5,
-  "algorithm": "a2c",
-  "config_name": "randomEnv-7x7-7450-v0",
-  "controller": false,
-  "debug_mode": false,
-  "dqn": {
-    "discount_factor": 0.99,
-    "epsilon_decay_episodes": 1000,
-    "epsilon_decay_frame": 5000,
-    "epsilon_final": 0.1,
-    "epsilon_start": 1.0,
-    "exploration_rate": 0.99,
-    "results_log_interval": 200
-  },
-  "env_name": "MiniGrid-RandomEnv-7x7-7450-v0",
-  "evaluation_directory_name": "evaluations",
-  "log_interval": 10,
-  "max_num_frames": 10000000,
-  "max_num_steps": 65000,
-  "monitors": {
-    "patterns": {
-      "absence": {
-        "waterAbsence": {
-          "action_planner": "wait",
-          "active": true,
-          "conditions": "stepping-on-water",
-          "mode": "enforcing",
-          "name": "waterAbsence",
-          "rewards": {
-            "respected": 0.0,
-            "violated": -0.1
-          },
-          "type": "absence"
+    "number_of_iteration": 1,
+    "on_violation_reset": false,
+    "recording": false,
+    "rendering": false,
+    "rewards": {
+        "actions": {
+            "forward": 0.0
+        },
+        "cleaningenv": {
+            "clean": 0.1
+        },
+        "standard": {
+            "death": -1.0,
+            "goal": 1.0,
+            "step": -0.1
         }
-      },
-      "precedence": {
-        "lightPrecedence": {
-          "action_planner": "turn_right",
-          "active": true,
-          "conditions": {
-            "post": "entering-a-room",
-            "pre": "light-switch-turned-on"
-          },
-          "mode": "enforcing",
-          "name": "lightPrecedence",
-          "rewards": {
-            "respected": 0.0,
-            "violated": -0.1
-          },
-          "type": "precedence"
-        },
-        "roomPrecedence": {
-          "action_planner": "turn_right",
-          "active": true,
-          "conditions": {
-            "post": "going-back",
-            "pre": "light-switch-turned-off"
-          },
-          "mode": "enforcing",
-          "name": "roomPrecedence",
-          "rewards": {
-            "respected": 0.0,
-            "violated": -0.1
-          },
-          "type": "precedence"
-        }
-      },
-      "response": {
-        "doorResponse": {
-          "action_planner": "forward",
-          "active": true,
-          "conditions": {
-            "post": "action-is-forward",
-            "pre": "ready-to-cross-door"
-          },
-          "mode": "enforcing",
-          "name": "doorResponse",
-          "rewards": {
-            "respected": 0.0,
-            "violated": -0.1
-          },
-          "type": "response"
-        },
-        "onDoorResponse": {
-          "action_planner": "forward",
-          "active": true,
-          "conditions": {
-            "post": "action-is-forward",
-            "pre": "agent-on-door"
-          },
-          "mode": "enforcing",
-          "name": "onDoorResponse",
-          "rewards": {
-            "respected": 0.0,
-            "violated": -0.1
-          },
-          "type": "response"
-        },
-        "openDoorResponse": {
-          "action_planner": "toggle_light",
-          "active": true,
-          "conditions": {
-            "post": "action-is-toggle",
-            "pre": "door-closed-in-front"
-          },
-          "mode": "enforcing",
-          "name": "openDoorResponse",
-          "rewards": {
-            "respected": 0.0,
-            "violated": -0.1
-          },
-          "type": "response"
-        },
-        "switchOffResponse": {
-          "action_planner": "toggle_light",
-          "active": true,
-          "conditions": {
-            "post": "action-is-toggle",
-            "pre": "light-switch-in-front-off"
-          },
-          "mode": "enforcing",
-          "name": "switchOffResponse",
-          "rewards": {
-            "respected": 0.0,
-            "violated": -0.1
-          },
-          "type": "response"
-        },
-        "switchOnResponse": {
-          "action_planner": "turn_left",
-          "active": true,
-          "conditions": {
-            "post": "action-is-left",
-            "pre": "light-switch-in-front-on"
-          },
-          "mode": "enforcing",
-          "name": "switchOnResponse",
-          "rewards": {
-            "respected": 0.0,
-            "violated": -0.1
-          },
-          "type": "response"
-        }
-      }
-    }
-  },
-  "num_processes": 48,
-  "num_steps": 4,
-  "number_of_iteration": 1,
-  "on_violation_reset": false,
-  "recording": false,
-  "rendering": false,
-  "rewards": {
-    "actions": {
-      "forward": 0.0
     },
-    "cleaningenv": {
-      "clean": 0.1
-    },
-    "standard": {
-      "death": -1.0,
-      "goal": 1000.0,
-      "step": -0.1
-    }
-  },
-  "stop_learning": 480,
-  "training_mode": true,
-  "visdom": false
+    "stop_learning": 480,
+    "training_mode": true,
+    "visdom": false
 }
