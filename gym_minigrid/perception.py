@@ -54,7 +54,6 @@ class Perception():
         """
         if Perception.light_on_current_room(obs):
             return object_name == obs.worldobj_in_agent(1, 0)
-        # TODO: why compare object type to None? and not just sinmply return false if the light is off
         return object_name == "None"
 
     @staticmethod

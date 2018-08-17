@@ -73,6 +73,8 @@ def get_args():
                         help='turn recording on, rendering will be automatically disabled')
     parser.add_argument('--nomonitor', action='store_true', default=False,
                         help='set no monitor')
+    parser.add_argument('--logstdfile', action='store_true', default=False,
+                        help='set std to LOG.txt in evaluations folder')
 
 
     args = parser.parse_args()

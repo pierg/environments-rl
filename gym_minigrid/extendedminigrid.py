@@ -137,9 +137,6 @@ class LightSwitch(WorldObj):
     def affectRoom(self, room):
         self.room = room
 
-    def setSwitchPos(self, position):
-        self.position = position
-
     def elements_in_room(self, room):
         self.elements = room
 
@@ -169,9 +166,9 @@ class LightSwitch(WorldObj):
         if self.room.getLight() == False:
             r.setColor(255, 0, 0)
             r.drawCircle(0.5 * CELL_PIXELS, 0.5 * CELL_PIXELS, 0.2 * CELL_PIXELS)
-            if hasattr(self, 'position'):
-                if hasattr(self, 'elements'):
-                    (xl, yl) = self.position
+            if hasattr(self, 'elements'):
+                if self.cur_pos is not None:
+                    (xl, yl) = self.cur_pos
                     for i in range(0, len(self.elements)):
                         if self.elements[i][2] == 1:
                             r.setLineColor(10, 10, 10)
@@ -355,9 +352,8 @@ class ExMiniGridEnv(MiniGridEnv):
         done = 6
 
 
-    def print_grid(self):
+    def print_grid(self, grid):
 
-        grid = self.gen_obs_grid()
         for i, e in enumerate(grid[0].grid):
             if i % grid[0].height == 0:
                 print("")
@@ -430,26 +426,42 @@ class ExMiniGridEnv(MiniGridEnv):
 
     def step(self, action):
 
+        self.step_count += 1
+
+        reward = 0
+        done = False
+
+        info = {"event": [], "steps_count": self.step_count}
+
         # Get the position in front of the agent
         fwd_pos = self.front_pos
+
         # Get the contents of the cell in front of the agent
         fwd_cell = self.grid.get(*fwd_pos)
 
         # Default actions and cells
         obs, reward, done, info = super().step(action)
 
-        info = {"event": [], "steps_count": self.step_count}
+        info = []
 
         if self.step_count == self.max_steps:
             info["event"].append("end")
             self.step_count = 0
             done = True
+        # Rotate left
+        if action == self.actions.left:
+            self.agent_dir -= 1
+            if self.agent_dir < 0:
+                self.agent_dir += 4
 
-        # Setting up costums cells and rewards
+        # Rotate right
+        elif action == self.actions.right:
+            self.agent_dir = (self.agent_dir + 1) % 4
 
         reward += self.config.rewards.standard.step
 
-        if action == self.actions.forward:
+        # Move forward
+        elif action == self.actions.forward:
             # Step into Water
             if fwd_cell is not None and fwd_cell.type == 'water':
                 done = True
@@ -463,7 +475,7 @@ class ExMiniGridEnv(MiniGridEnv):
                 # reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
                 info["event"].append("goal")
 
-        if action == self.actions.toggle:
+        elif action == self.actions.toggle:
             # Cleaning Dirt
             if fwd_cell is not None and fwd_cell.type == 'dirt':
                 reward += self.config.rewards.cleaningenv.clean
@@ -473,6 +485,7 @@ class ExMiniGridEnv(MiniGridEnv):
             return obs, reward, done, info
 
         if self.config.debug_mode: print("reward: " + str(reward) + "\tinfo: " + str(info))
+
         return obs, reward, done, info
 
 
@@ -482,21 +495,33 @@ class ExMiniGridEnv(MiniGridEnv):
         """
         grid, vis_mask = self.gen_obs_grid()
 
+        if self.config.debug_mode:
+            print("\nAgent View Original")
+            self.print_grid((grid, vis_mask))
+
         """ Encoding into a numpy array """
         codeSize = grid.width * grid.height
         array = np.zeros(shape=(grid.width, grid.height), dtype='uint8')
 
         """if Perception.light_on_current_room(self):"""
         try:
+            agent_pos = (AGENT_VIEW_SIZE // 2, AGENT_VIEW_SIZE - 1)
+
             if self.roomList:
                 for x in self.roomList:
-                    if x.objectInRoom(self.agent_pos):
+                    #check if room is on the dark
+                    if not x.getLight():
+                        for j in range(0, grid.height):
+                            for i in range(0, grid.width):
+                                # pass the obs coordinates (i, j) into the absolute grid coordinates (xpos, ypos).
+                                xpos = agent_pos[1] - j
+                                ypos = i - agent_pos[0]
+                                (xpos, ypos) = self.get_grid_coords_from_view((xpos, ypos))
 
-                        # The agent does not see the elements if the light in the room is off
-                        if not x.getLight():
-                            for i in range(0, len(grid.grid)):
-                                if grid.grid[i] is not None:
-                                    grid.grid[i] = None
+                                # check if the object position is on the room
+                                if x.objectInRoom((xpos, ypos)):
+                                    if grid.grid[(j * AGENT_VIEW_SIZE) + i] is not None:
+                                        grid.grid[i + (j * AGENT_VIEW_SIZE)] = None
 
         except AttributeError:
             pass
@@ -513,8 +538,14 @@ class ExMiniGridEnv(MiniGridEnv):
 
         image = array
 
-        # TODO: add direction and light status as part of the observations (self.agent_dir)
-        # obs = np.concatenate((image, self.agent_dir))
+            if self.config.debug_mode:
+                print("_______________________________________\n")
+                print("Agent View Modified with Light Info")
+                self.print_grid((grid, vis_mask))
+                print("\n\n")
+
+            # TODO: add direction and light status as part of the observations (self.agent_dir)
+            # obs = np.concatenate((image, self.agent_dir))
 
         obs = image.flatten()
 

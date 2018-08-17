@@ -8,8 +8,9 @@ qlearning=0
 double=0
 launch_monitor=0
 launch_without=0
+logstdfile=0
 
-while getopts qrt:e:w:s:i:lab opt; do
+while getopts qrt:e:w:s:i:labf opt; do
     case ${opt} in
         q)
             qlearning=1
@@ -47,6 +48,9 @@ while getopts qrt:e:w:s:i:lab opt; do
             ;;
         b)
             launch_without=1
+            ;;
+        f)
+            logstdfile=1
             ;;
     esac
 done
@@ -119,7 +123,10 @@ while [ $iterations -ne $i ]; do
     fi
     echo $launch_monitor
 
-    if [ $start_training -eq 1 ]; then
+    chmod 744 ./pytorch_dqn/main.py
+    chmod 744 ./pytorch_a2c/main.py
+
+    if [ $start_training -eq 1 ] && [ $logstdfile -eq 0 ]; then
             echo "...launching the training..."
             if [ $launch_monitor -eq 1 ]; then
                 echo "+++++ With Goap +++++"
@@ -131,12 +138,6 @@ while [ $iterations -ne $i ]; do
                 fi
             fi
             if [ $launch_without -eq 1 ]; then
-#                name=`grep -e '"config_name"' configurations/main.json`
-#                replace="v0_2\","
-#                replace=${name/v0\",/$replace}
-#                sed -i 's/"controller": true,/"controller": false,/g' configurations/main.json
-#                sed -i "s/$name/$replace/" configurations/main.json
-#                echo "   "
                 echo "..launching the training..."
                 echo "------ Without Goap -----"
                 if [ $qlearning -eq 1 ]; then
@@ -148,6 +149,31 @@ while [ $iterations -ne $i ]; do
             echo "plotting..."
             python3 ./evaluations/dqn/plot_dqn.py
             python3 ./evaluations/a2c/plot_a2c.py
+    fi
+    if [ $start_training -eq 1 ] && [ $logstdfile -eq 1 ]; then
+            echo "...launching the training..."
+            if [ $launch_monitor -eq 1 ]; then
+                echo "+++++ With Controller +++++"
+                if [ $qlearning -eq 1 ]; then
+                    echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
+                    python3 ./pytorch_dqn/main.py --stop $stop --record --norender --logstdfile
+                else
+                    python3 ./pytorch_a2c/main.py --stop $stop --record --norender --logstdfile
+                fi
+            fi
+            if [ $launch_without -eq 1 ]; then
+                echo "..launching the training..."
+                echo "------ Without Controller -----"
+                if [ $qlearning -eq 1 ]; then
+                    python3 ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor --logstdfile
+                else
+                    python3 ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor --logstdfile
+                fi
+            fi
+            echo "plotting..."
+            python3 ./evaluations/dqn/plot_dqn.py
+            python3 ./evaluations/a2c/plot_single.py
+            python3 ./evaluations/a2c/plot_comparison.py
     fi
     let "i+=1"
 

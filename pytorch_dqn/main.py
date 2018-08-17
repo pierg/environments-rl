@@ -252,7 +252,6 @@ for frame_idx in range(1, max_num_frames + 1):
     n_step_epi_idx += 1
 
     next_state, reward, done, info = env.step(action)
-
     replay_buffer.push(state, action, reward, next_state, done)
 
     # Render grid

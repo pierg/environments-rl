@@ -11,8 +11,7 @@ class DirtWatLightEnv(ExMiniGridEnv):
         super().__init__(
             grid_size=size,
             max_steps=4 * size * size,
-            # Set this to True for maximum speed
-            see_through_walls=True
+            see_through_walls=False
         )
 
 
@@ -28,6 +27,14 @@ class DirtWatLightEnv(ExMiniGridEnv):
                 else:
                     tab.append((i, j, 1))
         return tab
+
+    # Enables the goal only when the room has been completely cleaned
+    def goal_enabled(self):
+        nodirt = True
+        for element in self.grid.grid:
+            if element is not None and element.type == "dirt":
+                nodirt = False
+        return nodirt
 
     def _gen_grid(self, width, height):
         # Create an empty grid
@@ -90,8 +97,9 @@ class DirtWatLightEnv(ExMiniGridEnv):
         # Add the light switch next to the door
         switchRoom2 = LightSwitch()
         switchRoom2.affectRoom(self.roomList[1])
-        switchRoom2.setSwitchPos((3, 5))
+        # to send for visual ( it's not necessary for the operation )
         switchRoom2.elements_in_room(tab)
+        switchRoom2.cur_pos = (3, 5)
         self.grid.set(3, 5, switchRoom2)
         self.switchPosition = []
         self.switchPosition.append((3, 5))

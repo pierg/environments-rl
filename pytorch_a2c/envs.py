@@ -13,19 +13,19 @@ import os
 from configurations import config_grabber as cg
 
 
-def make_env(env_id, seed, rank):
+def make_env(env_id, seed, rank, force=False, resume=False, custom_message="_"):
 
     config = cg.Configuration.grab()
 
     def _thunk():
         env = gym.make(env_id)
-
         env.seed(seed + rank)
 
         if config.action_plan:
             env = ActionPlannerEnvelope(env)
 
-        if config.recording:
+        # record only the first agent
+        if config.recording and rank==0:
             print("starting recording..")
             eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
             if config.action_plan:
@@ -33,8 +33,8 @@ def make_env(env_id, seed, rank):
             else:
                 expt_dir = eval_folder + "/a2c/a2c_videos_no/"
 
-            uid = "___proc_n_" + str(rank) + " ___"
-            env = wrappers.Monitor(env, expt_dir, uid=uid)
+            uid = "___proc_n_" + str(rank) + " ___" + custom_message + "__++__"
+            env = wrappers.Monitor(env, expt_dir, uid=uid, force=force, resume=resume)
 
         return env
 
