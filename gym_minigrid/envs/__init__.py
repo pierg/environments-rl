@@ -8,7 +8,6 @@ from gym_minigrid.envs.putnear import *
 from gym_minigrid.envs.lockedroom import *
 from gym_minigrid.envs.playground_v0 import *
 from gym_minigrid.envs.redbluedoors import *
-from gym_minigrid.envs.unsafe import *
 from gym_minigrid.envs.unsafeDoor import *
 from gym_minigrid.envs.deadend import *
 from gym_minigrid.envs.deadendWater import *
@@ -21,6 +20,4 @@ from gym_minigrid.envs.miniclean import *
 from gym_minigrid.envs.bigcleanEnv import *
 from gym_minigrid.envs.unsafeRandomLevels import *
 from gym_minigrid.envs.unsafeEnv import *
-from gym_minigrid.envs.wa6_grid6 import *
 from gym_minigrid.envs.dirtwatlight import *
-from gym_minigrid.envs.randoms.randomenv7608 import *

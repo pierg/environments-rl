@@ -283,7 +283,7 @@ register(
         if hasattr(elements,"action_planning"):
             unsafe = -0.3
             on_plan = 0.01
-            off_plan = -0.15
+            off_plan = -0.01
             for current_monitor in rewards:
                 if current_monitor == "action_planning":
                     unsafe = current_monitor.unsafe

@@ -281,9 +281,9 @@ def main():
             end = time.time()
             total_num_steps = (j + 1) * args.num_processes * args.num_steps
 
-            # if the environment name and the controller state was not send
+            # if the environment name and the action_plan state was not send
             if not send_env_name:
-                evaluator.save(j, total_num_steps, final_rewards, dist_entropy, value_loss, action_loss, config.env_name, config.controller)
+                evaluator.save(j, total_num_steps, final_rewards, dist_entropy, value_loss, action_loss, config.env_name, config.action_plan)
                 send_env_name = True
             else:
                 evaluator.save(j, total_num_steps, final_rewards, dist_entropy, value_loss, action_loss)

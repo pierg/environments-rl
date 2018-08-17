@@ -1,14 +1,35 @@
 {
-  "grid_size": 10,
-  "n_water": 5,
-  "n_deadend": 4,
-  "light_switch": true,
+  "grid_size": 7,
+  "n_water": 4,
+  "n_deadend": 0,
+  "light_switch": false,
   "random_each_episode": false,
-  "stop_learning":480,
-  "number_of_iteration": 10,
+  "stop_learning": 432,
+  "number_of_iteration": 100,
+  "max_num_frames": 800000,
+  "agent_view_size": 5,
   "action_planning":{
     "active": true,
-    "random_unsafe_obj": 20,
+    "random_unsafe_obj": 0,
     "secondary_goals": []
-  }
+  },
+  "dqn": {
+        "exploration_rate": 0.99,
+        "discount_factor": 0.99,
+        "epsilon_final": 0.1,
+        "epsilon_decay_frame": 5000,
+        "results_log_interval": 200,
+        "epsilon_start": 1.0,
+        "epsilon_decay_episodes": 1000
+  },
+  "a2c": {
+        "save_evaluation_interval": 10,
+        "num_steps": 4,
+        "stop_learning": 1960,
+        "algorithm": "a2c",
+        "optimal_num_step": 40,
+        "stop_after_update_number": 0,
+        "save_model_interval": 50,
+        "num_processes": 16
+    }
 }

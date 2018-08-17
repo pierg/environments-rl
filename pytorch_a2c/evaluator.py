@@ -92,12 +92,12 @@ class Evaluator:
                 if "end" in info[i]["event"]:
                     self.log_N_end[i] += 1
 
-                if "goal" in info[i]["event"]:
+                if "goal" in info[i]["event"] or "goal+plan_finished" in info[i]["event"]:
                     self.log_N_goals[i] += 1
                     self.log_N_steps_goal[i] += info[i]["steps_count"]
 
 
-    def save(self, n_updates, total_num_steps, final_rewards, dist_entropy, value_loss, action_loss, env_name = None, controller = None):
+    def save(self, n_updates, total_num_steps, final_rewards, dist_entropy, value_loss, action_loss, env_name = None, action_plan = None):
 
         log_N_goals_avg = np.mean(self.log_N_goals)
         if np.count_nonzero(self.log_N_goals) > 0:
@@ -125,7 +125,7 @@ class Evaluator:
                                                         log_N_end,
                                                         log_N_steps_goal_avg,
                                                         env_name,
-                                                        controller
+                                                        action_plan
                                                         ])
 
         # Resetting all the variables until next logging interval

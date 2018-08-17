@@ -1,54 +1,61 @@
 {
-    "env_name": "MiniGrid-RandomEnv-12x12-7608-v0",
+    "agent_view_size": 5,
+    "rewards": {
+        "standard": {
+            "goal": 10.0,
+            "death": -10.0,
+            "step": -0.01
+        },
+        "cleaningenv": {
+            "clean": 0.1
+        }
+    },
+    "evaluation_directory_name": "evaluations",
+    "on_violation_reset": false,
+    "number_of_iteration": 100,
+    "num_processes": 48,
+    "action_plan": true,
+    "num_steps": 4,
+    "recording": true,
+    "training_mode": false,
+    "stop_learning": 432,
+    "optimal_num_steps": 24,
+    "log_interval": 10,
+    "dqn": {
+        "epsilon_start": 1.0,
+        "epsilon_final": 0.1,
+        "epsilon_decay_frame": 5000,
+        "epsilon_decay_episodes": 1000,
+        "results_log_interval": 200,
+        "discount_factor": 0.99,
+        "exploration_rate": 0.99
+    },
+    "max_num_frames": 192000,
+    "env_name": "MiniGrid-UnsafeEnv-8x8-v0",
+    "debug_mode": true,
+    "algorithm": "a2c",
+    "visdom": false,
     "action_planning": {
+        "active": true,
+        "random_unsafe_obj": 0,
         "secondary_goals": "[]",
         "reward": {
             "on_plan": 0.01,
             "unsafe": -0.3,
             "off_plan": -0.01
-        },
-        "random_unsafe_obj": 0
-    },
-    "a2c": {
-        "save_evaluation_interval": 10,
-        "num_steps": 4,
-        "stop_learning": 480,
-        "algorithm": "a2c",
-        "optimal_num_step": 40,
-        "stop_after_update_number": 0,
-        "save_model_interval": 50,
-        "num_processes": 16
-    },
-    "agent_view_size": 7,
-    "visdom": false,
-    "action_plan": true,
-    "rewards": {
-        "cleaningenv": {
-            "clean": 0.1
-        },
-        "standard": {
-            "death": -1.0,
-            "step": -0.01,
-            "goal": 1.0
         }
     },
     "rendering": false,
-    "dqn": {
-        "exploration_rate": 0.99,
-        "discount_factor": 0.99,
-        "epsilon_final": 0.1,
-        "epsilon_decay_frame": 5000,
-        "results_log_interval": 200,
-        "epsilon_start": 1.0,
-        "epsilon_decay_episodes": 1000
+    "a2c": {
+        "stop_learning": 1960,
+        "optimal_num_step": 40,
+        "num_processes": 16,
+        "save_evaluation_interval": 10,
+        "algorithm": "a2c",
+        "num_steps": 4,
+        "stop_after_update_number": 0,
+        "save_model_interval": 50
     },
-    "recording": true,
-    "number_of_iteration": 100,
-    "on_violation_reset": false,
-    "evaluation_directory_name": "evaluations",
-    "config_name": "randomEnv-12x12-7608-v0_2",
-    "log_interval": 10,
-    "training_mode": true,
-    "debug_mode": false,
-    "max_num_frames": 1000000
+    "config_name": "unsafeenv-8x8-4913-v0",
+    "stop_after_update_number": 0
 }

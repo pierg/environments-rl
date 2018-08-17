@@ -426,12 +426,11 @@ class ExMiniGridEnv(MiniGridEnv):
 
     def step(self, action):
 
-        self.step_count += 1
+        #self.step_count += 1
 
         reward = 0
         done = False
 
-        info = {"event": [], "steps_count": self.step_count}
 
         # Get the position in front of the agent
         fwd_pos = self.front_pos
@@ -442,27 +441,20 @@ class ExMiniGridEnv(MiniGridEnv):
         # Default actions and cells
         obs, reward, done, info = super().step(action)
 
-        info = []
+        info = {"event": [], "steps_count": self.step_count}
 
         if self.step_count == self.max_steps:
             info["event"].append("end")
-            self.step_count = 0
+            reward += self.config.rewards.standard.death
             done = True
-        # Rotate left
-        if action == self.actions.left:
-            self.agent_dir -= 1
-            if self.agent_dir < 0:
-                self.agent_dir += 4
-
-        # Rotate right
-        elif action == self.actions.right:
-            self.agent_dir = (self.agent_dir + 1) % 4
 
         reward += self.config.rewards.standard.step
 
+
+
         # Move forward
-        elif action == self.actions.forward:
-            # Step into Water
+        if action == self.actions.forward:
+
             if fwd_cell is not None and fwd_cell.type == 'water':
                 done = True
                 reward += self.config.rewards.standard.death
@@ -538,14 +530,14 @@ class ExMiniGridEnv(MiniGridEnv):
 
         image = array
 
-            if self.config.debug_mode:
-                print("_______________________________________\n")
-                print("Agent View Modified with Light Info")
-                self.print_grid((grid, vis_mask))
-                print("\n\n")
+        if self.config.debug_mode:
+            print("_______________________________________\n")
+            print("Agent View Modified with Light Info")
+            self.print_grid((grid, vis_mask))
+            print("\n\n")
 
-            # TODO: add direction and light status as part of the observations (self.agent_dir)
-            # obs = np.concatenate((image, self.agent_dir))
+        # TODO: add direction and light status as part of the observations (self.agent_dir)
+        # obs = np.concatenate((image, self.agent_dir))
 
         obs = image.flatten()
 
@@ -555,27 +547,40 @@ class ExMiniGridEnv(MiniGridEnv):
 
     def gen_obs_old_form(self):
         """
-            Generate the agent's view (partially observable, low-resolution encoding)
+        Generate the agent's view ( with Minigrid) and change object in the dark into None
         """
         obs = super().gen_obs()
 
         if hasattr(self, "roomList"):
-            if self.roomList:
-                for x in self.roomList:
-                    if x.objectInRoom(self.agent_pos):
 
-                        # The agent does not see the elements if the light in the room is off
-                        if not x.getLight():
-                            for i in range(0, len(obs['image'])):
-                                for j in range(0, len(obs['image'][i])):
-                                    if obs['image'][i][j][0] != 0:
-                                        obs['image'][i][j][0] = 0
-                                        obs['image'][i][j][1] = 0
-                                        obs['image'][i][j][2] = 0
+            agent_pos = (AGENT_VIEW_SIZE // 2, AGENT_VIEW_SIZE - 1)
+
+            for x in self.roomList:
+                # check if room is on the dark
+                if not x.getLight():
+                    for j in range(0, len(obs["image"])):
+                        for i in range(0, len(obs["image"][0])):
+                            # pass the obs coordinates (i, j) into the absolute grid coordinates (xpos, ypos).
+                            xpos = agent_pos[1] - j
+                            ypos = i - agent_pos[0]
+                            (xpos, ypos) = self.get_grid_coords_from_view((xpos, ypos))
+
+                            # The agent does not see the elements if the light in the room is off
+                            if not x.getLight():
+                                for i in range(0, len(obs['image'])):
+                                    for j in range(0, len(obs['image'][i])):
+                                        if obs['image'][i][j][0] != 0:
+                                            obs['image'][i][j][0] = 0
+                                            obs['image'][i][j][1] = 0
+                                            obs['image'][i][j][2] = 0
 
         return obs
 
     def decode_obs(self, obs):
+        """
+        Change the agent observation create with Minigrid into an array with just the object see by the agent
+        """
+
         """ Encoding into a numpy array """
 
         width = len(obs['image'])

@@ -123,6 +123,13 @@ from `MiniGridEnv`. Extending the environment with new object types or action
 should be very easy. If you wish to do this, you should take a look at the
 [gym_minigrid/minigrid.py](gym_minigrid/minigrid.py) source file.
 
+## Goap branch
+
+The goap branch include the action_planning solution. If action_plan is true in the json.
+If the goal is on the agent vision, the action_planner will create a safe plan to go to the goal.
+If the agent follow the plan, he will receive the on_plan multipliate by the number of steps which follow the plan.
+Else he will receive the off_plan reward  multipliate by the number of steps which follow the plan.
+
 ## Included Environments
 
 The environments listed below are implemented in the [gym_minigrid/envs](/gym_minigrid/envs) directory.
@@ -246,3 +253,41 @@ a textual mission string as input, telling it which room to go to in order
 to get the key that opens the locked room. It then has to go into the locked
 room in order to reach the final goal. This environment is extremely difficult
 to solve with vanilla reinforcement learning alone.
+
+### Water and Deadend Environment
+
+Registed configurations:
+- 'MiniGrid-DeadEndEnv-6x6-v0'
+- 'MiniGrid-DeadEndEnv-8x8-v0'
+- 'MiniGrid-DeadEndEnv-16x16-v0'
+- 'MiniGrid-DeadEndWaterEnv-6x6-v0'
+- 'MiniGrid-DeadEndWaterEnv-8x8-v0'
+- 'MiniGrid-DeadEndWaterEnv-16x16-v0'
+
+The agent must find the goal in an environment whithout going and water and deadend.
+If the agent go on water, the environment is reset.
+
+### Lightswitch Environment
+
+Registed configurations:
+- 'MiniGrid-DirtWatLightExp-9x9-v0'
+- 'MiniGrid-BigEnv-32x32-v0'
+- 'MiniGrid-BigEnv-24x24-v0'
+- 'MiniGrid-Safety-10x10-v0'
+
+The agent must find the goal in an environment. If the goal is in a room whitout light,
+the agent doesn't see the object which around him. He need to toggle the lightswitch
+to see in this room.
+
+### Cleaning Environment
+
+Registed configurations:
+- 'MiniGrid-MiniCleanEnv-5x5-v0'
+- 'MiniGrid-CleaningEnv-8x8-v0'
+- 'MiniGrid-BigCleanEnv-16x16-v0'
+
+The agent must clean all the dirt ( toggle action on a dirt ) into the environment.
+If the agent toggle a vase, the vase become a dirt. The goal is to test solution to prevent
+the agent to break a vase and to clean all the dirt.
+
+

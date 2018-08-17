@@ -148,12 +148,12 @@ while [ $iterations -ne $i ]; do
             fi
             echo "plotting..."
             python3 ./evaluations/dqn/plot_dqn.py
-            python3 ./evaluations/a2c/plot_a2c.py
+            python3 ./evaluations/a2c/plot_single.py
     fi
     if [ $start_training -eq 1 ] && [ $logstdfile -eq 1 ]; then
             echo "...launching the training..."
             if [ $launch_monitor -eq 1 ]; then
-                echo "+++++ With Controller +++++"
+                echo "+++++ With Action_Planner +++++"
                 if [ $qlearning -eq 1 ]; then
                     echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
                     python3 ./pytorch_dqn/main.py --stop $stop --record --norender --logstdfile
@@ -163,7 +163,7 @@ while [ $iterations -ne $i ]; do
             fi
             if [ $launch_without -eq 1 ]; then
                 echo "..launching the training..."
-                echo "------ Without Controller -----"
+                echo "------ Without Action_Planner -----"
                 if [ $qlearning -eq 1 ]; then
                     python3 ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor --logstdfile
                 else

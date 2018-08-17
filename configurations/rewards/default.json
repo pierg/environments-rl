@@ -1,8 +1,8 @@
 {
   "standard": {
-    "goal": 1,
+    "goal": 10,
     "step": -0.01,
-    "death": -1
+    "death": -10
   },
   "action_planning":{
     "unsafe":-0.3,

@@ -11,7 +11,7 @@ import gym
 
 class ActionPlannerEnvelope(gym.core.Wrapper):
     """
-    Safety envelope for safe exploration.
+    Action Planner envelope for safe exploration.
     """
 
     def __init__(self, env):
@@ -130,6 +130,14 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
 
         a, b = ExMiniGridEnv.get_grid_coords_from_view(self.env, (0, 0))
 
+        current_cell = Grid.get(self.env.grid, a, b)
+
+        if current_cell is not None and (current_cell.type == "unsafe" or current_cell.type == "water"):
+            reward += self.config.action_planning.reward.unsafe
+            info["event"] = "violation"
+
+
+
         """
             We track the position of the agent, if it is in the same cell for three consecutive moves it gets
             punished. It has no logical reason to stay in the same cell for more than three steps. 
@@ -138,9 +146,8 @@ class ActionPlannerEnvelope(gym.core.Wrapper):
             it would instead run out of steps by spinning in the same cell.
         """
         if self.last_cell[0] == (a, b) and self.last_cell[1] == (a, b) and self.last_cell[2] == (a, b):
-            return obs, self.config.action_planning.reward.unsafe, done, info
-        current_cell = Grid.get(self.env.grid, a, b)
-        self.last_cell[self.step_count % 3] = (a, b)
+            reward += self.config.action_planning.reward.unsafe
+        self.last_cell[info["steps_count"] % 3] = (a, b)
 
         """
         With every step we log the agent's position, direction and action.

@@ -34,7 +34,7 @@ def make_env(env_id, seed, rank, force=False, resume=False, custom_message="_"):
                 expt_dir = eval_folder + "/a2c/a2c_videos_no/"
 
             uid = "___proc_n_" + str(rank) + " ___" + custom_message + "__++__"
-            env = wrappers.Monitor(env, expt_dir, uid=uid, force=force, resume=resume)
+            env = wrappers.Monitor(env, expt_dir, uid=uid, force=True, resume=resume)
 
         return env
 

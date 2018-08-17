@@ -209,7 +209,7 @@ class Perception():
                         return x.number == number
             return True
         except AttributeError:
-            return True
+            return number == 0
 
     def is_condition_true(self):
         return True
