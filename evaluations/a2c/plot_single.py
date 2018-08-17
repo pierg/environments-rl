@@ -55,7 +55,7 @@ def extract_all_data_from_csv(csv_folder_abs_path):
             N_end_avg.append(extract_array("N_end_avg", csv_folder_abs_path + "/" + csv_file_name))
             N_step_goal_avg.append(extract_array("N_step_goal_avg", csv_folder_abs_path + "/" + csv_file_name))
             env_name.append(extract_array("env_name", csv_folder_abs_path + "/" + csv_file_name))
-            controller.append(extract_array("controller", csv_folder_abs_path + "/" + csv_file_name))
+            controller.append(extract_array("controller", csv_folder_abs_path + "/" + csv_file_name)[0])
 
 
 def extract_array(label, csv_file):
@@ -98,7 +98,7 @@ def single_line_plot(x, y, x_label, y_label, ys_sem=0, title=""):
     :param y_sem: (optional) standard error mean, it adds as translucent area around the y
     :return: matplot figure, it can then be added to a pdf
     """
-    x_size = len(x)
+    x_size = 20
     y_size = 2
     figure = plt.figure(num=None, figsize=(x_size, y_size), dpi=80, facecolor='w', edgecolor='k')
     plt.suptitle(title)
@@ -147,7 +147,7 @@ def multi_figures_plot(x, ys, x_label, y_labels, ys_sem=0, title=""):
     :param ys_sem: (optional) standard error mean, it adds as translucent area around the ys
     :return: matplot figure, it can then be added to a pdf
     """
-    x_size = len(x)
+    x_size = 20
     y_size = len(y_labels) * 2
     figure = plt.figure(num=None, figsize=(x_size, y_size), dpi=80, facecolor='w', edgecolor='k')
     plt.suptitle(title)
@@ -177,7 +177,7 @@ def plot():
     current_directory = os.path.abspath(os.path.dirname(__file__))
     extract_all_data_from_csv(current_directory)
     for i in range(len(N_updates)):
-        title = "controller : " + str(controller[i][0])
+        title = "controller : " + str(controller[i])
         figure_1 = multi_figures_plot(N_updates[i],
                                       [N_goals_avg[i],
                                        N_step_goal_avg[i]
@@ -200,7 +200,11 @@ def plot():
                                     'reward mean and sem',
                                     Reward_std[i])
 
-        Name = "a2c_experience_" + env_name[i][0] + ".pdf"
+        if controller[i] == "True":
+            Name = "YES_a2c_" + env_name[i][0] + ".pdf"
+        else:
+            Name = "NO_a2c_" + env_name[i][0] + ".pdf"
+
         print("PdfName : ", Name)
 
         pdf = PdfPages(current_directory + "/" + Name)
