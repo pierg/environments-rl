@@ -4,6 +4,7 @@ from sys import stdout
 import os
 from transitions import Machine
 from configurations import config_grabber as cg
+import random
 
 class Controller(Machine):
     """
@@ -66,14 +67,6 @@ class Controller(Machine):
         for action in available_actions[:]:
             if action.startswith('to_'):
                 available_actions.remove(action)
-            if action == ('switch'):
-                id = available_actions.index(action)
-                available_actions[id] = 'toggle'
-                self.is_toggle_a_switch = True
-            elif action == ('clean'):
-                id = available_actions.index(action)
-                available_actions[id] = 'toggle'
-                self.is_toggle_a_clean = True
 
         # Set controller active or not
         if "observation" in available_actions:
@@ -92,16 +85,26 @@ class Controller(Machine):
         if self.is_active():
             self.tigger_action = action
             if action == 'toggle':
-                if self.is_toggle_a_switch:
-                    self.tigger_action = 'switch'
-                    self.is_toggle_a_switch = False
-                elif self.is_toggle_a_clean:
-                    self.tigger_action = 'clean'
-                    self.is_toggle_a_clean = False
+                safe_actions = set(["clean", "toggle", "switch"])
+                safe_actions.intersection_update(self.available_actions)
+                self.tigger_action = random.choice(list(safe_actions))
             self.trigger(self.tigger_action)
 
-    def get_available_actions(self):
-        return self.available_actions
+
+
+    def get_available_actions_for_agent(self):
+        av_actions = self.available_actions[:]
+        toggle_is_in = False
+        for action in av_actions[:]:
+            if action in ["clean", "toggle", "switch"]:
+                id = av_actions.index(action)
+                if toggle_is_in:
+                    av_actions.remove(action)
+                else:
+                    av_actions[id] = 'toggle'
+                    toggle_is_in = True
+        return av_actions
+
 
     
     def fill_observations(self):

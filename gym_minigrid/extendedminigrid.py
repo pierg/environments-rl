@@ -91,9 +91,6 @@ class LightSwitch(WorldObj):
     def affectRoom(self, room):
         self.room = room
 
-    def setSwitchPos(self, position):
-        self.position = position
-
     def elements_in_room(self, room):
         self.elements = room
 
@@ -123,9 +120,9 @@ class LightSwitch(WorldObj):
         if self.room.getLight() == False:
             r.setColor(255, 0, 0)
             r.drawCircle(0.5 * CELL_PIXELS, 0.5 * CELL_PIXELS, 0.2 * CELL_PIXELS)
-            if hasattr(self, 'position'):
-                if hasattr(self, 'elements'):
-                    (xl, yl) = self.position
+            if hasattr(self, 'elements'):
+                if self.cur_pos is not None:
+                    (xl, yl) = self.cur_pos
                     for i in range(0, len(self.elements)):
                         if self.elements[i][2] == 1:
                             r.setLineColor(10, 10, 10)
@@ -427,10 +424,11 @@ class ExMiniGridEnv(MiniGridEnv):
                 info["event"].append("died")
             # Step into Goal
             elif fwd_cell is not None and fwd_cell.type == 'goal':
-                done = True
-                reward = self.config.rewards.standard.goal
-                # reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
-                info["event"].append("goal")
+                if self.goal_enabled():
+                    done = True
+                    reward = self.config.rewards.standard.goal
+                    # reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
+                    info["event"].append("goal")
             else:
                 reward = self.config.rewards.actions.forward
 
@@ -476,7 +474,8 @@ class ExMiniGridEnv(MiniGridEnv):
         return obs, reward, done, info
 
 
-
+    def goal_enabled(self):
+        assert False, "_goal_enabled needs to be implemented by each environment"
 
     def gen_obs(self):
         """
@@ -490,15 +489,23 @@ class ExMiniGridEnv(MiniGridEnv):
 
         """if Perception.light_on_current_room(self):"""
         try:
+            agent_pos = (AGENT_VIEW_SIZE // 2, AGENT_VIEW_SIZE - 1)
+
             if self.roomList:
                 for x in self.roomList:
-                    if x.objectInRoom(self.agent_pos):
+                    #check if room is on the dark
+                    if not x.getLight():
+                        for j in range(0, grid.height):
+                            for i in range(0, grid.width):
+                                # pass the obs coordinates (i, j) into the absolute grid coordinates (xpos, ypos).
+                                xpos = agent_pos[1] - j
+                                ypos = i - agent_pos[0]
+                                (xpos, ypos) = self.get_grid_coords_from_view((xpos, ypos))
 
-                        # The agent does not see the elements if the light in the room is off
-                        if not x.getLight():
-                            for i in range(0, len(grid.grid)):
-                                if grid.grid[i] is not None:
-                                    grid.grid[i] = None
+                                # check if the object position is on the room
+                                if x.objectInRoom((xpos, ypos)):
+                                    if grid.grid[(j * AGENT_VIEW_SIZE) + i] is not None:
+                                        grid.grid[i + (j * AGENT_VIEW_SIZE)] = None
 
             """ Encoding into a numpy array """
             codeSize = grid.width * grid.height
