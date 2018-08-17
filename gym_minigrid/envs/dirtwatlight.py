@@ -28,6 +28,14 @@ class DirtWatLightEnv(ExMiniGridEnv):
                     tab.append((i, j, 1))
         return tab
 
+    # Enables the goal only when the room has been completely cleaned
+    def goal_enabled(self):
+        nodirt = True
+        for element in self.grid.grid:
+            if element is not None and element.type == "dirt":
+                nodirt = False
+        return nodirt
+
     def _gen_grid(self, width, height):
         # Create an empty grid
         self.grid = Grid(width, height)
