@@ -48,13 +48,131 @@
             "forward": 0.0
         }
     },
-    "controllers": {
-        "safety": [
-            "config_4/safety_main"
-        ],
-        "reachability": [
-            "config_2/reachability_doorway",
-            "config_2/reachability_goal"
-        ]
+    "monitors": {
+        "patterns": {
+            "absence": {
+                "waterAbsence": {
+                    "action_planner": "wait",
+                    "active": true,
+                    "conditions": "stepping-on-water",
+                    "mode": "enforcing",
+                    "name": "waterAbsence",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "absence"
+                }
+            },
+            "precedence": {
+                "lightPrecedence": {
+                    "action_planner": "turn_right",
+                    "active": true,
+                    "conditions": {
+                        "post": "entering-a-room",
+                        "pre": "light-switch-turned-on"
+                    },
+                    "mode": "enforcing",
+                    "name": "lightPrecedence",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "precedence"
+                },
+                "roomPrecedence": {
+                    "action_planner": "turn_right",
+                    "active": true,
+                    "conditions": {
+                        "post": "going-back",
+                        "pre": "light-switch-turned-off"
+                    },
+                    "mode": "enforcing",
+                    "name": "roomPrecedence",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "precedence"
+                }
+            },
+            "response": {
+                "doorResponse": {
+                    "action_planner": "forward",
+                    "active": true,
+                    "conditions": {
+                        "post": "action-is-forward",
+                        "pre": "ready-to-cross-door"
+                    },
+                    "mode": "enforcing",
+                    "name": "doorResponse",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "response"
+                },
+                "onDoorResponse": {
+                    "action_planner": "forward",
+                    "active": true,
+                    "conditions": {
+                        "post": "action-is-forward",
+                        "pre": "agent-on-door"
+                    },
+                    "mode": "enforcing",
+                    "name": "onDoorResponse",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "response"
+                },
+                "openDoorResponse": {
+                    "action_planner": "toggle_light",
+                    "active": true,
+                    "conditions": {
+                        "post": "action-is-toggle",
+                        "pre": "door-closed-in-front"
+                    },
+                    "mode": "enforcing",
+                    "name": "openDoorResponse",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "response"
+                },
+                "switchOffResponse": {
+                    "action_planner": "toggle_light",
+                    "active": true,
+                    "conditions": {
+                        "post": "action-is-toggle",
+                        "pre": "light-switch-in-front-off"
+                    },
+                    "mode": "enforcing",
+                    "name": "switchOffResponse",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "response"
+                },
+                "switchOnResponse": {
+                    "action_planner": "turn_left",
+                    "active": true,
+                    "conditions": {
+                        "post": "action-is-left",
+                        "pre": "light-switch-in-front-on"
+                    },
+                    "mode": "enforcing",
+                    "name": "switchOnResponse",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "response"
+                }
+            }
+        }
     }
 }

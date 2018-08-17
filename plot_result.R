@@ -7,7 +7,7 @@ autoPlot <- function(array,fileName)
   Name <- paste(fileName, ".pdf",sep="-")             #add the pdf instance
   print(c("running",Name))              #beginning of the plot creation
   pdf(Name,width = 8, height = 6)
-  
+
   colonne <- dim(array)[1]              # recover the number of lines in the csv
 
   # add datas of the first line

@@ -381,7 +381,7 @@ def main(argv):
     # Load the gym environment
     env = gym.make(options.env_name)
 
-    if (config.controller): env = SafetyEnvelope(env)
+    if (config.monitors): env = SafetyEnvelope(env)
 
     # Create the application window
     app = QApplication(sys.argv)
