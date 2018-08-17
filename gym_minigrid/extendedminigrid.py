@@ -91,9 +91,6 @@ class LightSwitch(WorldObj):
     def affectRoom(self, room):
         self.room = room
 
-    def setSwitchPos(self, position):
-        self.position = position
-
     def elements_in_room(self, room):
         self.elements = room
 
@@ -123,9 +120,9 @@ class LightSwitch(WorldObj):
         if self.room.getLight() == False:
             r.setColor(255, 0, 0)
             r.drawCircle(0.5 * CELL_PIXELS, 0.5 * CELL_PIXELS, 0.2 * CELL_PIXELS)
-            if hasattr(self, 'position'):
-                if hasattr(self, 'elements'):
-                    (xl, yl) = self.position
+            if hasattr(self, 'elements'):
+                if self.cur_pos is not None:
+                    (xl, yl) = self.cur_pos
                     for i in range(0, len(self.elements)):
                         if self.elements[i][2] == 1:
                             r.setLineColor(10, 10, 10)

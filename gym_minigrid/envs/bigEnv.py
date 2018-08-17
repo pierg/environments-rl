@@ -86,11 +86,10 @@ class bigEnv(ExMiniGridEnv):
         #Add the light switch next to the door
         switchRoom2 = LightSwitch()
         switchRoom2.affectRoom(self.roomList[1])
-        switchRoom2 .setSwitchPos((int(round(width/2)-1),height-11))
+        # to send for visual ( it's not necessary for the operation )
+        switchRoom2.cur_pos = (int(round(width/2)-1),height-11)
         switchRoom2.elements_in_room(tab)
         self.grid.set(int(round(width/2)-1),height-11,switchRoom2)
-        self.switchPosition = []
-        self.switchPosition.append((int(round(width/2)-1),height-11))
 
         # Set start position
         self.start_pos = (1, 1)
@@ -98,12 +97,6 @@ class bigEnv(ExMiniGridEnv):
 
         self.mission = "get to the green goal square without moving on water"
 
-    def step(self,action):
-        # Reset if agent step on water without knowing it
-        if action == self.actions.forward and self.worldobj_in_agent(1,0) == "water" :
-            return self.gen_obs(), 0, True, "died"
-        else:
-            return super().step(action)
 
 class bigEnv24x24(bigEnv):
     def __init__(self):
