@@ -1,4 +1,3 @@
-from gym_minigrid.perception import Perception as p
 import logging
 
 from monitors.safetystatemachine import SafetyStateMachine
@@ -74,7 +73,7 @@ class Absence(SafetyStateMachine):
         return self.obs_condition
 
 
-    def __init__(self, name, conditions, notify, rewards):
+    def __init__(self, name, conditions, notify, rewards, perception):
         self.respectd_rwd = rewards.respected
         self.violated_rwd = rewards.violated
         self.condition = conditions
@@ -82,7 +81,7 @@ class Absence(SafetyStateMachine):
         self.active = False
         self.obs_condition = False
 
-        super().__init__(name, "absence", self.states, self.transitions, 'idle', notify)
+        super().__init__(name, "absence", self.states, self.transitions, 'idle', notify, perception)
 
     def _context_active(self, obs, action_proposed):
         return True
@@ -94,8 +93,8 @@ class Absence(SafetyStateMachine):
         return context_active
 
     # Convert observations to state and populate the obs_conditions
-    def _map_conditions(self, obs, action_proposed):
-        condition = not p.is_condition_satisfied(obs, self.condition, action_proposed)
+    def _map_conditions(self, action_proposed):
+        condition = not self.perception.is_condition_satisfied(self.condition, action_proposed)
         self.obs_condition = condition
 
     def _on_idle(self):

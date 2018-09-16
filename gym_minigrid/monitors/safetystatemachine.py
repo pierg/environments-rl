@@ -215,7 +215,7 @@ class MyTest(Machine):
 
 class SafetyStateMachine(object):
 
-    def __init__(self, name, pattern, states, transitions, initial, notify):
+    def __init__(self, name, pattern, states, transitions, initial, notify, perception):
         self.name = name
         self.pattern = pattern
 
@@ -240,6 +240,9 @@ class SafetyStateMachine(object):
         # Action proposed by the agent
         self.action_proposed = None
 
+        # Perceptions of the agent, it gets updated at every step
+        self.perception = perception
+
         # Function to be called when violation is detected (on_block) or when observations are needed (uncertainty)
         self.notify = notify
 
@@ -249,7 +252,7 @@ class SafetyStateMachine(object):
         # Stores if the state machine is active (based on the context)
         self.context_active = False
 
-    def _map_conditions(self, obs, action_proposed):
+    def _map_conditions(self, action_proposed):
         raise NotImplementedError
 
     def _map_context(self, obs, action_proposed):
@@ -294,7 +297,7 @@ class SafetyStateMachine(object):
             logging.info("     check() -> monitor_state context: " + self.state)
 
             # Check the conditions and trigger
-            self._map_conditions(obs_pre, action_proposed)
+            self._map_conditions(action_proposed)
             self.trigger('*')
 
             logging.info("     check() -> monitor_state conditions : " + self.state)
@@ -306,7 +309,7 @@ class SafetyStateMachine(object):
 
         if self.context_active:
             # Check the conditions and trigger
-            self._map_conditions(obs_post, applied_action)
+            self._map_conditions(applied_action)
             logging.info("     verity() -> mon_state bef : " + self.state)
 
             self.trigger('*')

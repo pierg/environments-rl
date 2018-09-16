@@ -7,6 +7,7 @@ from monitors.patterns.precedence import *
 from monitors.patterns.absence import *
 from monitors.patterns.universality import *
 from monitors.patterns.response import *
+from perception import Perception
 
 import gym
 
@@ -35,6 +36,9 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Dictionary that gets populated with information by all the monitors at runtime
         self.monitor_states = {}
 
+        # Perceptions of the agent, it gets updated at each step with the current observations
+        self.perception = Perception(env.gen_obs_grid())
+
         # Set rewards
         self.step_reward = self.config.rewards.standard.step
         self.goal_reward = self.config.rewards.standard.goal
@@ -50,11 +54,10 @@ class SafetyEnvelope(gym.core.Wrapper):
             for monitors in monitor_types:
                 for monitor in monitors:
                     if monitor.active:
-                        # Monitors with condition(s) (Absence / Precedence / Response / Universality)
                         if hasattr(monitor, 'conditions'):
                             new_monitor = dict_monitors[monitor.type](monitor.type + "_" + monitor.name,
                                                                       monitor.conditions, self._on_monitoring,
-                                                                      monitor.rewards)
+                                                                      monitor.rewards, self.perception)
                         self.monitors.append(new_monitor)
                         self.monitor_states[new_monitor.name] = {}
                         self.monitor_states[new_monitor.name]["state"] = ""
@@ -153,6 +156,8 @@ class SafetyEnvelope(gym.core.Wrapper):
         list_violations = []
 
         self.propsed_action = proposed_action
+
+        self.perception.update(self.env.gen_obs_grid(), self.env.agent_pos)
 
         current_obs_env = self.env
 

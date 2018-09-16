@@ -1,4 +1,3 @@
-from gym_minigrid.perception import Perception as p
 import logging
 
 from monitors.safetystatemachine import SafetyStateMachine
@@ -104,7 +103,7 @@ class Response(SafetyStateMachine):
     def postcondition_cond(self):
         return self.obs_postcondition
 
-    def __init__(self, name, conditions, notify, rewards):
+    def __init__(self, name, conditions, notify, rewards, perception):
         self.respectd_rwd = rewards.respected
         self.violated_rwd = rewards.violated
         self.postcondition = conditions.post
@@ -114,7 +113,7 @@ class Response(SafetyStateMachine):
         self.obs_precondition = False
         self.obs_postcondition = False
 
-        super().__init__(name, "response", self.states, self.transitions, 'idle', notify)
+        super().__init__(name, "response", self.states, self.transitions, 'idle', notify, perception)
 
     def _context_active(self, obs, action_proposed):
         return True
@@ -126,14 +125,14 @@ class Response(SafetyStateMachine):
         return context_active
 
     # Convert observations to state and populate the obs_conditions
-    def _map_conditions(self, obs, action_proposed):
+    def _map_conditions(self, action_proposed):
         self.action_proposed = action_proposed
-        precondition = p.is_condition_satisfied(obs, self.precondition, action_proposed)
+        precondition = self.perception.is_condition_satisfied(self.precondition, action_proposed)
         self.obs_precondition = precondition
 
         # If precondition is true, check postcondition and trigger as one atomic operation
         if precondition:
-            self.obs_postcondition = p.is_condition_satisfied(obs, self.postcondition, action_proposed)
+            self.obs_postcondition = self.perception.is_condition_satisfied(self.postcondition, action_proposed)
             self.trigger("*")
 
     def _on_idle(self):

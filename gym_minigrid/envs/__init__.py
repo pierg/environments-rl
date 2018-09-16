@@ -26,3 +26,20 @@ from gym_minigrid.envs.lighttest import *
 from gym_minigrid.envs.randoms.randomenv6810 import *
 from gym_minigrid.envs.dirtwatlight import *
 from gym_minigrid.envs.randoms.randomenv6810 import *
+
+from gym_minigrid.envs.randoms.randomenv6834 import *
+from gym_minigrid.envs.randoms.randomenv9832 import *
+from gym_minigrid.envs.randoms.randomenv9180 import *
+from gym_minigrid.envs.randoms.randomenv4091 import *
+from gym_minigrid.envs.randoms.randomenv90 import *
+from gym_minigrid.envs.randoms.randomenv218 import *
+from gym_minigrid.envs.randoms.randomenv4525 import *
+from gym_minigrid.envs.randoms.randomenv4404 import *
+from gym_minigrid.envs.randoms.randomenv6486 import *
+from gym_minigrid.envs.randoms.randomenv9329 import *
+from gym_minigrid.envs.randoms.randomenv881 import *
+from gym_minigrid.envs.randoms.randomenv6869 import *
+from gym_minigrid.envs.randoms.randomenv3323 import *
+from gym_minigrid.envs.randoms.randomenv2185 import *
+from gym_minigrid.envs.randoms.randomenv9314 import *
+from gym_minigrid.envs.randoms.randomenv7032 import *

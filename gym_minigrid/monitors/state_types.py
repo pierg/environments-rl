@@ -1,5 +1,4 @@
-from gym_minigrid.perception import Perception as p
-import logging
+
 
 from monitors.safetystatemachine import SafetyStateMachine
 
@@ -31,7 +30,7 @@ class StateTypes(SafetyStateMachine):
     transitions = []
 
     # Convert the observations stored in self.current_obs in a state a saves the state in current_state
-    def _map_conditions(self, obs, action_proposed):
+    def _map_conditions(self, action_proposed):
         self.curret_state = ''
 
     def __init__(self, name, notify):

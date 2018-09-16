@@ -92,6 +92,9 @@ class LightSwitch(WorldObj):
     def affectRoom(self, room):
         self.room = room
 
+    def setSwitchPos(self, position):
+        self.position = position
+
     def elements_in_room(self, room):
         self.elements = room
 
@@ -121,9 +124,9 @@ class LightSwitch(WorldObj):
         if self.room.getLight() == False:
             r.setColor(255, 0, 0)
             r.drawCircle(0.5 * CELL_PIXELS, 0.5 * CELL_PIXELS, 0.2 * CELL_PIXELS)
-            if hasattr(self, 'elements'):
-                if self.cur_pos is not None:
-                    (xl, yl) = self.cur_pos
+            if hasattr(self, 'position'):
+                if hasattr(self, 'elements'):
+                    (xl, yl) = self.position
                     for i in range(0, len(self.elements)):
                         if self.elements[i][2] == 1:
                             r.setLineColor(10, 10, 10)
@@ -249,25 +252,29 @@ class ExGrid(Grid):
         for j in range(0, height):
             for i in range(0, width):
 
-                typeIdx = array[i*j]
+                typeIdx = array[i, j, 0]
+                colorIdx = array[i, j, 1]
+                openIdx = array[i, j, 2]
 
                 if typeIdx == 0:
                     continue
 
                 objType = IDX_TO_OBJECT[typeIdx]
+                color = IDX_TO_COLOR[colorIdx]
+                is_open = True if openIdx == 1 else 0
 
                 if objType == 'wall':
-                    v = Wall()
+                    v = Wall(color)
                 elif objType == 'ball':
-                    v = Ball()
+                    v = Ball(color)
                 elif objType == 'key':
-                    v = Key()
+                    v = Key(color)
                 elif objType == 'box':
-                    v = Box()
+                    v = Box(color)
                 elif objType == 'door':
-                    v = Door("blue")
+                    v = Door(color, is_open)
                 elif objType == 'locked_door':
-                    v = LockedDoor("blue")
+                    v = LockedDoor(color, is_open)
                 elif objType == 'goal':
                     v = Goal()
                 elif objType == 'water':
@@ -359,11 +366,6 @@ class ExMiniGridEnv(MiniGridEnv):
         self.config = cg.Configuration.grab()
         # Overriding the max_num_steps
         max_num_steps = max_steps
-
-        # Initializing light and door status to be passed as observations
-        self.door_is_open = False
-        self.light_is_on = False
-
         if hasattr(self.config, 'max_num_steps'):
             max_num_steps = self.config.max_num_steps
         super().__init__(grid_size, max_num_steps, see_through_walls, seed)
@@ -479,7 +481,7 @@ class ExMiniGridEnv(MiniGridEnv):
 
 
     def goal_enabled(self):
-        assert False, "_goal_enabled needs to be implemented by each environment"
+        assert False, "goal_enabled needs to be implemented by each environment"
 
     def gen_obs(self):
         """
@@ -530,26 +532,6 @@ class ExMiniGridEnv(MiniGridEnv):
 
                     if hasattr(v, 'is_on') and v.is_on:
                         array[i, j, 1] = 1
-
-
-            # """ Encoding into a numpy array """
-            # array = np.zeros(shape=(grid.width, grid.height), dtype='uint8')
-            #
-            # for j in range(0, grid.height):
-            #     for i in range(0, grid.width):
-            #
-            #         v = grid.get(i, j)
-            #
-            #         if v == None:
-            #             continue
-            #         else:
-            #             if v.type == "lightsw":
-            #                 self.light_is_on = v.state
-            #
-            #             if v.type == "door":
-            #                 self.door_is_open = v.is_open
-            #
-            #         array[i, j] = OBJECT_TO_IDX[v.type]
 
             image = array
 

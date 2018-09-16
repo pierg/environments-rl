@@ -1,4 +1,3 @@
-from gym_minigrid.perception import Perception as p
 import logging
 
 from monitors.safetystatemachine import SafetyStateMachine
@@ -108,7 +107,7 @@ class Precedence(SafetyStateMachine):
         super().reset()
         self.obs_precondition = False
 
-    def __init__(self, name, conditions, notify, rewards):
+    def __init__(self, name, conditions, notify, rewards, perception):
         self.respectd_rwd = rewards.respected
         self.violated_rwd = rewards.violated
         self.precondition = conditions.pre
@@ -118,7 +117,7 @@ class Precedence(SafetyStateMachine):
         self.obs_precondition = False
         self.obs_postcondition = False
 
-        super().__init__(name, "precedence", self.states, self.transitions, 'idle', notify)
+        super().__init__(name, "precedence", self.states, self.transitions, 'idle', notify, perception)
 
 
     def _context_active(self, obs, action_proposed):
@@ -131,13 +130,14 @@ class Precedence(SafetyStateMachine):
         return context_active
 
     # Convert observations to state and populate the obs_conditions
-    def _map_conditions(self, obs, action_proposed):
+    def _map_conditions(self, action_proposed):
 
-        postcondition = p.is_condition_satisfied(obs, self.postcondition, action_proposed)
+        postcondition = self.perception.is_condition_satisfied(self.postcondition, action_proposed)
         self.obs_postcondition = postcondition
 
         if not self.obs_precondition:
-            self.obs_precondition = p.is_condition_satisfied(obs, self.precondition, action_proposed)
+            self.obs_precondition = self.perception.is_condition_satisfied(self.precondition, action_proposed)
+
         # If postcondition is true, check precondition and trigger as one atomic operation
         if postcondition:
             self.trigger("*")

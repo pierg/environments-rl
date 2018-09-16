@@ -68,7 +68,7 @@ while [ $iterations -ne $i ]; do
                     echo "...creating a random light environment... using $environment and $reward"
                     configuration_file=`python3 env_gen_light.py --environment_file $environment --rewards_file $reward`
                 else
-                    echo "...creating a  light environment... using $environment"
+                    echo "...creating a random light environment... using $environment"
                     configuration_file=`python3 env_gen_light.py --environment_file $environment --rewards_file "default"`
                 fi
             else

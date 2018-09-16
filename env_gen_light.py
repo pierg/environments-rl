@@ -29,7 +29,7 @@ def generate_environment(environment="default", rewards="default"):
     n_water = elements.n_water
     n_deadend = elements.n_deadend
     light_switch = elements.light_switch
-    random_each_episode = elements.random_each_episode
+    random_each_episode = False
     rewards = Configuration.grab("rewards/" + rewards)
     with open(environment_path + "randoms/" + "randomenv{0}.py".format(random_token), 'w') as env:
         env.write("""
@@ -228,22 +228,17 @@ register(
             "config_name": "randomEnv-{0}x{0}-{1}-v0".format(grid_size, random_token),
             "algorithm": "a2c",
             "env_name": "MiniGrid-RandomEnv-{0}x{0}-{1}-v0".format(grid_size, random_token),
-            "num_processes": 48,
-            "num_steps": 4,
-            "log_interval": 10,
-            "agent_view_size":  int("{0}".format(elements.agent_view_size)),
-            "on_violation_reset": False,
-            "rendering": False,
-            "stop_learning": int("{0}".format(elements.stop_learning)),
-            "number_of_iteration": int("{0}".format(elements.number_of_iteration)),
-            "evaluation_directory_name": "evaluations",
-            "visdom": False,
-            "debug_mode": False,
-            "recording" : False,
-            "training_mode": True,
-            "max_num_steps": int("{0}".format(elements.max_num_steps)),
+            "controller": bool(elements.controller),
+            "rendering": bool(elements.rendering),
+            "recording": bool(elements.recording),
+            "log_interval": int("{0}".format(elements.log_interval)),
             "max_num_frames": int("{0}".format(elements.max_num_frames)),
-            "controller": False,
+            "max_num_steps_episode": int("{0}".format(elements.max_num_steps_episode)),
+            "debug_mode": bool(elements.debug_mode),
+            "evaluation_directory_name": str(elements.evaluation_directory_name),
+            "training_mode": bool(elements.training_mode),
+            "agent_view_size": int("{0}".format(elements.agent_view_size)),
+            "visdom": bool(elements.visdom),
             "a2c": {
                 "algorithm": "a2c",
                 "save_model_interval": int("{0}".format(elements.a2c.save_model_interval)),

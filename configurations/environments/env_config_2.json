@@ -1,9 +1,0 @@
-{
-  "grid_size": 7,
-  "n_water": 2,
-  "n_deadend": 0,
-  "light_switch": true,
-  "random_each_episode": false,
-  "stop_learning":1200,
-  "number_of_iteration": 100
-}
