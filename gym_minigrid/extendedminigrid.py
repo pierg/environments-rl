@@ -430,11 +430,18 @@ class ExMiniGridEnv(MiniGridEnv):
                 info["event"].append("died")
             # Step into Goal
             elif fwd_cell is not None and fwd_cell.type == 'goal':
-                if self.goal_enabled():
+                try:
+                    if self.goal_enabled():
+                        done = True
+                        reward = self.config.rewards.standard.goal
+                        # reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
+                        info["event"].append("goal")
+                except:
                     done = True
                     reward = self.config.rewards.standard.goal
                     # reward = self.config.rewards.standard.goal - 0.9 * (self.step_count / self.max_steps)
                     info["event"].append("goal")
+
             else:
                 reward = self.config.rewards.actions.forward
 
@@ -481,7 +488,7 @@ class ExMiniGridEnv(MiniGridEnv):
 
 
     def goal_enabled(self):
-        assert False, "goal_enabled needs to be implemented by each environment"
+        raise NotImplementedError()
 
     def gen_obs(self):
         """
