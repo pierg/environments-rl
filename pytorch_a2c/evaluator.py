@@ -82,19 +82,19 @@ class Evaluator:
     def update(self, done, info):
 
         for i in range(0, len(info)):
-            if len(info[i]) > 0:
-                if "violation" in info[i]["event"]:
-                    self.log_N_violations[i] += 1
+            infoevent = info[i]
+            if "violation" in infoevent["event"]:
+                self.log_N_violations[i] += 1
 
-                if "died" in info[i]["event"]:
-                    self.log_N_died[i] += 1
+            if "died" in infoevent["event"]:
+                self.log_N_died[i] += 1
 
-                if "end" in info[i]["event"]:
-                    self.log_N_end[i] += 1
+            if "end" in infoevent["event"]:
+                self.log_N_end[i] += 1
 
-                if "goal" in info[i]["event"]:
-                    self.log_N_goals[i] += 1
-                    self.log_N_steps_goal[i] += info[i]["steps_count"]
+            if "goal" in infoevent["event"]:
+                self.log_N_goals[i] += 1
+                self.log_N_steps_goal[i] += infoevent["steps_count"]
 
 
     def save(self, n_updates, total_num_steps, final_rewards, dist_entropy, value_loss, action_loss, env_name = None, controller = None):

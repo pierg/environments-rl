@@ -40,9 +40,6 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.goal_reward = self.config.rewards.standard.goal
         self.death_reward = self.config.rewards.standard.death
 
-        # Counters of steps performed in an episode
-        self.n_steps = 0
-
         # Dictionary that contains all the type of monitors you can use
         dict_monitors = {'precedence': Precedence,
                          'response': Response,
@@ -72,6 +69,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         print("Active monitors:")
         for monitor in self.monitors:
             print(monitor)
+        self._reset_monitors()
 
     def _on_monitoring(self, name, state, **kwargs):
         """
@@ -121,12 +119,12 @@ class SafetyEnvelope(gym.core.Wrapper):
         else:
             for unsafe_action in unsafe_actions:
                 if unsafe_action[1] == "wait":
-                    logging.info("action_planner() -> safe action : %s", str(self.env.actions.wait))
-                    safe_action = self.env.actions.wait
+                    logging.info("action_planner() -> safe action : %s", str(self.env.actions.done))
+                    safe_action = self.env.actions.done
                 if unsafe_action[1] == "turn_right":
                     logging.info("action_planner() -> safe action : %s", str(self.env.actions.right))
                     safe_action = self.env.actions.right
-                if unsafe_action[1] == "toggle_light":
+                if unsafe_action[1] == "toggle":
                     logging.info("action_planner() -> safe action : %s", str(self.env.actions.toggle))
                     safe_action = self.env.actions.toggle
                 if unsafe_action[1] == "turn_left":
@@ -144,58 +142,46 @@ class SafetyEnvelope(gym.core.Wrapper):
         for monitor in self.monitors:
             monitor.reset()
 
+
+
     def step(self, proposed_action):
+        print("proposed_action = " + self.env.action_to_string(proposed_action))
 
         # To be returned to the agent
         obs, reward, done, info = None, None, None, None
 
-        saved = False
-        end = False
-        list_monitor = {}
-        if self.n_steps == 0:
-            self._reset_monitors()
-
-        self.n_steps += 1
-
-        if self.n_steps == self.env.max_steps:
-            end = True
-            self.n_steps = 0
+        list_violations = []
 
         self.propsed_action = proposed_action
 
         current_obs_env = self.env
+
+        # TODO: maybe to be removed
         current_obs_env.position = "check"
-        if self.config.num_processes == 1 and self.config.rendering:
+
+        # Rendering
+        if self.config.a2c.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
-        # logging.info("___check BEFORE action is applyed to the environmnent")
         # Check observation and proposed action in all running monitors
         for monitor in self.monitors:
             monitor.check(current_obs_env, proposed_action)
-            if monitor.state == "violated" or monitor.state == "precond_violated" or monitor.state == "postcond_violated" :
-                saved = True
-                list_monitor[len(list_monitor)] = monitor.name
+
         # Check for unsafe actions before sending them to the environment:
         unsafe_actions = []
         shaped_rewards = []
         for name, monitor in self.monitor_states.items():
             if monitor["state"] == "violation" or monitor["state"] == "precond_violated" or monitor["state"] == "postcond_violated" :
-                if self.config.on_violation_reset:
-                    obs = self.env.reset()
-                    done = True
-                    info = ("violation", self.monitor_states)
+                list_violations.append(name)
                 if "unsafe_action" in monitor:
                     # Add them only if the monitor is in enforcing mode
                     if monitor["mode"] == "enforcing":
                         unsafe_actions.append((monitor["unsafe_action"], monitor["action_planner"]))
+                    print("VIOLATION:\t" + name + "\tunsafe_action: " +
+                            self.env.action_to_string(monitor["unsafe_action"]) +
+                            "\taction_planner: " +
+                            monitor["action_planner"])
                 shaped_rewards.append(monitor["shaped_reward"])
-
-        # If have to reset
-        if done:
-            reward = sum(shaped_rewards)
-            self.n_steps = 0
-            self._reset_monitors()
-            return obs, reward, done, info
 
         # logging.info("unsafe actions = %s", unsafe_actions)
 
@@ -206,7 +192,8 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Send a suitable action to the environment
         obs, reward, done, info = self.env.step(suitable_action)
         if info:
-            info = (info, self.monitor_states)
+            for i in range(len(list_violations)):
+                info["event"].append("violation")
 
         current_obs_env.position = "verify"
         # logging.info("____verify AFTER action is applied to the environment")
@@ -227,28 +214,6 @@ class SafetyEnvelope(gym.core.Wrapper):
             monitor["shaped_reward"] = 0
             monitor["unsafe_action"] = ""
 
-        # Check if goal reached, if yes add goal_reward
-        a, b = ExMiniGridEnv.get_grid_coords_from_view(self.env, (0, 0))
-        current_cell = Grid.get(self.env.grid, a, b)
-        if current_cell is not None:
-            if current_cell.type == "goal":
-                reward = self.goal_reward
-                info = ("goal", self.monitor_states)
-                self.n_steps = 0
-
-        # Check if normal step, if yes add normal_reward
-        if reward == 0:
-            reward = self.step_reward
-
-        if saved and suitable_action != ExMiniGridEnv.Actions.wait:
-            saved = False
-
-        if end:
-            info = ("end", self.monitor_states)
-            reward += self.death_reward
-        elif not info and saved:
-            info = ("saved", list_monitor)
-        # Return everything to the agent
         if done:
             self._reset_monitors()
 

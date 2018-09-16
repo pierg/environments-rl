@@ -55,7 +55,7 @@
           "type": "response"
         },
         "lightResponse": {
-          "action_planner": "toggle_light",
+          "action_planner": "toggle",
           "active": true,
           "conditions": {
             "post": "action-is-toggle",

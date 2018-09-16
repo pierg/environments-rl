@@ -1,6 +1,6 @@
 {
     "controller": true,
-    "rendering": false,
+    "rendering": true,
     "recording": false,
     "log_interval": 10,
     "max_num_frames": 2000000,
@@ -26,7 +26,7 @@
         "num_steps": 4,
         "stop_after_update_number": 0,
         "algorithm": "a2c",
-        "num_processes": 48,
+        "num_processes": 1,
         "optimal_num_step": 40,
         "save_model_interval": 50,
         "save_evaluation_interval": 50
@@ -128,7 +128,7 @@
                     "type": "response"
                 },
                 "openDoorResponse": {
-                    "action_planner": "toggle_light",
+                    "action_planner": "toggle",
                     "active": true,
                     "conditions": {
                         "post": "action-is-toggle",
@@ -143,7 +143,7 @@
                     "type": "response"
                 },
                 "switchOffResponse": {
-                    "action_planner": "toggle_light",
+                    "action_planner": "toggle",
                     "active": true,
                     "conditions": {
                         "post": "action-is-toggle",

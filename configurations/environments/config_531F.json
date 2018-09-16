@@ -24,7 +24,7 @@
         "lightResponse": {
           "type": "response",
           "mode": "enforcing",
-          "action_planner": "toggle_light",
+          "action_planner": "toggle",
           "active": false,
           "name": "lightResponse",
           "conditions": {

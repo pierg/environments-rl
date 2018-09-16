@@ -5,13 +5,14 @@ import math
 import operator
 from functools import reduce
 
+import traceback
+
 import numpy as np
 
 config = cg.Configuration.grab()
 
 AGENT_VIEW_SIZE = config.agent_view_size
-OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
-
+OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE, 2)
 
 def extended_dic(obj_names=[]):
     """
@@ -85,7 +86,7 @@ class Water(WorldObj):
 
 class LightSwitch(WorldObj):
     def __init__(self):
-        self.state = False
+        self.is_on = False
         super(LightSwitch, self).__init__('lightsw', 'yellow')
 
     def affectRoom(self, room):
@@ -96,7 +97,7 @@ class LightSwitch(WorldObj):
 
     def toggle(self, env, pos):
         self.room.setLight(not self.room.getLight())
-        self.state = not self.state
+        self.is_on = not self.is_on
         return True
 
     def getRoomNumber(self):
@@ -238,37 +239,35 @@ class ExGrid(Grid):
         """
         Decode an array grid encoding back into a grid
         """
-        width = array.shape[0]
-        height = array.shape[1]
-        assert array.shape[2] == 3
+        flatten_dim = array.shape[0]
+        width = int(math.sqrt(flatten_dim))
+        height = width
+        # width = array.shape[0]
+        # height = array.shape[1]
         grid = ExGrid(width, height)
 
         for j in range(0, height):
             for i in range(0, width):
 
-                typeIdx = array[i, j, 0]
-                colorIdx = array[i, j, 1]
-                openIdx = array[i, j, 2]
+                typeIdx = array[i*j]
 
                 if typeIdx == 0:
                     continue
 
                 objType = IDX_TO_OBJECT[typeIdx]
-                color = IDX_TO_COLOR[colorIdx]
-                is_open = True if openIdx == 1 else 0
 
                 if objType == 'wall':
-                    v = Wall(color)
+                    v = Wall()
                 elif objType == 'ball':
-                    v = Ball(color)
+                    v = Ball()
                 elif objType == 'key':
-                    v = Key(color)
+                    v = Key()
                 elif objType == 'box':
-                    v = Box(color)
+                    v = Box()
                 elif objType == 'door':
-                    v = Door(color, is_open)
+                    v = Door("blue")
                 elif objType == 'locked_door':
-                    v = LockedDoor(color, is_open)
+                    v = LockedDoor("blue")
                 elif objType == 'goal':
                     v = Goal()
                 elif objType == 'water':
@@ -360,6 +359,11 @@ class ExMiniGridEnv(MiniGridEnv):
         self.config = cg.Configuration.grab()
         # Overriding the max_num_steps
         max_num_steps = max_steps
+
+        # Initializing light and door status to be passed as observations
+        self.door_is_open = False
+        self.light_is_on = False
+
         if hasattr(self.config, 'max_num_steps'):
             max_num_steps = self.config.max_num_steps
         super().__init__(grid_size, max_num_steps, see_through_walls, seed)
@@ -507,9 +511,9 @@ class ExMiniGridEnv(MiniGridEnv):
                                     if grid.grid[(j * AGENT_VIEW_SIZE) + i] is not None:
                                         grid.grid[i + (j * AGENT_VIEW_SIZE)] = None
 
-            """ Encoding into a numpy array """
-            codeSize = grid.width * grid.height
-            array = np.zeros(shape=(grid.width, grid.height), dtype='uint8')
+
+
+            array = np.zeros(shape=(grid.width, grid.height, 2), dtype='uint8')
 
             for j in range(0, grid.height):
                 for i in range(0, grid.width):
@@ -519,7 +523,33 @@ class ExMiniGridEnv(MiniGridEnv):
                     if v == None:
                         continue
 
-                    array[i, j] = OBJECT_TO_IDX[v.type]
+                    array[i, j, 0] = OBJECT_TO_IDX[v.type]
+
+                    if hasattr(v, 'is_open') and v.is_open:
+                        array[i, j, 1] = 1
+
+                    if hasattr(v, 'is_on') and v.is_on:
+                        array[i, j, 1] = 1
+
+
+            # """ Encoding into a numpy array """
+            # array = np.zeros(shape=(grid.width, grid.height), dtype='uint8')
+            #
+            # for j in range(0, grid.height):
+            #     for i in range(0, grid.width):
+            #
+            #         v = grid.get(i, j)
+            #
+            #         if v == None:
+            #             continue
+            #         else:
+            #             if v.type == "lightsw":
+            #                 self.light_is_on = v.state
+            #
+            #             if v.type == "door":
+            #                 self.door_is_open = v.is_open
+            #
+            #         array[i, j] = OBJECT_TO_IDX[v.type]
 
             image = array
 
@@ -529,15 +559,15 @@ class ExMiniGridEnv(MiniGridEnv):
                 self.print_grid((grid, vis_mask))
                 print("\n\n")
 
-            # TODO: add direction and light status as part of the observations (self.agent_dir)
-            # obs = np.concatenate((image, self.agent_dir))
-
             obs = image.flatten()
 
             return obs
 
         except AttributeError:
-            return super().gen_obs()
+            traceback.print_exc()
+            print("ERROR!!!")
+            # return super().gen_obs()
+
 
     def get_grid_coords_from_view(self, coordinates):
         """

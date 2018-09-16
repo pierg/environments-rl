@@ -94,23 +94,14 @@ class Response(SafetyStateMachine):
 
     ]
 
-    obs = {
-        "active": False,
-        "precondition": False,
-        "postcondition": False,
-    }
-
     # Sate machine conditions
     def active_cond(self):
-        #return Response.obs["active"]
         return self.active
 
     def precondition_cond(self):
-        #return Response.obs["precondition"]
         return self.obs_precondition
 
     def postcondition_cond(self):
-        #return Response.obs["postcondition"]
         return self.obs_postcondition
 
     def __init__(self, name, conditions, notify, rewards):
@@ -131,7 +122,6 @@ class Response(SafetyStateMachine):
     def _map_context(self, obs, action_proposed):
         # Activating condition
         context_active = self._context_active(obs, action_proposed)
-        #Response.obs["active"] = context_active
         self.active = context_active
         return context_active
 
@@ -139,12 +129,10 @@ class Response(SafetyStateMachine):
     def _map_conditions(self, obs, action_proposed):
         self.action_proposed = action_proposed
         precondition = p.is_condition_satisfied(obs, self.precondition, action_proposed)
-        #Response.obs["precondition"] = precondition
         self.obs_precondition = precondition
 
         # If precondition is true, check postcondition and trigger as one atomic operation
         if precondition:
-            #Response.obs["postcondition"] = p.is_condition_satisfied(obs, self.postcondition, action_proposed)
             self.obs_postcondition = p.is_condition_satisfied(obs, self.postcondition, action_proposed)
             self.trigger("*")
 

@@ -65,18 +65,12 @@ class Absence(SafetyStateMachine):
 
     ]
 
-    obs = {
-        "active": False,
-        "condition": False
-    }
 
     # Sate machine conditions
     def active_cond(self):
-        #return Absence.obs["active"]
         return self.active
 
     def condition_cond(self):
-        #return Absence.obs["condition"]
         return self.obs_condition
 
 
@@ -96,14 +90,12 @@ class Absence(SafetyStateMachine):
     def _map_context(self, obs, action_proposed):
         # Activating condition
         context_active = self._context_active(obs, action_proposed)
-        #Absence.obs["active"] = context_active
         self.active = context_active
         return context_active
 
     # Convert observations to state and populate the obs_conditions
     def _map_conditions(self, obs, action_proposed):
         condition = not p.is_condition_satisfied(obs, self.condition, action_proposed)
-        #Absence.obs["condition"] = condition
         self.obs_condition = condition
 
     def _on_idle(self):
