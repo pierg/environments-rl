@@ -145,7 +145,8 @@ while [ $iterations -ne $i ]; do
             fi
             echo "plotting..."
             python3 ./evaluations/dqn/plot_dqn.py
-            python3 ./evaluations/a2c/plot_a2c.py
+            python3 ./evaluations/a2c/plot_single.py
+            python3 ./evaluations/a2c/plot_comparison.py
     fi
     if [ $start_training -eq 1 ] && [ $logstdfile -eq 1 ]; then
             echo "...launching the training..."
