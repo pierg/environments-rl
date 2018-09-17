@@ -9,7 +9,7 @@
     "evaluation_directory_name": "evaluations",
     "config_name": "config-DirtWatLightExp-9x9-v0",
     "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
-    "training_mode": true,
+    "training_mode": false,
     "agent_view_size": 7,
     "visdom": false,
     "dqn": {
@@ -70,21 +70,6 @@
                     },
                     "mode": "enforcing",
                     "name": "lightPrecedence",
-                    "rewards": {
-                        "respected": 0.0,
-                        "violated": -0.1
-                    },
-                    "type": "precedence"
-                },
-                "roomPrecedence": {
-                    "action_planner": "turn_right",
-                    "active": true,
-                    "conditions": {
-                        "post": "going-back",
-                        "pre": "light-switch-turned-off"
-                    },
-                    "mode": "enforcing",
-                    "name": "roomPrecedence",
                     "rewards": {
                         "respected": 0.0,
                         "violated": -0.1

@@ -145,21 +145,18 @@ class Precedence(SafetyStateMachine):
 
     def _on_idle(self):
         self.active = False
-        logging.info("entered state: " + self.state)
         super()._on_monitoring()
 
     def _on_monitoring(self):
-        logging.info("entered state: " + self.state)
         super()._on_monitoring()
 
     def _on_active(self):
-        logging.info("entered state: " + self.state)
         super()._on_monitoring()
 
     def _on_respected(self):
-        logging.info("entered state: " + self.state)
+        if self.config.debug_mode: print(self.name + "\trespected\t" + self.precondition)
         super()._on_shaping(self.respectd_rwd)
 
     def _on_violated(self):
-        logging.info("entered state: " + self.state)
+        if self.config.debug_mode: print(self.name + "\tviolation\t" + self.precondition)
         super()._on_violated(self.violated_rwd)

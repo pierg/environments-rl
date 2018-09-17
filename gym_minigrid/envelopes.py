@@ -148,7 +148,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
 
     def step(self, proposed_action):
-        print("proposed_action = " + self.env.action_to_string(proposed_action))
+        if self.config.debug_mode: print("proposed_action = " + self.env.action_to_string(proposed_action))
 
         # To be returned to the agent
         obs, reward, done, info = None, None, None, None
@@ -182,7 +182,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                     # Add them only if the monitor is in enforcing mode
                     if monitor["mode"] == "enforcing":
                         unsafe_actions.append((monitor["unsafe_action"], monitor["action_planner"]))
-                    print("VIOLATION:\t" + name + "\tunsafe_action: " +
+                        if self.config.debug_mode: print("VIOLATION:\t" + name + "\tunsafe_action: " +
                             self.env.action_to_string(monitor["unsafe_action"]) +
                             "\taction_planner: " +
                             monitor["action_planner"])

@@ -20,7 +20,7 @@ class Absence(SafetyStateMachine):
 
         {'name': 'respected',
          'type': 'sys_fin_ctrl',
-         'on_enter': '_on_active'},
+         'on_enter': '_on_respected'},
 
         {'name': 'violated',
          'type': 'satisfied',
@@ -99,21 +99,18 @@ class Absence(SafetyStateMachine):
 
     def _on_idle(self):
         self.active = False
-        logging.info("entered state: " + self.state)
         super()._on_monitoring()
 
     def _on_monitoring(self):
-        logging.info("entered state: " + self.state)
         super()._on_monitoring()
 
     def _on_active(self):
-        logging.info("entered state: " + self.state)
         super()._on_monitoring()
 
     def _on_respected(self):
-        logging.info("entered state: " + self.state)
+        if self.config.debug_mode: print(self.name + "\trespected\t" + self.condition)
         super()._on_shaping(self.respectd_rwd)
 
     def _on_violated(self):
-        logging.info("entered state: " + self.state)
+        if self.config.debug_mode: print(self.name + "\tviolated\t" + self.condition)
         super()._on_violated(self.violated_rwd)

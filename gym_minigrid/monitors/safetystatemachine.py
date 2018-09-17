@@ -12,6 +12,8 @@ from transitions.extensions.factory import NestedGraphTransition, LockedNestedEv
 
 from gym_minigrid.extendedminigrid import *
 
+from configurations.config_grabber import Configuration as cg
+
 import os
 import logging
 
@@ -231,6 +233,9 @@ class SafetyStateMachine(object):
         # Initial state observed by the agent
         self.initial_state = None
         self.env_state = None
+
+        # Configuration
+        self.config = cg.grab()
 
         # Observations retreived before applying the action
         self.observations = None
