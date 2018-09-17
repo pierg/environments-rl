@@ -3,39 +3,48 @@ from gym_minigrid.extendedminigrid import *
 
 class Perception():
 
-    def __init__(self, obs_grid):
-        self.obs_grid = obs_grid
-        self.agent_pos = None
+    def __init__(self, observations):
+        self.obs_grid, extra_obs = observations
+        self.obs_door_open = extra_obs[0]
+        self.obs_light_on = extra_obs[1]
+        self.current_room = extra_obs[2]
+        self.current_room_light = extra_obs[3]
+        self.next_room_light = extra_obs[4]
 
     def search_and_return(self, element_name):
-        grid = self.obs_grid[0]
+        grid = self.obs_grid
         for i, e in enumerate(grid.grid):
             if e is not None and e.type == element_name:
                 return e
         return None
 
     def element_in_front(self):
-        grid = self.obs_grid[0]
+        grid = self.obs_grid
         front_index = grid.width*(grid.height-2) + int(math.floor(grid.width/2))
         return grid.grid[front_index]
 
 
-    def update(self, obs_grid, agent_pos):
-        self.obs_grid = obs_grid
-        self.agent_pos = agent_pos
-
+    def update(self, observations):
+        self.obs_grid, extra_obs = observations
+        self.obs_door_open = extra_obs[0]
+        self.obs_light_on = extra_obs[1]
+        self.current_room = extra_obs[2]
+        self.current_room_light = extra_obs[3]
+        self.next_room_light = extra_obs[4]
 
     def is_condition_satisfied(self, condition, action_proposed=None):
         if condition == "light-on-current-room":
             # Returns true if the lights are on in the room the agent is currently in
-            return NotImplementedError
+            if self.current_room_light == 1:
+                return True
+            return False
 
         elif condition == "light-switch-turned-on":
             # It looks for a light switch around its field of view and returns true if it is on
-            elem = self.search_and_return("lightsw")
-            if elem is not None:
-                return hasattr(elem, 'is_on') and elem.is_on
+            if self.obs_light_on == 1:
+                return True
             return False
+
 
         elif condition == "light-switch-in-front-off":
             # Returns true if the agent is in front of a light-switch and it is off
@@ -98,12 +107,18 @@ class Perception():
 
         elif condition == "light-on-next-room":
             # It returns true is the light in the other room of the environment
-            return NotImplementedError
+            if self.next_room_light == 1:
+                return True
+            return False
 
         elif condition == "room-0":
             # Returns true if the agent is in the room where it first starts
-            return NotImplementedError
+            if self.current_room == 0:
+                return True
+            return False
 
         elif condition == "room-1":
             # Returns true if the agent is in the room after it crossed the door
-            return NotImplementedError
+            if self.current_room == 1:
+                return True
+            return False

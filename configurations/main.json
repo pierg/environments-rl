@@ -9,7 +9,7 @@
     "evaluation_directory_name": "evaluations",
     "config_name": "config-DirtWatLightExp-9x9-v0",
     "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
-    "training_mode": false,
+    "training_mode": true,
     "agent_view_size": 7,
     "visdom": false,
     "dqn": {
@@ -60,6 +60,20 @@
                     "type": "absence"
                 }
             },
+            "universality": {
+                "lightUniversally": {
+                    "action_planner": "wait",
+                    "active": true,
+                    "conditions": "light-on-current-room",
+                    "mode": "enforcing",
+                    "name": "lightUniversality",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "universality"
+                }
+            },
             "precedence": {
                 "lightPrecedence": {
                     "action_planner": "turn_right",
@@ -78,36 +92,6 @@
                 }
             },
             "response": {
-                "doorResponse": {
-                    "action_planner": "forward",
-                    "active": true,
-                    "conditions": {
-                        "post": "action-is-forward",
-                        "pre": "ready-to-cross-door"
-                    },
-                    "mode": "enforcing",
-                    "name": "doorResponse",
-                    "rewards": {
-                        "respected": 0.0,
-                        "violated": -0.1
-                    },
-                    "type": "response"
-                },
-                "onDoorResponse": {
-                    "action_planner": "forward",
-                    "active": true,
-                    "conditions": {
-                        "post": "action-is-forward",
-                        "pre": "agent-on-door"
-                    },
-                    "mode": "enforcing",
-                    "name": "onDoorResponse",
-                    "rewards": {
-                        "respected": 0.0,
-                        "violated": -0.1
-                    },
-                    "type": "response"
-                },
                 "openDoorResponse": {
                     "action_planner": "toggle",
                     "active": true,
@@ -132,21 +116,6 @@
                     },
                     "mode": "enforcing",
                     "name": "switchOffResponse",
-                    "rewards": {
-                        "respected": 0.0,
-                        "violated": -0.1
-                    },
-                    "type": "response"
-                },
-                "switchOnResponse": {
-                    "action_planner": "turn_left",
-                    "active": true,
-                    "conditions": {
-                        "post": "action-is-left",
-                        "pre": "light-switch-in-front-on"
-                    },
-                    "mode": "enforcing",
-                    "name": "switchOnResponse",
                     "rewards": {
                         "respected": 0.0,
                         "violated": -0.1

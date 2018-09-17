@@ -37,7 +37,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.monitor_states = {}
 
         # Perceptions of the agent, it gets updated at each step with the current observations
-        self.perception = Perception(env.gen_obs_grid())
+        self.perception = Perception(env.gen_obs_decoded())
 
         # Set rewards
         self.step_reward = self.config.rewards.standard.step
@@ -157,12 +157,9 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         self.propsed_action = proposed_action
 
-        self.perception.update(self.env.gen_obs_grid(), self.env.agent_pos)
+        self.perception.update(self.env.gen_obs_decoded())
 
         current_obs_env = self.env
-
-        # TODO: maybe to be removed
-        current_obs_env.position = "check"
 
         # Rendering
         if self.config.a2c.num_processes == 1 and self.config.rendering:
@@ -200,7 +197,6 @@ class SafetyEnvelope(gym.core.Wrapper):
             for i in range(len(list_violations)):
                 info["event"].append("violation")
 
-        current_obs_env.position = "verify"
         # logging.info("____verify AFTER action is applied to the environment")
         # Notify the monitors of the new state reached in the environment and the applied action
         for monitor in self.monitors:

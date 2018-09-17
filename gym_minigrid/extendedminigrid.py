@@ -12,7 +12,8 @@ import numpy as np
 config = cg.Configuration.grab()
 
 AGENT_VIEW_SIZE = config.agent_view_size
-OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE, 2)
+EXTRA_OBSERVATIONS_SIZE = 5
+OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
 
 def extended_dic(obj_names=[]):
     """
@@ -315,8 +316,8 @@ class ExMiniGridEnv(MiniGridEnv):
 
     def print_grid(self, grid):
 
-        for i, e in enumerate(grid[0].grid):
-            if i % grid[0].height == 0:
+        for i, e in enumerate(grid.grid):
+            if i % grid.height == 0:
                 print("")
             if e is not None:
                 print(str(e.type), end="\t")
@@ -377,7 +378,7 @@ class ExMiniGridEnv(MiniGridEnv):
         high: highest element value
         shape: imgSize tuple, each element can be of a value between 'low' and 'high'
         """
-        imgSize = reduce(operator.mul, OBS_ARRAY_SIZE, 1)
+        imgSize = reduce(operator.mul, OBS_ARRAY_SIZE, 1) + EXTRA_OBSERVATIONS_SIZE
         elemSize = len(IDX_TO_OBJECT)
         self.observation_space = spaces.Box(
             low=0,
@@ -490,7 +491,8 @@ class ExMiniGridEnv(MiniGridEnv):
     def goal_enabled(self):
         raise NotImplementedError()
 
-    def gen_obs(self):
+
+    def gen_obs_decoded(self):
         """
         Generate the agent's view (partially observable, low-resolution encoding)
         """
@@ -504,9 +506,22 @@ class ExMiniGridEnv(MiniGridEnv):
         try:
             agent_pos = (AGENT_VIEW_SIZE // 2, AGENT_VIEW_SIZE - 1)
 
+            obs_door_open = 0
+            obs_light_on = 0
+            current_room = 0
+            current_room_light = 0
+            next_room_light = 0
+
             if self.roomList:
                 for x in self.roomList:
-                    #check if room is on the dark
+                    # Save room number
+                    if x.objectInRoom(self.agent_pos):
+                        current_room = x.number
+                        current_room_light = x.getLight()
+                    else:
+                        next_room_light = x.getLight()
+
+                    # check if room is on the dark
                     if not x.getLight():
                         for j in range(0, grid.height):
                             for i in range(0, grid.width):
@@ -520,9 +535,51 @@ class ExMiniGridEnv(MiniGridEnv):
                                     if grid.grid[(j * AGENT_VIEW_SIZE) + i] is not None:
                                         grid.grid[i + (j * AGENT_VIEW_SIZE)] = None
 
+            for j in range(0, grid.height):
+                for i in range(0, grid.width):
+
+                    v = grid.get(i, j)
+
+                    if hasattr(v, 'is_open') and v.is_open:
+                        obs_door_open = 1
+
+                    if hasattr(v, 'is_on') and v.is_on:
+                        obs_light_on = 1
 
 
-            array = np.zeros(shape=(grid.width, grid.height, 2), dtype='uint8')
+            if self.config.debug_mode:
+                print("\n\nobs_door_open\t\t" + str(obs_door_open))
+                print("obs_light_on\t\t" + str(obs_light_on))
+                print("current_room\t\t" + str(current_room))
+                print("current_room_light\t" + str(current_room_light*1))
+                print("next_room_light\t\t" + str(next_room_light*1) + "\n\n")
+
+
+            return grid, (obs_door_open, obs_light_on, current_room, current_room_light*1, next_room_light*1)
+
+        except AttributeError:
+            traceback.print_exc()
+            print("ERROR!!!")
+
+
+
+    def gen_obs(self):
+        """
+        Generate the agent's view (partially observable, low-resolution encoding)
+        """
+        grid, extra_observations = self.gen_obs_decoded()
+
+        if self.config.debug_mode:
+            print("\nAgent View Original")
+            self.print_grid(grid)
+
+        """if Perception.light_on_current_room(self):"""
+        try:
+
+            array = np.zeros(shape=(grid.width, grid.height, 1), dtype='uint8')
+
+            obs_door_open = 0
+            obs_light_on = 0
 
             for j in range(0, grid.height):
                 for i in range(0, grid.width):
@@ -535,20 +592,22 @@ class ExMiniGridEnv(MiniGridEnv):
                     array[i, j, 0] = OBJECT_TO_IDX[v.type]
 
                     if hasattr(v, 'is_open') and v.is_open:
-                        array[i, j, 1] = 1
+                        obs_door_open = 1
 
                     if hasattr(v, 'is_on') and v.is_on:
-                        array[i, j, 1] = 1
+                        obs_light_on = 1
 
             image = array
 
             if self.config.debug_mode:
                 print("_______________________________________\n")
                 print("Agent View Modified with Light Info")
-                self.print_grid((grid, vis_mask))
+                self.print_grid(grid)
                 print("\n\n")
 
-            obs = image.flatten()
+            flatten_image = image.flatten()
+
+            obs = np.append(flatten_image, extra_observations)
 
             return obs
 
