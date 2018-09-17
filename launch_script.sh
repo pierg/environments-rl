@@ -119,7 +119,6 @@ while [ $iterations -ne $i ]; do
     if ! [ $stop ]; then
         stop=0
     fi
-    echo $launch_monitor
 
     chmod 744 ./pytorch_dqn/main.py
     chmod 744 ./pytorch_a2c/main.py
