@@ -1,9 +1,9 @@
 {
     "controller": true,
-    "rendering": true,
-    "recording": false,
+    "rendering": false,
+    "recording": true,
     "log_interval": 10,
-    "max_num_frames": 2000000,
+    "max_num_frames": 5000000,
     "max_num_steps_episode": -1,
     "debug_mode": false,
     "evaluation_directory_name": "evaluations",
@@ -32,17 +32,13 @@
         "save_evaluation_interval": 50
     },
     "rewards": {
-        "controller": {
-            "violated": -0.001,
-            "respected": 0.0
-        },
         "cleaningenv": {
-            "clean": 10.0
+            "clean": 1.0
         },
         "standard": {
-            "death": -10.0,
-            "goal": 1.0,
-            "step": -0.005
+            "death": -1.0,
+            "goal": 10.0,
+            "step": 0.0
         },
         "actions": {
             "forward": 0.0
@@ -64,6 +60,20 @@
                     "type": "absence"
                 }
             },
+            "universality": {
+                "lightUniversally": {
+                    "action_planner": "wait",
+                    "active": true,
+                    "conditions": "light-on-current-room",
+                    "mode": "enforcing",
+                    "name": "lightUniversality",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "universality"
+                }
+            },
             "precedence": {
                 "lightPrecedence": {
                     "action_planner": "turn_right",
@@ -79,54 +89,9 @@
                         "violated": -0.1
                     },
                     "type": "precedence"
-                },
-                "roomPrecedence": {
-                    "action_planner": "turn_right",
-                    "active": true,
-                    "conditions": {
-                        "post": "going-back",
-                        "pre": "light-switch-turned-off"
-                    },
-                    "mode": "enforcing",
-                    "name": "roomPrecedence",
-                    "rewards": {
-                        "respected": 0.0,
-                        "violated": -0.1
-                    },
-                    "type": "precedence"
                 }
             },
             "response": {
-                "doorResponse": {
-                    "action_planner": "forward",
-                    "active": true,
-                    "conditions": {
-                        "post": "action-is-forward",
-                        "pre": "ready-to-cross-door"
-                    },
-                    "mode": "enforcing",
-                    "name": "doorResponse",
-                    "rewards": {
-                        "respected": 0.0,
-                        "violated": -0.1
-                    },
-                    "type": "response"
-                },
-                "onDoorResponse": {
-                    "action_planner": "forward",
-                    "active": true,
-                    "conditions": {
-                        "post": "action-is-forward",
-                        "pre": "agent-on-door"
-                    },
-                    "mode": "enforcing",
-                    "name": "onDoorResponse",
-                    "rewards": {
-                        "respected": 0.0,
-                        "violated": -0.1
-                    },
-                    "type": "response"
-                },
                 "openDoorResponse": {
                     "action_planner": "toggle",
                     "active": true,
@@ -151,21 +116,6 @@
                     },
                     "mode": "enforcing",
                     "name": "switchOffResponse",
-                    "rewards": {
-                        "respected": 0.0,
-                        "violated": -0.1
-                    },
-                    "type": "response"
-                },
-                "switchOnResponse": {
-                    "action_planner": "turn_left",
-                    "active": true,
-                    "conditions": {
-                        "post": "action-is-left",
-                        "pre": "light-switch-in-front-on"
-                    },
-                    "mode": "enforcing",
-                    "name": "switchOnResponse",
                     "rewards": {
                         "respected": 0.0,
                         "violated": -0.1

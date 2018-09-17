@@ -43,3 +43,5 @@ from gym_minigrid.envs.randoms.randomenv3323 import *
 from gym_minigrid.envs.randoms.randomenv2185 import *
 from gym_minigrid.envs.randoms.randomenv9314 import *
 from gym_minigrid.envs.randoms.randomenv7032 import *
+from gym_minigrid.envs.randoms.randomenv3011 import *
+from gym_minigrid.envs.randoms.randomenv6633 import *
