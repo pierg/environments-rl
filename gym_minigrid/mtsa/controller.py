@@ -1,4 +1,3 @@
-from gym_minigrid.perception import Perception as p
 import logging
 from sys import stdout
 import os
@@ -11,10 +10,11 @@ class Controller(Machine):
     MTSA Controller synthetised from safety properties
     """
 
-    def __init__(self, name, type):
+    def __init__(self, name, type, perception):
 
         self.controller_name = name
         self.controller_type = type
+        self.perception = perception
 
         # Grab configuration
         self.config = cg.Configuration.grab()
@@ -108,33 +108,33 @@ class Controller(Machine):
 
     
     def fill_observations(self):
-        Controller.obs["light-on-next-room"] = p.is_condition_satisfied(self.observations, "light-on-next-room")
-        Controller.obs["light-off-next-room"] = not p.is_condition_satisfied(self.observations, "light-on-next-room")
-        Controller.obs["door-opened"] = p.is_condition_satisfied(self.observations, "door-opened-in-front") or p.is_condition_satisfied(self.observations, "door-opened")
-        Controller.obs["door-closed"] = p.is_condition_satisfied(self.observations, "door-closed")
-        Controller.obs["room-0"] = p.is_condition_satisfied(self.observations, "room-0", self.tigger_action)
-        Controller.obs["room-1"] = p.is_condition_satisfied(self.observations, "room-1", self.tigger_action)
-        Controller.obs["dirt-left"] = p.at_left_is(self.observations, "dirt")
-        Controller.obs["light-switch-left"] = p.at_left_is(self.observations, "lightsw")
-        Controller.obs["water-left"] = p.at_left_is(self.observations, "water")
-        Controller.obs["door-left"] = p.at_left_is(self.observations, "door")
-        Controller.obs["dirt-right"] = p.at_right_is(self.observations, "dirt")
-        Controller.obs["switch-right"] = p.at_right_is(self.observations, "lightsw")
-        Controller.obs["water-right"] = p.at_right_is(self.observations, "water")
-        Controller.obs["door-right"] = p.at_right_is(self.observations, "door")
-        Controller.obs["dirt-front"] = p.in_front_of(self.observations, "dirt")
-        Controller.obs["switch-front"] = p.in_front_of(self.observations, "lightsw")
-        Controller.obs["water-front"] = p.in_front_of(self.observations, "water")
-        Controller.obs["door-front"] = p.in_front_of(self.observations, "door")
-        Controller.obs["vase-left"] = p.at_left_is(self.observations, "vase")
-        Controller.obs["vase-front"] = p.in_front_of(self.observations, "vase")
-        Controller.obs["vase-right"] = p.at_right_is(self.observations, "vase")
-        Controller.obs["wall-left"] = p.at_left_is(self.observations, "wall")
-        Controller.obs["wall-front"] = p.in_front_of(self.observations, "wall")
-        Controller.obs["wall-right"] = p.at_right_is(self.observations, "wall")
-        Controller.obs["goal-left"] = p.at_left_is(self.observations, "goal")
-        Controller.obs["goal-front"] = p.in_front_of(self.observations, "goal")
-        Controller.obs["goal-right"] = p.at_right_is(self.observations, "goal")
+        Controller.obs["light-on-next-room"] = self.perception.is_condition_satisfied("light-on-next-room")
+        Controller.obs["light-off-next-room"] = not self.perception.is_condition_satisfied("light-on-next-room")
+        Controller.obs["door-opened"] = self.perception.is_condition_satisfied("door-opened-in-front") or self.perception.is_condition_satisfied("door-opened")
+        Controller.obs["door-closed"] = self.perception.is_condition_satisfied("door-closed")
+        Controller.obs["room-0"] = self.perception.is_condition_satisfied("room-0")
+        Controller.obs["room-1"] = self.perception.is_condition_satisfied("room-1")
+        Controller.obs["dirt-left"] = self.perception.at_left_is("dirt")
+        Controller.obs["light-switch-left"] = self.perception.at_left_is("lightsw")
+        Controller.obs["water-left"] = self.perception.at_left_is("water")
+        Controller.obs["door-left"] = self.perception.at_left_is("door")
+        Controller.obs["dirt-right"] = self.perception.at_right_is("dirt")
+        Controller.obs["switch-right"] = self.perception.at_right_is("lightsw")
+        Controller.obs["water-right"] = self.perception.at_right_is("water")
+        Controller.obs["door-right"] = self.perception.at_right_is("door")
+        Controller.obs["dirt-front"] = self.perception.in_front_of("dirt")
+        Controller.obs["switch-front"] = self.perception.in_front_of("lightsw")
+        Controller.obs["water-front"] = self.perception.in_front_of("water")
+        Controller.obs["door-front"] = self.perception.in_front_of("door")
+        Controller.obs["vase-left"] = self.perception.at_left_is("vase")
+        Controller.obs["vase-front"] = self.perception.in_front_of("vase")
+        Controller.obs["vase-right"] = self.perception.at_right_is("vase")
+        Controller.obs["wall-left"] = self.perception.at_left_is("wall")
+        Controller.obs["wall-front"] = self.perception.in_front_of("wall")
+        Controller.obs["wall-right"] = self.perception.at_right_is("wall")
+        Controller.obs["goal-left"] = self.perception.at_left_is("goal")
+        Controller.obs["goal-front"] = self.perception.in_front_of("goal")
+        Controller.obs["goal-right"] = self.perception.at_right_is("goal")
 
 
 

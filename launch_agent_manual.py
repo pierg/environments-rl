@@ -26,7 +26,7 @@ def main():
     observed = True
 
     cg.Configuration.set("training_mode", False)
-    cg.Configuration.set("debug_mode", True)
+    # cg.Configuration.set("debug_mode", False)
 
     parser = OptionParser()
     parser.add_option(
@@ -49,7 +49,7 @@ def main():
     # Load the gym environment
     env = gym.make(options.env_name)
 
-    if config.controller:
+    if config.envelope:
         env = SafetyEnvelope(env)
 
 
@@ -161,7 +161,7 @@ def main():
     while True:
         env.render('human')
         time.sleep(0.01)
-        if observed and config.controller:
+        if observed and config.envelope:
             env.step(-1)
             observed = False
         # If the window was closed

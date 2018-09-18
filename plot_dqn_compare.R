@@ -4,7 +4,7 @@
 autoPlot <- function(array_mo,array_nomo,fileName)
 {
   setwd("results/")                     #place the pdf in resuts file
-  Name <-paste(fileName, "controller.pdf",sep="-")           #add the pdf instance
+  Name <-paste(fileName, "envelope.pdf",sep="-")           #add the pdf instance
   print(c("running",Name))              #beginning of the plot creation
   pdf(Name,width = 8, height = 6)
   
@@ -48,21 +48,21 @@ autoPlot <- function(array_mo,array_nomo,fileName)
   min = min(min(N_goal_reached_mo),min(N_goal_reached_nomo))
   plot(N_frame_mo,N_goal_reached_mo, type = 'l', col="red", ylim = c(min,max),xlim=c(0,long), ylab= "")
   lines(N_frame_nomo,N_goal_reached_nomo,type ='l', col="blue")
-  legend(1,5,legend = c("N_goal_reached_controller","N_goal_reached_no_controller"), col = c("red","blue"), lty=1:1, cex=0.8)
+  legend(1,5,legend = c("N_goal_reached_envelope","N_goal_reached_no_envelope"), col = c("red","blue"), lty=1:1, cex=0.8)
   
   #second graph with Reward_mean
   max = max(max(N_death_mo),max(N_death_nomo))
   min = min(min(N_death_mo),min(N_death_nomo))
   plot(N_frame_mo,N_death_mo, type = 'l', col="red", ylim = c(min,max),xlim=c(0,long), ylab= "")
   lines(N_frame_nomo,N_death_nomo,type ='l', col="blue")
-  legend(1,5,legend = c("N_death_controller","N_death_no_controller"), col = c("red","blue"), lty=1:1, cex=0.8)
+  legend(1,5,legend = c("N_death_envelope","N_death_no_envelope"), col = c("red","blue"), lty=1:1, cex=0.8)
   
   #third graph with Reward_mean
   max = max(max(Reward_mean_mo),max(Reward_mean_nomo))
   min = min(min(Reward_mean_mo),min(Reward_mean_nomo))
   plot(N_frame_mo,Reward_mean_mo, type = 'l', col="red", ylim = c(min,max), xlim=c(0,long),ylab= "")
   lines(N_frame_nomo,Reward_mean_nomo,type  ='l', col="blue")
-  legend(1,0.7,legend = c("Reward_mean_controller","Reward_mean_no_controller"), col = c("red","blue"), lty=1:1, cex=0.8)
+  legend(1,0.7,legend = c("Reward_mean_envelope","Reward_mean_no_envelope"), col = c("red","blue"), lty=1:1, cex=0.8)
   
   dev.off()                   #Close the pdf
   setwd("..")                 #return in the current directory

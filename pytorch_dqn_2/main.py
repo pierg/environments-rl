@@ -46,7 +46,7 @@ evaluator_episodes = ev_epi("dqn")
 
 env = gym.make(config.env_name)
 # env.seed(seed + rank)
-if config.controller:
+if config.envelope:
     env = SafetyEnvelope(env)
 
 # until RL code supports dict observations, squash observations into a flat vector
@@ -116,7 +116,7 @@ if __name__ == '__main__':
 
     # env = wrap_deepmind(env)
 
-    if config.controller:
+    if config.envelope:
         env = SafetyEnvelope(env)
 
     # # until RL code supports dict observations, squash observations into a flat vector

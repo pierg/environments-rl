@@ -52,9 +52,9 @@ if args.record:
     cg.Configuration.set("recording", True)
 
 if args.nomonitor:
-    cg.Configuration.set("controller", False)
+    cg.Configuration.set("envelope", False)
 else:
-    cg.Configuration.set("controller", True)
+    cg.Configuration.set("envelope", True)
 
 
 # Getting configuration from file
@@ -67,7 +67,7 @@ env = gym.make(config.env_name)
 
 # env.seed(seed + rank)
 
-if config.controller:
+if config.envelope:
     env = SafetyEnvelope(env)
 
 eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
@@ -82,7 +82,7 @@ evaluator_episodes = ev_epi("dqn")
 
 if config.recording:
     print("starting recording..")
-    if config.controller:
+    if config.envelope:
         expt_dir = eval_folder + "/dqn/dqn_videos_yes/"
     else:
         expt_dir = eval_folder + "/dqn/dqn_videos_no/"

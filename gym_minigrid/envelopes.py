@@ -4,6 +4,7 @@ from configurations import config_grabber as cg
 
 from extendedminigrid import *
 from mtsa.controller import *
+from perception import Perception
 
 import gym
 
@@ -20,7 +21,10 @@ class SafetyEnvelope(gym.core.Wrapper):
         # Grab configuration
         self.config = cg.Configuration.grab()
 
-        print("Controllers: " + str(self.config.controllers))
+        # Perceptions of the agent, it gets updated at each step with the current observations
+        self.perception = Perception(env.gen_obs_decoded())
+
+        print("Envelopes: " + str(self.config.controllers))
         print("Rewards: " + str(self.config.rewards))
 
         # State Machine MTSA controllers
@@ -28,14 +32,9 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # Safety controllers
         for controller in self.config.controllers.safety:
-            new_controller = Controller(controller, "safe")
+            new_controller = Controller(controller, "safe", self.perception)
             self.controllers.append(new_controller)
 
-        # Reachability controllers
-        if hasattr(self.config.controllers, 'reachability'):
-            for controller in self.config.controllers.reachability:
-                new_controller = Controller(controller, "reach")
-                self.controllers.append(new_controller)
 
         # Set controller rewards
         self.respected_reward = self.config.rewards.controller.respected
@@ -46,6 +45,23 @@ class SafetyEnvelope(gym.core.Wrapper):
 
 
     def observe(self):
+
+        self.perception.update(self.env.gen_obs_decoded())
+
+        right = self.perception.element_at_right()
+        left = self.perception.element_at_left()
+
+        if right is not None:
+            print("R:\t" + right.type)
+        else:
+            print("R:\tnone")
+
+        if left is not None:
+            print("L:\t" + left.type)
+        else:
+            print("L:\tnone")
+
+
         list_actions = []
         for controller in self.controllers:
             controller.observe(self.env)
@@ -54,6 +70,8 @@ class SafetyEnvelope(gym.core.Wrapper):
             if controller.is_active():
                 list_actions.append(safe_actions_strings)
 
+        if not list_actions:
+            print("ERROR - List Empty!")
         safe_actions = set(list_actions[0])
         if len(list_actions) > 1:
             for s in list_actions[1:]:
