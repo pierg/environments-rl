@@ -16,7 +16,7 @@ class Evaluator:
         # Getting configuration from file
         self.config = cg.Configuration.grab()
 
-        if self.config.controller:
+        if self.config.envelope:
             file_name = self.config.evaluation_directory_name + "/a2c/" \
                         + "YES_" + str(algorithm) + "_" \
                         + self.config.config_name \
@@ -66,7 +66,7 @@ class Evaluator:
                                   'N_end_avg',
                                   'N_step_goal_avg',
                                   'env_name',
-                                  'controller'])
+                                  'envelope'])
 
 
         """
@@ -97,7 +97,7 @@ class Evaluator:
                 self.log_N_steps_goal[i] += infoevent["steps_count"]
 
 
-    def save(self, n_updates, total_num_steps, final_rewards, dist_entropy, value_loss, action_loss, env_name = None, controller = None):
+    def save(self, n_updates, total_num_steps, final_rewards, dist_entropy, value_loss, action_loss, env_name = None, envelope = None):
 
         log_N_goals_avg = np.mean(self.log_N_goals)
         if np.count_nonzero(self.log_N_goals) > 0:
@@ -125,7 +125,7 @@ class Evaluator:
                                                         log_N_end,
                                                         log_N_steps_goal_avg,
                                                         env_name,
-                                                        controller
+                                                        envelope
                                                         ])
 
         # Resetting all the variables until next logging interval

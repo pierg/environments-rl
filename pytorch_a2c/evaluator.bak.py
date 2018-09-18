@@ -17,7 +17,7 @@ class Evaluator:
         # Getting configuration from file
         self.config = cg.Configuration.grab()
 
-        if self.config.controller:
+        if self.config.envelope:
             file_name = self.config.evaluation_directory_name + "/a2c/" \
                         + "YES_" + str(algorithm) + "_" \
                         + self.config.config_name \
@@ -73,7 +73,7 @@ class Evaluator:
                                   'N_end_avg',
                                   'N_step_goal_avg',
                                   'env_name',
-                                  'controller'])
+                                  'envelope'])
 
         # For each episode of each processor, store the mean values of...
         csv_logger.create_header(config_file_path_episodes,
@@ -203,7 +203,7 @@ class Evaluator:
     def get_reward_median(self):
         return self.final_rewards.median()
 
-    def save(self, n_updates, t_start, t_end, dist_entropy, value_loss, action_loss, env_name=None, controller=None):
+    def save(self, n_updates, t_start, t_end, dist_entropy, value_loss, action_loss, env_name=None, envelope=None):
         total_num_steps = (n_updates + 1) * self.config.a2c.num_processes * self.config.a2c.num_steps
         csv_logger.write_to_log(self.config_file_path, [n_updates,
                                                         total_num_steps,
@@ -222,5 +222,5 @@ class Evaluator:
                                                         self.N_died_by_end / self.N_process,
                                                         self.numberOfStepAverage,
                                                         env_name,
-                                                        controller
+                                                        envelope
                                                         ])

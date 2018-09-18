@@ -228,7 +228,7 @@ register(
             "config_name": "randomEnv-{0}x{0}-{1}-v0".format(grid_size, random_token),
             "algorithm": "a2c",
             "env_name": "MiniGrid-RandomEnv-{0}x{0}-{1}-v0".format(grid_size, random_token),
-            "controller": bool(elements.controller),
+            "envelope": bool(elements.envelope),
             "rendering": bool(elements.rendering),
             "recording": bool(elements.recording),
             "log_interval": int("{0}".format(elements.log_interval)),

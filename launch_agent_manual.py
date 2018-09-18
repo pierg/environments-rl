@@ -49,7 +49,7 @@ def main():
     # Load the gym environment
     env = gym.make(options.env_name)
 
-    if config.controller:
+    if config.envelope:
         env = SafetyEnvelope(env)
 
 

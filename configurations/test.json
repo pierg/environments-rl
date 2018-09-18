@@ -1,5 +1,5 @@
 {
-    "controller": true,
+    "envelope": true,
     "rendering": true,
     "recording": false,
     "log_interval": 10,
@@ -32,10 +32,6 @@
         "save_evaluation_interval": 50
     },
     "rewards": {
-        "controller": {
-            "violated": -0.001,
-            "respected": 0.0
-        },
         "cleaningenv": {
             "clean": 10.0
         },

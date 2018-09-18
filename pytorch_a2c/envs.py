@@ -20,14 +20,14 @@ def make_env(env_id, seed, rank, force=False, resume=False, custom_message="_"):
         env = gym.make(env_id)
         env.seed(seed + rank)
 
-        if config.controller:
+        if config.envelope:
             env = SafetyEnvelope(env)
 
         # record only the first agent
         if config.recording and rank==0:
             print("starting recording..")
             eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
-            if config.controller:
+            if config.envelope:
                 expt_dir = eval_folder + "/a2c/a2c_videos_yes/"
             else:
                 expt_dir = eval_folder + "/a2c/a2c_videos_no/"

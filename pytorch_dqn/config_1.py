@@ -48,7 +48,7 @@ env = gym.make(config.env_name)
 
 # env.seed(seed + rank)
 
-if config.controller:
+if config.envelope:
     env = SafetyEnvelope(env)
 
 if args.record:

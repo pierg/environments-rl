@@ -3,7 +3,7 @@
   "n_water": 50,
   "n_deadend": 4,
   "light_switch": false,
-  "controller": true,
+  "envelope": true,
   "rendering": true,
   "recording": false,
   "log_interval": 10,
