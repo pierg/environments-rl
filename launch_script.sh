@@ -68,7 +68,7 @@ while [ $iterations -ne $i ]; do
                     echo "...creating a random light environment... using $environment and $reward"
                     configuration_file=`python3 env_gen_light.py --environment_file $environment --rewards_file $reward`
                 else
-                    echo "...creating a  light environment... using $environment"
+                    echo "...creating a random light environment... using $environment"
                     configuration_file=`python3 env_gen_light.py --environment_file $environment --rewards_file "default"`
                 fi
             else
@@ -146,7 +146,8 @@ while [ $iterations -ne $i ]; do
             fi
             echo "plotting..."
             python3 ./evaluations/dqn/plot_dqn.py
-            python3 ./evaluations/a2c/plot_a2c.py
+            python3 ./evaluations/a2c/plot_single.py
+            python3 ./evaluations/a2c/plot_comparison.py
     fi
     if [ $start_training -eq 1 ] && [ $logstdfile -eq 1 ]; then
             echo "...launching the training..."
