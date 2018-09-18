@@ -178,13 +178,13 @@ N_steps_nomo = N_steps_nomo / N_whitout_mo
 N_Updates_nomo = N_Updates_nomo / N_whitout_mo
 
 # print all the mean info
-print("Controller Data: ")
+print("Envelope Data: ")
 print(c("N_total_death : ", N_total_death_mo, "  N_death_by_end : ", N_death_by_end_mo, "  N_death_by_Environment : ", N_death_env_mo))
 print(c("N_saved : ", N_saved_mo))
 print(c("N_Episodes", N_episode_mo, "  N_steps : ", N_steps_mo, "  N_Updates : ", N_Updates_mo))
 
 print("                            ")
-print("No Controller Data: ")
+print("No Envelope Data: ")
 print(c("N_total_death : ", N_total_death_nomo, "  N_death_by_end : ", N_death_by_end_nomo, "  N_death_by_Environment : ", N_death_env_nomo))
 print(c("N_saved : ", N_saved_nomo))
 print(c("N_Episodes", N_episode_nomo, "  N_steps : ", N_steps_nomo, "  N_Updates : ", N_Updates_nomo))
