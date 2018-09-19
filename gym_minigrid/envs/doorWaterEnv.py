@@ -34,6 +34,7 @@ class DoorWaterEnv(ExMiniGridEnv):
         self.grid.vert_wall(3, 0, height)
         self.grid.horz_wall(0, 5, width)
         self.grid.horz_wall(0, 6, width)
+
         # Place the door which separate the rooms
         self.grid.set(3, 2, Door(self._rand_elem(sorted(set(COLOR_NAMES)))))
 

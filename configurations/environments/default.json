@@ -1,8 +1,8 @@
 {
-  "grid_size": 19,
-  "n_water": 50,
+  "grid_size": 15,
+  "n_water": 2,
   "n_deadend": 4,
-  "light_switch": false,
+  "light_switch": true,
   "envelope": true,
   "rendering": true,
   "recording": false,

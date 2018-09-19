@@ -72,6 +72,11 @@ class LightTestExpEnv(ExMiniGridEnv):
         self.grid.set(3, 5, switchRoom2)
 
         # add water
+        self.grid.set(1, 4, Water())
+        self.grid.set(2, 6, Water())
+        self.grid.set(5, 3, Water())
+        self.grid.set(6, 5, Water())
+
 
         # Set start position
         self.start_pos = (1, 1)
