@@ -1,5 +1,5 @@
 {
-    "envelope": true,
+    "envelope": false,
     "rendering": false,
     "recording": true,
     "log_interval": 10,
