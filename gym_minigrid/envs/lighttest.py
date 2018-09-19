@@ -61,6 +61,12 @@ class LightTestExpEnv(ExMiniGridEnv):
         # Place the door
         self.grid.set(4, 4, Door(self._rand_elem(sorted(set(COLOR_NAMES)))))
 
+        # add water
+        self.grid.set(1, 4, Water())
+        self.grid.set(2, 6, Water())
+        self.grid.set(5, 3, Water())
+        self.grid.set(6, 5, Water())
+
         # Add the room
         self.roomList = []
         self.roomList.append(Room(0, (3, 7), (1, 1), True))
@@ -76,12 +82,6 @@ class LightTestExpEnv(ExMiniGridEnv):
         switchRoom2.cur_pos = (3, 5)
         switchRoom2.elements_in_room(tab)
         self.grid.set(3, 5, switchRoom2)
-
-        # add water
-        self.grid.set(1, 4, Water())
-        self.grid.set(2, 6, Water())
-        self.grid.set(5, 3, Water())
-        self.grid.set(6, 5, Water())
 
 
         # Set start position
