@@ -12,7 +12,6 @@ import numpy as np
 config = cg.Configuration.grab()
 
 AGENT_VIEW_SIZE = config.agent_view_size
-EXTRA_OBSERVATIONS_SIZE = 5
 OBS_ARRAY_SIZE = (AGENT_VIEW_SIZE, AGENT_VIEW_SIZE)
 
 def extended_dic(obj_names=[]):
@@ -378,7 +377,7 @@ class ExMiniGridEnv(MiniGridEnv):
         high: highest element value
         shape: imgSize tuple, each element can be of a value between 'low' and 'high'
         """
-        imgSize = reduce(operator.mul, OBS_ARRAY_SIZE, 1) + EXTRA_OBSERVATIONS_SIZE
+        imgSize = reduce(operator.mul, OBS_ARRAY_SIZE, 1)
         elemSize = len(IDX_TO_OBJECT)
         self.observation_space = spaces.Box(
             low=0,
@@ -578,9 +577,6 @@ class ExMiniGridEnv(MiniGridEnv):
 
             array = np.zeros(shape=(grid.width, grid.height, 1), dtype='uint8')
 
-            obs_door_open = 0
-            obs_light_on = 0
-
             for j in range(0, grid.height):
                 for i in range(0, grid.width):
 
@@ -591,11 +587,6 @@ class ExMiniGridEnv(MiniGridEnv):
 
                     array[i, j, 0] = OBJECT_TO_IDX[v.type]
 
-                    if hasattr(v, 'is_open') and v.is_open:
-                        obs_door_open = 1
-
-                    if hasattr(v, 'is_on') and v.is_on:
-                        obs_light_on = 1
 
             image = array
 
@@ -607,7 +598,8 @@ class ExMiniGridEnv(MiniGridEnv):
 
             flatten_image = image.flatten()
 
-            obs = np.append(flatten_image, extra_observations)
+            # obs = np.append(flatten_image, extra_observations)
+            obs = flatten_image
 
             return obs
 
