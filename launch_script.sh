@@ -124,22 +124,24 @@ while [ $iterations -ne $i ]; do
     chmod 744 ./pytorch_a2c/main.py
 
     if [ $start_training -eq 1 ] && [ $logstdfile -eq 0 ]; then
-            echo "...launching the training..."
+    echo "...launching the training without logging to file..."
             if [ $launch_monitor -eq 1 ]; then
                 echo "+++++ With Envelope +++++"
                 if [ $qlearning -eq 1 ]; then
                     echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
                     python3 ./pytorch_dqn/main.py --stop $stop --record --norender
                 else
+                    echo "launching ./pytorch_a2c/main.py --stop $stop --record --norender"
                     python3 ./pytorch_a2c/main.py --stop $stop --record --norender
                 fi
             fi
             if [ $launch_without -eq 1 ]; then
-                echo "..launching the training..."
                 echo "------ Without Envelope -----"
                 if [ $qlearning -eq 1 ]; then
+                    echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
                     python3 ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor
                 else
+                    echo "launching: ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor"
                     python3 ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor
                 fi
             fi
@@ -149,22 +151,24 @@ while [ $iterations -ne $i ]; do
             python3 ./evaluations/a2c/plot_comparison.py
     fi
     if [ $start_training -eq 1 ] && [ $logstdfile -eq 1 ]; then
-            echo "...launching the training..."
+    echo "...launching the training logging to file..."
             if [ $launch_monitor -eq 1 ]; then
                 echo "+++++ With Envelope +++++"
                 if [ $qlearning -eq 1 ]; then
                     echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
                     python3 ./pytorch_dqn/main.py --stop $stop --record --norender --logstdfile
                 else
+                    echo "launching: ./pytorch_a2c/main.py --stop $stop --record --norender --logstdfile"
                     python3 ./pytorch_a2c/main.py --stop $stop --record --norender --logstdfile
                 fi
             fi
             if [ $launch_without -eq 1 ]; then
-                echo "..launching the training..."
                 echo "------ Without Envelope -----"
                 if [ $qlearning -eq 1 ]; then
+                    echo "launching: ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor --logstdfile"
                     python3 ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor --logstdfile
                 else
+                    echo "launching: ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor --logstdfile"
                     python3 ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor --logstdfile
                 fi
             fi
