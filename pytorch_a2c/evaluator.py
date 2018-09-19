@@ -105,7 +105,7 @@ class Evaluator:
 
         log_N_goals_avg = np.mean(self.log_N_goals)
         if np.count_nonzero(self.log_N_goals) > 0:
-            log_N_steps_goal_avg = np.sum(self.log_N_steps_goal)/np.count_nonzero(self.log_N_goals)
+            log_N_steps_goal_avg = np.sum(self.log_N_steps_goal)/np.sum(self.log_N_goals)
         else:
             log_N_steps_goal_avg = -100
         log_N_died_avg = np.mean(self.log_N_died)
