@@ -500,7 +500,7 @@ class ExMiniGridEnv(MiniGridEnv):
 
         if self.config.debug_mode:
             print("\nAgent View Original")
-            self.print_grid((grid, vis_mask))
+            self.print_grid(grid)
 
         """if Perception.light_on_current_room(self):"""
         try:
@@ -570,7 +570,7 @@ class ExMiniGridEnv(MiniGridEnv):
         grid, extra_observations = self.gen_obs_decoded()
 
         if self.config.debug_mode:
-            print("\nAgent View Original")
+            print("\nAgent View Retreived")
             self.print_grid(grid)
 
         """if Perception.light_on_current_room(self):"""
@@ -598,12 +598,6 @@ class ExMiniGridEnv(MiniGridEnv):
                         obs_light_on = 1
 
             image = array
-
-            if self.config.debug_mode:
-                print("_______________________________________\n")
-                print("Agent View Modified with Light Info")
-                self.print_grid(grid)
-                print("\n\n")
 
             flatten_image = image.flatten()
 

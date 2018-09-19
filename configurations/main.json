@@ -5,11 +5,11 @@
     "log_interval": 10,
     "max_num_frames": 5000000,
     "max_num_steps_episode": -1,
-    "debug_mode": false,
+    "debug_mode": true,
     "evaluation_directory_name": "evaluations",
     "config_name": "config-MiniGrid-LightTestExp-9x9-v0",
     "env_name": "MiniGrid-LightTestExp-9x9-v0",
-    "training_mode": true,
+    "training_mode": false,
     "agent_view_size": 7,
     "visdom": false,
     "dqn": {
