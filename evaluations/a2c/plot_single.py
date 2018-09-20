@@ -102,6 +102,7 @@ def single_line_plot(x, y, x_label, y_label, ys_sem=0, title=""):
     y_size = 2
     figure = plt.figure(num=None, figsize=(x_size, y_size), dpi=80, facecolor='w', edgecolor='k')
     plt.suptitle(title)
+    plt.grid(True)
 
     plt.plot(x, y, linewidth=0.5)
     if ys_sem != 0 and len(y) != 0:
@@ -128,6 +129,7 @@ def multi_line_plot(x, ys, x_label, y_labels, ys_sem=0, title=""):
     """
     figure = plt.figure()
     plt.suptitle(title)
+    plt.grid(True)
 
     for k in range(len(ys)):
         plt.plot(x, ys[k], label=y_labels[k])
@@ -151,6 +153,7 @@ def multi_figures_plot(x, ys, x_label, y_labels, ys_sem=0, title=""):
     y_size = len(y_labels) * 2
     figure = plt.figure(num=None, figsize=(x_size, y_size), dpi=80, facecolor='w', edgecolor='k')
     plt.suptitle(title)
+    plt.grid(True)
 
     ax_to_send = figure.subplots(nrows=len(ys), ncols=1)
     if len(ys) == 1:

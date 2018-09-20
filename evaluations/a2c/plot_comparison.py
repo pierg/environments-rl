@@ -98,10 +98,12 @@ def single_line_plot(x, y, x_label, y_label, ys_sem=0, title=""):
     :param y_sem: (optional) standard error mean, it adds as translucent area around the y
     :return: matplot figure, it can then be added to a pdf
     """
-    x_size = 20
+
+    x_size = 40
     y_size = 2
     figure = plt.figure(num=None, figsize=(x_size, y_size), dpi=80, facecolor='w', edgecolor='k')
     plt.suptitle(title)
+    plt.grid(True)
 
     plt.plot(x, y, linewidth=0.5)
     if ys_sem != 0 and len(y) != 0:
@@ -128,6 +130,7 @@ def multi_line_plot(xs, ys, x_label, y_labels, colors, ys_sem=0, title=""):
     """
     figure = plt.figure()
     plt.suptitle(title)
+    plt.grid(True)
     for k in range(len(ys)):
         plt.plot(xs[k], ys[k], colors[k], label=y_labels[k], linewidth=0.3)
         if ys_sem != 0:
@@ -138,7 +141,6 @@ def multi_line_plot(xs, ys, x_label, y_labels, colors, ys_sem=0, title=""):
                 area_top.append(ys[k][l] + ys_sem[k][l - 1])
             plt.fill_between(xs[k], area_bot, area_top, color=colors[k], alpha=0.2)
     plt.legend()
-    plt.grid(True)
     plt.xlabel('Number of updates (k)')
 
     return figure
@@ -159,6 +161,7 @@ def multi_figures_plot(x, ys, x_label, y_labels, ys_sem=0, title=""):
     y_size = len(y_labels) * 2
     figure = plt.figure(num=None, figsize=(x_size, y_size), dpi=80, facecolor='w', edgecolor='k')
     plt.suptitle(title)
+    plt.grid(True)
 
     ax_to_send = figure.subplots(nrows=len(ys), ncols=1)
     if len(ys) == 1:
