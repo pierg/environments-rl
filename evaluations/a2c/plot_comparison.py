@@ -13,7 +13,7 @@ plt.rcParams.update({'font.size': 10})
 
 # Data
 env_name = []
-controller = []
+envelope = []
 
 N_updates = []
 N_timesteps = []
@@ -31,7 +31,7 @@ N_died_avg = []
 N_end_avg = []
 N_step_goal_avg = []
 env_name = []
-controller = []
+envelope = []
 
 
 def extract_all_data_from_csv(csv_folder_abs_path):
@@ -55,7 +55,7 @@ def extract_all_data_from_csv(csv_folder_abs_path):
             N_end_avg.append(extract_array("N_end_avg", csv_folder_abs_path + "/" + csv_file_name))
             N_step_goal_avg.append(extract_array("N_step_goal_avg", csv_folder_abs_path + "/" + csv_file_name))
             env_name.append(extract_array("env_name", csv_folder_abs_path + "/" + csv_file_name))
-            controller.append(extract_array("controller", csv_folder_abs_path + "/" + csv_file_name)[0])
+            envelope.append(extract_array("envelope", csv_folder_abs_path + "/" + csv_file_name)[0])
 
 
 def extract_array(label, csv_file):
@@ -110,13 +110,13 @@ def single_line_plot(x, y, x_label, y_label, ys_sem=0, title=""):
         for k in range(1, len(y)):
             area_bot.append(y[k] - ys_sem[k - 1])
             area_top.append(y[k] + ys_sem[k - 1])
-        plt.fill_between(x, area_bot, area_top, color="skyblue", alpha=0.4)
+        plt.fill_between(x, area_bot, area_top, color="skyblue", alpha=0.8)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     return figure
 
 
-def multi_line_plot(x, ys, x_label, y_labels, ys_sem=0, title=""):
+def multi_line_plot(xs, ys, x_label, y_labels, colors, ys_sem=0, title=""):
     """
     Plots all the elements in the y[0], y[1]...etc.. as overlapping lines on on the x
     :param x: array of values rappresenting the x, scale
@@ -128,10 +128,18 @@ def multi_line_plot(x, ys, x_label, y_labels, ys_sem=0, title=""):
     """
     figure = plt.figure()
     plt.suptitle(title)
-
     for k in range(len(ys)):
-        plt.plot(x, ys[k], label=y_labels[k])
+        plt.plot(xs[k], ys[k], colors[k], label=y_labels[k], linewidth=0.3)
+        if ys_sem != 0:
+            area_top = [ys[k][0]]
+            area_bot = [ys[k][0]]
+            for l in range(1, len(ys[k])):
+                area_bot.append(ys[k][l] - ys_sem[k][l - 1])
+                area_top.append(ys[k][l] + ys_sem[k][l - 1])
+            plt.fill_between(xs[k], area_bot, area_top, color=colors[k], alpha=0.2)
     plt.legend()
+    plt.grid(True)
+    plt.xlabel('Number of updates (k)')
 
     return figure
 
@@ -176,44 +184,32 @@ def multi_figures_plot(x, ys, x_label, y_labels, ys_sem=0, title=""):
 def plot():
     current_directory = os.path.abspath(os.path.dirname(__file__))
     extract_all_data_from_csv(current_directory)
-    for i in range(len(N_updates)):
-        title = "controller : " + str(controller[i])
-        figure_1 = multi_figures_plot(N_updates[i],
-                                      [N_goals_avg[i],
-                                       N_step_goal_avg[i]
-                                       ], 'N_updates', ['N goals reached (avg)',
-                                                        'steps to goal (avg)'
-                                                        ], title=title)
 
-        figure_2 = multi_figures_plot(N_updates[i],
-                                      [N_died_avg[i],
-                                       N_end_avg[i],
-                                       N_violation_avg[i]
-                                       ], 'N_updates', ['N deaths (avg)',
-                                                        'N ended (avg)',
-                                                        'N violations (avg)'
-                                                        ])
+    if "True" in envelope[0]:
+        label_0 = "WiseML"
+    else:
+        label_0 = "SimpleRL"
 
-        figure_3 = single_line_plot(N_updates[i],
-                                    Reward_mean[i],
-                                    'N_updates',
-                                    'reward mean and sem',
-                                    Reward_std[i])
+    if "True" in envelope[1]:
+        label_1 = "WiseML"
+    else:
+        label_1 = "SimpleRL"
 
-        if controller[i] == "True":
-            Name = "YES_a2c_" + env_name[i][0] + ".pdf"
-        else:
-            Name = "NO_a2c_" + env_name[i][0] + ".pdf"
+    figure_1 = multi_line_plot([N_updates[0][:], N_updates[1][:]],
+                               [Reward_mean[0][:], Reward_mean[1][:]],
+                               "N_updates",
+                               [label_0, label_1],
+                               ["r", "b"],
+                               [Reward_std[0][:], Reward_std[1][:]])
 
-        print("PdfName : ", Name)
+    Name = "COMPARISON_a2c_" + env_name[0][0] + ".pdf"
+    print("PdfName : ", Name)
 
-        pdf = PdfPages(current_directory + "/" + Name)
+    pdf = PdfPages(current_directory + "/" + Name)
 
-        pdf.savefig(figure_3)
-        pdf.savefig(figure_1)
-        pdf.savefig(figure_2)
+    pdf.savefig(figure_1)
 
-        pdf.close()
+    pdf.close()
 
 
 if __name__ == "__main__":

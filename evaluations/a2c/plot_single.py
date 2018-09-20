@@ -13,7 +13,7 @@ plt.rcParams.update({'font.size': 10})
 
 # Data
 env_name = []
-controller = []
+envelope = []
 
 N_updates = []
 N_timesteps = []
@@ -31,7 +31,7 @@ N_died_avg = []
 N_end_avg = []
 N_step_goal_avg = []
 env_name = []
-controller = []
+envelope = []
 
 
 def extract_all_data_from_csv(csv_folder_abs_path):
@@ -55,7 +55,7 @@ def extract_all_data_from_csv(csv_folder_abs_path):
             N_end_avg.append(extract_array("N_end_avg", csv_folder_abs_path + "/" + csv_file_name))
             N_step_goal_avg.append(extract_array("N_step_goal_avg", csv_folder_abs_path + "/" + csv_file_name))
             env_name.append(extract_array("env_name", csv_folder_abs_path + "/" + csv_file_name))
-            controller.append(extract_array("controller", csv_folder_abs_path + "/" + csv_file_name)[0])
+            envelope.append(extract_array("envelope", csv_folder_abs_path + "/" + csv_file_name)[0])
 
 
 def extract_array(label, csv_file):
@@ -177,7 +177,7 @@ def plot():
     current_directory = os.path.abspath(os.path.dirname(__file__))
     extract_all_data_from_csv(current_directory)
     for i in range(len(N_updates)):
-        title = "controller : " + str(controller[i])
+        title = "envelope : " + str(envelope[i])
         figure_1 = multi_figures_plot(N_updates[i],
                                       [N_goals_avg[i],
                                        N_step_goal_avg[i]
@@ -200,7 +200,7 @@ def plot():
                                     'reward mean and sem',
                                     Reward_std[i])
 
-        if controller[i] == "True":
+        if envelope[i] == "True":
             Name = "YES_a2c_" + env_name[i][0] + ".pdf"
         else:
             Name = "NO_a2c_" + env_name[i][0] + ".pdf"
