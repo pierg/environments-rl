@@ -120,12 +120,12 @@ class Precedence(SafetyStateMachine):
         super().__init__(name, "precedence", self.states, self.transitions, 'idle', notify, perception)
 
 
-    def _context_active(self, obs, action_proposed):
+    def context_active(self, obs, action_proposed):
         return True
 
     def _map_context(self, obs, action_proposed):
         # Activating condition
-        context_active = self._context_active(obs, action_proposed)
+        context_active = self.context_active(obs, action_proposed)
         self.active = context_active
         return context_active
 

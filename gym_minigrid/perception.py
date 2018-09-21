@@ -32,6 +32,16 @@ class Perception():
         self.current_room_light = extra_obs[3]
         self.next_room_light = extra_obs[4]
 
+    def check_context(self, context):
+        if context == "water-front":
+            elem = self.element_in_front()
+            if elem is not None and elem.type == "water":
+                return True
+            return False
+        elif context == "always":
+            return True
+
+
     def is_condition_satisfied(self, condition, action_proposed=None):
         if condition == "light-on-current-room":
             # Returns true if the lights are on in the room the agent is currently in

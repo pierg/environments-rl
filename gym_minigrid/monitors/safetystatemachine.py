@@ -217,7 +217,7 @@ class MyTest(Machine):
 
 class SafetyStateMachine(object):
 
-    def __init__(self, name, pattern, states, transitions, initial, notify, perception):
+    def __init__(self, name, pattern, states, transitions, initial, notify, perception, context):
         self.name = name
         self.pattern = pattern
 
@@ -255,6 +255,7 @@ class SafetyStateMachine(object):
         self.actions = MiniGridEnv.Actions
 
         # Stores if the state machine is active (based on the context)
+        self.context = context
         self.context_active = False
 
     def _map_conditions(self, action_proposed):
@@ -288,41 +289,45 @@ class SafetyStateMachine(object):
         abs_file_path = os.path.abspath(__file__ + "/../draws/" + self.pattern + "_" + self.name + ".png")
         self.machine.get_graph(title=self.name).draw(abs_file_path, prog='dot')
 
+
+    def is_context_active(self):
+        return self.context_active
+
     # Called before the action is going to be performed on the environment and obs are the current observations
-    def check(self, obs_pre, action_proposed):
-        self.observations = obs_pre
-        self.action_proposed = action_proposed
-        logging.info("     check() -> monitor_state before: " + self.state)
+    def activate_contextually(self):
 
         # Check if needs to be activated and trigger
-        self.context_active = self._map_context(obs_pre, action_proposed)
+        self.context_active = self.perception.check_context(self.context)
+        if self.context_active:
+            print("ACTIVE")
         self.trigger('*')
 
-        if self.context_active:
-            logging.info("     check() -> monitor_state context: " + self.state)
+        if self.state == "active":
+            print(self.name + " is active -> state: " + self.state)
+            return True
+        else:
+            return False
 
-            # Check the conditions and trigger
-            self._map_conditions(action_proposed)
-            self.trigger('*')
 
-            logging.info("     check() -> monitor_state conditions : " + self.state)
+    # Called before the action is going to be performed on the environment and obs are the current observations
+    def check(self, obs_pre, action_proposed):
+        logging.info("     check() -> monitor_state context: " + self.state)
+
+        # Check the conditions and trigger
+        self._map_conditions(action_proposed)
+        self.trigger('*')
+
+        logging.info("     check() -> monitor_state conditions : " + self.state)
 
     # Update the state after the action has been performed in the environment
     def verify(self, obs_post, applied_action):
+        # Check the conditions and trigger
+        self._map_conditions(applied_action)
+        logging.info("     verity() -> mon_state bef : " + self.state)
 
-        logging.info("____________________________________")
+        self.trigger('*')
 
-        if self.context_active:
-            # Check the conditions and trigger
-            self._map_conditions(applied_action)
-            logging.info("     verity() -> mon_state bef : " + self.state)
-
-            self.trigger('*')
-
-            logging.info("     verity() -> mon_state aft : " + self.state)
-
-        # if self.state != self.env_state:
-        #     self._on_mismatch()
+        logging.info("     verity() -> mon_state aft : " + self.state)
 
 
     """ Actions available to the agent - used for conditions checking """

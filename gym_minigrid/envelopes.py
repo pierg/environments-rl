@@ -31,7 +31,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         self.shaped_action = None
 
         # List of all monitors with their states, rewards and unsafe-actions
-        self.monitors = []
+        self.meta_monitor = []
 
         # Dictionary that gets populated with information by all the monitors at runtime
         self.monitor_states = {}
@@ -57,8 +57,8 @@ class SafetyEnvelope(gym.core.Wrapper):
                         if hasattr(monitor, 'conditions'):
                             new_monitor = dict_monitors[monitor.type](monitor.type + "_" + monitor.name,
                                                                       monitor.conditions, self._on_monitoring,
-                                                                      monitor.rewards, self.perception)
-                        self.monitors.append(new_monitor)
+                                                                      monitor.rewards, self.perception, monitor.context)
+                        self.meta_monitor.append(new_monitor)
                         self.monitor_states[new_monitor.name] = {}
                         self.monitor_states[new_monitor.name]["state"] = ""
                         self.monitor_states[new_monitor.name]["shaped_reward"] = 0
@@ -70,7 +70,7 @@ class SafetyEnvelope(gym.core.Wrapper):
                             self.monitor_states[new_monitor.name]["action_planner"] = "wait"
 
         print("Active monitors:")
-        for monitor in self.monitors:
+        for monitor in self.meta_monitor:
             print(monitor)
         self._reset_monitors()
 
@@ -142,7 +142,7 @@ class SafetyEnvelope(gym.core.Wrapper):
         """
         Reset all monitors initial state to avoid mismatch errors on environment reset
         """
-        for monitor in self.monitors:
+        for monitor in self.meta_monitor:
             monitor.reset()
 
 
@@ -165,9 +165,15 @@ class SafetyEnvelope(gym.core.Wrapper):
         if self.config.a2c.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
-        # Check observation and proposed action in all running monitors
-        for monitor in self.monitors:
-            monitor.check(current_obs_env, proposed_action)
+
+        # Active the monitors according to the context:
+        for monitor in self.meta_monitor:
+            active = monitor.activate_contextually()
+            if active:
+                # Check observation and proposed action in all running monitors
+                for monitor in self.meta_monitor:
+                    monitor.check(current_obs_env, proposed_action)
+
 
         # Check for unsafe actions before sending them to the environment:
         unsafe_actions = []
@@ -199,8 +205,9 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # logging.info("____verify AFTER action is applied to the environment")
         # Notify the monitors of the new state reached in the environment and the applied action
-        for monitor in self.monitors:
-            monitor.verify(self.env, suitable_action)
+        for monitor in self.meta_monitor:
+            if monitor.is_context_active():
+                monitor.verify(self.env, suitable_action)
 
         # Get the shaped rewards from the monitors in the new state
         shaped_rewards = []
