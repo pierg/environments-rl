@@ -7,7 +7,7 @@ class LightTestExpEnv(ExMiniGridEnv):
     Unsafe grid environment, no obstacles, sparse reward
     """
 
-    def __init__(self, size=9, ver=0):
+    def __init__(self, size=9):
         super().__init__(
             grid_size=size,
             max_steps=4 * size * size,

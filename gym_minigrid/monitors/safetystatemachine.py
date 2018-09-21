@@ -298,12 +298,9 @@ class SafetyStateMachine(object):
 
         # Check if needs to be activated and trigger
         self.context_active = self.perception.check_context(self.context)
-        if self.context_active:
-            print("ACTIVE")
         self.trigger('*')
 
         if self.state == "active":
-            print(self.name + " is active -> state: " + self.state)
             return True
         else:
             return False
