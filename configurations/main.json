@@ -75,6 +75,58 @@
                     },
                     "type": "universality"
                 }
+            },
+            "precedence": {
+                "lightPrecedence": {
+                    "action_planner": "turn_right",
+                    "active": true,
+                    "context": "door-front",
+                    "conditions": {
+                        "post": "entering-a-room",
+                        "pre": "light-switch-turned-on"
+                    },
+                    "mode": "enforcing",
+                    "name": "lightPrecedence",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "precedence"
+                }
+            },
+            "response": {
+                "openDoorResponse": {
+                    "action_planner": "toggle",
+                    "active": true,
+                    "context": "door-front",
+                    "conditions": {
+                        "post": "action-is-toggle",
+                        "pre": "door-closed-in-front"
+                    },
+                    "mode": "enforcing",
+                    "name": "openDoorResponse",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "response"
+                },
+                "switchOffResponse": {
+                    "action_planner": "toggle",
+                    "active": true,
+                    "context": "lightsw-front",
+                    "conditions": {
+                        "post": "action-is-toggle",
+                        "pre": "light-switch-in-front-off"
+                    },
+                    "mode": "enforcing",
+                    "name": "switchOffResponse",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "response"
+                }
             }
         }
     }

@@ -95,7 +95,7 @@ class Response(SafetyStateMachine):
 
     # Sate machine conditions
     def active_cond(self):
-        return self.active
+        return self.context_active
 
     def precondition_cond(self):
         return self.obs_precondition
@@ -103,26 +103,20 @@ class Response(SafetyStateMachine):
     def postcondition_cond(self):
         return self.obs_postcondition
 
-    def __init__(self, name, conditions, notify, rewards, perception):
+    def __init__(self, name, conditions, notify, rewards, perception, context):
         self.respectd_rwd = rewards.respected
         self.violated_rwd = rewards.violated
         self.postcondition = conditions.post
         self.precondition = conditions.pre
 
-        self.active = False
+        self.context_active = False
         self.obs_precondition = False
         self.obs_postcondition = False
 
-        super().__init__(name, "response", self.states, self.transitions, 'idle', notify, perception)
+        super().__init__(name, "response", self.states, self.transitions, 'idle', notify, perception, context)
 
     def context_active(self, obs, action_proposed):
         return True
-
-    def _map_context(self, obs, action_proposed):
-        # Activating condition
-        context_active = self.context_active(obs, action_proposed)
-        self.active = context_active
-        return context_active
 
     # Convert observations to state and populate the obs_conditions
     def _map_conditions(self, action_proposed):
@@ -136,7 +130,7 @@ class Response(SafetyStateMachine):
             self.trigger("*")
 
     def _on_idle(self):
-        self.active = False
+        self.context_active = False
         super()._on_monitoring()
 
     def _on_monitoring(self):

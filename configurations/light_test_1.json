@@ -32,9 +32,6 @@
         "save_evaluation_interval": 50
     },
     "rewards": {
-        "cleaningenv": {
-            "clean": 1.0
-        },
         "standard": {
             "death": -10.0,
             "goal": 10.0,
@@ -50,6 +47,7 @@
                 "waterAbsence": {
                     "action_planner": "wait",
                     "active": true,
+                    "context": "water-front",
                     "conditions": "stepping-on-water",
                     "mode": "enforcing",
                     "name": "waterAbsence",
@@ -64,6 +62,7 @@
                 "lightUniversally": {
                     "action_planner": "wait",
                     "active": true,
+                    "context": "always",
                     "conditions": "light-on-current-room",
                     "mode": "enforcing",
                     "name": "lightUniversality",
@@ -78,6 +77,7 @@
                 "lightPrecedence": {
                     "action_planner": "turn_right",
                     "active": true,
+                    "context": "door-front",
                     "conditions": {
                         "post": "entering-a-room",
                         "pre": "light-switch-turned-on"
@@ -95,6 +95,7 @@
                 "openDoorResponse": {
                     "action_planner": "toggle",
                     "active": true,
+                    "context": "door-front",
                     "conditions": {
                         "post": "action-is-toggle",
                         "pre": "door-closed-in-front"
@@ -110,6 +111,7 @@
                 "switchOffResponse": {
                     "action_planner": "toggle",
                     "active": true,
+                    "context": "lightsw-front",
                     "conditions": {
                         "post": "action-is-toggle",
                         "pre": "light-switch-in-front-off"
