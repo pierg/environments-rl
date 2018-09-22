@@ -8,6 +8,7 @@ class LightTestExpEnv(ExMiniGridEnv):
     """
 
     def __init__(self, size=9):
+        self.ver = 0
         super().__init__(
             grid_size=size,
             max_steps=4 * size * size,

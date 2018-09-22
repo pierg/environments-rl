@@ -12,7 +12,7 @@ except Exception as e:
 from configurations import config_grabber as cg
 
 
-def make_env(env_id, seed, rank, force=False, resume=False, custom_message="_"):
+def make_env(env_id, seed, rank, evaluation_id, force=False, resume=False, custom_message="_"):
 
     config = cg.Configuration.grab()
 
@@ -28,9 +28,9 @@ def make_env(env_id, seed, rank, force=False, resume=False, custom_message="_"):
             print("starting recording..")
             eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
             if config.envelope:
-                expt_dir = eval_folder + "/a2c/a2c_videos_yes/"
+                expt_dir = eval_folder + "/" + evaluation_id + "_videos"
             else:
-                expt_dir = eval_folder + "/a2c/a2c_videos_no/"
+                expt_dir = eval_folder + "/" + evaluation_id + "_videos"
 
             uid = "___proc_n_" + str(rank) + " ___" + custom_message + "__++__"
             env = wrappers.Monitor(env, expt_dir, uid=uid, force=force, resume=resume)

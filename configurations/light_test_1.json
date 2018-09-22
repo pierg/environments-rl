@@ -7,7 +7,7 @@
     "max_num_steps_episode": -1,
     "debug_mode": false,
     "evaluation_directory_name": "evaluations",
-    "config_name": "config-MiniGrid-LightTestExp-9x9-v0",
+    "config_name": "light_test_1",
     "env_name": "MiniGrid-LightTestExp-9x9-v0",
     "training_mode": true,
     "agent_view_size": 7,

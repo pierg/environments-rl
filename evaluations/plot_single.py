@@ -12,7 +12,7 @@ plt.rcParams["font.family"] = "Times New Roman"
 plt.rcParams.update({'font.size': 10})
 
 # Data
-env_name = []
+eval_name = []
 envelope = []
 
 N_updates = []
@@ -30,7 +30,7 @@ N_goals_avg = []
 N_died_avg = []
 N_end_avg = []
 N_step_goal_avg = []
-env_name = []
+eval_name = []
 envelope = []
 
 
@@ -39,6 +39,7 @@ def extract_all_data_from_csv(csv_folder_abs_path):
         if "a2c" in csv_file_name and ".csv" in csv_file_name:
             print("CsvName : ", csv_file_name)
 
+            file_eval_name = csv_file_name.replace(".csv", "")
             N_updates.append(extract_array("N_updates", csv_folder_abs_path + "/" + csv_file_name))
             N_timesteps.append(extract_array("N_timesteps", csv_folder_abs_path + "/" + csv_file_name))
             Reward_mean.append(extract_array("Reward_mean", csv_folder_abs_path + "/" + csv_file_name))
@@ -54,7 +55,7 @@ def extract_all_data_from_csv(csv_folder_abs_path):
             N_died_avg.append(extract_array("N_died_avg", csv_folder_abs_path + "/" + csv_file_name))
             N_end_avg.append(extract_array("N_end_avg", csv_folder_abs_path + "/" + csv_file_name))
             N_step_goal_avg.append(extract_array("N_step_goal_avg", csv_folder_abs_path + "/" + csv_file_name))
-            env_name.append(extract_array("env_name", csv_folder_abs_path + "/" + csv_file_name))
+            eval_name.append(file_eval_name)
             envelope.append(extract_array("envelope", csv_folder_abs_path + "/" + csv_file_name)[0])
 
 
@@ -204,9 +205,9 @@ def plot():
                                     Reward_std[i])
 
         if envelope[i] == "True":
-            Name = "YES_a2c_" + env_name[i][0] + ".pdf"
+            Name = eval_name[i] + ".pdf"
         else:
-            Name = "NO_a2c_" + env_name[i][0] + ".pdf"
+            Name = eval_name[i] + ".pdf"
 
         print("PdfName : ", Name)
 
