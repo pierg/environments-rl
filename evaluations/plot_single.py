@@ -35,28 +35,27 @@ envelope = []
 
 
 def extract_all_data_from_csv(csv_folder_abs_path):
-    for csv_file_name in os.listdir(csv_folder_abs_path):
-        if "a2c" in csv_file_name and ".csv" in csv_file_name:
-            print("CsvName : ", csv_file_name)
-
-            file_eval_name = csv_file_name.replace(".csv", "")
-            N_updates.append(extract_array("N_updates", csv_folder_abs_path + "/" + csv_file_name))
-            N_timesteps.append(extract_array("N_timesteps", csv_folder_abs_path + "/" + csv_file_name))
-            Reward_mean.append(extract_array("Reward_mean", csv_folder_abs_path + "/" + csv_file_name))
-            Reward_median.append(extract_array("Reward_median", csv_folder_abs_path + "/" + csv_file_name))
-            Reward_min.append(extract_array("Reward_min", csv_folder_abs_path + "/" + csv_file_name))
-            Reward_max.append(extract_array("Reward_max", csv_folder_abs_path + "/" + csv_file_name))
-            Reward_std.append(extract_array("Reward_std", csv_folder_abs_path + "/" + csv_file_name))
-            Entropy.append(extract_array("Entropy", csv_folder_abs_path + "/" + csv_file_name))
-            Value_loss.append(extract_array("Value_loss", csv_folder_abs_path + "/" + csv_file_name))
-            Action_loss.append(extract_array("Action_loss", csv_folder_abs_path + "/" + csv_file_name))
-            N_violation_avg.append(extract_array("N_violation_avg", csv_folder_abs_path + "/" + csv_file_name))
-            N_goals_avg.append(extract_array("N_goals_avg", csv_folder_abs_path + "/" + csv_file_name))
-            N_died_avg.append(extract_array("N_died_avg", csv_folder_abs_path + "/" + csv_file_name))
-            N_end_avg.append(extract_array("N_end_avg", csv_folder_abs_path + "/" + csv_file_name))
-            N_step_goal_avg.append(extract_array("N_step_goal_avg", csv_folder_abs_path + "/" + csv_file_name))
+    for file_name in os.listdir(csv_folder_abs_path):
+        if "a2c" in file_name and ".csv" in file_name:
+            print("CsvName : ", file_name)
+            file_eval_name = file_name.replace(".csv", "")
+            N_updates.append(extract_array("N_updates", csv_folder_abs_path + "/" + file_name))
+            N_timesteps.append(extract_array("N_timesteps", csv_folder_abs_path + "/" + file_name))
+            Reward_mean.append(extract_array("Reward_mean", csv_folder_abs_path + "/" + file_name))
+            Reward_median.append(extract_array("Reward_median", csv_folder_abs_path + "/" + file_name))
+            Reward_min.append(extract_array("Reward_min", csv_folder_abs_path + "/" + file_name))
+            Reward_max.append(extract_array("Reward_max", csv_folder_abs_path + "/" + file_name))
+            Reward_std.append(extract_array("Reward_std", csv_folder_abs_path + "/" + file_name))
+            Entropy.append(extract_array("Entropy", csv_folder_abs_path + "/" + file_name))
+            Value_loss.append(extract_array("Value_loss", csv_folder_abs_path + "/" + file_name))
+            Action_loss.append(extract_array("Action_loss", csv_folder_abs_path + "/" + file_name))
+            N_violation_avg.append(extract_array("N_violation_avg", csv_folder_abs_path + "/" + file_name))
+            N_goals_avg.append(extract_array("N_goals_avg", csv_folder_abs_path + "/" + file_name))
+            N_died_avg.append(extract_array("N_died_avg", csv_folder_abs_path + "/" + file_name))
+            N_end_avg.append(extract_array("N_end_avg", csv_folder_abs_path + "/" + file_name))
+            N_step_goal_avg.append(extract_array("N_step_goal_avg", csv_folder_abs_path + "/" + file_name))
             eval_name.append(file_eval_name)
-            envelope.append(extract_array("envelope", csv_folder_abs_path + "/" + csv_file_name)[0])
+            envelope.append(extract_array("envelope", csv_folder_abs_path + "/" + file_name)[0])
 
 
 def extract_array(label, csv_file):
