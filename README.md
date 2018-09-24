@@ -1,248 +1,124 @@
-# Minimalistic Gridworld Environment (MiniGrid)
 
-[![Build Status](https://travis-ci.org/maximecb/gym-minigrid.svg?branch=master)](https://travis-ci.org/maximecb/gym-minigrid)
+This is an extension of ["Minimalistic Gridworld Environment for OpenAI Gym"
+](https://github.com/maximecb/gym-minigrid)
 
-There are other gridworld Gym environments out there, but this one is
-designed to be particularly simple, lightweight and fast. The code has very few
-dependencies, making it less likely to break or fail to install. It loads no
-external sprites/textures, and it can run at up to 6000 FPS on a quad-core i7
-laptop, which means you can run your experiments faster. Batteries are
-included: a known-working RL implementation is supplied in this repository
-to help you get started.
 
 Requirements:
-- Python 3
-- OpenAI Gym
-- NumPy
-- PyQT 5 for graphics
+- Python 3.6
+- Pip3
+- [PyTorch for Python 3.6 ](https://pytorch.org)
 
-Please use this bibtex if you want to cite this repository in your publications:
 
-```
-@misc{gym_minigrid,
-  author = {Maxime Chevalier-Boisvert, Lucas Willems},
-  title = {Minimalistic Gridworld Environment for OpenAI Gym},
-  year = {2018},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{https://github.com/maximecb/gym-minigrid}},
-}
-```
-
-This environment has been built as part of work done at the [MILA](https://mila.quebec/en/).
-
-## Installation
-
-Clone this repository and install the other dependencies with `pip3`:
+Then with pip3 install the required packages:
 
 ```
-git clone https://github.com/maximecb/gym-minigrid.git
-cd gym-minigrid
-pip3 install -e .
+pip3 install -r requirements.txt
 ```
 
-Optionally, if you wish use the reinforcement learning code included
-under [/pytorch_a2c](/pytorch_a2c), you should install PyTorch as follows:
+If launching from terminal, first export the python environment:
 
 ```
-# PyTorch
-conda install pytorch torchvision -c pytorch
+PYTHONPATH=../gym-minigrid/:../gym-minigrid/gym_minigrid/:./configurations:./:$PYTHONPATH
+export PYTHONPATH
 ```
 
-Note: the pytorch_a2c code is a custom fork of [this repository](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr),
-which was modified to work with this environment.
-
-## Basic Usage
-
-To run the standalone UI application, which allows you to manually control the agent with the arrow keys:
+Then you can launch the agent manually:
 
 ```
-./standalone.py
+python3 ./launch_agent_manual.py
 ```
 
-The environment being run can be selected with the `--env-name` option, eg:
+Launch the training with a2c:
 
 ```
-./standalone.py --env-name MiniGrid-Empty-8x8-v0
+python3 ./pytorch_a2c/main.py
 ```
 
-Basic reinforcement learning code is provided in the `pytorch_a2c` subdirectory.
-You can perform training using the A2C algorithm with:
 
+## Configuration file
+
+The configuration file in 'configurations/main.json' is used by all the project through all the training.
+It specifies all the importat variables needed to configure an experiment such as:
+
+1. Name of the environment
+2. Rewards to be assigned to the agent
+3. Monitors to activate and their conditions
+4. Parameters of the training algorithm
+
+Modify main.json to launch the configuration that you want.
+
+All the results of the training will be saved in the 'evaluations' folder
+
+## Launching experiments with the launch_script.sh
+
+You can easily launch training sessions by launching the launch_script.sh
+
+The available options are:
+
+*-t* configuration file to choose for training (located in configurations folder)
+If no configuration file is specified configurations/main.json is used
+
+*-q* to train with DQN
+
+*-r* to activate the random environment generation
+
+*-l* to use the random light generator
+
+*-e env_filename* specifies the configuration of the random environment generator (located in configurations/environments)
+If no file is specified configurations/environments/default.json is used
+
+*-w reward_filename* specifies the reward file to be used in the random environment generator (located in configurations/rewards)
+If no file is specified configurations/rewards/default.json is used
+
+*-s stop_steps* overrides from the configuration file the max number of steps to train the agent
+
+*-i iteration_number* specifies the number of iterations, meaning the number of times to run the same configuration
+
+*-f* save output in a LOG.txt file
+
+*-a* launch the training with the safety envelope
+
+*-b* launch the training without the safety envelope
+
+
+### Examples of experiments that can be launched
+
+Launch configurations/light_test_1.json with the safety envelope
 ```
-python3 pytorch_a2c/main.py --env-name MiniGrid-Empty-6x6-v0 --no-vis --num-processes 48 --algo a2c
+./launch_script.sh -t light_test_1.json -a
 ```
 
-You can view the result of training using the `enjoy.py` script:
-
+Launch configurations/light_test_1.json without the safety envelope
 ```
-python3 pytorch_a2c/enjoy.py --env-name MiniGrid-Empty-6x6-v0 --load-dir ./trained_models/a2c
+./launch_script.sh -t light_test_1.json -b
 ```
 
-## Design
+Launch configurations/light_test_1.json first with and then without the safety envelope
+```
+./launch_script.sh -t light_test_1.json -a -b
+```
 
-MiniGrid is built to support tasks involving natural language and sparse rewards.
-The observations are dictionaries, with an 'image' field, partially observable
-view of the environment, a 'mission' field which is a textual string
-describing the objective the agent should reach to get a reward, and a 'direction'
-field which can be used as an optional compass. Using dictionaries makes it
-easy for you to add additional information to observations
-if you need to, without having to force everything into a single tensor.
-If your RL code expects one single tensor for observations, please take a look at
-`FlatObsWrapper` in
-[gym_minigrid/wrappers.py](/gym_minigrid/wrappers.py).
+Launch configurations/main.json first with and then without the safety envelope
+```
+./launch_script.sh -a -b
+```
 
-The partially observable view of the environment uses a compact and efficient
-encoding, with just 3 input values per visible grid cell, 7x7x3 values total.
-If you want to obtain an array of RGB pixels instead, see the `get_obs_render` method in
-[gym_minigrid/minigrid.py](gym_minigrid/minigrid.py).
+Generate a random environment with a light switch using configurations/environments/env_config.json as environment configuration and configurations/environments/reward_config as rewards configuration. Then launch the training on the generated environment first with and then without the safety envelope
+```
+./launch_script.sh -r -l -e env_config -w reward_config -a -b
+```
 
-Structure of the world:
-- The world is an NxM grid of tiles
-- Each tile in the grid world contains zero or one object
-  - Cells that do not contain an object have the value `None`
-- Each object has an associated discrete color (string)
-- Each object has an associated type (string)
-  - Provided object types are: wall, floor, door, locked_doors, key, ball, box and goal
-- The agent can pick up and carry exactly one object (eg: ball or key)
 
-Actions in the basic environment:
-- Turn left
-- Turn right
-- Move forward
-- Pick up an object
-- Drop the object being carried
-- Toggle (interact with objects)
-- Done (task completed, optional)
+### Docker
+The easiest way to launch an experiment and collect results is with docker.
+You can pull the image from dockerhub:
+```
+docker pull pmallozzi/gym-minigrid:patterns
+```
 
-By default, sparse rewards are given for reaching a green goal tile. A
-reward of 1 is given for success, and zero for failure. There is also an
-environment-specific time step limit for completing the task.
-You can define your own reward function by creating a class derived
-from `MiniGridEnv`. Extending the environment with new object types or action
-should be very easy. If you wish to do this, you should take a look at the
-[gym_minigrid/minigrid.py](gym_minigrid/minigrid.py) source file.
+All the arguments passed to the docker image when running it will be passed to the launch_script.sh
 
-## Included Environments
-
-The environments listed below are implemented in the [gym_minigrid/envs](/gym_minigrid/envs) directory.
-Each environment provides one or more configurations registered with OpenAI gym. Each environment
-is also programmatically tunable in terms of size/complexity, which is useful for curriculum learning
-or to fine-tune difficulty.
-
-### Empty environment
-
-Registered configurations:
-- `MiniGrid-Empty-6x6-v0`
-- `MiniGrid-Empty-8x8-v0`
-- `MiniGrid-Empty-16x16-v0`
-
-<p align="center">
-<img src="/figures/empty-env.png" width=250>
-</p>
-
-This environment is an empty room, and the goal of the agent is to reach the
-green goal square, which provides a sparse reward. A small penalty is
-subtracted for the number of steps to reach the goal. This environment is
-useful, with small rooms, to validate that your RL algorithm works correctly,
-and with large rooms to experiment with sparse rewards.
-
-### Door & key environment
-
-Registered configurations:
-- `MiniGrid-DoorKey-5x5-v0`
-- `MiniGrid-DoorKey-6x6-v0`
-- `MiniGrid-DoorKey-8x8-v0`
-- `MiniGrid-DoorKey-16x16-v0`
-
-<p align="center">
-<img src="/figures/door-key-env.png">
-</p>
-
-This environment has a key that the agent must pick up in order to unlock
-a goal and then get to the green goal square. This environment is difficult,
-because of the sparse reward, to solve using classical RL algorithms. It is
-useful to experiment with curiosity or curriculum learning.
-
-### Multi-room environment
-
-Registered configurations:
-- `MiniGrid-MultiRoom-N2-S4-v0` (two small rooms)
-- `MiniGrid-MultiRoom-N6-v0` (six room)
-
-<p align="center">
-<img src="/figures/multi-room.gif" width=416 height=424>
-</p>
-
-This environment has a series of connected rooms with doors that must be
-opened in order to get to the next room. The final room has the green goal
-square the agent must get to. This environment is extremely difficult to
-solve using classical RL. However, by gradually increasing the number of
-rooms and building a curriculum, the environment can be solved.
-
-### Fetch environment
-
-Registered configurations:
-- `MiniGrid-Fetch-5x5-N2-v0`
-- `MiniGrid-Fetch-6x6-N2-v0`
-- `MiniGrid-Fetch-8x8-N3-v0`
-
-<p align="center">
-<img src="/figures/fetch-env.png" width=450>
-</p>
-
-This environment has multiple objects of assorted types and colors. The
-agent receives a textual string as part of its observation telling it
-which object to pick up. Picking up the wrong object produces a negative
-reward.
-
-### Go-to-door environment
-
-Registered configurations:
-- `MiniGrid-GoToDoor-5x5-v0`
-- `MiniGrid-GoToDoor-6x6-v0`
-- `MiniGrid-GoToDoor-8x8-v0`
-
-<p align="center">
-<img src="/figures/gotodoor-6x6.png" width=400>
-</p>
-
-This environment is a room with four doors, one on each wall. The agent
-receives a textual (mission) string as input, telling it which door to go to,
-(eg: "go to the red door"). It receives a positive reward for performing the
-`wait` action next to the correct door, as indicated in the mission string.
-
-### Put-near environment
-
-Registered configurations:
-- `MiniGrid-PutNear-6x6-N2-v0`
-- `MiniGrid-PutNear-8x8-N3-v0`
-
-The agent is instructed through a textual string to pick up an object and
-place it next to another object. This environment is easy to solve with two
-objects, but difficult to solve with more, as it involves both textual
-understanding and spatial reasoning involving multiple objects.
-
-### Red and blue doors environment
-
-Registered configurations:
-- `MiniGrid-RedBlueDoors-6x6-v0`
-- `MiniGrid-RedBlueDoors-8x8-v0`
-
-The agent is randomly placed within a room with one red and one blue door
-facing opposite directions. The agent has to open the red door and then open
-the blue door, in that order. The purpose of this environment is to test
-memory. The agent, when facing one door, cannot see the door behind him.
-Hence, the agent needs to remember whether or not he has previously opened
-the other door in order to reliably succeed at completing the task.
-
-### Locked Room Environment
-
-Registed configurations:
-- `MiniGrid-LockedRoom-v0`
-
-The environment has six rooms, one of which is locked. The agent receives
-a textual mission string as input, telling it which room to go to in order
-to get the key that opens the locked room. It then has to go into the locked
-room in order to reach the final goal. This environment is extremely difficult
-to solve with vanilla reinforcement learning alone.
+For example you can run:
+```
+docker run -it -v ~/evaluations/:/headless/gym-minigrid/evaluations pmallozzi/gym-minigrid:patterns -a -b -t light_test_2.json
+```
