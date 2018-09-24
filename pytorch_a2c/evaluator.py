@@ -12,34 +12,13 @@ import os, re, os.path
 
 class Evaluator:
 
-    def __init__(self, algorithm, number=0):
+    def __init__(self, evaluation_id):
         # Getting configuration from file
         self.config = cg.Configuration.grab()
 
-        if self.config.envelope:
-            file_name = self.config.evaluation_directory_name + "/a2c/" \
-                        + "YES_" + str(algorithm) + "_" \
-                        + self.config.config_name \
-                        + "_"
-        else:
-            file_name = self.config.evaluation_directory_name + "/a2c/" \
-                        + "NO_" + str(algorithm) + "_" \
-                        + self.config.config_name \
-                        + "_"
-
-
-        while os.path.isfile(__file__ + "/../../"
-                             + file_name
-                             + str(number)
-                             + ".csv"):
-            number += 1
-
-
         config_file_path = os.path.abspath(__file__ + "/../../"
-                                           + file_name
-                                           + "_"
-                                           + str(number)
-                                           + ".csv")
+                                           + self.config.evaluation_directory_name + "/"
+                                           + evaluation_id + ".csv")
 
 
         self.config_file_path = config_file_path

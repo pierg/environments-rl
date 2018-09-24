@@ -26,6 +26,8 @@ from configurations import config_grabber as cg
 
 from envs import make_env
 
+import random, string
+
 import os, re, os.path
 
 
@@ -45,23 +47,31 @@ if args.record:
 
 if args.nomonitor:
     cg.Configuration.set("envelope", False)
-else:
-    cg.Configuration.set("envelope", True)
 
 
 # Getting configuration from file
 config = cg.Configuration.grab()
 eval_folder = os.path.abspath(os.path.dirname(__file__) + "/../" + config.evaluation_directory_name)
 
+# random_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(3))
+random_id = ''.join(random.choice(string.digits) for _ in range(4))
+
+
+if config.envelope:
+    evaluation_id = config.config_name \
+                + "_YES_a2c_" + random_id
+else:
+    evaluation_id = config.config_name \
+                + "_NOP_a2c_" + random_id
 
 if args.logstdfile:
     import sys
-    sys.stdout = open(eval_folder + "/a2c/LOG.txt", "w")
+    sys.stdout = open(eval_folder + "/" + evaluation_id + "_LOG.txt", "w")
     print ("test sys.stdout")
 
 
 # Copy config file to evaluation folder
-copyfile(cg.Configuration.file_path(), eval_folder + "/configuration_a2c.txt")
+copyfile(cg.Configuration.file_path(), eval_folder + "/" + evaluation_id + "_config.txt")
 
 
 def main():
@@ -73,11 +83,11 @@ def main():
     print("stop_learning:   " + str(config.a2c.stop_learning))
 
     # Initializing evaluation
-    evaluator = Evaluator("a2c")
+    evaluator = Evaluator(evaluation_id)
 
     os.environ['OMP_NUM_THREADS'] = '1'
 
-    envs = [make_env(config.env_name, args.seed, i) for i in range(config.a2c.num_processes)]
+    envs = [make_env(config.env_name, args.seed, i, evaluation_id) for i in range(config.a2c.num_processes)]
 
     if config.a2c.num_processes > 1:
         envs = SubprocVecEnv(envs)
@@ -261,7 +271,7 @@ def main():
 
         rollouts.after_update()
 
-        save_dir = "../" + config.evaluation_directory_name + "/a2c/trained_model/"
+        save_dir = "../a2c_trained_model/"
         if j % config.a2c.save_model_interval == 0:
             save_path = save_dir
             try:

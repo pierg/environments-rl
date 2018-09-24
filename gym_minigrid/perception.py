@@ -38,6 +38,19 @@ class Perception():
             if elem is not None and elem.type == "water":
                 return True
             return False
+
+        elif context == "door-front":
+            elem = self.element_in_front()
+            if elem is not None and elem.type == "door":
+                return True
+            return False
+
+        elif context == "lightsw-front":
+            elem = self.element_in_front()
+            if elem is not None and elem.type == "lightsw":
+                return True
+            return False
+
         elif context == "always":
             return True
 

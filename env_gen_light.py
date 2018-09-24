@@ -205,6 +205,7 @@ register(
                                     "type": "{0}".format(monitor.type),
                                     "mode": "{0}".format(monitor.mode),
                                     "active": True if monitor.active else False,
+                                    "context": "{0}".format(monitor.context),
                                     "name": "{0}".format(monitor.name),
                                     "action_planner": "{0}".format(monitor.action_planner) if hasattr(monitor, "action_planner") else "wait",
                                     "conditions":"{0}".format(monitor.conditions) if not hasattr(monitor.conditions,"pre") else {

@@ -3,12 +3,12 @@
     "rendering": false,
     "recording": true,
     "log_interval": 10,
-    "max_num_frames": 5000000,
+    "max_num_frames": 3000000,
     "max_num_steps_episode": -1,
     "debug_mode": false,
     "evaluation_directory_name": "evaluations",
-    "config_name": "config-DirtWatLightExp-9x9-v0",
-    "env_name": "MiniGrid-DirtWatLightExp-9x9-v0",
+    "config_name": "light_test_2",
+    "env_name": "MiniGrid-LightTestExp-9x9-v1",
     "training_mode": true,
     "agent_view_size": 7,
     "visdom": false,
@@ -32,11 +32,8 @@
         "save_evaluation_interval": 50
     },
     "rewards": {
-        "cleaningenv": {
-            "clean": 1.0
-        },
         "standard": {
-            "death": -1.0,
+            "death": -10.0,
             "goal": 10.0,
             "step": -0.005
         },
@@ -50,6 +47,7 @@
                 "waterAbsence": {
                     "action_planner": "wait",
                     "active": true,
+                    "context": "water-front",
                     "conditions": "stepping-on-water",
                     "mode": "enforcing",
                     "name": "waterAbsence",
@@ -64,6 +62,7 @@
                 "lightUniversally": {
                     "action_planner": "wait",
                     "active": true,
+                    "context": "always",
                     "conditions": "light-on-current-room",
                     "mode": "enforcing",
                     "name": "lightUniversality",
@@ -78,6 +77,7 @@
                 "lightPrecedence": {
                     "action_planner": "turn_right",
                     "active": true,
+                    "context": "door-front",
                     "conditions": {
                         "post": "entering-a-room",
                         "pre": "light-switch-turned-on"
@@ -95,6 +95,7 @@
                 "openDoorResponse": {
                     "action_planner": "toggle",
                     "active": true,
+                    "context": "door-front",
                     "conditions": {
                         "post": "action-is-toggle",
                         "pre": "door-closed-in-front"
@@ -110,6 +111,7 @@
                 "switchOffResponse": {
                     "action_planner": "toggle",
                     "active": true,
+                    "context": "lightsw-front",
                     "conditions": {
                         "post": "action-is-toggle",
                         "pre": "light-switch-in-front-off"
