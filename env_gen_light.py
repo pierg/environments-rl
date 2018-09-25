@@ -314,15 +314,15 @@ register(
             },
             "rewards": {
                 "actions": {
-                    "forward": float("{0:.2f}".format(rewards.actions.forward if hasattr(rewards.actions,'forward') else 0))
+                    "forward": float("{0:.5f}".format(rewards.actions.forward if hasattr(rewards.actions,'forward') else 0))
                 },
                 "standard":{
-                    "goal": float("{0:.2f}".format(rewards.standard.goal if hasattr(rewards.standard,'goal') else 1)),
-                    "step": float("{0:.2f}".format(rewards.standard.step if hasattr(rewards.standard,'step')else 0)),
-                    'death': float("{0:.2f}".format(rewards.standard.death if hasattr(rewards.standard,'death') else -1))
+                    "goal": float("{0:.5f}".format(rewards.standard.goal if hasattr(rewards.standard,'goal') else 1)),
+                    "step": float("{0:.5f}".format(rewards.standard.step if hasattr(rewards.standard,'step')else 0)),
+                    'death': float("{0:.5f}".format(rewards.standard.death if hasattr(rewards.standard,'death') else -1))
                 },
                 "cleaningenv":{
-                    "clean":float("{0:.2f}".format(rewards.cleaningenv.clean if hasattr(rewards.cleaningenv,'clean') else 0.5))
+                    "clean":float("{0:.5f}".format(rewards.cleaningenv.clean if hasattr(rewards.cleaningenv,'clean') else 0.5))
                 }
             }
         }, indent=2)
