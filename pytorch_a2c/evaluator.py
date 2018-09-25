@@ -113,7 +113,7 @@ class Evaluator:
 
         csv_logger.write_to_log(self.config_file_path, [n_updates,
                                                         total_num_steps,
-                                                        mean_rwd,
+                                                        mean_rwd_curr,
                                                         final_rewards.median(),
                                                         final_rewards.min(),
                                                         final_rewards.max(),
