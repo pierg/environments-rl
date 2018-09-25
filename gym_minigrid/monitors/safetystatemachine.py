@@ -261,10 +261,6 @@ class SafetyStateMachine(object):
     def _map_conditions(self, action_proposed):
         raise NotImplementedError
 
-    def _map_context(self, obs, action_proposed):
-        raise NotImplementedError
-
-
     def _on_monitoring(self):
         # Notify
         self.notify(self.name, "monitoring")
@@ -308,6 +304,7 @@ class SafetyStateMachine(object):
 
     # Called before the action is going to be performed on the environment and obs are the current observations
     def check(self, obs_pre, action_proposed):
+        self.action_proposed = action_proposed
         logging.info("     check() -> monitor_state context: " + self.state)
 
         # Check the conditions and trigger
