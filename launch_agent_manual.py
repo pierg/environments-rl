@@ -32,7 +32,7 @@ def main():
     parser.add_option(
         "-e",
         "--env-name",
-        dest="env_name",
+        dest="env_name",r
         help="gym environment to load",
         default='MiniGrid-MultiRoom-N6-v0'
     )

@@ -31,6 +31,7 @@ def generate_environment(environment="default", rewards="default"):
     light_switch = elements.light_switch
     random_each_episode = False
     rewards = Configuration.grab("rewards/" + rewards)
+
     with open(environment_path + "randoms/" + "randomenv{0}.py".format(random_token), 'w') as env:
         env.write("""
 from gym_minigrid.extendedminigrid import *
@@ -83,7 +84,55 @@ class RandomEnv(ExMiniGridEnv):
             return self._rand_bool()
         else:
             return random.choice([True, False])
+            
+    def _reachable_elements(self, x_agent, y_agent):
+        queue = [(x_agent, y_agent)]
+        elements = set()
+        visited = set()
+        while len(queue) > 0:
+            (x,y) = queue.pop()
+            visited.add((x,y))
+            directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+            for (dx,dy) in directions:
+                other_pos = (x+dx,y+dy)
+                (ox,oy) = other_pos
+                if 0 < ox < self.grid.width and 0 < oy < self.grid.height and other_pos not in visited and other_pos not in queue:
+                    if isinstance(self.grid.get(ox,oy), type(None)) or isinstance(self.grid.get(ox,oy), Door):
+                        queue.append(other_pos)
+                    if isinstance(self.grid.get(ox,oy), LightSwitch) or isinstance(self.grid.get(ox,oy), Door) or isinstance(self.grid.get(ox,oy), Goal):
+                        elements.add(type(self.grid.get(ox,oy)))
+        return elements                
         
+    def _valid_water_position(self, x_agent, y_agent):
+        x = random.randint(1, self.grid.width - 2)
+        y = random.randint(1, self.grid.height - 2)
+        while type(self.grid.get(x, y)) != type(None) or (x_agent == x and y_agent ==y):
+            x = random.randint(1, self.grid.width - 2)
+            y = random.randint(1, self.grid.height - 2)
+        return (x,y)
+        
+        
+    def _place_water(self, x_agent, y_agent):
+        water = []
+        while {1} > len(water):        
+            (x_water, y_water) = self._valid_water_position(x_agent, y_agent)
+            self.grid.set(x_water, y_water, Water())
+            water += [(x_water, y_water)]
+        return water 
+    
+    def _reset_water(self, water):
+        for (x,y) in water:
+            self.grid.set(x,y,None)
+            
+    def _place_agent(self, width_pos, height_pos):
+        max_height = self.grid.height
+        x_agent = random.randint(1, width_pos)
+        y_agent = random.randint(1, max_height)
+        while x_agent == width_pos and y_agent == height_pos:
+            x_agent = random.randint(1, width_pos)
+            y_agent = random.randint(1, max_height)
+        self.start_pos = (x_agent, y_agent)
+                    
     def _gen_grid(self, width, height):
         # Create an empty grid
         self.grid = Grid(width, height)
@@ -91,26 +140,34 @@ class RandomEnv(ExMiniGridEnv):
         # Generate the surrounding walls
         self.grid.wall_rect(0, 0, width, height)
 
-        # Place the agent in the top-left corner
-        self.start_pos = (1, 1)
-        self.start_dir = 0
-
-        # Place a goal square in the top-right corner
-        self.grid.set(width - 2, 1, Goal())
-
         # Set the random seed to the random token, so we can reproduce the environment
         random.seed("{4}")
         
         #Place lightswitch
-        width_pos = 2
-        height_pos = 5
-        xdoor = 3
-        ydoor = 4
+        width_pos = random.randint(2,{0}-5) # x position of the light switch (2 tiles space for each room)
+        height_pos = random.randint(2,{0}-2) # y position of light switch (needs space for the wall and door)
+        xdoor = width_pos + 1 # x position of the door 
+        ydoor = height_pos -1 # y position of the door
         switchRoom = LightSwitch()
         
-        #Place the wall
-        self.grid.vert_wall(width_pos+1, 1, height-2)
+        # Place the agent
+        self._place_agent(width_pos,{0}-2)
+        self.start_dir = random.randint(0,3)
+        (x_agent, y_agent) = self.start_pos
         
+        # Place a goal square 
+        x_goal = random.randint(xdoor + 1, width - 2)
+        y_goal = random.randint(1,width -2)
+        
+        #Avoid placing it in front of the door. 
+        while x_goal ==  xdoor + 1 and ydoor == y_goal:
+            x_goal = random.randint(xdoor + 1, width - 2)
+            y_goal = random.randint(1,width -2)            
+        
+        self.grid.set(x_goal, y_goal , Goal())
+        
+        #Place the wall
+        self.grid.vert_wall(xdoor, 1, height-2)
                 
         self.grid.set(xdoor, ydoor , Door(self._rand_elem(sorted(set(COLOR_NAMES)))))
         
@@ -124,40 +181,31 @@ class RandomEnv(ExMiniGridEnv):
         #Place the lightswitch
         switchRoom.affectRoom(self.roomList[1])
         switchRoom.setSwitchPos((width_pos,height_pos))
+        switchRoom.cur_pos = (width_pos, height_pos)
         
         self.grid.set(width_pos, height_pos, switchRoom)
         self.switchPosition = []
         self.switchPosition.append((width_pos, height_pos))
 
         # Place water
-        placed_water_tiles = 0
-        anti_loop = 0
-        while {1} > placed_water_tiles:
+        water = self._place_water(x_agent,y_agent)
         
-            # Added to avoid a number of water tiles that is impossible (infinite loop)
-            anti_loop +=1
-            if anti_loop > 1000:
-                placed_water_tiles = {1}
-            # Minus 2 because grid is zero indexed, and the last one is just a wall
-            width_pos , height_pos = self._random_or_not_position(1, width - 2, 1, height - 2)
-            number = self._random_number(1,6)
-            if number == 1:
-                width_pos , height_pos = (1,2)
-            elif number == 2:
-                width_pos , height_pos = (1,3)
-            elif number == 3:
-                width_pos , height_pos = (1,4)
-            elif number == 4:
-                width_pos , height_pos = (4,1)
-            elif number == 5:
-                width_pos , height_pos = (4,2)
-            elif number == 6:
-                width_pos , height_pos = (5,4)
-            if isinstance(self.grid.get(width_pos, height_pos), Water):
-                # Do not place water on water
-                continue
-            self.grid.set(width_pos, height_pos, Water())
-            placed_water_tiles += 1
+        elements = self._reachable_elements(x_agent,y_agent)
+        
+        stop = 0
+        
+        while len(elements) != 3 and stop < 10000:
+            stop += 1
+            if (stop % 10) == 0:
+                self._place_agent(width_pos,{0}-2)
+                (x_agent, y_agent) = self.start_pos
+            self._reset_water(water)
+            water = self._place_water(x_agent,y_agent)
+            elements = self._reachable_elements(x_agent,y_agent)
+        
+        tab = self.saveElements(self.roomList[1])
+        switchRoom.elements_in_room(tab)
+        
         self.mission = ""
         
     def step(self,action):
@@ -226,7 +274,7 @@ register(
                             patterns_map[monitor.type] = [monitor.name]
 
         json_object = json.dumps({
-            "config_name": "randomEnv-{0}x{0}-{1}-v0".format(grid_size, random_token),
+            "config_name": "randomEnv-{0}x{0}-{1}".format(grid_size, random_token),
             "algorithm": "a2c",
             "env_name": "MiniGrid-RandomEnv-{0}x{0}-{1}-v0".format(grid_size, random_token),
             "envelope": bool(elements.envelope),
