@@ -89,9 +89,6 @@ class Evaluator:
                 print(str(e))
 
 
-    def is_converging(self):
-        return self.is_converging
-
 
     def save(self, n_updates, total_num_steps, final_rewards, dist_entropy, value_loss, action_loss, env_name = None, envelope = None):
 

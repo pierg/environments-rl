@@ -207,13 +207,6 @@ class RandomEnv(ExMiniGridEnv):
         switchRoom.elements_in_room(tab)
         
         self.mission = ""
-        
-    def step(self,action):
-        # Reset if agent step on water without knowing it
-        if action == self.actions.forward and self.worldobj_in_agent(1,0) == "water" :
-            return self.gen_obs(), {6}, True, "died"
-        else:
-            return super().step(action)
 
 class RandomEnv{0}x{0}_{4}(RandomEnv):
     def __init__(self):

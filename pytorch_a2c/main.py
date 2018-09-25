@@ -304,7 +304,7 @@ def main():
             else:
                 evaluator.save(j, total_num_steps, final_rewards, dist_entropy, value_loss, action_loss)
 
-            if evaluator.is_converging():
+            if evaluator.is_converging:
                 n_times_is_converging += 1
 
             print(
