@@ -27,7 +27,7 @@ def generate_environment(environment="default", rewards="default"):
     elements = Configuration.grab("environments/"+environment)
     grid_size = elements.grid_size
     n_water = elements.n_water
-    n_deadend = elements.n_deadend
+    n_deadend = 0
     light_switch = elements.light_switch
     random_each_episode = False
     rewards = Configuration.grab("rewards/" + rewards)
@@ -274,7 +274,7 @@ register(
                             patterns_map[monitor.type] = [monitor.name]
 
         json_object = json.dumps({
-            "config_name": "randomEnv-{0}x{0}-{1}".format(grid_size, random_token),
+            "config_name": "randomEnv-s{0}-w{1}-r{2}".format(grid_size, n_water, random_token),
             "algorithm": "a2c",
             "env_name": "MiniGrid-RandomEnv-{0}x{0}-{1}-v0".format(grid_size, random_token),
             "envelope": bool(elements.envelope),

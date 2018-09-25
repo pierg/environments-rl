@@ -1,54 +1,41 @@
 {
-    "envelope": true,
-    "rendering": false,
-    "recording": true,
-    "log_interval": 10,
-    "max_num_frames": 3000000,
-    "max_num_steps_episode": -1,
-    "debug_mode": false,
-    "evaluation_directory_name": "evaluations",
-    "config_name": "light_test_2",
-    "env_name": "MiniGrid-LightTestExp-9x9-v1",
-    "training_mode": false,
-    "agent_view_size": 7,
-    "visdom": false,
-    "dqn": {
-        "exploration_rate": 0.99,
-        "epsilon_decay_episodes": 1000,
-        "results_log_interval": 200,
-        "epsilon_start": 1.0,
-        "discount_factor": 0.99,
-        "epsilon_decay_frame": 5000,
-        "epsilon_final": 0.1
-    },
     "a2c": {
-        "stop_learning": 48000,
-        "num_steps": 4,
-        "stop_after_update_number": 0,
         "algorithm": "a2c",
         "num_processes": 48,
+        "num_steps": 4,
         "optimal_num_step": 40,
+        "save_evaluation_interval": 50,
         "save_model_interval": 50,
-        "save_evaluation_interval": 50
+        "stop_after_update_number": 0,
+        "stop_learning": 48000
     },
-    "rewards": {
-        "standard": {
-            "death": -10.0,
-            "goal": 10.0,
-            "step": -0.005
-        },
-        "actions": {
-            "forward": 0.0
-        }
+    "agent_view_size": 7,
+    "algorithm": "a2c",
+    "config_name": "randomEnv-s11-w10-r2355",
+    "debug_mode": false,
+    "dqn": {
+        "discount_factor": 0.99,
+        "epsilon_decay_episodes": 1000,
+        "epsilon_decay_frame": 5000,
+        "epsilon_final": 0.1,
+        "epsilon_start": 1.0,
+        "exploration_rate": 0.99,
+        "results_log_interval": 200
     },
+    "env_name": "MiniGrid-RandomEnv-11x11-2355-v0",
+    "envelope": true,
+    "evaluation_directory_name": "evaluations",
+    "log_interval": 10,
+    "max_num_frames": 8000000,
+    "max_num_steps_episode": -1,
     "monitors": {
         "patterns": {
             "absence": {
                 "waterAbsence": {
                     "action_planner": "wait",
                     "active": true,
-                    "context": "water-front",
                     "conditions": "stepping-on-water",
+                    "context": "water-front",
                     "mode": "enforcing",
                     "name": "waterAbsence",
                     "rewards": {
@@ -58,30 +45,15 @@
                     "type": "absence"
                 }
             },
-            "universality": {
-                "lightUniversally": {
-                    "action_planner": "wait",
-                    "active": true,
-                    "context": "always",
-                    "conditions": "light-on-current-room",
-                    "mode": "enforcing",
-                    "name": "lightUniversality",
-                    "rewards": {
-                        "respected": 0.0,
-                        "violated": -0.1
-                    },
-                    "type": "universality"
-                }
-            },
             "precedence": {
                 "lightPrecedence": {
                     "action_planner": "turn_right",
                     "active": true,
-                    "context": "door-front",
                     "conditions": {
                         "post": "entering-a-room",
                         "pre": "light-switch-turned-on"
                     },
+                    "context": "door-front",
                     "mode": "enforcing",
                     "name": "lightPrecedence",
                     "rewards": {
@@ -95,11 +67,11 @@
                 "openDoorResponse": {
                     "action_planner": "toggle",
                     "active": true,
-                    "context": "door-front",
                     "conditions": {
                         "post": "action-is-toggle",
                         "pre": "door-closed-in-front"
                     },
+                    "context": "door-front",
                     "mode": "enforcing",
                     "name": "openDoorResponse",
                     "rewards": {
@@ -111,11 +83,11 @@
                 "switchOffResponse": {
                     "action_planner": "toggle",
                     "active": true,
-                    "context": "lightsw-front",
                     "conditions": {
                         "post": "action-is-toggle",
                         "pre": "light-switch-in-front-off"
                     },
+                    "context": "lightsw-front",
                     "mode": "enforcing",
                     "name": "switchOffResponse",
                     "rewards": {
@@ -124,7 +96,39 @@
                     },
                     "type": "response"
                 }
+            },
+            "universality": {
+                "lightUniversality": {
+                    "action_planner": "wait",
+                    "active": true,
+                    "conditions": "light-on-current-room",
+                    "context": "always",
+                    "mode": "enforcing",
+                    "name": "lightUniversality",
+                    "rewards": {
+                        "respected": 0.0,
+                        "violated": -0.1
+                    },
+                    "type": "universality"
+                }
             }
         }
-    }
+    },
+    "recording": true,
+    "rendering": false,
+    "rewards": {
+        "actions": {
+            "forward": 0.0
+        },
+        "cleaningenv": {
+            "clean": 0.1
+        },
+        "standard": {
+            "death": -1.0,
+            "goal": 10.0,
+            "step": -0.01
+        }
+    },
+    "training_mode": false,
+    "visdom": false
 }
