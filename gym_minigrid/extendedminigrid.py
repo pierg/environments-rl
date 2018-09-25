@@ -430,7 +430,6 @@ class ExMiniGridEnv(MiniGridEnv):
                 reward = self.config.rewards.standard.death
                 info["event"].append("died")
                 print("DIED!!!!!")
-                traceback.print_stack()
             # Step into Goal
             elif fwd_cell is not None and fwd_cell.type == 'goal':
                 try:
