@@ -262,7 +262,6 @@ class SafetyStateMachine(object):
         raise NotImplementedError
 
     def _on_monitoring(self):
-        # Notify
         self.notify(self.name, "monitoring")
 
     def _on_shaping(self, shaped_reward=0):
@@ -294,16 +293,12 @@ class SafetyStateMachine(object):
 
         # Check if needs to be activated and trigger
         self.context_active = self.perception.check_context(self.context)
-        self.trigger('*')
-
-        if self.state == "active":
-            return True
-        else:
-            return False
+        return self.context_active
 
 
     # Called before the action is going to be performed on the environment and obs are the current observations
     def check(self, obs_pre, action_proposed):
+        self.machine.set_state('active')
         self.action_proposed = action_proposed
         logging.info("     check() -> monitor_state context: " + self.state)
 

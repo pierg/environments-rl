@@ -429,7 +429,8 @@ class ExMiniGridEnv(MiniGridEnv):
                 done = True
                 reward = self.config.rewards.standard.death
                 info["event"].append("died")
-                print("DIED!!!!!")
+                if self.config.envelope:
+                    print("DIED!! >>>>>>> Problems with envelope!")
             # Step into Goal
             elif fwd_cell is not None and fwd_cell.type == 'goal':
                 try:

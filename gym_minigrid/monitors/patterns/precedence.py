@@ -113,7 +113,6 @@ class Precedence(SafetyStateMachine):
         self.precondition = conditions.pre
         self.postcondition = conditions.post
 
-        self.context_active = False
         self.obs_precondition = False
         self.obs_postcondition = False
 

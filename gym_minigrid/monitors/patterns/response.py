@@ -109,14 +109,10 @@ class Response(SafetyStateMachine):
         self.postcondition = conditions.post
         self.precondition = conditions.pre
 
-        self.context_active = False
         self.obs_precondition = False
         self.obs_postcondition = False
 
         super().__init__(name, "response", self.states, self.transitions, 'idle', notify, perception, context)
-
-    def context_active(self, obs, action_proposed):
-        return True
 
     # Convert observations to state and populate the obs_conditions
     def _map_conditions(self, action_proposed):

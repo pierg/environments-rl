@@ -81,6 +81,9 @@ class SafetyEnvelope(gym.core.Wrapper):
         :param kwargs: in case of violation it returns a reward and the action causing the violation (unsafe_aciton)
         :return: None
         """
+
+        # if self.monitor_states[name] == ""
+
         self.monitor_states[name]["state"] = state
 
         if state == "mismatch":
@@ -165,14 +168,17 @@ class SafetyEnvelope(gym.core.Wrapper):
         if self.config.a2c.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
+        active_monitors = []
 
         # Active the monitors according to the context:
         for monitor in self.meta_monitor:
             active = monitor.activate_contextually()
             if active:
-                # Check observation and proposed action in all running monitors
-                for monitor in self.meta_monitor:
-                    monitor.check(current_obs_env, proposed_action)
+                active_monitors.append(monitor)
+
+
+        for monitor in active_monitors:
+            monitor.check(current_obs_env, proposed_action)
 
 
         # Check for unsafe actions before sending them to the environment:
@@ -205,8 +211,7 @@ class SafetyEnvelope(gym.core.Wrapper):
 
         # logging.info("____verify AFTER action is applied to the environment")
         # Notify the monitors of the new state reached in the environment and the applied action
-        for monitor in self.meta_monitor:
-            if monitor.is_context_active():
+        for monitor in active_monitors:
                 monitor.verify(self.env, suitable_action)
 
         # Get the shaped rewards from the monitors in the new state
