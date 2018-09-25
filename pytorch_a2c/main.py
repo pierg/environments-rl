@@ -77,6 +77,7 @@ copyfile(cg.Configuration.file_path(), eval_folder + "/" + evaluation_id + "_con
 def main():
 
     num_updates = int(config.max_num_frames) // args.num_steps // config.a2c.num_processes
+    n_times_is_converging = 0
 
     print("num_updates:     " + str(num_updates))
 
@@ -149,6 +150,11 @@ def main():
 
     send_env_name = False
     for j in range(num_updates):
+
+        if n_times_is_converging > 3:
+            print("Converged...")
+            break
+
         for step in range(args.num_steps):
             # Sample actions
             value, action, action_log_prob, states = actor_critic.act(
@@ -297,6 +303,10 @@ def main():
                 send_env_name = True
             else:
                 evaluator.save(j, total_num_steps, final_rewards, dist_entropy, value_loss, action_loss)
+
+            if evaluator.is_converging():
+                n_times_is_converging += 1
+
             print(
                 "Updates {}, num timesteps {}, FPS {}, mean/median reward {:.2f}/{:.2f}, min/max reward {:.2f}/{:.2f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
                     format(
