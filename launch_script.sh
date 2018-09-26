@@ -3,6 +3,8 @@
 # Sets the main.json as default, if the -t is specifed
 # it will use that as config file.
 configuration_file="main.json"
+environment="default"
+reward="default"
 start_training=1
 qlearning=0
 double=0
@@ -62,31 +64,12 @@ if ! [ $iterations ]; then
 fi
 while [ $iterations -ne $i ]; do
     if [ $random ]; then
-        if [ $environment ]; then
-            if [ $light ]; then
-                if [ $reward ]; then
-                    echo "...creating a random light environment... using $environment and $reward"
-                    configuration_file=`python3 env_gen_light.py --environment_file $environment --rewards_file $reward`
-                else
-                    echo "...creating a random light environment... using $environment"
-                    configuration_file=`python3 env_gen_light.py --environment_file $environment --rewards_file "default"`
-                fi
-            else
-                if [ $reward ]; then
-                    echo "...creating a random environment... using $environment and $reward"
-                    configuration_file=`python3 env_generator.py --environment_file $environment --rewards_file $reward`
-                else
-                    echo "...creating a random environment... using $environment"
-                    configuration_file=`python3 env_generator.py --environment_file $environment --rewards_file "default"`
-                fi
-            fi
-        elif [ $reward ]; then
-            echo "...creating a random environment... using $reward"
-            configuration_file=`python3 env_generator.py --environment_file "default" --rewards_file $reward`
+        if [ $light ]; then
+            echo "...creating a random light environment... using environment_file: $environment and reward_file: $reward"
+            configuration_file=`python3 env_gen_light.py --environment_file $environment --rewards_file $reward`
         else
-            echo "...creating a random environment..."
-            echo "...creating environment with grid_size 6, number of water tiles 3, max block size 1, with default reward config"
-            configuration_file=`python3 env_generator.py --environment_file "default" --rewards_file "default"`
+            echo "...creating a random environment... using $environment and $reward"
+            configuration_file=`python3 env_generator.py --environment_file $environment --rewards_file $reward`
         fi
         configuration_file="randoms/$configuration_file"
     fi
