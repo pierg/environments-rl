@@ -232,7 +232,7 @@ register(
 
     # Creates a json config file for the random environment
     config_filename = configuration_path + "randoms/" + "randomEnv-{0}x{0}-{1}-v0.json".format(grid_size, random_token)
-    os.makedirs(os.path.dirname(env_filename), exist_ok=True)
+    os.makedirs(os.path.dirname(config_filename), exist_ok=True)
     with open(config_filename, 'w') as config:
         list_of_json_patterns = {}
         patterns_map = {}
