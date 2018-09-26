@@ -15,7 +15,7 @@ parser.add_argument('--rewards_file', type=str, required=False, help="A json fil
                                                                       "of the actions")
 
 environment_path = "../gym-minigrid/gym_minigrid/envs/"
-configuration_path = "configurations/"
+configuration_path = "../gym-minigrid/configurations/"
 random_token = randint(0,9999)
 
 """ This script creates a random environment in the gym_minigrid/envs folder. It uses a token_hex(4) 
