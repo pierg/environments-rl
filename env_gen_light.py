@@ -2,6 +2,7 @@ import argparse
 import json
 from random import randint
 from configurations.config_grabber import Configuration
+import os
 
 parser = argparse.ArgumentParser(description='Arguments for creating the environments and its configuration')
 parser.add_argument('--environment_file', type=str, required=False, help="A json file containing the keys: "
@@ -32,7 +33,9 @@ def generate_environment(environment="default", rewards="default"):
     random_each_episode = False
     rewards = Configuration.grab("rewards/" + rewards)
 
-    with open(environment_path + "randoms/" + "randomenv{0}.py".format(random_token), 'w') as env:
+    env_filename = environment_path + "randoms/" + "randomenv{0}.py".format(random_token)
+    os.makedirs(os.path.dirname(env_filename), exist_ok=True)
+    with open(env_filename, 'w') as env:
         env.write("""
 from gym_minigrid.extendedminigrid import *
 from gym_minigrid.register import register
