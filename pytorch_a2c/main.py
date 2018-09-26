@@ -151,7 +151,7 @@ def main():
     send_env_name = False
     for j in range(num_updates):
 
-        if n_times_is_converging > 10:
+        if n_times_is_converging > 3:
             print("Converged...")
             break
 
