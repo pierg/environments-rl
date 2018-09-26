@@ -223,13 +223,17 @@ register(
         env.close()
     # Adds the import statement to __init__.py in the envs folder in gym_minigrid,
     # otherwise the environment is unavailable to use.
-    with open(environment_path + "__init__.py", 'a') as init_file:
+    init_filename = environment_path + "__init__.py"
+    os.makedirs(os.path.dirname(init_filename), exist_ok=True)
+    with open(init_filename, 'a') as init_file:
         init_file.write("\n")
         init_file.write("from gym_minigrid.envs.randoms.randomenv{0} import *".format(random_token))
         init_file.close()
 
     # Creates a json config file for the random environment
-    with open(configuration_path + "randoms/" + "randomEnv-{0}x{0}-{1}-v0.json".format(grid_size, random_token), 'w') as config:
+    config_filename = configuration_path + "randoms/" + "randomEnv-{0}x{0}-{1}-v0.json".format(grid_size, random_token)
+    os.makedirs(os.path.dirname(env_filename), exist_ok=True)
+    with open(config_filename, 'w') as config:
         list_of_json_patterns = {}
         patterns_map = {}
         if hasattr(elements,"monitors"):
