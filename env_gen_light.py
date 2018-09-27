@@ -54,6 +54,14 @@ class RandomEnv(ExMiniGridEnv):
         
     def getRooms(self):
         return self.roomList
+    
+    # Goal is to turn on the light before reaching the goal
+    def goal_enabled(self):
+        for element in self.grid.grid:
+            if element is not None and element.type == "lightsw" \
+                    and hasattr(element, 'is_on'):
+                return element.is_on
+        return False
         
     def saveElements(self,room):
         tab=[]
