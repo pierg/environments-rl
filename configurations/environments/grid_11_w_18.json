@@ -1,6 +1,6 @@
 {
     "grid_size": 11,
-    "n_water": 20,
+    "n_water": 18,
     "light_switch": true,
 
     "envelope": true,
