@@ -135,6 +135,7 @@ class RandomEnv(ExMiniGridEnv):
         for (x,y) in water:
             self.grid.set(x,y,None)
             
+    #Places the agent in a random position within the first room.         
     def _place_agent(self, width_pos, height_pos):
         max_height = self.grid.height
         x_agent = random.randint(1, width_pos)
@@ -162,13 +163,14 @@ class RandomEnv(ExMiniGridEnv):
         switchRoom = LightSwitch()
         
         # Place the agent
-        self._place_agent(width_pos,{0}-2)
         self.start_dir = random.randint(0,3)
-        (x_agent, y_agent) = self.start_pos
+        x_agent = 1
+        y_agent = 1
+        self.start_pos = (x_agent, y_agent)
         
         # Place a goal square 
-        x_goal = random.randint(xdoor + 1, width - 2)
-        y_goal = random.randint(1,width -2)
+        x_goal = width - 2 #random.randint(xdoor + 1, width - 2)
+        y_goal = height -2 #random.randint(1,height -2)
         
         #Avoid placing it in front of the door. 
         while x_goal ==  xdoor + 1 and ydoor == y_goal:
@@ -184,8 +186,8 @@ class RandomEnv(ExMiniGridEnv):
         
         #Add the room
         self.roomList = []
-        self.roomList.append(Room(0,(width_pos + 1, height),(0, 0),True))
-        self.roomList.append(Room(1,(width - width_pos - 2, height),(width_pos + 1, 0),False))
+        self.roomList.append(Room(0,(width_pos + 2, height),(0, 0),True))
+        self.roomList.append(Room(1,(width - width_pos - 2, height),(width_pos + 2, 0),False))
         self.roomList[1].setEntryDoor((xdoor,ydoor))
         self.roomList[0].setExitDoor((xdoor,ydoor))        
         
@@ -206,13 +208,10 @@ class RandomEnv(ExMiniGridEnv):
         stop = 0
         
         while len(elements) != 3 and stop < 10000:
-            stop += 1
-            if (stop % 10) == 0:
-                self._place_agent(width_pos,{0}-2)
-                (x_agent, y_agent) = self.start_pos
             self._reset_water(water)
             water = self._place_water(x_agent,y_agent)
             elements = self._reachable_elements(x_agent,y_agent)
+            stop += 1
         
         tab = self.saveElements(self.roomList[1])
         switchRoom.elements_in_room(tab)
