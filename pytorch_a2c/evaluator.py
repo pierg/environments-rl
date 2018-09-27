@@ -107,6 +107,8 @@ class Evaluator:
         mean_rwd_curr = final_rewards.mean()
         value_lss_curr = value_loss.data[0]
 
+        final_rewards_std = final_rewards.std()
+
 
         csv_logger.write_to_log(self.config_file_path, [n_updates,
                                                         total_num_steps,
@@ -114,7 +116,7 @@ class Evaluator:
                                                         final_rewards.median(),
                                                         final_rewards.min(),
                                                         final_rewards.max(),
-                                                        final_rewards.std(),
+                                                        final_rewards_std,
                                                         dist_entropy.data[0],
                                                         value_lss_curr,
                                                         action_loss.data[0],
@@ -128,10 +130,11 @@ class Evaluator:
                                                         ])
 
         # Check convergence
-        if (abs(log_n_steps_goal_avg_curr - self.log_n_steps_goal_avg_prev) < 0.01
-                and value_lss_curr < 0.001
+        if (abs(log_n_steps_goal_avg_curr - self.log_n_steps_goal_avg_prev) < 0.1
+                and value_lss_curr < 0.01
                 and mean_rwd_curr > 0.0
-                and log_n_goals_avg_curr > 0.0):
+                and log_n_goals_avg_curr > 0.0
+                and final_rewards_std < 0.001):
             self.is_converging = True
 
         self.log_n_goals_avg_prev = log_n_goals_avg_curr
