@@ -1,0 +1,102 @@
+{
+    "grid_size": 9,
+    "n_water": 10d      ,
+    "light_switch": true,
+
+    "envelope": true,
+    "rendering": false,
+    "recording": true,
+    "log_interval": 10,
+    "max_num_frames": 8000000,
+    "max_num_steps_episode": -1,
+    "debug_mode": false,
+    "evaluation_directory_name": "evaluations",
+    "training_mode": true,
+    "agent_view_size": 7,
+    "visdom": false,
+    "dqn": {
+        "exploration_rate": 0.99,
+        "epsilon_decay_episodes": 1000,
+        "results_log_interval": 200,
+        "epsilon_start": 1.0,
+        "discount_factor": 0.99,
+        "epsilon_decay_frame": 5000,
+        "epsilon_final": 0.1
+    },
+    "a2c": {
+        "stop_learning": 48000,
+        "num_steps": 4,
+        "stop_after_update_number": 0,
+        "algorithm": "a2c",
+        "num_processes": 48,
+        "optimal_num_step": 40,
+        "save_model_interval": 50,
+        "save_evaluation_interval": 50
+    },
+    "monitors": {
+        "patterns": {
+            "absence": {
+                "waterAbsence": {
+                    "action_planner": "wait",
+                    "active": true,
+                    "context": "water-front",
+                    "conditions": "stepping-on-water",
+                    "mode": "enforcing",
+                    "name": "waterAbsence",
+                    "type": "absence"
+                }
+            },
+            "universality": {
+                "lightUniversally": {
+                    "action_planner": "wait",
+                    "active": true,
+                    "context": "always",
+                    "conditions": "light-on-current-room",
+                    "mode": "enforcing",
+                    "name": "lightUniversality",
+                    "type": "universality"
+                }
+            },
+            "precedence": {
+                "lightPrecedence": {
+                    "action_planner": "turn_right",
+                    "active": true,
+                    "context": "door-front",
+                    "conditions": {
+                        "post": "entering-a-room",
+                        "pre": "light-switch-turned-on"
+                    },
+                    "mode": "enforcing",
+                    "name": "lightPrecedence",
+                    "type": "precedence"
+                }
+            },
+            "response": {
+                "openDoorResponse": {
+                    "action_planner": "toggle",
+                    "active": true,
+                    "context": "door-front",
+                    "conditions": {
+                        "post": "action-is-toggle",
+                        "pre": "door-closed-in-front"
+                    },
+                    "mode": "enforcing",
+                    "name": "openDoorResponse",
+                    "type": "response"
+                },
+                "switchOffResponse": {
+                    "action_planner": "toggle",
+                    "active": true,
+                    "context": "lightsw-front",
+                    "conditions": {
+                        "post": "action-is-toggle",
+                        "pre": "light-switch-in-front-off"
+                    },
+                    "mode": "enforcing",
+                    "name": "switchOffResponse",
+                    "type": "response"
+                }
+            }
+        }
+    }
+}
