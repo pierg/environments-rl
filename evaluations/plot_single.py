@@ -39,6 +39,9 @@ def extract_all_data_from_csv(csv_folder_abs_path):
         if "a2c" in file_name and ".csv" in file_name:
             print("CsvName : ", file_name)
             file_eval_name = file_name.replace(".csv", "")
+            if os.path.exists(file_eval_name + '.pdf'):
+                print('Pdf File already exists.')
+                continue
             N_updates.append(extract_array("N_updates", csv_folder_abs_path + "/" + file_name))
             N_timesteps.append(extract_array("N_timesteps", csv_folder_abs_path + "/" + file_name))
             Reward_mean.append(extract_array("Reward_mean", csv_folder_abs_path + "/" + file_name))
