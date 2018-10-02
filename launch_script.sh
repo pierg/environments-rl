@@ -11,8 +11,9 @@ double=0
 launch_monitor=0
 launch_without=0
 logstdfile=0
+plot=0
 
-while getopts qt:r:e:w:s:i:labf opt; do
+while getopts qt:r:e:w:s:i:labfp opt; do
     case ${opt} in
         q)
             qlearning=1
@@ -54,6 +55,9 @@ while getopts qt:r:e:w:s:i:labf opt; do
             ;;
         f)
             logstdfile=1
+            ;;
+        p)
+            plot=1
             ;;
     esac
 done
@@ -136,9 +140,11 @@ while [ $random_iterations -ne $i ]; do
                         python3 ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor
                     fi
                 fi
-                echo "plotting..."
-                python3 ./evaluations/plot_dqn.py
-                python3 ./evaluations/plot_single.py
+                if [ $plot -eq 1 ]; then
+                    echo "plotting..."
+                    python3 ./evaluations/plot_dqn.py
+                    python3 ./evaluations/plot_single.py
+                fi
         fi
         if [ $start_training -eq 1 ] && [ $logstdfile -eq 1 ]; then
         echo "...launching the training logging to file..."
@@ -162,9 +168,11 @@ while [ $random_iterations -ne $i ]; do
                         python3 ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor --logstdfile
                     fi
                 fi
-                echo "plotting..."
-                python3 ./evaluations/plot_dqn.py
-                python3 ./evaluations/plot_single.py
+                if [ $plot -eq 1 ]; then
+                    echo "plotting..."
+                    python3 ./evaluations/plot_dqn.py
+                    python3 ./evaluations/plot_single.py
+                fi
         fi
         let j+=1
     done
