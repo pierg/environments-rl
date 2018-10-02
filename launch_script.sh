@@ -123,21 +123,21 @@ while [ $random_iterations -ne $i ]; do
                 if [ $launch_monitor -eq 1 ]; then
                     echo "+++++ With Envelope +++++"
                     if [ $qlearning -eq 1 ]; then
-                        echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
-                        python3 ./pytorch_dqn/main.py --stop $stop --record --norender
+                        echo "launching: ./pytorch_dqn/main.py --stop $stop "
+                        python3 ./pytorch_dqn/main.py --stop $stop  --norender
                     else
-                        echo "launching ./pytorch_a2c/main.py --stop $stop --record --norender"
-                        python3 ./pytorch_a2c/main.py --stop $stop --record --norender
+                        echo "launching ./pytorch_a2c/main.py --stop $stop  --norender"
+                        python3 ./pytorch_a2c/main.py --stop $stop  --norender
                     fi
                 fi
                 if [ $launch_without -eq 1 ]; then
                     echo "------ Without Envelope -----"
                     if [ $qlearning -eq 1 ]; then
-                        echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
-                        python3 ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor
+                        echo "launching: ./pytorch_dqn/main.py --stop $stop "
+                        python3 ./pytorch_dqn/main.py --stop $stop  --norender --nomonitor
                     else
-                        echo "launching: ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor"
-                        python3 ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor
+                        echo "launching: ./pytorch_a2c/main.py --stop $stop  --norender --nomonitor"
+                        python3 ./pytorch_a2c/main.py --stop $stop  --norender --nomonitor
                     fi
                 fi
                 if [ $plot -eq 1 ]; then
@@ -151,21 +151,21 @@ while [ $random_iterations -ne $i ]; do
                 if [ $launch_monitor -eq 1 ]; then
                     echo "+++++ With Envelope +++++"
                     if [ $qlearning -eq 1 ]; then
-                        echo "launching: ./pytorch_dqn/main.py --stop $stop --record"
-                        python3 ./pytorch_dqn/main.py --stop $stop --record --norender --logstdfile
+                        echo "launching: ./pytorch_dqn/main.py --stop $stop "
+                        python3 ./pytorch_dqn/main.py --stop $stop  --norender --logstdfile
                     else
-                        echo "launching: ./pytorch_a2c/main.py --stop $stop --record --norender --logstdfile"
-                        python3 ./pytorch_a2c/main.py --stop $stop --record --norender --logstdfile
+                        echo "launching: ./pytorch_a2c/main.py --stop $stop  --norender --logstdfile"
+                        python3 ./pytorch_a2c/main.py --stop $stop  --norender --logstdfile
                     fi
                 fi
                 if [ $launch_without -eq 1 ]; then
                     echo "------ Without Envelope -----"
                     if [ $qlearning -eq 1 ]; then
-                        echo "launching: ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor --logstdfile"
-                        python3 ./pytorch_dqn/main.py --stop $stop --record --norender --nomonitor --logstdfile
+                        echo "launching: ./pytorch_dqn/main.py --stop $stop  --norender --nomonitor --logstdfile"
+                        python3 ./pytorch_dqn/main.py --stop $stop  --norender --nomonitor --logstdfile
                     else
-                        echo "launching: ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor --logstdfile"
-                        python3 ./pytorch_a2c/main.py --stop $stop --record --norender --nomonitor --logstdfile
+                        echo "launching: ./pytorch_a2c/main.py --stop $stop  --norender --nomonitor --logstdfile"
+                        python3 ./pytorch_a2c/main.py --stop $stop  --norender --nomonitor --logstdfile
                     fi
                 fi
                 if [ $plot -eq 1 ]; then
