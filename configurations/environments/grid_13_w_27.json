@@ -28,7 +28,7 @@
         "num_steps": 4,
         "stop_after_update_number": 0,
         "algorithm": "a2c",
-        "num_processes": 4,
+        "num_processes": 48,
         "optimal_num_step": 40,
         "save_model_interval": 50,
         "save_evaluation_interval": 50
