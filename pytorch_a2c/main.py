@@ -26,6 +26,8 @@ from configurations import config_grabber as cg
 
 from envs import make_env
 
+import objgraph
+
 import random, string
 
 import os, re, os.path
@@ -324,6 +326,7 @@ def main():
                     action_loss.data[0]
                 )
             )
+            objgraph.show_most_common_types()
 
         if config.visdom and j % config.visdom_interval == 0:
             win = visdom_plot(

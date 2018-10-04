@@ -39,3 +39,4 @@ urllib3
 visdom
 wheel
 zmq
+objgraph
