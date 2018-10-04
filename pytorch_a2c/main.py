@@ -30,7 +30,6 @@ import random, string
 
 import os, re, os.path
 
-from objgraph import *
 
 args = get_args()
 
@@ -309,8 +308,6 @@ def main():
                 n_times_is_converging += 1
             else:
                 n_times_is_converging = 0
-
-            print(objgraph.show_most_common_types())
 
             print(
                 "Updates {}, num timesteps {}, FPS {}, mean/median reward {:.2f}/{:.2f}, min/max reward {:.2f}/{:.2f}, entropy {:.5f}, value loss {:.5f}, policy loss {:.5f}".
