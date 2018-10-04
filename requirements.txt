@@ -11,6 +11,7 @@ joblib
 kiwisolver
 matplotlib
 numpy
+objgraph
 Pillow
 pip
 progressbar2
