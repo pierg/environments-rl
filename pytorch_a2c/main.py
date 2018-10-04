@@ -30,8 +30,7 @@ import random, string
 
 import os, re, os.path
 
-import objgraph
-
+from objgraph import *
 
 args = get_args()
 
