@@ -99,7 +99,7 @@ class Evaluator:
         else:
             log_n_steps_goal_avg_curr = -100
 
-        log_n_died_avg = np.mean(self.log_n_died)
+        log_n_died_avg = np.sum(self.log_n_died)
 
         log_n_violations_avg_curr = np.mean(self.log_n_violations)
         log_n_end = np.mean(self.log_n_end)
