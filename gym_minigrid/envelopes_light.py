@@ -15,7 +15,7 @@ class SafetyEnvelope(gym.core.Wrapper):
     """
 
     def __init__(self, env):
-        super(LightSafetyEnvelope, self).__init__(env)
+        super(SafetyEnvelope, self).__init__(env)
 
         # Grab configuration
         self.config = cg.Configuration.grab()
