@@ -2,7 +2,7 @@ try:
     import os
     import gym_minigrid
     from gym_minigrid.wrappers import *
-    from gym_minigrid.envelopes import *
+    from gym_minigrid.envelopes_light import *
     from gym import wrappers, logger
 except Exception as e:
     print(" =========== =========== IMPORT ERROR ===========")
@@ -21,7 +21,7 @@ def make_env(env_id, seed, rank, evaluation_id, force=False, resume=False, custo
         env.seed(seed + rank)
 
         if config.envelope:
-            env = LightSafetyEnvelope(env)
+            env = SafetyEnvelope(env)
 
         # record only the first agent
         if config.recording and rank==0:

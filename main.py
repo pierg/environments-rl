@@ -15,7 +15,7 @@ from gym_minigrid import minigrid
 try:
     import gym_minigrid
     from gym_minigrid.wrappers import *
-    from gym_minigrid.envelopes import *
+    from gym_minigrid.envelopes_light import *
 
 except:
     pass
