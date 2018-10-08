@@ -7,7 +7,7 @@
     "rendering": false,
     "recording": true,
     "log_interval": 10,
-    "max_num_frames": 8000000,
+    "max_num_frames": 50000000,
     "max_num_steps_episode": -1,
     "debug_mode": false,
     "evaluation_directory_name": "evaluations",
