@@ -275,34 +275,31 @@ class LightSafetyEnvelope(gym.core.Wrapper):
         if self.config.a2c.num_processes == 1 and self.config.rendering:
             self.env.render('human')
 
-        # To be returned to the agent
-        obs, reward, done, info = None, None, None, None
-
         n_violations = 0
         shaped_reward = 0
         safe_action = proposed_action
 
         # Checking waterAbsence
-        if self.is_condition_satisfied("stepping-on-water", proposed_action):
+        if self.perception.is_condition_satisfied("stepping-on-water", proposed_action):
             n_violations += 1
             shaped_reward -= 0.1
             safe_action = self.env.actions.done
 
         # Checking lightUniversally
-        if not self.is_condition_satisfied("light-on-current-room"):
+        if not self.perception.is_condition_satisfied("light-on-current-room"):
             n_violations += 1
             shaped_reward -= 0.1
             safe_action = self.env.actions.done
 
         # Checking lightPrecedence
-        if (self.is_condition_satisfied("entering-a-room", proposed_action)
-                and not self.is_condition_satisfied("light-switch-turned-on")):
+        if (self.perception.is_condition_satisfied("entering-a-room", proposed_action)
+                and not self.perception.is_condition_satisfied("light-switch-turned-on")):
             n_violations += 1
             shaped_reward -= 0.1
             safe_action = self.env.actions.right
 
         # Checking openDoorResponse
-        if (self.is_condition_satisfied("door-closed-in-front")
+        if (self.perception.is_condition_satisfied("door-closed-in-front")
                 and proposed_action != self.env.actions.toggle):
             n_violations += 1
             shaped_reward -= 0.1
@@ -310,7 +307,7 @@ class LightSafetyEnvelope(gym.core.Wrapper):
 
 
         # Checking switchOffResponse
-        if (self.is_condition_satisfied("light-switch-in-front-off")
+        if (self.perception.is_condition_satisfied("light-switch-in-front-off")
                 and proposed_action != self.env.actions.toggle):
             n_violations += 1
             shaped_reward -= 0.1
