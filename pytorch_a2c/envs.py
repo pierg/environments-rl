@@ -21,7 +21,7 @@ def make_env(env_id, seed, rank, evaluation_id, force=False, resume=False, custo
         env.seed(seed + rank)
 
         if config.envelope:
-            env = SafetyEnvelope(env)
+            env = LightSafetyEnvelope(env)
 
         # record only the first agent
         if config.recording and rank==0:

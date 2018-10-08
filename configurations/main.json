@@ -1,7 +1,7 @@
 {
     "envelope": true,
-    "rendering": false,
-    "recording": true,
+    "rendering": true,
+    "recording": false,
     "log_interval": 10,
     "max_num_frames": 3000000,
     "max_num_steps_episode": -1,
@@ -9,7 +9,7 @@
     "evaluation_directory_name": "evaluations",
     "config_name": "light_test_1",
     "env_name": "MiniGrid-LightTestExp-9x9-v0",
-    "training_mode": true,
+    "training_mode": false,
     "agent_view_size": 7,
     "visdom": false,
     "dqn": {
