@@ -30,6 +30,8 @@ import objgraph
 
 import random, string
 
+import objgraph
+
 import os, re, os.path
 
 
@@ -327,6 +329,8 @@ def main():
                 )
             )
             objgraph.show_most_common_types()
+
+            objgraph.show_growth(limit=3)
 
         if config.visdom and j % config.visdom_interval == 0:
             win = visdom_plot(

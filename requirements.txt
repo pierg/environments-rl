@@ -32,6 +32,6 @@ tqdm==4.19.9
 transitions==0.6.4
 urllib3==1.22
 visdom
+wheel
 zmq==0.0.0
 objgraph==3.4.0
-
