@@ -133,8 +133,7 @@ class Evaluator:
         if (abs(log_n_steps_goal_avg_curr - self.log_n_steps_goal_avg_prev) < 0.1
                 and value_lss_curr < 0.01
                 and mean_rwd_curr > 0.0
-                and log_n_goals_avg_curr > 0.0
-                and final_rewards_std < 0.001):
+                and log_n_goals_avg_curr > 0.0):
             self.is_converging = True
 
         self.log_n_goals_avg_prev = log_n_goals_avg_curr
