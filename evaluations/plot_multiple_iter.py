@@ -32,6 +32,12 @@ N_end_avg = []
 N_step_goal_avg = []
 eval_name = []
 envelope = []
+convergence = []
+
+iterations_number = 10
+
+def max_timesteps(size):
+    return size * size * 10000
 
 
 def respects_criteria(file_name, criteria):
@@ -41,7 +47,7 @@ def respects_criteria(file_name, criteria):
     return True
 
 
-def extract_all_data_from_csv(csv_folder_abs_path, criteria):
+def extract_all_data_from_csv(csv_folder_abs_path, criteria=[]):
     eval_name.clear()
     envelope.clear()
     N_updates.clear()
@@ -61,7 +67,7 @@ def extract_all_data_from_csv(csv_folder_abs_path, criteria):
     N_step_goal_avg.clear()
     eval_name.clear()
     envelope.clear()
-
+    convergence.clear()
     for file_name in os.listdir(csv_folder_abs_path):
         if "a2c" in file_name and ".csv" in file_name and respects_criteria(file_name, criteria):
             file_eval_name = file_name.replace(".csv", "")
@@ -82,6 +88,54 @@ def extract_all_data_from_csv(csv_folder_abs_path, criteria):
             N_step_goal_avg.append(extract_array("N_step_goal_avg", csv_folder_abs_path + "/" + file_name))
             eval_name.append(file_eval_name)
             envelope.append(extract_array("envelope", csv_folder_abs_path + "/" + file_name)[0])
+            cut_to_convergence()
+
+
+def cut_to_convergence():
+    count = 0
+    size = int(eval_name[-1].split('-')[1].replace('s', ''))
+    timesteps = max_timesteps(size)
+    for i in range(1, len(N_step_goal_avg[-1])):
+        if converged(N_step_goal_avg[-1][i], N_step_goal_avg[-1][i-1], Value_loss[-1][i], Reward_mean[-1][i], Reward_std[-1][i], N_step_goal_avg[-1][i]):
+            count += 1
+        else:
+            count = 0
+
+        if count > 0:
+            cut_table(i)
+            convergence.append(True)
+            return
+        if N_timesteps[-1][i] > timesteps:
+            cut_table(i)
+            convergence.append(False)
+            return
+    convergence.append(False)
+
+
+def cut_table(row):
+    N_updates[-1] = N_updates[-1][0:row+1]
+    N_timesteps[-1] = N_timesteps[-1][0:row+1]
+    Reward_mean[-1] = Reward_mean[-1][0:row+1]
+    Reward_median[-1] = Reward_median[-1][0:row+1]
+    Reward_min[-1] = Reward_min[-1][0:row+1]
+    Reward_max[-1] = Reward_max[-1][0:row+1]
+    Reward_std[-1] = Reward_std[-1][0:row+1]
+    Entropy[-1] = Entropy[-1][0:row+1]
+    Value_loss[-1] = Value_loss[-1][0:row+1]
+    Action_loss[-1] = Action_loss[-1][0:row+1]
+    N_violation_avg[-1] = N_violation_avg[-1][0:row+1]
+    N_goals_avg[-1] = N_goals_avg[-1][0:row+1]
+    N_died_avg[-1] = N_died_avg[-1][0:row+1]
+    N_end_avg[-1] = N_end_avg[-1][0:row+1]
+    N_step_goal_avg[-1] = N_step_goal_avg[-1][0:row+1]
+
+
+def converged(log_n_steps_goal_avg_curr, log_n_steps_goal_avg_prev, value_lss_curr, mean_rwd_curr, final_rewards_std, log_n_goals_avg_curr):
+    return (abs(log_n_steps_goal_avg_curr - log_n_steps_goal_avg_prev) < 0.1
+            and value_lss_curr < 0.01
+            and mean_rwd_curr > 0.0
+            and log_n_goals_avg_curr > 0.0
+            )
 
 
 def extract_array(label, csv_file):
@@ -234,15 +288,6 @@ def avg(iterable):
     return sum(iterable) / len(iterable)
 
 
-def converged(log_n_steps_goal_avg_curr, log_n_steps_goal_avg_prev, value_lss_curr, mean_rwd_curr, final_rewards_std,
-              log_n_goals_avg_curr):
-    return (abs(log_n_steps_goal_avg_curr - log_n_steps_goal_avg_prev) < 0.1
-            and value_lss_curr < 0.01
-            and mean_rwd_curr > 0.0
-            and log_n_goals_avg_curr > 0.0
-            and final_rewards_std < 0.001)
-
-
 def get_environments(csv_folder_abs_path, criteria):
     environments = set()
     for file_name in os.listdir(csv_folder_abs_path):
@@ -265,25 +310,22 @@ def plot_all(criteria):
         size = int(env.split('-')[1].replace('s', ''))
         res_yes = plot(local_criteria + ['YES'])
         res_no = plot(local_criteria + ['NO'])
-        if size in results:
-            size_results = results[size]
-        else:
-            size_results = {}
-        size_results[env] = (res_yes, res_no)
-        results[size] = size_results
+        if size not in results:
+            results[size] = {}
+        results[size][env] = (res_yes, res_no)
 
     print("Table 1")
     print(
-        'Environment, Envelope, Converged, Min Steps, Avg Steps, Max Steps, Min Mean Rwd, Avg Mean Rwd, Max Min Rwd, Min Goal Steps, Avg Goal Steps, Max Goal Steps \\\\'.replace(
+        'Environment, Envelope, Iteration ,Converged, Min Steps, Avg Steps, Max Steps, Min Mean Rwd, Avg Mean Rwd, Max Min Rwd, Min Goal Steps, Avg Goal Steps, Max Goal Steps \\\\'.replace(
             ',', ' & '))
     for size in sorted(results):
         size_results = results[size]
         for env in size_results:
             # It must be the same number of iterations.
-            if len(size_results[env][0]) > 0 and len(size_results[env][1]) > 0 and size_results[env][0][0] == \
-                    size_results[env][1][0]:
-                print(env[10:] + ' & YES & ' + format_list(size_results[env][0][1:]) + '\\\\')
-                print(env[10:] + ' &  NO & ' + format_list(size_results[env][1][1:]) + '\\\\')
+            if len(size_results[env][0]) > 0 and len(size_results[env][1]) > 0 and size_results[env][0][0] == size_results[env][1][0]:
+                print(env[10:] + ' & YES & ' + format_list(size_results[env][0][0:]) + '\\\\')
+                print(env[10:] + ' &  NO & ' + format_list(size_results[env][1][0:]) + '\\\\')
+
 
     print("Table 2")
     for size in sorted(results):
@@ -296,8 +338,9 @@ def plot_all(criteria):
         converged_sip = 0
         converged_nop = 0
         for env in size_results:
-            if len(size_results[env][0]) > 0 and len(size_results[env][1]) > 0 and size_results[env][0][0] == \
-                    size_results[env][1][0]:
+            #There is at least one iteration of both yes and no.
+            if len(size_results[env][0]) > 0 and len(size_results[env][1]) > 0 and \
+                size_results[env][0][0] == iterations_number and size_results[env][1][0] == iterations_number:
                 if len(size_results[env][0]) > 3 and len(size_results[env][1]) > 3:
                     avg_steps += (1 - (size_results[env][0][3] / size_results[env][1][3]))
                     death_nop += size_results[env][1][-2]
@@ -308,9 +351,10 @@ def plot_all(criteria):
                 total += 1
 
         print(' & '.join("{:10.2f}".format(x) if type(x) == type(float) else str(x) for x in
-                         [size, avg_steps / compared * 100 if compared > 0 else 'N/A',
+                         [size, total , avg_steps / compared * 100 if compared > 0 else 'N/A',
                           converged_sip / total if total > 0 else 'N/A', converged_nop / total if total > 0 else 'N/A',
                           death_sip, death_nop]), '\\\\\\hline')
+
 
 
 def plot(criteria):
@@ -323,26 +367,16 @@ def plot(criteria):
     if len(labels) == 0:
         return []
 
-    values = [[N_timesteps[i][-1] for i in range(len(labels)) if
-               converged(N_step_goal_avg[i][-2], N_step_goal_avg[i][-3], Value_loss[i][-2], Reward_mean[i][-2],
-                         Reward_std[i][-2], N_goals_avg[i][-2])]]
-    values += [[Reward_mean[i][-1] for i in range(len(labels)) if
-                converged(N_step_goal_avg[i][-2], N_step_goal_avg[i][-3], Value_loss[i][-2], Reward_mean[i][-2],
-                          Reward_std[i][-2], N_goals_avg[i][-2])]]
-    values += [[N_step_goal_avg[i][-1] for i in range(len(labels)) if
-                converged(N_step_goal_avg[i][-2], N_step_goal_avg[i][-3], Value_loss[i][-2], Reward_mean[i][-2],
-                          Reward_std[i][-2], N_goals_avg[i][-2])]]
-
-    values += [[sum(N_died_avg[i][0:-1]) for i in range(len(labels)) if
-                converged(N_step_goal_avg[i][-2], N_step_goal_avg[i][-3], Value_loss[i][-2], Reward_mean[i][-2],
-                          Reward_std[i][-2], N_goals_avg[i][-2])]]
+    values = [[N_timesteps[i][-1] for i in range(len(labels)) if convergence[i]]]
+    values += [[Reward_mean[i][-1] for i in range(len(labels)) if convergence[i]]]
+    values += [[N_step_goal_avg[i][-1] for i in range(len(labels)) if convergence[i]]]
+    values += [[sum(N_died_avg[i][0:-1]) for i in range(len(labels)) if convergence[i]]]
 
     results = [len(labels), len(values[0]) / len(labels) * 100]
     if len(values[0]) > 0:
         functions = [min, avg, max]
         results += [f(value) for value in values for f in functions]
     return results
-
 
 '''
     figure_1 = multi_line_plot([N_timesteps[i][:] for i in range(len(labels))],
