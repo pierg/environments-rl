@@ -36,6 +36,7 @@ convergence = []
 
 iterations_number = 10
 
+
 def max_timesteps(size):
     return size * size * 10000
 
@@ -96,7 +97,8 @@ def cut_to_convergence():
     size = int(eval_name[-1].split('-')[1].replace('s', ''))
     timesteps = max_timesteps(size)
     for i in range(1, len(N_step_goal_avg[-1])):
-        if converged(N_step_goal_avg[-1][i], N_step_goal_avg[-1][i-1], Value_loss[-1][i], Reward_mean[-1][i], Reward_std[-1][i], N_step_goal_avg[-1][i]):
+        if converged(N_step_goal_avg[-1][i], N_step_goal_avg[-1][i - 1], Value_loss[-1][i], Reward_mean[-1][i],
+                     Reward_std[-1][i], N_step_goal_avg[-1][i]):
             count += 1
         else:
             count = 0
@@ -113,24 +115,25 @@ def cut_to_convergence():
 
 
 def cut_table(row):
-    N_updates[-1] = N_updates[-1][0:row+1]
-    N_timesteps[-1] = N_timesteps[-1][0:row+1]
-    Reward_mean[-1] = Reward_mean[-1][0:row+1]
-    Reward_median[-1] = Reward_median[-1][0:row+1]
-    Reward_min[-1] = Reward_min[-1][0:row+1]
-    Reward_max[-1] = Reward_max[-1][0:row+1]
-    Reward_std[-1] = Reward_std[-1][0:row+1]
-    Entropy[-1] = Entropy[-1][0:row+1]
-    Value_loss[-1] = Value_loss[-1][0:row+1]
-    Action_loss[-1] = Action_loss[-1][0:row+1]
-    N_violation_avg[-1] = N_violation_avg[-1][0:row+1]
-    N_goals_avg[-1] = N_goals_avg[-1][0:row+1]
-    N_died_avg[-1] = N_died_avg[-1][0:row+1]
-    N_end_avg[-1] = N_end_avg[-1][0:row+1]
-    N_step_goal_avg[-1] = N_step_goal_avg[-1][0:row+1]
+    N_updates[-1] = N_updates[-1][0:row + 1]
+    N_timesteps[-1] = N_timesteps[-1][0:row + 1]
+    Reward_mean[-1] = Reward_mean[-1][0:row + 1]
+    Reward_median[-1] = Reward_median[-1][0:row + 1]
+    Reward_min[-1] = Reward_min[-1][0:row + 1]
+    Reward_max[-1] = Reward_max[-1][0:row + 1]
+    Reward_std[-1] = Reward_std[-1][0:row + 1]
+    Entropy[-1] = Entropy[-1][0:row + 1]
+    Value_loss[-1] = Value_loss[-1][0:row + 1]
+    Action_loss[-1] = Action_loss[-1][0:row + 1]
+    N_violation_avg[-1] = N_violation_avg[-1][0:row + 1]
+    N_goals_avg[-1] = N_goals_avg[-1][0:row + 1]
+    N_died_avg[-1] = N_died_avg[-1][0:row + 1]
+    N_end_avg[-1] = N_end_avg[-1][0:row + 1]
+    N_step_goal_avg[-1] = N_step_goal_avg[-1][0:row + 1]
 
 
-def converged(log_n_steps_goal_avg_curr, log_n_steps_goal_avg_prev, value_lss_curr, mean_rwd_curr, final_rewards_std, log_n_goals_avg_curr):
+def converged(log_n_steps_goal_avg_curr, log_n_steps_goal_avg_prev, value_lss_curr, mean_rwd_curr, final_rewards_std,
+              log_n_goals_avg_curr):
     return (abs(log_n_steps_goal_avg_curr - log_n_steps_goal_avg_prev) < 0.1
             and value_lss_curr < 0.01
             and mean_rwd_curr > 0.0
@@ -322,12 +325,14 @@ def plot_all(criteria):
         size_results = results[size]
         for env in size_results:
             # It must be the same number of iterations.
-            if len(size_results[env][0]) > 0 and len(size_results[env][1]) > 0 and size_results[env][0][0] == size_results[env][1][0]:
+            if len(size_results[env][0]) > 0 and len(size_results[env][1]) > 0 and size_results[env][0][0] == \
+                    size_results[env][1][0]:
                 print(env[10:] + ' & YES & ' + format_list(size_results[env][0][0:]) + '\\\\')
                 print(env[10:] + ' &  NO & ' + format_list(size_results[env][1][0:]) + '\\\\')
 
+    convergence_table = []
+    comparison_table = []
 
-    print("Table 2")
     for size in sorted(results):
         size_results = results[size]
         avg_steps = 0.0
@@ -338,9 +343,9 @@ def plot_all(criteria):
         converged_sip = 0
         converged_nop = 0
         for env in size_results:
-            #There is at least one iteration of both yes and no.
+            # There is at least one iteration of both yes and no.
             if len(size_results[env][0]) > 0 and len(size_results[env][1]) > 0 and \
-                size_results[env][0][0] == iterations_number and size_results[env][1][0] == iterations_number:
+                    size_results[env][0][0] == iterations_number and size_results[env][1][0] == iterations_number:
                 if len(size_results[env][0]) > 3 and len(size_results[env][1]) > 3:
                     avg_steps += (1 - (size_results[env][0][3] / size_results[env][1][3]))
                     death_nop += size_results[env][1][-2]
@@ -350,11 +355,17 @@ def plot_all(criteria):
                 converged_nop += size_results[env][1][1]
                 total += 1
 
-        print(' & '.join("{:10.2f}".format(x) if type(x) == type(float) else str(x) for x in
-                         [size, total , avg_steps / compared * 100 if compared > 0 else 'N/A',
-                          converged_sip / total if total > 0 else 'N/A', converged_nop / total if total > 0 else 'N/A',
-                          death_sip, death_nop]), '\\\\\\hline')
+        convergence_table += [[size, size * size * 10000, converged_sip / total if total > 0 else 'N/A',
+                               converged_nop / total if total > 0 else 'N/A']]
+        comparison_table += [[size, total, avg_steps / compared * 100 if compared > 0 else 'N/A', death_sip, death_nop]]
 
+    print('Size & Max. Number &  Convergence - WiseML & Convergence - SimpleRL', '\\\\\\hline')
+    for row in convergence_table:
+        print(' & '.join("{:10.2f}".format(x) if type(x) == float else str(x) for x in row), '\\\\\\hline')
+
+    print('Size & Faster (\%) &  Catastrophes - WiseML & Catastrophes - SimpleRL', '\\\\\\hline')
+    for row in comparison_table:
+        print(' & '.join("{:10.2f}".format(x) if type(x) == float else str(x) for x in row), '\\\\\\hline')
 
 
 def plot(criteria):
@@ -377,6 +388,7 @@ def plot(criteria):
         functions = [min, avg, max]
         results += [f(value) for value in values for f in functions]
     return results
+
 
 '''
     figure_1 = multi_line_plot([N_timesteps[i][:] for i in range(len(labels))],
