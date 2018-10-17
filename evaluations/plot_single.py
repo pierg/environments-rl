@@ -1,12 +1,10 @@
 import matplotlib
 import os
-
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import csv
-import glob
-from random import randint
+
 
 plt.rcParams["font.family"] = "Times New Roman"
 plt.rcParams.update({'font.size': 10})
@@ -32,14 +30,45 @@ N_end_avg = []
 N_step_goal_avg = []
 eval_name = []
 envelope = []
+convergence = []
 
 
-def extract_all_data_from_csv(csv_folder_abs_path):
+def respects_criteria(file_name, criteria):
+    for word in criteria:
+        if word not in file_name:
+            return False
+    return True
+
+def clear_all():
+    eval_name.clear()
+    envelope.clear()
+    N_updates.clear()
+    N_timesteps.clear()
+    Reward_mean.clear()
+    Reward_median.clear()
+    Reward_min.clear()
+    Reward_max.clear()
+    Reward_std.clear()
+    Entropy.clear()
+    Value_loss.clear()
+    Action_loss.clear()
+    N_violation_avg.clear()
+    N_goals_avg.clear()
+    N_died_avg.clear()
+    N_end_avg.clear()
+    N_step_goal_avg.clear()
+    eval_name.clear()
+    envelope.clear()
+    convergence.clear()
+
+
+def extract_all_data_from_csv(csv_folder_abs_path, criteria=[], reopen=False):
+    clear_all()
     for file_name in os.listdir(csv_folder_abs_path):
-        if "a2c" in file_name and ".csv" in file_name:
+        if "a2c" in file_name and ".csv" in file_name and respects_criteria(file_name, criteria):
             print("CsvName : ", file_name)
             file_eval_name = file_name.replace(".csv", "")
-            if os.path.exists(file_eval_name + '.pdf'):
+            if not reopen and os.path.exists(file_eval_name + '.pdf'):
                 print('Pdf File already exists.')
                 continue
             N_updates.append(extract_array("N_updates", csv_folder_abs_path + "/" + file_name))
@@ -59,6 +88,48 @@ def extract_all_data_from_csv(csv_folder_abs_path):
             N_step_goal_avg.append(extract_array("N_step_goal_avg", csv_folder_abs_path + "/" + file_name))
             eval_name.append(file_eval_name)
             envelope.append(extract_array("envelope", csv_folder_abs_path + "/" + file_name)[0])
+            cut_to_convergence()
+
+
+def cut_to_convergence():
+    count = 0
+    for i in range(1, len(N_step_goal_avg[-1])):
+        if converged(N_step_goal_avg[-1][i], N_step_goal_avg[-1][i-1], Value_loss[-1][i], Reward_mean[-1][i],Reward_std[-1][i], N_step_goal_avg[-1][i]):
+            count += 1
+        else:
+            count = 0
+        if count > 1:
+            cut_table(i)
+            convergence.append(True)
+            return
+    convergence.append(False)
+
+
+def cut_table(row):
+    N_updates[-1] = N_updates[-1][0:row]
+    N_timesteps[-1] = N_timesteps[-1][0:row]
+    Reward_mean[-1] = Reward_mean[-1][0:row]
+    Reward_median[-1] = Reward_median[-1][0:row]
+    Reward_min[-1] = Reward_min[-1][0:row]
+    Reward_max[-1] = Reward_max[-1][0:row]
+    Reward_std[-1] = Reward_std[-1][0:row]
+    Entropy[-1] = Entropy[-1][0:row]
+    Value_loss[-1] = Value_loss[-1][0:row]
+    Action_loss[-1] = Action_loss[-1][0:row]
+    N_violation_avg[-1] = N_violation_avg[-1][0:row]
+    N_goals_avg[-1] = N_goals_avg[-1][0:row]
+    N_died_avg[-1] = N_died_avg[-1][0:row]
+    N_end_avg[-1] = N_end_avg[-1][0:row]
+    N_step_goal_avg[-1] = N_step_goal_avg[-1][0:row]
+
+
+def converged(log_n_steps_goal_avg_curr, log_n_steps_goal_avg_prev, value_lss_curr, mean_rwd_curr, final_rewards_std,
+              log_n_goals_avg_curr):
+    return (abs(log_n_steps_goal_avg_curr - log_n_steps_goal_avg_prev) < 0.1
+            and value_lss_curr < 0.01
+            and mean_rwd_curr > 0.0
+            and log_n_goals_avg_curr > 0.0
+            and final_rewards_std < 5)
 
 
 def extract_array(label, csv_file):
@@ -89,7 +160,6 @@ def extract_array(label, csv_file):
                     values.append(row[label_index])
 
     return values
-
 
 def single_line_plot(x, y, x_label, y_label, ys_sem=0, title=""):
     """
