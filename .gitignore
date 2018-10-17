@@ -1,4 +1,4 @@
-.idea/
+.idea/*
 pytorch_a2c/trained_models/
 .DS_Store
 results/
