@@ -162,7 +162,7 @@ class Dirt(WorldObj):
     def toggle(self, env, pos):
         x, y = ExMiniGridEnv.get_grid_coords_from_view(env, (1, 0))
         env.grid.set(x, y, None)
-        del self.list[len(self.list) - 1]
+#        del self.list[len(self.list) - 1]
         return True
 
     def render(self, r):

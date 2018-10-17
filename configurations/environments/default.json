@@ -1,6 +1,7 @@
 {
     "grid_size": 7,
     "n_water": 3,
+    "n_dirt":5,
     "light_switch": true,
 
     "envelope": true,

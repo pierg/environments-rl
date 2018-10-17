@@ -28,6 +28,7 @@ def generate_environment(environment="default", rewards="default"):
     elements = Configuration.grab("environments/"+environment)
     grid_size = elements.grid_size
     n_water = elements.n_water
+    n_dirt = elements.n_dirt
     n_deadend = 0
     light_switch = elements.light_switch
     random_each_episode = False
@@ -57,11 +58,22 @@ class RandomEnv(ExMiniGridEnv):
     
     # Goal is to turn on the light before reaching the goal
     def goal_enabled(self):
+        return self.light_on_room() and self.clean_room()
+    
+    def light_on_room(self):
         for element in self.grid.grid:
             if element is not None and element.type == "lightsw" \
                     and hasattr(element, 'is_on'):
                 return element.is_on
         return False
+        
+    # Enables the goal only when the room has been completely cleaned
+    def clean_room(self):
+        nodirt = True
+        for element in self.grid.grid:
+            if element is not None and element.type == "dirt":
+                nodirt = False
+        return nodirt
         
     def saveElements(self,room):
         tab=[]
@@ -100,6 +112,7 @@ class RandomEnv(ExMiniGridEnv):
         queue = [(x_agent, y_agent)]
         elements = set()
         visited = set()
+        dirt_count = 0
         while len(queue) > 0:
             (x,y) = queue.pop()
             visited.add((x,y))
@@ -108,11 +121,13 @@ class RandomEnv(ExMiniGridEnv):
                 other_pos = (x+dx,y+dy)
                 (ox,oy) = other_pos
                 if 0 < ox < self.grid.width and 0 < oy < self.grid.height and other_pos not in visited and other_pos not in queue:
-                    if isinstance(self.grid.get(ox,oy), type(None)) or isinstance(self.grid.get(ox,oy), Door):
+                    if isinstance(self.grid.get(ox,oy), type(None)) or isinstance(self.grid.get(ox,oy), Door) or isinstance(self.grid.get(ox,oy), Dirt):
                         queue.append(other_pos)
                     if isinstance(self.grid.get(ox,oy), LightSwitch) or isinstance(self.grid.get(ox,oy), Door) or isinstance(self.grid.get(ox,oy), Goal):
                         elements.add(type(self.grid.get(ox,oy)))
-        return elements                
+                    if isinstance(self.grid.get(ox,oy), Dirt):
+                        dirt_count+=1
+        return (elements,dirt_count)                
         
     def _valid_water_position(self, x_agent, y_agent):
         x = random.randint(1, self.grid.width - 2)
@@ -123,15 +138,15 @@ class RandomEnv(ExMiniGridEnv):
         return (x,y)
         
         
-    def _place_water(self, x_agent, y_agent):
+    def _place_randomly(self, x_agent, y_agent, n ,Element):
         water = []
-        while {1} > len(water):        
+        while n > len(water):        
             (x_water, y_water) = self._valid_water_position(x_agent, y_agent)
-            self.grid.set(x_water, y_water, Water())
+            self.grid.set(x_water, y_water, Element())
             water += [(x_water, y_water)]
         return water 
     
-    def _reset_water(self, water):
+    def _reset_positions(self, water):
         for (x,y) in water:
             self.grid.set(x,y,None)
             
@@ -191,6 +206,7 @@ class RandomEnv(ExMiniGridEnv):
         self.roomList[1].setEntryDoor((xdoor,ydoor))
         self.roomList[0].setExitDoor((xdoor,ydoor))        
         
+        
         #Place the lightswitch
         switchRoom.affectRoom(self.roomList[1])
         switchRoom.setSwitchPos((width_pos,height_pos))
@@ -199,21 +215,30 @@ class RandomEnv(ExMiniGridEnv):
         self.grid.set(width_pos, height_pos, switchRoom)
         self.switchPosition = []
         self.switchPosition.append((width_pos, height_pos))
+        
+        
+        n_water = {1}
+        n_dirt = {7}
+        
+        dirt = self._place_randomly(x_agent,y_agent,n_dirt,Dirt)
 
         # Place water
-        water = self._place_water(x_agent,y_agent)
+        water = self._place_randomly(x_agent,y_agent,n_water,Water)
         
-        elements = self._reachable_elements(x_agent,y_agent)
+        (elements, dirt_count) = self._reachable_elements(x_agent,y_agent)
         
         stop = 0
         
-        while len(elements) != 3 and stop < 10000:
-            self._reset_water(water)
-            water = self._place_water(x_agent,y_agent)
-            elements = self._reachable_elements(x_agent,y_agent)
+        while (len(elements) != 3 or dirt_count != n_dirt) and stop < 100000:
+            self._reset_positions(water)
+            self._reset_positions(dirt)
+            water = self._place_randomly(x_agent,y_agent,n_water,Water)
+            dirt = self._place_randomly(x_agent,y_agent,n_dirt,Dirt)
+            (elements, dirt_count) = self._reachable_elements(x_agent,y_agent)
             stop += 1
         
         tab = self.saveElements(self.roomList[1])
+        switchRoom.elements_in_room(tab)
         switchRoom.elements_in_room(tab)
         
         self.mission = ""
@@ -226,7 +251,7 @@ register(
     id='MiniGrid-RandomEnv-{0}x{0}-{4}-v0',
     entry_point='gym_minigrid.envs:RandomEnv{0}x{0}_{4}'
 )
-""".format(grid_size, n_water, n_deadend, light_switch, random_token, random_each_episode, rewards.standard.death))
+""".format(grid_size, n_water, n_deadend, light_switch, random_token, random_each_episode, rewards.standard.death, n_dirt))
         env.close()
     # Adds the import statement to __init__.py in the envs folder in gym_minigrid,
     # otherwise the environment is unavailable to use.
