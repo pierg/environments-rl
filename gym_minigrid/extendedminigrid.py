@@ -229,6 +229,14 @@ def worldobj_name_to_object(worldobj_name):
         return Vase()
     elif worldobj_name == "goal":
         return Goal()
+    elif worldobj_name == "key":
+        return Key()
+    elif worldobj_name == "door":
+        return Door()
+    elif worldobj_name == 'locked_door':
+        return LockedDoor()
+    elif worldobj_name == 'box':
+        return Box('red')
     else:
         return None
 
@@ -320,9 +328,9 @@ class ExMiniGridEnv(MiniGridEnv):
             if i % grid.height == 0:
                 print("")
             if e is not None:
-                print(str(e.type), end="\t")
+                print(str(e.type).ljust(12), end="\t")
             else:
-                print("none",  end="\t")
+                print("none".ljust(12),  end="\t")
         print("")
 
     def strings_to_actions(self, actions):
@@ -341,6 +349,10 @@ class ExMiniGridEnv(MiniGridEnv):
                 actions[i] = self.actions.clean
             elif action_name == "observe":
                 actions[i] = self.actions.observe
+            elif action_name == "pickup":
+                actions[i] = self.actions.pickup
+            elif action_name == "drop":
+                actions[i] = self.actions.drop
 
         return actions
 
@@ -359,6 +371,10 @@ class ExMiniGridEnv(MiniGridEnv):
             return "clean"
         elif action == self.actions.observe:
             return "observe"
+        elif action == self.actions.pickup:
+            return "pickup"
+        elif action == self.actions.drop:
+            return "drop"
         return None
 
 

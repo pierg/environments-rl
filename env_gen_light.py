@@ -29,6 +29,8 @@ def generate_environment(environment="default", rewards="default"):
     grid_size = elements.grid_size
     n_water = elements.n_water
     n_dirt = elements.n_dirt
+    n_boxes = elements.n_boxes
+    locked = elements.locked
     n_deadend = 0
     light_switch = elements.light_switch
     random_each_episode = False
@@ -113,6 +115,8 @@ class RandomEnv(ExMiniGridEnv):
         elements = set()
         visited = set()
         dirt_count = 0
+        boxes_count = 0
+
         while len(queue) > 0:
             (x,y) = queue.pop()
             visited.add((x,y))
@@ -121,28 +125,33 @@ class RandomEnv(ExMiniGridEnv):
                 other_pos = (x+dx,y+dy)
                 (ox,oy) = other_pos
                 if 0 < ox < self.grid.width and 0 < oy < self.grid.height and other_pos not in visited and other_pos not in queue:
-                    if isinstance(self.grid.get(ox,oy), type(None)) or isinstance(self.grid.get(ox,oy), Door) or isinstance(self.grid.get(ox,oy), Dirt):
+                    if isinstance(self.grid.get(ox,oy), type(None)) or isinstance(self.grid.get(ox,oy), Door)  or isinstance(self.grid.get(ox,oy), Box) or isinstance(self.grid.get(ox,oy), Key) or isinstance(self.grid.get(ox,oy), LockedDoor)  or isinstance(self.grid.get(ox,oy), Dirt):
                         queue.append(other_pos)
-                    if isinstance(self.grid.get(ox,oy), LightSwitch) or isinstance(self.grid.get(ox,oy), Door) or isinstance(self.grid.get(ox,oy), Goal):
+                    if isinstance(self.grid.get(ox,oy), LightSwitch) or isinstance(self.grid.get(ox,oy), Door) or isinstance(self.grid.get(ox,oy), Key)  or isinstance(self.grid.get(ox,oy), LockedDoor) or isinstance(self.grid.get(ox,oy), Goal):
                         elements.add(type(self.grid.get(ox,oy)))
                     if isinstance(self.grid.get(ox,oy), Dirt):
                         dirt_count+=1
-        return (elements,dirt_count)                
+                    if isinstance(self.grid.get(ox,oy), Box):
+                        boxes_count+=1
+        return (elements,dirt_count, boxes_count)                
         
-    def _valid_water_position(self, x_agent, y_agent):
-        x = random.randint(1, self.grid.width - 2)
-        y = random.randint(1, self.grid.height - 2)
+    def _valid_free_position(self, x_agent, y_agent, x_bound, y_bound):
+        x = random.randint(1, x_bound - 1)
+        y = random.randint(1, y_bound - 1)
         while type(self.grid.get(x, y)) != type(None) or (x_agent == x and y_agent ==y):
-            x = random.randint(1, self.grid.width - 2)
-            y = random.randint(1, self.grid.height - 2)
+            x = random.randint(1, x_bound - 1)
+            y = random.randint(1, y_bound -1)
         return (x,y)
         
         
-    def _place_randomly(self, x_agent, y_agent, n ,Element):
+    def _place_randomly(self, x_agent, y_agent, n ,Element, color=None):
         water = []
         while n > len(water):        
-            (x_water, y_water) = self._valid_water_position(x_agent, y_agent)
-            self.grid.set(x_water, y_water, Element())
+            (x_water, y_water) = self._valid_free_position(x_agent, y_agent,  self.grid.width - 1, self.grid.height - 1)
+            if color != None:
+                self.grid.set(x_water, y_water, Element(color))
+            else: 
+                self.grid.set(x_water, y_water, Element())
             water += [(x_water, y_water)]
         return water 
     
@@ -196,8 +205,19 @@ class RandomEnv(ExMiniGridEnv):
         
         #Place the wall
         self.grid.vert_wall(xdoor, 1, height-2)
-                
-        self.grid.set(xdoor, ydoor , Door(self._rand_elem(sorted(set(COLOR_NAMES)))))
+        
+        
+        #The number of elements that need to be reachable in the room (Door, Goal, LightSwitch)
+        n_elements = 3
+        
+        if {8}:        
+            self.grid.set(xdoor, ydoor , LockedDoor('yellow'))
+            (x_key, y_key) = self._valid_free_position(x_agent, y_agent, xdoor, self.grid.height - 1)
+            self.grid.set(x_key, y_key, Key())
+            n_elements += 1
+        else:
+            self.grid.set(xdoor, ydoor ,Door('yellow'))
+        
         
         #Add the room
         self.roomList = []
@@ -219,22 +239,27 @@ class RandomEnv(ExMiniGridEnv):
         
         n_water = {1}
         n_dirt = {7}
+        n_boxes = {9}
         
         dirt = self._place_randomly(x_agent,y_agent,n_dirt,Dirt)
+        
+        boxes = self._place_randomly(x_agent,y_agent,n_boxes,Box,'red')
 
         # Place water
         water = self._place_randomly(x_agent,y_agent,n_water,Water)
         
-        (elements, dirt_count) = self._reachable_elements(x_agent,y_agent)
+        (elements, dirt_count, boxes_count) = self._reachable_elements(x_agent,y_agent)
         
         stop = 0
         
-        while (len(elements) != 3 or dirt_count != n_dirt) and stop < 100000:
+        while (len(elements) != n_elements or boxes_count != n_boxes or dirt_count != n_dirt) and stop < 100000:
             self._reset_positions(water)
             self._reset_positions(dirt)
+            self._reset_positions(boxes)
             water = self._place_randomly(x_agent,y_agent,n_water,Water)
             dirt = self._place_randomly(x_agent,y_agent,n_dirt,Dirt)
-            (elements, dirt_count) = self._reachable_elements(x_agent,y_agent)
+            boxes = self._place_randomly(x_agent,y_agent,n_boxes,Box,'red')
+            (elements, dirt_count, boxes_count) = self._reachable_elements(x_agent,y_agent)
             stop += 1
         
         tab = self.saveElements(self.roomList[1])
@@ -251,7 +276,7 @@ register(
     id='MiniGrid-RandomEnv-{0}x{0}-{4}-v0',
     entry_point='gym_minigrid.envs:RandomEnv{0}x{0}_{4}'
 )
-""".format(grid_size, n_water, n_deadend, light_switch, random_token, random_each_episode, rewards.standard.death, n_dirt))
+""".format(grid_size, n_water, n_deadend, light_switch, random_token, random_each_episode, rewards.standard.death, n_dirt, locked, n_boxes))
         env.close()
     # Adds the import statement to __init__.py in the envs folder in gym_minigrid,
     # otherwise the environment is unavailable to use.
