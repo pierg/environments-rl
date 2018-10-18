@@ -21,6 +21,7 @@ for envName in env_list:
 
     # Load the gym environment
     env = gym.make(envName)
+    env.max_steps = min(env.max_steps, 200)
     env.reset()
     env.render('rgb_array')
 
@@ -85,3 +86,6 @@ for i in range(0, 500):
     assert agent_sees_goal == goal_visible
     if done:
         env.reset()
+
+#############################################################################
+

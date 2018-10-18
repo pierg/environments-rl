@@ -359,8 +359,8 @@ class Grid:
     """
 
     def __init__(self, width, height):
-        assert width >= 3
-        assert height >= 3
+        assert width >= 4
+        assert height >= 4
 
         self.width = width
         self.height = height
