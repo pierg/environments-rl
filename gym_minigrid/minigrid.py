@@ -271,7 +271,7 @@ class LockedDoor(WorldObj):
         )
 
 class Key(WorldObj):
-    def __init__(self, color='blue'):
+    def __init__(self, color='yellow'):
         super(Key, self).__init__('key', color)
 
     def can_pickup(self):

@@ -87,7 +87,6 @@ def main():
                 action = env.env.actions.right
             elif keyName == 'UP':
                 action = env.env.actions.forward
-
             elif keyName == 'SPACE':
                 action = env.env.actions.toggle
             elif keyName == 'PAGE_UP':
@@ -98,7 +97,10 @@ def main():
                 action = env.env.actions.forward
                 print("unknown key %s, going forward" % keyName)
                 return
-
+            elif keyName == 'ALT':
+                action = env.actions.pickup
+            elif keyName == 'RETURN':
+                action = env.actions.drop
             elif keyName == 'CTRL':
                 action = env.env.actions.forward
                 print("unknown key %s, going forward" % keyName)
@@ -122,9 +124,12 @@ def main():
                 action = env.actions.right
             elif keyName == 'UP':
                 action = env.actions.forward
-
             elif keyName == 'SPACE':
                 action = env.actions.toggle
+            elif keyName == 'ALT':
+                action = env.actions.pickup
+            elif keyName == 'RETURN':
+                action = env.actions.drop
             elif keyName == 'PAGE_UP':
                 action = env.actions.forward
                 print("unknown key %s, going forward" % keyName)

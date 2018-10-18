@@ -1,6 +1,9 @@
 {
     "grid_size": 7,
     "n_water": 3,
+    "n_dirt":5,
+    "n_boxes": 1,
+    "locked": true,
     "light_switch": true,
 
     "envelope": true,
